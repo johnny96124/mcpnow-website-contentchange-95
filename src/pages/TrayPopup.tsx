@@ -5,8 +5,14 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, hosts, serverInstances } from "@/data/mockData";
+import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const TrayPopup = () => {
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
@@ -17,6 +23,9 @@ const TrayPopup = () => {
       return acc;
     }, {} as Record<string, string>)
   );
+
+  // Track active instances for each profile and definition combination
+  const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
     setSelectedProfileIds(prev => ({
@@ -38,6 +47,46 @@ const TrayPopup = () => {
     if (profileInstances.some(inst => inst.status === "error")) return "error";
     if (profileInstances.some(inst => inst.status === "running")) return "active";
     return "inactive";
+  };
+
+  const handleInstanceChange = (profileId: string, definitionId: string, instanceId: string) => {
+    // Create or update the active instances state
+    setActiveInstances(prev => {
+      const profileInstances = {...(prev[profileId] || {})};
+      profileInstances[definitionId] = instanceId;
+      
+      return {
+        ...prev,
+        [profileId]: profileInstances
+      };
+    });
+  };
+
+  const getInstancesForDefinition = (profileId: string, definitionId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return [];
+    
+    // Get all instances tied to this profile
+    return serverInstances
+      .filter(instance => 
+        profile.instances.includes(instance.id) && 
+        instance.definitionId === definitionId
+      );
+  };
+
+  const getServerDefinitionsInProfile = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return [];
+    
+    // Get profile instances
+    const profileInstanceIds = profile.instances;
+    const profileInstances = serverInstances.filter(inst => profileInstanceIds.includes(inst.id));
+    
+    // Get unique definition IDs from these instances
+    const definitionIds = [...new Set(profileInstances.map(inst => inst.definitionId))];
+    
+    // Return the actual definition objects
+    return serverDefinitions.filter(def => definitionIds.includes(def.id));
   };
 
   const openDashboard = () => {
@@ -76,6 +125,7 @@ const TrayPopup = () => {
           {activeHosts.map(host => {
             const currentProfileId = selectedProfileIds[host.id] || '';
             const currentProfile = profiles.find(p => p.id === currentProfileId);
+            const serverDefsInProfile = getServerDefinitionsInProfile(currentProfileId);
             
             return (
               <Card key={host.id} className="overflow-hidden">
@@ -115,23 +165,72 @@ const TrayPopup = () => {
                     </Select>
                   </div>
                   
-                  {currentProfile && (
+                  {currentProfile && serverDefsInProfile.length > 0 && (
                     <div className="mt-2 bg-muted rounded-md p-2">
                       <p className="text-xs text-muted-foreground mb-1">Active server instances:</p>
                       <ul className="text-xs space-y-1">
-                        {currentProfile.instances.map(instanceId => {
-                          const instance = serverInstances.find(s => s.id === instanceId);
-                          if (!instance) return null;
+                        {serverDefsInProfile.map(definition => {
+                          const instancesForDef = getInstancesForDefinition(currentProfileId, definition.id);
+                          
+                          // Get the currently active instance for this definition in this profile
+                          const activeInstanceId = 
+                            (activeInstances[currentProfileId]?.[definition.id]) || 
+                            (instancesForDef[0]?.id);
+                          
+                          const activeInstance = instancesForDef.find(inst => inst.id === activeInstanceId) || instancesForDef[0];
+                          
+                          if (!activeInstance) return null;
                           
                           return (
-                            <li key={instanceId} className="flex items-center gap-1">
-                              <StatusIndicator 
-                                status={
-                                  instance.status === 'running' ? 'active' : 
-                                  instance.status === 'error' ? 'error' : 'inactive'
-                                } 
-                              />
-                              <span>{instance.name}</span>
+                            <li key={definition.id} className="flex items-center justify-between">
+                              <div className="flex items-center gap-1">
+                                <StatusIndicator 
+                                  status={
+                                    activeInstance.status === 'running' ? 'active' : 
+                                    activeInstance.status === 'error' ? 'error' : 'inactive'
+                                  } 
+                                />
+                                <span>{definition.name}</span>
+                              </div>
+                              
+                              {instancesForDef.length > 1 && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 text-xs px-2 py-1"
+                                    >
+                                      {activeInstance.name.split('-').pop()} <ChevronDown className="h-3 w-3 ml-1" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-40">
+                                    {instancesForDef.map(instance => (
+                                      <DropdownMenuItem
+                                        key={instance.id}
+                                        className="text-xs flex items-center justify-between"
+                                        onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
+                                      >
+                                        <div className="flex items-center gap-1">
+                                          <StatusIndicator 
+                                            status={
+                                              instance.status === 'running' ? 'active' : 
+                                              instance.status === 'error' ? 'error' : 'inactive'
+                                            } 
+                                          />
+                                          <span>{instance.name.split('-').pop()}</span>
+                                        </div>
+                                        {instance.id === activeInstanceId && (
+                                          <Check className="h-3 w-3" />
+                                        )}
+                                      </DropdownMenuItem>
+                                    ))}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                              {instancesForDef.length <= 1 && (
+                                <span className="text-xs text-muted-foreground">{activeInstance.name.split('-').pop()}</span>
+                              )}
                             </li>
                           );
                         })}
