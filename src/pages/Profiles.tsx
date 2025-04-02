@@ -10,7 +10,7 @@ import {
   PlusCircle, 
   TerminalSquare, 
   Trash2, 
-  WorldWideWeb 
+  Globe 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,7 +87,7 @@ const Profiles = () => {
                     <label className="text-sm font-medium block mb-1">Connection Endpoint</label>
                     <div className="flex items-center gap-2 bg-muted p-2 rounded-md">
                       {profile.endpointType === 'HTTP_SSE' ? (
-                        <WorldWideWeb className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
                       ) : (
                         <TerminalSquare className="h-4 w-4 text-purple-500 flex-shrink-0" />
                       )}

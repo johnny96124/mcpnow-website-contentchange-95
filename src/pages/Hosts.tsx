@@ -10,7 +10,7 @@ import {
   FilePlus, 
   Loader2, 
   PlusCircle, 
-  Refresh, 
+  RefreshCw, 
   Search, 
   Settings2 
 } from "lucide-react";

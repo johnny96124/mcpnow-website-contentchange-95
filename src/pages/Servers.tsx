@@ -13,7 +13,8 @@ import {
   ServerCrash, 
   StopCircle, 
   Trash2, 
-  WorldWideWeb 
+  Globe,
+  Terminal
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -183,9 +184,9 @@ const Servers = () => {
                         <td className="p-4 align-middle">
                           <div className="flex items-center gap-2">
                             {definition?.type === 'HTTP_SSE' ? (
-                              <WorldWideWeb className="h-4 w-4 text-blue-500" />
+                              <Globe className="h-4 w-4 text-blue-500" />
                             ) : (
-                              <TerminalSquare className="h-4 w-4 text-purple-500" />
+                              <Terminal className="h-4 w-4 text-purple-500" />
                             )}
                             <code className="text-xs bg-muted px-2 py-1 rounded">
                               {instance.connectionDetails.length > 25 
