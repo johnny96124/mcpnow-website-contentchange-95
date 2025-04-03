@@ -10,6 +10,10 @@ export interface ServerDefinition {
   author?: string;
   version?: string;
   icon?: string;
+  isOfficial?: boolean;
+  categories?: string[];
+  features?: string[];
+  repository?: string;
 }
 
 export interface ServerInstance {
@@ -50,7 +54,16 @@ export const serverDefinitions: ServerDefinition[] = [
     description: 'A tool for interacting with PostgreSQL databases via MCP',
     author: 'MCP Team',
     version: '1.0.0',
-    icon: '🐘'
+    icon: '🐘',
+    isOfficial: true,
+    categories: ['Database', 'SQL', 'Development'],
+    features: [
+      'Database connection management',
+      'SQL query execution',
+      'Schema visualization',
+      'Query optimizations'
+    ],
+    repository: 'https://github.com/mcp/postgres-tool'
   },
   {
     id: 'github-copilot-proxy',
@@ -59,7 +72,16 @@ export const serverDefinitions: ServerDefinition[] = [
     description: 'Proxy for GitHub Copilot API',
     author: 'MCP Team',
     version: '1.2.0',
-    icon: '🤖'
+    icon: '🤖',
+    isOfficial: true,
+    categories: ['AI', 'Development', 'Productivity'],
+    features: [
+      'Code suggestions',
+      'Auto-completion',
+      'Comment-to-code generation',
+      'API integration'
+    ],
+    repository: 'https://github.com/mcp/github-copilot-proxy'
   },
   {
     id: 'local-file-assistant',
@@ -68,7 +90,16 @@ export const serverDefinitions: ServerDefinition[] = [
     description: 'Assists with local file operations',
     author: 'MCP Team',
     version: '0.9.1',
-    icon: '📁'
+    icon: '📁',
+    isOfficial: false,
+    categories: ['Files', 'System', 'Utility'],
+    features: [
+      'File search and indexing',
+      'Content analysis',
+      'File monitoring',
+      'Batch operations'
+    ],
+    repository: 'https://github.com/mcp/local-file-assistant'
   },
 ];
 
@@ -179,36 +210,72 @@ export const discoveryItems: ServerDefinition[] = [
     id: 'aws-toolkit',
     name: 'AWS Toolkit',
     type: 'STDIO',
-    description: 'Tools for working with AWS services',
+    description: 'Tools for working with AWS services, including Lambda, EC2, S3, and more. Provides seamless integration with the AWS ecosystem.',
     author: 'AWS Community',
     version: '2.1.0',
-    icon: '☁️'
+    icon: '☁️',
+    isOfficial: true,
+    categories: ['Cloud', 'DevOps', 'Infrastructure'],
+    features: [
+      'Supports TypeScript development',
+      'Auto-imports and code completion',
+      'Real-time error checking',
+      'Integrated debugging'
+    ],
+    repository: 'https://github.com/AWS Community/aws toolkit'
   },
   {
     id: 'docker-assistant',
     name: 'Docker Assistant',
     type: 'HTTP_SSE',
-    description: 'Helps manage Docker containers and images',
+    description: 'Helps manage Docker containers and images. Provides an intuitive interface for container management and monitoring.',
     author: 'Docker Community',
     version: '1.5.0',
-    icon: '🐳'
+    icon: '🐳',
+    isOfficial: false,
+    categories: ['DevOps', 'Containers', 'Infrastructure'],
+    features: [
+      'Container lifecycle management',
+      'Image building and optimization',
+      'Network configuration',
+      'Volume management'
+    ],
+    repository: 'https://github.com/docker/assistant'
   },
   {
     id: 'kubernetes-helper',
     name: 'Kubernetes Helper',
     type: 'STDIO',
-    description: 'Tools for working with Kubernetes clusters',
+    description: 'Tools for working with Kubernetes clusters, including deployment, scaling, and monitoring solutions.',
     author: 'K8s Community',
     version: '0.9.5',
-    icon: '⎈'
+    icon: '⎈',
+    isOfficial: false,
+    categories: ['DevOps', 'Cloud', 'Infrastructure'],
+    features: [
+      'Cluster management',
+      'Pod visualization',
+      'Resource monitoring',
+      'Deployment automation'
+    ],
+    repository: 'https://github.com/k8s/helper'
   },
   {
     id: 'frontend-dev-tools',
     name: 'Frontend Dev Tools',
     type: 'HTTP_SSE',
-    description: 'Utilities for frontend development',
+    description: 'Utilities for frontend development, including code generators, component libraries, and testing tools.',
     author: 'Web Dev Team',
     version: '3.2.1',
-    icon: '🖥️'
+    icon: '🖥️',
+    isOfficial: true,
+    categories: ['Web', 'UI/UX', 'Frontend'],
+    features: [
+      'Component scaffolding',
+      'Style generation',
+      'Accessibility testing',
+      'Performance optimization'
+    ],
+    repository: 'https://github.com/webdev/frontend-tools'
   },
 ];
