@@ -65,12 +65,10 @@ const Servers = () => {
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [activeTab, setActiveTab] = useState("integrated");
   
-  // Function to toggle instance status
   const toggleInstanceStatus = (instanceId: string) => {
     setInstances(prevInstances => 
       prevInstances.map(instance => {
         if (instance.id === instanceId) {
-          // If it's running, stop it. If it's stopped, start connecting
           const newStatus = instance.status === 'running' ? 'stopped' : 'connecting';
           return { ...instance, status: newStatus };
         }
@@ -78,25 +76,22 @@ const Servers = () => {
       })
     );
     
-    // If status is changing to 'connecting', simulate completion after delay
     const instance = instances.find(i => i.id === instanceId);
     if (instance && instance.status !== 'running') {
       setTimeout(() => {
         setInstances(prevInstances => 
           prevInstances.map(instance => {
             if (instance.id === instanceId && instance.status === 'connecting') {
-              // 80% chance of success, 20% chance of error
               const newStatus = Math.random() > 0.2 ? 'running' : 'error';
               return { ...instance, status: newStatus };
             }
             return instance;
           })
         );
-      }, 1500); // Simulate 1.5 second connection process
+      }, 1500);
     }
   };
   
-  // Group instances by definition ID
   const instancesByDefinition = instances.reduce((acc, instance) => {
     const { definitionId } = instance;
     if (!acc[definitionId]) {
@@ -106,13 +101,11 @@ const Servers = () => {
     return acc;
   }, {} as Record<string, ServerInstance[]>);
   
-  // Calculate total requests for each definition
   const getRequestCount = (definitionId: string): number => {
     const definitionInstances = instancesByDefinition[definitionId] || [];
     return definitionInstances.reduce((total, instance) => total + (instance.requestCount || 0), 0);
   };
 
-  // Truncate description to two lines (approx. 100 characters)
   const truncateDescription = (description: string, maxLength = 100): string => {
     if (description.length <= maxLength) return description;
     return `${description.substring(0, maxLength)}...`;
@@ -146,9 +139,8 @@ const Servers = () => {
           <TabsTrigger value="instances">Server Instances</TabsTrigger>
         </TabsList>
         
-        {/* Integrated View - Shows definitions with their instances */}
         <TabsContent value="integrated" className="mt-4">
-          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1">
             {definitions.map(definition => {
               const definitionInstances = instancesByDefinition[definition.id] || [];
               
@@ -157,7 +149,7 @@ const Servers = () => {
                   <CardHeader className="pb-2 bg-secondary/30">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="flex items-center">
+                        <CardTitle className="flex items-center mb-4">
                           {definition.name}
                         </CardTitle>
                         <div className="flex items-center gap-2 mt-3">
@@ -167,7 +159,11 @@ const Servers = () => {
                           </CardDescription>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105 hover:shadow-md"
+                      >
                         <CirclePlus className="h-4 w-4 mr-1" />
                         Add Instance
                       </Button>
@@ -244,9 +240,8 @@ const Servers = () => {
                       </HoverCard>
                     </div>
                     
-                    {/* Instances Table - Show only if there are instances */}
                     {definitionInstances.length > 0 && (
-                      <div className="border rounded-md overflow-hidden">
+                      <div className="border rounded-md overflow-hidden mt-6">
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -257,8 +252,7 @@ const Servers = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {/* Only show max 2 instances in the card */}
-                            {definitionInstances.slice(0, 2).map(instance => (
+                            {definitionInstances.map(instance => (
                               <TableRow key={instance.id}>
                                 <TableCell className="font-medium">{instance.name}</TableCell>
                                 <TableCell>
@@ -336,24 +330,9 @@ const Servers = () => {
                             ))}
                           </TableBody>
                         </Table>
-                        
-                        {/* Show a link to view all instances if there are more than 2 */}
-                        {definitionInstances.length > 2 && (
-                          <div className="py-2 px-4 bg-muted/30 border-t text-sm">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-primary text-xs"
-                              onClick={() => setActiveTab("instances")}
-                            >
-                              View all {definitionInstances.length} instances
-                            </Button>
-                          </div>
-                        )}
                       </div>
                     )}
                     
-                    {/* No instances message - updated style */}
                     {definitionInstances.length === 0 && (
                       <div className="text-center p-8 border rounded-md bg-secondary/10 flex flex-col items-center">
                         <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-2" />
@@ -402,7 +381,6 @@ const Servers = () => {
               );
             })}
             
-            {/* Create new definition card */}
             <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
@@ -417,7 +395,6 @@ const Servers = () => {
           </div>
         </TabsContent>
         
-        {/* Server Definitions Tab (keep original content) */}
         <TabsContent value="definitions" className="mt-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {definitions.map(definition => {
@@ -523,7 +500,6 @@ const Servers = () => {
               );
             })}
             
-            {/* Create new definition card */}
             <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
@@ -538,7 +514,6 @@ const Servers = () => {
           </div>
         </TabsContent>
         
-        {/* Server Instances Tab (keep original content) */}
         <TabsContent value="instances" className="mt-4">
           <div className="rounded-md border">
             <div className="relative w-full overflow-auto">
