@@ -1,3 +1,4 @@
+
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -25,6 +26,7 @@ export interface ServerInstance {
   connectionDetails: string;
   environment?: Record<string, string>;
   arguments?: string[];
+  requestCount?: number; // Added request count field
 }
 
 export interface Profile {
@@ -34,6 +36,7 @@ export interface Profile {
   enabled: boolean;
   endpoint: string;
   instances: string[]; // Array of ServerInstance IDs
+  description?: string; // Added missing description field
 }
 
 export interface Host {
@@ -113,7 +116,8 @@ export const serverInstances: ServerInstance[] = [
     connectionDetails: '/usr/local/bin/postgres-mcp',
     environment: {
       'DB_URL': 'postgresql://dev:password@localhost:5432/dev'
-    }
+    },
+    requestCount: 124 // Added request count
   },
   {
     id: 'postgres-prod',
@@ -124,7 +128,8 @@ export const serverInstances: ServerInstance[] = [
     connectionDetails: '/usr/local/bin/postgres-mcp',
     environment: {
       'DB_URL': 'postgresql://prod:password@db.example.com:5432/prod'
-    }
+    },
+    requestCount: 37 // Added request count
   },
   {
     id: 'github-copilot',
@@ -135,7 +140,8 @@ export const serverInstances: ServerInstance[] = [
     connectionDetails: 'https://api.github.com/copilot/v1',
     environment: {
       'GITHUB_TOKEN': 'github_pat_xxxxxxxxxxxx'
-    }
+    },
+    requestCount: 892 // Added request count
   },
   {
     id: 'local-files',
@@ -144,7 +150,8 @@ export const serverInstances: ServerInstance[] = [
     status: 'error',
     enabled: true,
     connectionDetails: '/usr/local/bin/file-assistant',
-    arguments: ['--watch', '/home/user/projects']
+    arguments: ['--watch', '/home/user/projects'],
+    requestCount: 56 // Added request count
   },
 ];
 
@@ -155,7 +162,8 @@ export const profiles: Profile[] = [
     endpointType: 'HTTP_SSE',
     enabled: true,
     endpoint: 'http://localhost:8008/mcp',
-    instances: ['github-copilot', 'local-files']
+    instances: ['github-copilot', 'local-files'],
+    description: 'General development profile for everyday coding tasks'
   },
   {
     id: 'database-ops',
@@ -163,7 +171,8 @@ export const profiles: Profile[] = [
     endpointType: 'HTTP_SSE',
     enabled: true,
     endpoint: 'http://localhost:8009/mcp',
-    instances: ['postgres-dev']
+    instances: ['postgres-dev'],
+    description: 'Profile for database operations and management'
   },
   {
     id: 'project-x',
@@ -171,7 +180,8 @@ export const profiles: Profile[] = [
     endpointType: 'STDIO',
     enabled: false,
     endpoint: '/usr/local/bin/mcp-stdio',
-    instances: ['github-copilot', 'postgres-prod']
+    instances: ['github-copilot', 'postgres-prod'],
+    description: 'Specialized profile for Project X development'
   },
 ];
 

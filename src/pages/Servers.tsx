@@ -27,6 +27,17 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { 
   serverDefinitions, 
   serverInstances,
@@ -47,6 +58,18 @@ const Servers = () => {
     acc[definitionId].push(instance);
     return acc;
   }, {} as Record<string, ServerInstance[]>);
+  
+  // Calculate total requests for each definition
+  const getRequestCount = (definitionId: string): number => {
+    const definitionInstances = instancesByDefinition[definitionId] || [];
+    return definitionInstances.reduce((total, instance) => total + (instance.requestCount || 0), 0);
+  };
+
+  // Truncate description to two lines (approx. 100 characters)
+  const truncateDescription = (description: string, maxLength = 100): string => {
+    if (description.length <= maxLength) return description;
+    return `${description.substring(0, maxLength)}...`;
+  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -79,7 +102,6 @@ const Servers = () => {
                 <Card key={definition.id}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">{definition.icon}</span>
                       <CardTitle>{definition.name}</CardTitle>
                     </div>
                     <div className="flex items-center gap-2">
@@ -90,23 +112,71 @@ const Servers = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {definition.description}
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {truncateDescription(definition.description)}
                     </p>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <div>
-                        <p className="font-medium">Instances</p>
-                        <p className="text-muted-foreground">{definitionInstances.length} total</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Running</p>
-                        <p className="text-muted-foreground">{runningCount} active</p>
-                      </div>
-                      <div>
-                        <p className="font-medium">Author</p>
-                        <p className="text-muted-foreground">{definition.author}</p>
-                      </div>
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-help">
+                            <p className="font-medium">Instances</p>
+                            <p className="text-muted-foreground">{definitionInstances.length} total</p>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold">Instances</h4>
+                            {definitionInstances.length > 0 ? (
+                              <ul className="text-xs space-y-1">
+                                {definitionInstances.map(instance => (
+                                  <li key={instance.id} className="flex items-center justify-between">
+                                    <span>{instance.name}</span>
+                                    <StatusIndicator 
+                                      status={
+                                        instance.status === 'running' ? 'active' : 
+                                        instance.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                      label={
+                                        instance.status === 'running' ? 'Running' : 
+                                        instance.status === 'error' ? 'Error' : 'Stopped'
+                                      }
+                                    />
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">No instances available</p>
+                            )}
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                      
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-help">
+                            <p className="font-medium">Requests</p>
+                            <p className="text-muted-foreground">{getRequestCount(definition.id)} total</p>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold">Instance Requests</h4>
+                            {definitionInstances.length > 0 ? (
+                              <ul className="text-xs space-y-1">
+                                {definitionInstances.map(instance => (
+                                  <li key={instance.id} className="flex items-center justify-between">
+                                    <span>{instance.name}</span>
+                                    <span className="font-medium">{instance.requestCount || 0} requests</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">No instances available</p>
+                            )}
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between pt-0">
