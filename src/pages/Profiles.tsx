@@ -18,9 +18,14 @@ import { Switch } from "@/components/ui/switch";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances } from "@/data/mockData";
+import { ManageInstancesModal } from "@/components/profiles/ManageInstancesModal";
+import { useToast } from "@/hooks/use-toast";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const toggleProfile = (id: string) => {
     setLocalProfiles(prev => 
@@ -34,6 +39,24 @@ const Profiles = () => {
     return profile.instances.map(
       instanceId => serverInstances.find(s => s.id === instanceId)
     ).filter(Boolean);
+  };
+
+  const handleOpenManageModal = (profile: Profile) => {
+    setSelectedProfile(profile);
+    setIsManageModalOpen(true);
+  };
+
+  const handleSaveInstances = (profile: Profile, selectedInstanceIds: string[]) => {
+    setLocalProfiles(prev => 
+      prev.map(p => 
+        p.id === profile.id ? { ...p, instances: selectedInstanceIds } : p
+      )
+    );
+    
+    toast({
+      title: "Profile updated",
+      description: `Updated instances for ${profile.name}`,
+    });
   };
 
   return (
@@ -135,7 +158,7 @@ const Profiles = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => handleOpenManageModal(profile)}>
                   Manage Instances
                 </Button>
               </CardFooter>
@@ -156,6 +179,17 @@ const Profiles = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Manage instances modal */}
+      {selectedProfile && (
+        <ManageInstancesModal
+          isOpen={isManageModalOpen}
+          onClose={() => setIsManageModalOpen(false)}
+          profile={selectedProfile}
+          allInstances={serverInstances}
+          onSave={handleSaveInstances}
+        />
+      )}
     </div>
   );
 };
