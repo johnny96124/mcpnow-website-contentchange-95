@@ -63,6 +63,15 @@ export function MainSidebar() {
                   Overview
                 </NavLink>
                 <NavLink 
+                  to="/hosts" 
+                  className={({ isActive }) => 
+                    cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                  }
+                >
+                  <UsersRound className="h-4 w-4" />
+                  Hosts
+                </NavLink>
+                <NavLink 
                   to="/profiles" 
                   className={({ isActive }) => 
                     cn("sidebar-item text-sm", isActive && "sidebar-item-active")
@@ -79,15 +88,6 @@ export function MainSidebar() {
                 >
                   <GridIcon className="h-4 w-4" />
                   Servers
-                </NavLink>
-                <NavLink 
-                  to="/hosts" 
-                  className={({ isActive }) => 
-                    cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                  }
-                >
-                  <UsersRound className="h-4 w-4" />
-                  Hosts
                 </NavLink>
               </div>
             </CollapsibleContent>

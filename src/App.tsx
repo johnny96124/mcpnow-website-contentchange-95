@@ -7,9 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import DefaultLayout from "./layouts/DefaultLayout";
 import Dashboard from "./pages/Dashboard";
+import Hosts from "./pages/Hosts";
 import Profiles from "./pages/Profiles";
 import Servers from "./pages/Servers";
-import Hosts from "./pages/Hosts";
 import Discovery from "./pages/Discovery";
 import Settings from "./pages/Settings";
 import TrayPopup from "./pages/TrayPopup";
@@ -28,9 +28,9 @@ const App = () => (
             <Route path="/tray" element={<TrayPopup />} />
             <Route path="/" element={<DefaultLayout />}>
               <Route index element={<Dashboard />} />
+              <Route path="hosts" element={<Hosts />} />
               <Route path="profiles" element={<Profiles />} />
               <Route path="servers" element={<Servers />} />
-              <Route path="hosts" element={<Hosts />} />
               <Route path="discovery" element={<Discovery />} />
               <Route path="settings" element={<Settings />} />
             </Route>
