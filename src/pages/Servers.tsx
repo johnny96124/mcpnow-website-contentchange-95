@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -404,7 +405,7 @@ const Servers = () => {
                       
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <div className="cursor-help">
+                          <div className="cursor-help text-center">
                             <p className="font-medium">Requests</p>
                             <p className="text-muted-foreground">{getRequestCount(definition.id)} total</p>
                           </div>
