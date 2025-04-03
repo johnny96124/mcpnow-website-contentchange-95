@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
   Download, 
@@ -26,6 +27,27 @@ import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryFilter } from "@/components/discovery/CategoryFilter";
 import { EmptyState } from "@/components/discovery/EmptyState";
+import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+const ITEMS_PER_PAGE = 6;
+
+// Duplicate and modify the discovery items to create more content
+const extendedItems = [
+  ...discoveryItems,
+  // Additional items with slight modifications
+  ...discoveryItems.map((item, index) => ({
+    ...item,
+    id: `extended-${item.id}-${index}`,
+    name: `${item.name} Extended`,
+  })),
+  ...discoveryItems.map((item, index) => ({
+    ...item,
+    id: `custom-${item.id}-${index}`,
+    name: `${item.name} Custom`,
+    isOfficial: false,
+  }))
+];
 
 const Discovery = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,8 +56,13 @@ const Discovery = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
+  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const filteredServers = discoveryItems
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  const filteredServers = extendedItems
     .filter(server => 
       (searchQuery === "" || 
         server.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,6 +73,48 @@ const Discovery = () => {
         server.categories?.includes(selectedCategory)
       )
     );
+
+  const visibleServers = filteredServers.slice(0, visibleItems);
+  const hasMore = visibleServers.length < filteredServers.length;
+
+  useEffect(() => {
+    // Reset visible items when filters change
+    setVisibleItems(ITEMS_PER_PAGE);
+  }, [searchQuery, selectedCategory]);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          loadMoreItems();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [visibleItems, filteredServers.length, isLoading]);
+
+  const loadMoreItems = () => {
+    if (!hasMore) return;
+    
+    setIsLoading(true);
+    
+    // Simulate network delay for loading more items
+    setTimeout(() => {
+      setVisibleItems(prev => prev + ITEMS_PER_PAGE);
+      setIsLoading(false);
+    }, 800);
+  };
 
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
@@ -95,72 +164,82 @@ const Discovery = () => {
         />
       </div>
       
-      {filteredServers.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredServers.map(server => (
-            <Card key={server.id} className="flex flex-col overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex flex-col">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-xl">{server.name}</CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <EndpointLabel type={server.type} />
-                    {server.isOfficial && <OfficialBadge />}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                  {server.description}
-                </p>
-                
-                <div className="mb-4">
-                  <CategoryList categories={server.categories || []} maxVisible={3} />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                    <p className="text-sm font-medium">{server.author}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                    <p className="text-sm font-medium">{server.version}</p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
-                <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
-                  <Info className="h-4 w-4 mr-1" />
-                  Details
-                </Button>
-                {installedServers[server.id] ? (
-                  <Button variant="outline" size="sm" disabled className="text-green-600">
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Installed
-                  </Button>
-                ) : isInstalling[server.id] ? (
-                  <Button variant="outline" size="sm" disabled>
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    Installing...
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={() => handleInstall(server.id)}>
-                    <PackagePlus className="h-4 w-4 mr-1" />
-                    Add Server
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <EmptyState 
-          searchQuery={searchQuery} 
-          onReset={handleClearFilters} 
-        />
-      )}
+      <ScrollArea className="h-[calc(100vh-220px)] pr-4">
+        {filteredServers.length > 0 ? (
+          <>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {visibleServers.map(server => (
+                <Card key={server.id} className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-col">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-xl">{server.name}</CardTitle>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <EndpointLabel type={server.type} />
+                        {server.isOfficial && <OfficialBadge />}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1">
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                      {server.description}
+                    </p>
+                    
+                    <div className="mb-4">
+                      <CategoryList categories={server.categories || []} maxVisible={3} />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
+                        <p className="text-sm font-medium">{server.author}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
+                        <p className="text-sm font-medium">{server.version}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
+                      <Info className="h-4 w-4 mr-1" />
+                      Details
+                    </Button>
+                    {installedServers[server.id] ? (
+                      <Button variant="outline" size="sm" disabled className="text-green-600">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Installed
+                      </Button>
+                    ) : isInstalling[server.id] ? (
+                      <Button variant="outline" size="sm" disabled>
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        Installing...
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={() => handleInstall(server.id)}>
+                        <PackagePlus className="h-4 w-4 mr-1" />
+                        Add Server
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+            
+            {hasMore && (
+              <div ref={loadMoreRef} className="py-2">
+                {isLoading && <LoadingIndicator />}
+              </div>
+            )}
+          </>
+        ) : (
+          <EmptyState 
+            searchQuery={searchQuery} 
+            onReset={handleClearFilters} 
+          />
+        )}
+      </ScrollArea>
       
       {/* Server details dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
