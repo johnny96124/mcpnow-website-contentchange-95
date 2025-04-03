@@ -1,3 +1,4 @@
+
 export interface ServerDefinition {
   id: string;
   name: string;
@@ -15,6 +16,26 @@ export interface ServerInstance {
   status: 'running' | 'stopped' | 'error';
   connectionDetails: string;
   requestCount?: number;
+}
+
+export type ConnectionStatus = 'connected' | 'disconnected' | 'unknown';
+
+export interface Host {
+  id: string;
+  name: string;
+  icon?: string;
+  connectionStatus: ConnectionStatus;
+  configPath?: string;
+  configStatus: 'configured' | 'misconfigured' | 'unknown';
+  profileId?: string;
+}
+
+export interface Profile {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  instances: string[];
 }
 
 export const serverDefinitions: ServerDefinition[] = [
@@ -87,5 +108,65 @@ export const serverInstances: ServerInstance[] = [
     status: "running",
     connectionDetails: "https://eu-api.example.com/v1",
     requestCount: 732
+  }
+];
+
+export const hosts: Host[] = [
+  {
+    id: "host1",
+    name: "Local Development Machine",
+    icon: "💻",
+    connectionStatus: "connected",
+    configPath: "/Users/developer/.config/mcp-now/config.json",
+    configStatus: "configured",
+    profileId: "profile1"
+  },
+  {
+    id: "host2",
+    name: "Production Server",
+    icon: "🖥️",
+    connectionStatus: "connected",
+    configPath: "/etc/mcp-now/config.json",
+    configStatus: "configured",
+    profileId: "profile2"
+  },
+  {
+    id: "host3",
+    name: "Testing Environment",
+    icon: "🧪",
+    connectionStatus: "disconnected",
+    configPath: "/var/lib/mcp-now/config.json",
+    configStatus: "misconfigured"
+  },
+  {
+    id: "host4",
+    name: "Staging Server",
+    icon: "🔄",
+    connectionStatus: "unknown",
+    configStatus: "unknown"
+  }
+];
+
+export const profiles: Profile[] = [
+  {
+    id: "profile1",
+    name: "Development Profile",
+    description: "Configuration for local development environments with debugging enabled.",
+    enabled: true,
+    instances: ["inst1", "inst3"]
+  },
+  {
+    id: "profile2",
+    name: "Production Profile",
+    description: "Optimized settings for production environments with high throughput.",
+    enabled: true,
+    instances: ["inst1", "inst5"]
+  },
+  {
+    id: "profile3",
+    name: "Testing Profile",
+    description: "Configuration for automated testing with mocked services.",
+    enabled: false,
+    instances: ["inst2", "inst4"]
   }
 ];
