@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
@@ -132,11 +133,11 @@ const Discovery = () => {
 
   const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="mb-6">
-      <div className="bg-muted/50 rounded-lg p-3">
-        <h3 className="text-base font-medium">{title}</h3>
-      </div>
-      <div className="px-4 py-3">
-        <div className="text-muted-foreground text-sm">{children}</div>
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <h3 className="text-base font-medium p-4 border-b border-gray-100 dark:border-gray-700">{title}</h3>
+        <div className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -260,12 +261,12 @@ const Discovery = () => {
                 </div>
               </DialogHeader>
               
-              <div className="space-y-4 mt-2">
+              <div className="space-y-6 mt-4">
                 <DialogSection title="Description">
                   {selectedServer.description}
                 </DialogSection>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   <DialogSection title="Author">
                     {selectedServer.author}
                   </DialogSection>
@@ -286,7 +287,7 @@ const Discovery = () => {
                 </DialogSection>
                 
                 <DialogSection title="Features">
-                  <ul className="list-disc list-inside space-y-1 ml-1">
+                  <ul className="list-disc list-inside space-y-2">
                     {selectedServer.features?.map((feature, index) => (
                       <li key={index}>{feature}</li>
                     ))}
