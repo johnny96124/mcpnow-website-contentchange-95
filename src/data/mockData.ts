@@ -1,6 +1,6 @@
 
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
-export type Status = 'running' | 'stopped' | 'error';
+export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
 
 export interface ServerDefinition {
