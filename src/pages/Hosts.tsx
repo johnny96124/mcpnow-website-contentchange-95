@@ -9,6 +9,8 @@ import { HostCard } from "@/components/hosts/HostCard";
 import { HostSearch } from "@/components/hosts/HostSearch";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { AddHostDialog } from "@/components/hosts/AddHostDialog";
+import { ConnectionStatus, Host } from "@/data/mockData";
 
 // Mock JSON config data
 const mockJsonConfig = {
@@ -58,16 +60,18 @@ const mockJsonConfig = {
 
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [hostsList, setHostsList] = useState<Host[]>(hosts);
+  const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
-  const filteredHosts = hosts.filter(host => 
+  const filteredHosts = hostsList.filter(host => 
     host.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleOpenConfigDialog = (hostId: string) => {
-    const host = hosts.find(h => h.id === hostId);
+    const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
       openConfigDialog(hostId, host.configPath);
     }
@@ -82,6 +86,27 @@ const Hosts = () => {
         description: `Config file saved to ${configDialog.configPath}`,
       });
     }
+  };
+  
+  const handleAddHost = (newHost: {
+    name: string;
+    configPath?: string;
+    icon?: string;
+    configStatus: "configured" | "misconfigured" | "unknown";
+    connectionStatus: ConnectionStatus;
+  }) => {
+    const id = `host-${Date.now()}`;
+    const host: Host = {
+      id,
+      ...newHost
+    };
+    
+    setHostsList([...hostsList, host]);
+    
+    toast({
+      title: "Host Added",
+      description: `${newHost.name} has been added successfully`,
+    });
   };
 
   return (
@@ -98,7 +123,7 @@ const Hosts = () => {
             <Search className="h-4 w-4 mr-2" />
             Scan for Hosts
           </Button>
-          <Button>
+          <Button onClick={() => setAddHostDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Add Host Manually
           </Button>
@@ -128,6 +153,12 @@ const Hosts = () => {
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
         onSave={handleSaveConfig}
+      />
+      
+      <AddHostDialog 
+        open={addHostDialogOpen}
+        onOpenChange={setAddHostDialogOpen}
+        onAddHost={handleAddHost}
       />
     </div>
   );
