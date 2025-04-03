@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   ActivityIcon, 
@@ -8,7 +7,6 @@ import {
   PlusCircle, 
   Server, 
   Star,
-  Trending,
   TrendingUp,
   UsersRound 
 } from "lucide-react";
@@ -234,7 +232,7 @@ const Dashboard = () => {
           </Button>
         </div>
         
-        <ScrollArea className="w-full" orientation="horizontal">
+        <ScrollArea className="w-full">
           <div className="flex space-x-4 pb-4">
             {trendingServers.map(server => (
               <Card key={server.id} className="min-w-[300px] max-w-[300px]">

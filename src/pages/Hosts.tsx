@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CircleCheck, 
@@ -8,7 +7,7 @@ import {
   Edit, 
   ExternalLink, 
   FilePlus, 
-  FileSave,
+  Save,
   Loader2, 
   PlusCircle, 
   RefreshCw, 
@@ -49,7 +48,6 @@ const Hosts = () => {
   
   const { toast } = useToast();
   
-  // Filter hosts by search query
   const filteredHosts = hosts.filter(host => 
     host.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -87,8 +85,6 @@ const Hosts = () => {
   const openConfigDialog = (hostId: string) => {
     const host = hosts.find(h => h.id === hostId);
     if (host && host.configPath) {
-      // In a real application, we would fetch the config file content
-      // For this example, we'll simulate a JSON config
       const mockConfig = {
         profile: hostProfiles[hostId] || "",
         connection: {
@@ -114,7 +110,6 @@ const Hosts = () => {
   
   const handleSaveConfig = (config: string) => {
     if (configDialog.hostId) {
-      // In a real application, we would save the config file
       console.log(`Saving config for host ${configDialog.hostId}:`, config);
       
       toast({

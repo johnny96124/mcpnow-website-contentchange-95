@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { FileSave } from "lucide-react";
+import { Save } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -91,7 +91,7 @@ export function ConfigFileDialog({
             Format JSON
           </Button>
           <Button onClick={handleSave}>
-            <FileSave className="mr-2 h-4 w-4" />
+            <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
         </div>
