@@ -1,4 +1,3 @@
-
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -40,7 +39,7 @@ export interface Host {
   configStatus: 'configured' | 'misconfigured' | 'unknown';
   connectionStatus: ConnectionStatus;
   configPath?: string;
-  icon?: string;
+  icon?: string; // This should remain optional
 }
 
 export const serverDefinitions: ServerDefinition[] = [

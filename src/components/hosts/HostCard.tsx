@@ -11,7 +11,7 @@ interface HostCardProps {
   host: {
     id: string;
     name: string;
-    icon: string;
+    icon?: string; // Changed from required to optional
     connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
     configStatus: 'configured' | 'misconfigured' | 'unknown';
     configPath?: string;
@@ -59,7 +59,7 @@ export function HostCard({
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{host.icon}</span>
+            {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
           </div>
           <div className="flex items-center gap-2">
