@@ -50,7 +50,6 @@ const TrayPopup = () => {
   };
 
   const handleInstanceChange = (profileId: string, definitionId: string, instanceId: string) => {
-    // Create or update the active instances state
     setActiveInstances(prev => {
       const profileInstances = {...(prev[profileId] || {})};
       profileInstances[definitionId] = instanceId;
@@ -60,6 +59,9 @@ const TrayPopup = () => {
         [profileId]: profileInstances
       };
     });
+    
+    // This would be where you'd make an API call to actually change the active instance
+    console.log(`Changed instance for ${definitionId} to ${instanceId} in profile ${profileId}`);
   };
 
   const getInstancesForDefinition = (profileId: string, definitionId: string) => {
@@ -199,16 +201,20 @@ const TrayPopup = () => {
                                     <Button 
                                       variant="ghost" 
                                       size="sm" 
-                                      className="h-6 text-xs px-2 py-1"
+                                      className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
                                     >
-                                      {activeInstance.name.split('-').pop()} <ChevronDown className="h-3 w-3 ml-1" />
+                                      <span>{activeInstance.name.split('-').pop()}</span>
+                                      <ChevronDown className="h-3 w-3" />
                                     </Button>
                                   </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-40">
+                                  <DropdownMenuContent align="end" className="w-40 bg-popover shadow-lg">
                                     {instancesForDef.map(instance => (
                                       <DropdownMenuItem
                                         key={instance.id}
-                                        className="text-xs flex items-center justify-between"
+                                        className={cn(
+                                          "text-xs flex items-center justify-between",
+                                          instance.id === activeInstanceId && "bg-accent"
+                                        )}
                                         onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
                                       >
                                         <div className="flex items-center gap-1">
