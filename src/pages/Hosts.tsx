@@ -30,6 +30,51 @@ interface ConfigDialogState {
   configContent: string;
 }
 
+const mockJsonConfig = {
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/postgres",
+        "--config",
+        "\"{\\\"postgresConnectionString\\\":\\\"postgresql://postgres:postgres@localhost:5432/cobo_dev?gssencmode=disable\\\"}\""
+      ]
+    },
+    "sequential thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@smithery-ai/server-sequential-thinking",
+        "--config",
+        "\"{}\""
+      ]
+    },
+    "weather": {
+      "command": "node",
+      "args": [
+        "/Users/changhaojiang/tmp/mcp-node-server/build/index.js"
+      ], 
+      "env": {
+        "NODE_EXTRA_CA_CERTS": "/Users/changhaojiang/Downloads/Cloudflare_CA.pem"
+      }
+    },
+    "browser-tools": {
+      "command": "npx",
+      "args": [
+        "@agentdeskai/browser-tools-mcp@1.2.0"
+      ],
+      "env": {
+        "NODE_EXTRA_CA_CERTS": "/Users/changhaojiang/Downloads/Cloudflare_CA.pem"
+      }
+    }
+  }
+};
+
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hostProfiles, setHostProfiles] = useState(
@@ -85,25 +130,11 @@ const Hosts = () => {
   const openConfigDialog = (hostId: string) => {
     const host = hosts.find(h => h.id === hostId);
     if (host && host.configPath) {
-      const mockConfig = {
-        profile: hostProfiles[hostId] || "",
-        connection: {
-          type: getProfileEndpointType(hostProfiles[hostId] || "") || "HTTP_SSE",
-          endpoint: getProfileEndpoint(hostProfiles[hostId] || ""),
-          token: "sample-token-xyz",
-        },
-        settings: {
-          autoReconnect: true,
-          reconnectInterval: 5000,
-          debug: false,
-        }
-      };
-      
       setConfigDialog({
         isOpen: true,
         hostId,
         configPath: host.configPath,
-        configContent: JSON.stringify(mockConfig, null, 2),
+        configContent: JSON.stringify(mockJsonConfig, null, 2),
       });
     }
   };
