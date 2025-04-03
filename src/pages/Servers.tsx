@@ -2,15 +2,11 @@
 import { useState } from "react";
 import { 
   CirclePlus, 
-  Code2, 
   Edit, 
   ExternalLink, 
-  MonitorPlay, 
   MoreHorizontal, 
   PlayCircle, 
   PlusCircle, 
-  Power, 
-  ServerCrash, 
   StopCircle, 
   Trash2, 
   Globe,
@@ -33,11 +29,13 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { 
   serverDefinitions, 
   serverInstances,
@@ -48,6 +46,7 @@ import {
 const Servers = () => {
   const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances] = useState<ServerInstance[]>(serverInstances);
+  const [activeTab, setActiveTab] = useState("integrated");
   
   // Group instances by definition ID
   const instancesByDefinition = instances.reduce((acc, instance) => {
@@ -77,21 +76,253 @@ const Servers = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Servers</h1>
           <p className="text-muted-foreground">
-            Manage server definitions and instances
+            Manage server definitions and their instances
           </p>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Define New Server
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            New Instance
+          </Button>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Define New Server
+          </Button>
+        </div>
       </div>
       
-      <Tabs defaultValue="definitions">
+      <Tabs defaultValue="integrated" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
+          <TabsTrigger value="integrated">Integrated View</TabsTrigger>
           <TabsTrigger value="definitions">Server Definitions</TabsTrigger>
           <TabsTrigger value="instances">Server Instances</TabsTrigger>
         </TabsList>
         
+        {/* Integrated View - Shows definitions with their instances */}
+        <TabsContent value="integrated" className="mt-4">
+          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+            {definitions.map(definition => {
+              const definitionInstances = instancesByDefinition[definition.id] || [];
+              
+              return (
+                <Card key={definition.id} className="overflow-hidden">
+                  <CardHeader className="pb-2 bg-secondary/30">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {definition.name}
+                        </CardTitle>
+                        <div className="flex items-center gap-2 mt-1">
+                          <EndpointLabel type={definition.type} />
+                          <CardDescription className="text-xs">
+                            v{definition.version}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <CirclePlus className="h-4 w-4 mr-1" />
+                        Add Instance
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-4">
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {truncateDescription(definition.description)}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm mb-4">
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-help">
+                            <p className="font-medium">Instances</p>
+                            <p className="text-muted-foreground">{definitionInstances.length} total</p>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold">Instances</h4>
+                            {definitionInstances.length > 0 ? (
+                              <ul className="text-xs space-y-1">
+                                {definitionInstances.map(instance => (
+                                  <li key={instance.id} className="flex items-center justify-between">
+                                    <span>{instance.name}</span>
+                                    <StatusIndicator 
+                                      status={
+                                        instance.status === 'running' ? 'active' : 
+                                        instance.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                      label={
+                                        instance.status === 'running' ? 'Running' : 
+                                        instance.status === 'error' ? 'Error' : 'Stopped'
+                                      }
+                                    />
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">No instances available</p>
+                            )}
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                      
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <div className="cursor-help">
+                            <p className="font-medium">Requests</p>
+                            <p className="text-muted-foreground">{getRequestCount(definition.id)} total</p>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold">Instance Requests</h4>
+                            {definitionInstances.length > 0 ? (
+                              <ul className="text-xs space-y-1">
+                                {definitionInstances.map(instance => (
+                                  <li key={instance.id} className="flex items-center justify-between">
+                                    <span>{instance.name}</span>
+                                    <span className="font-medium">{instance.requestCount || 0} requests</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">No instances available</p>
+                            )}
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                    
+                    {/* Instances Table - Only show if there are instances */}
+                    {definitionInstances.length > 0 && (
+                      <div className="border rounded-md overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Instance Name</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Connection</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {definitionInstances.map(instance => (
+                              <TableRow key={instance.id}>
+                                <TableCell className="font-medium">{instance.name}</TableCell>
+                                <TableCell>
+                                  <StatusIndicator 
+                                    status={
+                                      instance.status === 'running' ? 'active' : 
+                                      instance.status === 'error' ? 'error' : 'inactive'
+                                    } 
+                                    label={
+                                      instance.status === 'running' ? 'Running' : 
+                                      instance.status === 'error' ? 'Error' : 'Stopped'
+                                    }
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {definition.type === 'HTTP_SSE' ? (
+                                      <Globe className="h-4 w-4 text-blue-500" />
+                                    ) : (
+                                      <Terminal className="h-4 w-4 text-purple-500" />
+                                    )}
+                                    <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[150px]">
+                                      {instance.connectionDetails}
+                                    </code>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {instance.status === 'running' ? (
+                                      <Button variant="outline" size="sm">
+                                        <StopCircle className="h-4 w-4 mr-1" />
+                                        Stop
+                                      </Button>
+                                    ) : (
+                                      <Button variant="outline" size="sm">
+                                        <PlayCircle className="h-4 w-4 mr-1" />
+                                        Start
+                                      </Button>
+                                    )}
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent>
+                                        <DropdownMenuItem>
+                                          <Edit className="h-4 w-4 mr-2" />
+                                          Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                          <ExternalLink className="h-4 w-4 mr-2" />
+                                          View Details
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem className="text-destructive">
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                    
+                    {/* No instances message */}
+                    {definitionInstances.length === 0 && (
+                      <div className="text-center p-4 border rounded-md bg-secondary/10">
+                        <p className="text-muted-foreground">No instances created for this server definition</p>
+                        <Button variant="outline" size="sm" className="mt-2">
+                          <CirclePlus className="h-4 w-4 mr-1" />
+                          Create First Instance
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                  
+                  <CardFooter className="flex justify-between pt-0 border-t mt-2 bg-secondary/10">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Button variant="default" size="sm">
+                      <CirclePlus className="h-4 w-4 mr-1" />
+                      Create Instance
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+            
+            {/* Create new definition card */}
+            <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
+              <CardContent className="flex flex-col items-center justify-center p-6">
+                <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-center">
+                  Define a new server template
+                </p>
+                <Button className="mt-4">
+                  Define New Server
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Server Definitions Tab (Original Content) */}
         <TabsContent value="definitions" className="mt-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {definitions.map(definition => {
@@ -212,6 +443,7 @@ const Servers = () => {
           </div>
         </TabsContent>
         
+        {/* Server Instances Tab (Original Content) */}
         <TabsContent value="instances" className="mt-4">
           <div className="rounded-md border">
             <div className="relative w-full overflow-auto">
