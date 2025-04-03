@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -10,7 +9,8 @@ import {
   StopCircle, 
   Trash2, 
   Globe,
-  Terminal
+  Terminal,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { 
   serverDefinitions, 
   serverInstances,
@@ -45,8 +62,39 @@ import {
 
 const Servers = () => {
   const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
-  const [instances] = useState<ServerInstance[]>(serverInstances);
+  const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [activeTab, setActiveTab] = useState("integrated");
+  
+  // Function to toggle instance status
+  const toggleInstanceStatus = (instanceId: string) => {
+    setInstances(prevInstances => 
+      prevInstances.map(instance => {
+        if (instance.id === instanceId) {
+          // If it's running, stop it. If it's stopped, start connecting
+          const newStatus = instance.status === 'running' ? 'stopped' : 'connecting';
+          return { ...instance, status: newStatus };
+        }
+        return instance;
+      })
+    );
+    
+    // If status is changing to 'connecting', simulate completion after delay
+    const instance = instances.find(i => i.id === instanceId);
+    if (instance && instance.status !== 'running') {
+      setTimeout(() => {
+        setInstances(prevInstances => 
+          prevInstances.map(instance => {
+            if (instance.id === instanceId && instance.status === 'connecting') {
+              // 80% chance of success, 20% chance of error
+              const newStatus = Math.random() > 0.2 ? 'running' : 'error';
+              return { ...instance, status: newStatus };
+            }
+            return instance;
+          })
+        );
+      }, 1500); // Simulate 1.5 second connection process
+    }
+  };
   
   // Group instances by definition ID
   const instancesByDefinition = instances.reduce((acc, instance) => {
@@ -109,17 +157,17 @@ const Servers = () => {
                   <CardHeader className="pb-2 bg-secondary/30">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center">
                           {definition.name}
                         </CardTitle>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-3">
                           <EndpointLabel type={definition.type} />
                           <CardDescription className="text-xs">
                             v{definition.version}
                           </CardDescription>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105">
                         <CirclePlus className="h-4 w-4 mr-1" />
                         Add Instance
                       </Button>
@@ -150,10 +198,12 @@ const Servers = () => {
                                     <StatusIndicator 
                                       status={
                                         instance.status === 'running' ? 'active' : 
+                                        instance.status === 'connecting' ? 'warning' :
                                         instance.status === 'error' ? 'error' : 'inactive'
                                       } 
                                       label={
                                         instance.status === 'running' ? 'Running' : 
+                                        instance.status === 'connecting' ? 'Connecting' :
                                         instance.status === 'error' ? 'Error' : 'Stopped'
                                       }
                                     />
@@ -194,7 +244,7 @@ const Servers = () => {
                       </HoverCard>
                     </div>
                     
-                    {/* Instances Table - Only show if there are instances */}
+                    {/* Instances Table - Show only if there are instances */}
                     {definitionInstances.length > 0 && (
                       <div className="border rounded-md overflow-hidden">
                         <Table>
@@ -207,42 +257,58 @@ const Servers = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {definitionInstances.map(instance => (
+                            {/* Only show max 2 instances in the card */}
+                            {definitionInstances.slice(0, 2).map(instance => (
                               <TableRow key={instance.id}>
                                 <TableCell className="font-medium">{instance.name}</TableCell>
                                 <TableCell>
                                   <StatusIndicator 
                                     status={
                                       instance.status === 'running' ? 'active' : 
+                                      instance.status === 'connecting' ? 'warning' :
                                       instance.status === 'error' ? 'error' : 'inactive'
                                     } 
                                     label={
                                       instance.status === 'running' ? 'Running' : 
+                                      instance.status === 'connecting' ? 'Connecting' :
                                       instance.status === 'error' ? 'Error' : 'Stopped'
                                     }
                                   />
                                 </TableCell>
                                 <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    {definition.type === 'HTTP_SSE' ? (
-                                      <Globe className="h-4 w-4 text-blue-500" />
-                                    ) : (
-                                      <Terminal className="h-4 w-4 text-purple-500" />
-                                    )}
-                                    <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[150px]">
-                                      {instance.connectionDetails}
-                                    </code>
-                                  </div>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-2">
+                                          {definition.type === 'HTTP_SSE' ? (
+                                            <Globe className="h-4 w-4 text-blue-500" />
+                                          ) : (
+                                            <Terminal className="h-4 w-4 text-purple-500" />
+                                          )}
+                                          <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[150px]">
+                                            {instance.connectionDetails}
+                                          </code>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-md">
+                                        <code className="text-xs">{instance.connectionDetails}</code>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </TableCell>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     {instance.status === 'running' ? (
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" onClick={() => toggleInstanceStatus(instance.id)}>
                                         <StopCircle className="h-4 w-4 mr-1" />
                                         Stop
                                       </Button>
+                                    ) : instance.status === 'connecting' ? (
+                                      <Button variant="outline" size="sm" disabled>
+                                        <span className="animate-pulse">Connecting...</span>
+                                      </Button>
                                     ) : (
-                                      <Button variant="outline" size="sm">
+                                      <Button variant="outline" size="sm" onClick={() => toggleInstanceStatus(instance.id)}>
                                         <PlayCircle className="h-4 w-4 mr-1" />
                                         Start
                                       </Button>
@@ -254,10 +320,6 @@ const Servers = () => {
                                         </Button>
                                       </DropdownMenuTrigger>
                                       <DropdownMenuContent>
-                                        <DropdownMenuItem>
-                                          <Edit className="h-4 w-4 mr-2" />
-                                          Edit
-                                        </DropdownMenuItem>
                                         <DropdownMenuItem>
                                           <ExternalLink className="h-4 w-4 mr-2" />
                                           View Details
@@ -274,14 +336,29 @@ const Servers = () => {
                             ))}
                           </TableBody>
                         </Table>
+                        
+                        {/* Show a link to view all instances if there are more than 2 */}
+                        {definitionInstances.length > 2 && (
+                          <div className="py-2 px-4 bg-muted/30 border-t text-sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-primary text-xs"
+                              onClick={() => setActiveTab("instances")}
+                            >
+                              View all {definitionInstances.length} instances
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                     
-                    {/* No instances message */}
+                    {/* No instances message - updated style */}
                     {definitionInstances.length === 0 && (
-                      <div className="text-center p-4 border rounded-md bg-secondary/10">
-                        <p className="text-muted-foreground">No instances created for this server definition</p>
-                        <Button variant="outline" size="sm" className="mt-2">
+                      <div className="text-center p-8 border rounded-md bg-secondary/10 flex flex-col items-center">
+                        <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-2" />
+                        <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
+                        <Button variant="outline" size="sm" className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105">
                           <CirclePlus className="h-4 w-4 mr-1" />
                           Create First Instance
                         </Button>
@@ -289,19 +366,37 @@ const Servers = () => {
                     )}
                   </CardContent>
                   
-                  <CardFooter className="flex justify-between pt-0 border-t mt-2 bg-secondary/10">
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
+                  <CardFooter className="flex justify-end pt-4 pb-4 border-t mt-2 bg-secondary/10">
+                    {definitionInstances.length > 0 ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete Server
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete the server definition "{definition.name}" and all its {definitionInstances.length} instances. 
+                              This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : (
+                      <Button variant="destructive" size="sm">
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete Server
                       </Button>
-                      <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button variant="default" size="sm">
-                      <CirclePlus className="h-4 w-4 mr-1" />
-                      Create Instance
-                    </Button>
+                    )}
                   </CardFooter>
                 </Card>
               );
@@ -314,7 +409,7 @@ const Servers = () => {
                 <p className="text-muted-foreground text-center">
                   Define a new server template
                 </p>
-                <Button className="mt-4">
+                <Button className="mt-4 hover:scale-105 transition-all duration-300">
                   Define New Server
                 </Button>
               </CardContent>
@@ -322,7 +417,7 @@ const Servers = () => {
           </div>
         </TabsContent>
         
-        {/* Server Definitions Tab (Original Content) */}
+        {/* Server Definitions Tab (keep original content) */}
         <TabsContent value="definitions" className="mt-4">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {definitions.map(definition => {
@@ -443,7 +538,7 @@ const Servers = () => {
           </div>
         </TabsContent>
         
-        {/* Server Instances Tab (Original Content) */}
+        {/* Server Instances Tab (keep original content) */}
         <TabsContent value="instances" className="mt-4">
           <div className="rounded-md border">
             <div className="relative w-full overflow-auto">
