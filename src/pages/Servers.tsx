@@ -21,6 +21,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
+import { ServerInstancesInfo } from "@/components/servers/ServerInstancesInfo";
+import { AuthorRequestInfo } from "@/components/servers/AuthorRequestInfo";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -74,12 +76,12 @@ const Servers = () => {
             {definitions.map(definition => {
               const definitionInstances = instancesByDefinition[definition.id] || [];
               const runningCount = definitionInstances.filter(i => i.status === 'running').length;
+              const totalRequests = definitionInstances.reduce((sum, instance) => sum + (instance.requestCount || 0), 0);
               
               return (
                 <Card key={definition.id}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">{definition.icon}</span>
                       <CardTitle>{definition.name}</CardTitle>
                     </div>
                     <div className="flex items-center gap-2">
@@ -90,22 +92,31 @@ const Servers = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {definition.description}
                     </p>
                     
                     <div className="flex items-center justify-between text-sm">
                       <div>
-                        <p className="font-medium">Instances</p>
-                        <p className="text-muted-foreground">{definitionInstances.length} total</p>
+                        <ServerInstancesInfo 
+                          instances={definitionInstances}
+                          label={
+                            <>
+                              <p className="font-medium">Instances</p>
+                              <p className="text-muted-foreground">{definitionInstances.length} total</p>
+                            </>
+                          }
+                        />
                       </div>
                       <div>
                         <p className="font-medium">Running</p>
                         <p className="text-muted-foreground">{runningCount} active</p>
                       </div>
                       <div>
-                        <p className="font-medium">Author</p>
-                        <p className="text-muted-foreground">{definition.author}</p>
+                        <AuthorRequestInfo 
+                          instances={definitionInstances} 
+                          author={definition.author}
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -177,8 +188,7 @@ const Servers = () => {
                         </td>
                         <td className="p-4 align-middle">
                           <div className="flex items-center gap-2">
-                            {definition?.icon && <span>{definition.icon}</span>}
-                            <span>{definition?.name || 'Unknown'}</span>
+                            {definition?.name || 'Unknown'}
                           </div>
                         </td>
                         <td className="p-4 align-middle">
