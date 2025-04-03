@@ -73,6 +73,11 @@ const Profiles = () => {
     };
     
     setLocalProfiles(prev => [...prev, newProfile]);
+    
+    toast({
+      title: "Profile created successfully",
+      description: `The profile "${name}" has been created with ${endpointType} endpoint.`,
+    });
   };
 
   return (

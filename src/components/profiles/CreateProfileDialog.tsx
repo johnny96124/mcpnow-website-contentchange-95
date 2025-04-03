@@ -80,7 +80,7 @@ export function CreateProfileDialog({ open, onOpenChange, onCreateProfile }: Cre
         <DialogHeader>
           <DialogTitle>Create New Profile</DialogTitle>
           <DialogDescription>
-            Create a new MCP profile to aggregate server instances.
+            Profiles allow you to group server instances and connect to hosts.
           </DialogDescription>
         </DialogHeader>
         
