@@ -31,10 +31,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ITEMS_PER_PAGE = 6;
 
-// Duplicate and modify the discovery items to create more content
 const extendedItems = [
   ...discoveryItems,
-  // Additional items with slight modifications
   ...discoveryItems.map((item, index) => ({
     ...item,
     id: `extended-${item.id}-${index}`,
@@ -77,7 +75,6 @@ const Discovery = () => {
   const hasMore = visibleServers.length < filteredServers.length;
 
   useEffect(() => {
-    // Reset visible items when filters change
     setVisibleItems(ITEMS_PER_PAGE);
   }, [searchQuery, selectedCategory]);
 
@@ -108,7 +105,6 @@ const Discovery = () => {
     
     setIsLoading(true);
     
-    // Simulate network delay for loading more items
     setTimeout(() => {
       setVisibleItems(prev => prev + ITEMS_PER_PAGE);
       setIsLoading(false);
@@ -123,7 +119,6 @@ const Discovery = () => {
   const handleInstall = (serverId: string) => {
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
-    // Simulate installation process
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
@@ -135,13 +130,14 @@ const Discovery = () => {
     setSelectedCategory(null);
   };
 
-  // Dialog section component
   const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="mb-6">
-      <div className="bg-muted/80 rounded-lg p-4 mb-3">
+      <div className="bg-muted/50 rounded-lg p-3">
         <h3 className="text-base font-medium">{title}</h3>
       </div>
-      <div className="px-1">{children}</div>
+      <div className="px-4 py-3">
+        <div className="text-muted-foreground text-sm">{children}</div>
+      </div>
     </div>
   );
 
@@ -250,7 +246,6 @@ const Discovery = () => {
         )}
       </ScrollArea>
       
-      {/* Enhanced server details dialog with styled sections */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           {selectedServer && (
@@ -267,22 +262,16 @@ const Discovery = () => {
               
               <div className="space-y-4 mt-2">
                 <DialogSection title="Description">
-                  <p className="text-sm text-muted-foreground">
-                    {selectedServer.description}
-                  </p>
+                  {selectedServer.description}
                 </DialogSection>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <DialogSection title="Author">
-                    <p className="text-sm font-medium">
-                      {selectedServer.author}
-                    </p>
+                    {selectedServer.author}
                   </DialogSection>
                   
                   <DialogSection title="Version">
-                    <p className="text-sm font-medium">
-                      {selectedServer.version}
-                    </p>
+                    {selectedServer.version}
                   </DialogSection>
                 </div>
                 
@@ -297,9 +286,9 @@ const Discovery = () => {
                 </DialogSection>
                 
                 <DialogSection title="Features">
-                  <ul className="list-disc list-inside text-sm space-y-1 ml-1">
+                  <ul className="list-disc list-inside space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
-                      <li key={index} className="text-muted-foreground">{feature}</li>
+                      <li key={index}>{feature}</li>
                     ))}
                   </ul>
                 </DialogSection>
@@ -307,7 +296,7 @@ const Discovery = () => {
                 <DialogSection title="Repository">
                   <a 
                     href="#" 
-                    className="text-sm text-primary flex items-center hover:underline"
+                    className="text-primary flex items-center hover:underline"
                   >
                     {selectedServer.repository}
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
