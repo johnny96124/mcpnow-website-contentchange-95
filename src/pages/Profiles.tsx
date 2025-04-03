@@ -10,21 +10,24 @@ import {
   PlusCircle, 
   TerminalSquare, 
   Trash2, 
-  Globe 
+  Globe,
+  UserPlus 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { Profile, profiles, serverInstances } from "@/data/mockData";
+import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
 import { ManageInstancesModal } from "@/components/profiles/ManageInstancesModal";
 import { useToast } from "@/hooks/use-toast";
+import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
   const { toast } = useToast();
 
   const toggleProfile = (id: string) => {
@@ -59,6 +62,19 @@ const Profiles = () => {
     });
   };
 
+  const handleCreateProfile = ({ name, endpointType, endpoint }: { name: string; endpointType: EndpointType; endpoint: string }) => {
+    const newProfile: Profile = {
+      id: `profile-${Date.now()}`,
+      name,
+      endpointType,
+      endpoint,
+      enabled: true,
+      instances: [],
+    };
+    
+    setLocalProfiles(prev => [...prev, newProfile]);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -68,7 +84,7 @@ const Profiles = () => {
             Create and manage MCP profiles to aggregate server instances.
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsCreateProfileOpen(true)}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Create Profile
         </Button>
@@ -173,7 +189,7 @@ const Profiles = () => {
             <p className="text-muted-foreground text-center">
               Create a new profile to group server instances together
             </p>
-            <Button className="mt-4">
+            <Button className="mt-4" onClick={() => setIsCreateProfileOpen(true)}>
               Create Profile
             </Button>
           </CardContent>
@@ -190,6 +206,13 @@ const Profiles = () => {
           onSave={handleSaveInstances}
         />
       )}
+      
+      {/* Create profile dialog */}
+      <CreateProfileDialog
+        open={isCreateProfileOpen}
+        onOpenChange={setIsCreateProfileOpen}
+        onCreateProfile={handleCreateProfile}
+      />
     </div>
   );
 };
