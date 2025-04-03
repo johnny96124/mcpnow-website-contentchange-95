@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryFilter } from "@/components/discovery/CategoryFilter";
+import { EmptyState } from "@/components/discovery/EmptyState";
 
 const Discovery = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,6 +62,11 @@ const Discovery = () => {
     }, 1500);
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory(null);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -89,65 +95,72 @@ const Discovery = () => {
         />
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredServers.map(server => (
-          <Card key={server.id} className="flex flex-col overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex flex-col">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl">{server.name}</CardTitle>
+      {filteredServers.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredServers.map(server => (
+            <Card key={server.id} className="flex flex-col overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-xl">{server.name}</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <EndpointLabel type={server.type} />
+                    {server.isOfficial && <OfficialBadge />}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <EndpointLabel type={server.type} />
-                  {server.isOfficial && <OfficialBadge />}
+              </CardHeader>
+              <CardContent className="flex-1">
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                  {server.description}
+                </p>
+                
+                <div className="mb-4">
+                  <CategoryList categories={server.categories || []} maxVisible={3} />
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                {server.description}
-              </p>
-              
-              <div className="mb-4">
-                <CategoryList categories={server.categories || []} maxVisible={3} />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                  <p className="text-sm font-medium">{server.author}</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
+                    <p className="text-sm font-medium">{server.author}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
+                    <p className="text-sm font-medium">{server.version}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                  <p className="text-sm font-medium">{server.version}</p>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
-              <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
-                <Info className="h-4 w-4 mr-1" />
-                Details
-              </Button>
-              {installedServers[server.id] ? (
-                <Button variant="outline" size="sm" disabled className="text-green-600">
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Installed
+              </CardContent>
+              <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
+                  <Info className="h-4 w-4 mr-1" />
+                  Details
                 </Button>
-              ) : isInstalling[server.id] ? (
-                <Button variant="outline" size="sm" disabled>
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  Installing...
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => handleInstall(server.id)}>
-                  <PackagePlus className="h-4 w-4 mr-1" />
-                  Add Server
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+                {installedServers[server.id] ? (
+                  <Button variant="outline" size="sm" disabled className="text-green-600">
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Installed
+                  </Button>
+                ) : isInstalling[server.id] ? (
+                  <Button variant="outline" size="sm" disabled>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Installing...
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => handleInstall(server.id)}>
+                    <PackagePlus className="h-4 w-4 mr-1" />
+                    Add Server
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <EmptyState 
+          searchQuery={searchQuery} 
+          onReset={handleClearFilters} 
+        />
+      )}
       
       {/* Server details dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
