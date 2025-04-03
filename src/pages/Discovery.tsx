@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CheckCircle,
@@ -94,12 +93,11 @@ const Discovery = () => {
         {filteredServers.map(server => (
           <Card key={server.id} className="flex flex-col overflow-hidden">
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{server.icon}</span>
+              <div className="flex flex-col">
+                <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">{server.name}</CardTitle>
                 </div>
-                <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-2 mt-2">
                   <EndpointLabel type={server.type} />
                   {server.isOfficial && <OfficialBadge />}
                 </div>
@@ -156,11 +154,10 @@ const Discovery = () => {
         <DialogContent className="max-w-2xl">
           {selectedServer && (
             <>
-              <DialogHeader className="flex flex-row items-center space-y-0 gap-4">
-                <span className="text-3xl">{selectedServer.icon}</span>
+              <DialogHeader className="flex flex-col items-start space-y-2">
                 <div>
                   <DialogTitle className="text-2xl">{selectedServer.name}</DialogTitle>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
