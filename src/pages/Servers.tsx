@@ -10,7 +10,8 @@ import {
   Trash2, 
   Globe,
   Terminal,
-  AlertCircle
+  AlertCircle,
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +36,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter
 } from "@/components/ui/table";
 import {
   AlertDialog,
@@ -143,6 +145,7 @@ const Servers = () => {
           <div className="grid gap-6 grid-cols-1">
             {definitions.map(definition => {
               const definitionInstances = instancesByDefinition[definition.id] || [];
+              const totalRequests = getRequestCount(definition.id);
               
               return (
                 <Card key={definition.id} className="overflow-hidden">
@@ -175,49 +178,13 @@ const Servers = () => {
                       {truncateDescription(definition.description)}
                     </p>
                     
-                    <div className="flex items-center justify-between text-sm mb-4">
+                    <div className="flex items-center text-sm mb-4">
                       <HoverCard>
                         <HoverCardTrigger asChild>
-                          <div className="cursor-help">
-                            <p className="font-medium">Instances</p>
-                            <p className="text-muted-foreground">{definitionInstances.length} total</p>
-                          </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80">
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Instances</h4>
-                            {definitionInstances.length > 0 ? (
-                              <ul className="text-xs space-y-1">
-                                {definitionInstances.map(instance => (
-                                  <li key={instance.id} className="flex items-center justify-between">
-                                    <span>{instance.name}</span>
-                                    <StatusIndicator 
-                                      status={
-                                        instance.status === 'running' ? 'active' : 
-                                        instance.status === 'connecting' ? 'warning' :
-                                        instance.status === 'error' ? 'error' : 'inactive'
-                                      } 
-                                      label={
-                                        instance.status === 'running' ? 'Running' : 
-                                        instance.status === 'connecting' ? 'Connecting' :
-                                        instance.status === 'error' ? 'Error' : 'Stopped'
-                                      }
-                                    />
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-xs text-muted-foreground">No instances available</p>
-                            )}
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                      
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <div className="cursor-help">
-                            <p className="font-medium">Requests</p>
-                            <p className="text-muted-foreground">{getRequestCount(definition.id)} total</p>
+                          <div className="cursor-help flex items-center">
+                            <Activity className="h-4 w-4 mr-1 text-muted-foreground" />
+                            <p className="font-medium mr-1">Total Requests:</p>
+                            <p className="text-muted-foreground">{totalRequests}</p>
                           </div>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-80">
@@ -246,28 +213,25 @@ const Servers = () => {
                           <TableHeader>
                             <TableRow>
                               <TableHead>Instance Name</TableHead>
-                              <TableHead>Status</TableHead>
                               <TableHead>Connection</TableHead>
+                              <TableHead>Requests</TableHead>
                               <TableHead>Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {definitionInstances.map(instance => (
                               <TableRow key={instance.id}>
-                                <TableCell className="font-medium">{instance.name}</TableCell>
-                                <TableCell>
-                                  <StatusIndicator 
-                                    status={
-                                      instance.status === 'running' ? 'active' : 
-                                      instance.status === 'connecting' ? 'warning' :
-                                      instance.status === 'error' ? 'error' : 'inactive'
-                                    } 
-                                    label={
-                                      instance.status === 'running' ? 'Running' : 
-                                      instance.status === 'connecting' ? 'Connecting' :
-                                      instance.status === 'error' ? 'Error' : 'Stopped'
-                                    }
-                                  />
+                                <TableCell className="font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <StatusIndicator 
+                                      status={
+                                        instance.status === 'running' ? 'active' : 
+                                        instance.status === 'connecting' ? 'warning' :
+                                        instance.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                      label={instance.name}
+                                    />
+                                  </div>
                                 </TableCell>
                                 <TableCell>
                                   <TooltipProvider>
@@ -279,7 +243,7 @@ const Servers = () => {
                                           ) : (
                                             <Terminal className="h-4 w-4 text-purple-500" />
                                           )}
-                                          <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[150px]">
+                                          <code className="text-xs bg-muted px-2 py-1 rounded">
                                             {instance.connectionDetails}
                                           </code>
                                         </div>
@@ -291,9 +255,17 @@ const Servers = () => {
                                   </TooltipProvider>
                                 </TableCell>
                                 <TableCell>
+                                  {instance.requestCount || 0}
+                                </TableCell>
+                                <TableCell>
                                   <div className="flex items-center gap-2">
                                     {instance.status === 'running' ? (
-                                      <Button variant="outline" size="sm" onClick={() => toggleInstanceStatus(instance.id)}>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => toggleInstanceStatus(instance.id)}
+                                        className="text-amber-500 hover:text-red-500 hover:border-red-500 transition-colors"
+                                      >
                                         <StopCircle className="h-4 w-4 mr-1" />
                                         Stop
                                       </Button>
@@ -302,7 +274,12 @@ const Servers = () => {
                                         <span className="animate-pulse">Connecting...</span>
                                       </Button>
                                     ) : (
-                                      <Button variant="outline" size="sm" onClick={() => toggleInstanceStatus(instance.id)}>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => toggleInstanceStatus(instance.id)}
+                                        className="text-emerald-500 hover:text-emerald-600 hover:border-emerald-500 transition-colors"
+                                      >
                                         <PlayCircle className="h-4 w-4 mr-1" />
                                         Start
                                       </Button>
@@ -329,6 +306,13 @@ const Servers = () => {
                               </TableRow>
                             ))}
                           </TableBody>
+                          <TableFooter>
+                            <TableRow>
+                              <TableCell colSpan={2} className="text-right">Total Instances: {definitionInstances.length}</TableCell>
+                              <TableCell className="text-right">Total: {totalRequests}</TableCell>
+                              <TableCell></TableCell>
+                            </TableRow>
+                          </TableFooter>
                         </Table>
                       </div>
                     )}
