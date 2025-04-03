@@ -95,8 +95,58 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Quick actions */}
+      {/* Quick actions - reordered to Hosts > Profiles > Servers */}
       <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Hosts</CardTitle>
+            <CardDescription>
+              Manage host connections and configurations
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              {hosts.slice(0, 3).map(host => (
+                <div 
+                  key={host.id} 
+                  className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{host.icon}</span>
+                    <span className="font-medium">{host.name}</span>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    host.connectionStatus === 'connected' ? 
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
+                    host.connectionStatus === 'disconnected' ? 
+                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' :
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                  }`}>
+                    {host.connectionStatus === 'connected' ? 'Connected' : 
+                     host.connectionStatus === 'disconnected' ? 'Disconnected' : 
+                     'Unknown'}
+                  </span>
+                </div>
+              ))}
+              {hosts.length > 3 && (
+                <p className="text-xs text-muted-foreground text-center">
+                  +{hosts.length - 3} more hosts
+                </p>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <Button asChild className="flex-1">
+                <Link to="/hosts">
+                  View All
+                </Link>
+              </Button>
+              <Button variant="outline" size="icon">
+                <PlusCircle className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
         <Card>
           <CardHeader>
             <CardTitle>Profiles</CardTitle>
@@ -175,56 +225,6 @@ const Dashboard = () => {
             <div className="flex space-x-2">
               <Button asChild className="flex-1">
                 <Link to="/servers">
-                  View All
-                </Link>
-              </Button>
-              <Button variant="outline" size="icon">
-                <PlusCircle className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Hosts</CardTitle>
-            <CardDescription>
-              Manage host connections and configurations
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              {hosts.slice(0, 3).map(host => (
-                <div 
-                  key={host.id} 
-                  className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{host.icon}</span>
-                    <span className="font-medium">{host.name}</span>
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    host.connectionStatus === 'connected' ? 
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
-                    host.connectionStatus === 'disconnected' ? 
-                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' :
-                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                  }`}>
-                    {host.connectionStatus === 'connected' ? 'Connected' : 
-                     host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                     'Unknown'}
-                  </span>
-                </div>
-              ))}
-              {hosts.length > 3 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  +{hosts.length - 3} more hosts
-                </p>
-              )}
-            </div>
-            <div className="flex space-x-2">
-              <Button asChild className="flex-1">
-                <Link to="/hosts">
                   View All
                 </Link>
               </Button>
