@@ -8,6 +8,7 @@ import {
   Edit, 
   ExternalLink, 
   FilePlus, 
+  FileSave,
   Loader2, 
   PlusCircle, 
   RefreshCw, 
@@ -20,6 +21,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { hosts, profiles } from "@/data/mockData";
+import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
+import { useToast } from "@/hooks/use-toast";
+
+interface ConfigDialogState {
+  isOpen: boolean;
+  hostId: string | null;
+  configPath: string;
+  configContent: string;
+}
 
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +39,15 @@ const Hosts = () => {
       return acc;
     }, {} as Record<string, string>)
   );
+  
+  const [configDialog, setConfigDialog] = useState<ConfigDialogState>({
+    isOpen: false,
+    hostId: null,
+    configPath: "",
+    configContent: "",
+  });
+  
+  const { toast } = useToast();
   
   // Filter hosts by search query
   const filteredHosts = hosts.filter(host => 
@@ -62,6 +81,46 @@ const Hosts = () => {
         return <CircleMinus className="h-5 w-5 text-status-inactive" />;
       default:
         return null;
+    }
+  };
+  
+  const openConfigDialog = (hostId: string) => {
+    const host = hosts.find(h => h.id === hostId);
+    if (host && host.configPath) {
+      // In a real application, we would fetch the config file content
+      // For this example, we'll simulate a JSON config
+      const mockConfig = {
+        profile: hostProfiles[hostId] || "",
+        connection: {
+          type: getProfileEndpointType(hostProfiles[hostId] || "") || "HTTP_SSE",
+          endpoint: getProfileEndpoint(hostProfiles[hostId] || ""),
+          token: "sample-token-xyz",
+        },
+        settings: {
+          autoReconnect: true,
+          reconnectInterval: 5000,
+          debug: false,
+        }
+      };
+      
+      setConfigDialog({
+        isOpen: true,
+        hostId,
+        configPath: host.configPath,
+        configContent: JSON.stringify(mockConfig, null, 2),
+      });
+    }
+  };
+  
+  const handleSaveConfig = (config: string) => {
+    if (configDialog.hostId) {
+      // In a real application, we would save the config file
+      console.log(`Saving config for host ${configDialog.hostId}:`, config);
+      
+      toast({
+        title: "Configuration saved",
+        description: `Config file saved to ${configDialog.configPath}`,
+      });
     }
   };
 
@@ -186,7 +245,12 @@ const Hosts = () => {
                           <Settings2 className="h-4 w-4 mr-2" />
                           Configure Host
                         </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => openConfigDialog(host.id)}
+                        >
                           <FilePlus className="h-4 w-4 mr-2" />
                           View Config File
                         </Button>
@@ -207,6 +271,14 @@ const Hosts = () => {
           );
         })}
       </div>
+      
+      <ConfigFileDialog
+        open={configDialog.isOpen}
+        onOpenChange={(isOpen) => setConfigDialog(prev => ({ ...prev, isOpen }))}
+        configPath={configDialog.configPath}
+        initialConfig={configDialog.configContent}
+        onSave={handleSaveConfig}
+      />
     </div>
   );
 };
