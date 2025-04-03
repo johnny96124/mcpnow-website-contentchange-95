@@ -145,7 +145,6 @@ const Servers = () => {
           <div className="grid gap-6 grid-cols-1">
             {definitions.map(definition => {
               const definitionInstances = instancesByDefinition[definition.id] || [];
-              const totalRequests = getRequestCount(definition.id);
               
               return (
                 <Card key={definition.id} className="overflow-hidden">
@@ -177,35 +176,6 @@ const Servers = () => {
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                       {truncateDescription(definition.description)}
                     </p>
-                    
-                    <div className="flex items-center text-sm mb-4">
-                      <HoverCard>
-                        <HoverCardTrigger asChild>
-                          <div className="cursor-help flex items-center">
-                            <Activity className="h-4 w-4 mr-1 text-muted-foreground" />
-                            <p className="font-medium mr-1">Total Requests:</p>
-                            <p className="text-muted-foreground">{totalRequests}</p>
-                          </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="w-80">
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-semibold">Instance Requests</h4>
-                            {definitionInstances.length > 0 ? (
-                              <ul className="text-xs space-y-1">
-                                {definitionInstances.map(instance => (
-                                  <li key={instance.id} className="flex items-center justify-between">
-                                    <span>{instance.name}</span>
-                                    <span className="font-medium">{instance.requestCount || 0} requests</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-xs text-muted-foreground">No instances available</p>
-                            )}
-                          </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
                     
                     {definitionInstances.length > 0 && (
                       <div className="border rounded-md overflow-hidden mt-6">
@@ -306,13 +276,6 @@ const Servers = () => {
                               </TableRow>
                             ))}
                           </TableBody>
-                          <TableFooter>
-                            <TableRow>
-                              <TableCell colSpan={2} className="text-right">Total Instances: {definitionInstances.length}</TableCell>
-                              <TableCell className="text-right">Total: {totalRequests}</TableCell>
-                              <TableCell></TableCell>
-                            </TableRow>
-                          </TableFooter>
                         </Table>
                       </div>
                     )}
