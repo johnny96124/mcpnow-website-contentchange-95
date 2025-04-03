@@ -3,13 +3,18 @@ import { Link } from "react-router-dom";
 import { 
   ActivityIcon, 
   Database,
+  ExternalLink,
   Plus,
   PlusCircle, 
   Server, 
+  Star,
+  Trending,
+  TrendingUp,
   UsersRound 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 
 const Dashboard = () => {
@@ -20,6 +25,14 @@ const Dashboard = () => {
   
   // Calculate requests in last hour (mock data)
   const requestsLastHour = 285;
+  
+  // Mock trending server data
+  const trendingServers = [
+    { id: "trend1", name: "FastGPT Server", icon: "🚀", type: "HTTP_SSE", stars: 4.9, downloads: 2342, description: "High-performance GPT model server with streaming responses" },
+    { id: "trend2", name: "CodeAssistant", icon: "💻", type: "STDIO", stars: 4.8, downloads: 1856, description: "Code completion and analysis server with multiple language support" },
+    { id: "trend3", name: "PromptWizard", icon: "✨", type: "HTTP_SSE", stars: 4.7, downloads: 1543, description: "Advanced prompt engineering and testing server" },
+    { id: "trend4", name: "SemanticSearch", icon: "🔍", type: "HTTP_SSE", stars: 4.6, downloads: 1278, description: "Vector database integration for semantic search capabilities" }
+  ];
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -32,77 +45,20 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Stats cards - reordered to Connected Hosts > Active Profiles > Server Instances */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      {/* Combined Cards */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Hosts Combined Card */}
+        <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Connected Hosts
-            </CardTitle>
-            <UsersRound className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{connectedHosts}</div>
-            <p className="text-xs text-muted-foreground">
-              of {hosts.length} total hosts
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Profiles
-            </CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeProfiles}</div>
-            <p className="text-xs text-muted-foreground">
-              of {profiles.length} total profiles
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Server Instances
-            </CardTitle>
-            <Server className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{runningInstances}</div>
-            <p className="text-xs text-muted-foreground">
-              of {serverInstances.length} total instances
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Requests (Last Hour)
-            </CardTitle>
-            <ActivityIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{requestsLastHour}</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from previous hour
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Quick actions - reordered to Hosts > Profiles > Servers */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Hosts</CardTitle>
-            <CardDescription>
-              Manage host connections and configurations
-            </CardDescription>
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Connected Hosts
+              </CardTitle>
+              <CardDescription>
+                {connectedHosts} of {hosts.length} hosts connected
+              </CardDescription>
+            </div>
+            <UsersRound className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -147,12 +103,18 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Profiles</CardTitle>
-            <CardDescription>
-              Manage MCP profiles and their endpoints
-            </CardDescription>
+        {/* Profiles Combined Card */}
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Active Profiles
+              </CardTitle>
+              <CardDescription>
+                {activeProfiles} of {profiles.length} profiles enabled
+              </CardDescription>
+            </div>
+            <Database className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -189,12 +151,18 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Servers</CardTitle>
-            <CardDescription>
-              Manage server definitions and instances
-            </CardDescription>
+        {/* Servers Combined Card */}
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Server Instances
+              </CardTitle>
+              <CardDescription>
+                {runningInstances} of {serverInstances.length} instances running
+              </CardDescription>
+            </div>
+            <Server className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -234,6 +202,76 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Requests Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-lg font-medium">
+            Requests (Last Hour)
+          </CardTitle>
+          <ActivityIcon className="h-5 w-5 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-baseline justify-between">
+            <div className="text-2xl font-bold">{requestsLastHour}</div>
+            <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+              +12% from previous hour
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Trending MCP Servers */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/discovery">
+              View All
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        
+        <ScrollArea className="w-full" orientation="horizontal">
+          <div className="flex space-x-4 pb-4">
+            {trendingServers.map(server => (
+              <Card key={server.id} className="min-w-[300px] max-w-[300px]">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{server.icon}</span>
+                    <div>
+                      <CardTitle className="text-base">{server.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          server.type === 'HTTP_SSE' ? 
+                          'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 
+                          'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                        }`}>
+                          {server.type === 'HTTP_SSE' ? 'HTTP' : 'STDIO'}
+                        </span>
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm line-clamp-2">{server.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-sm font-medium">{server.stars}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>{server.downloads} downloads</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
