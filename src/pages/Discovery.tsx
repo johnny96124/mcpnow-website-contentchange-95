@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
@@ -136,6 +135,16 @@ const Discovery = () => {
     setSelectedCategory(null);
   };
 
+  // Dialog section component
+  const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-6">
+      <div className="bg-muted/80 rounded-lg p-4 mb-3">
+        <h3 className="text-base font-medium">{title}</h3>
+      </div>
+      <div className="px-1">{children}</div>
+    </div>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -241,14 +250,14 @@ const Discovery = () => {
         )}
       </ScrollArea>
       
-      {/* Server details dialog */}
+      {/* Enhanced server details dialog with styled sections */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           {selectedServer && (
             <>
-              <DialogHeader className="flex flex-col items-start space-y-2">
-                <div>
-                  <DialogTitle className="text-2xl">{selectedServer.name}</DialogTitle>
+              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
+                <div className="w-full">
+                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
@@ -256,52 +265,46 @@ const Discovery = () => {
                 </div>
               </DialogHeader>
               
-              <div className="space-y-6">
-                <div className="rounded-lg bg-muted/50 p-4">
-                  <h3 className="text-base font-medium mb-2">Description</h3>
+              <div className="space-y-4 mt-2">
+                <DialogSection title="Description">
                   <p className="text-sm text-muted-foreground">
                     {selectedServer.description}
                   </p>
-                </div>
+                </DialogSection>
                 
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Author</h3>
-                    <p className="text-sm text-muted-foreground">
+                <div className="grid grid-cols-2 gap-4">
+                  <DialogSection title="Author">
+                    <p className="text-sm font-medium">
                       {selectedServer.author}
                     </p>
-                  </div>
+                  </DialogSection>
                   
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Version</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <DialogSection title="Version">
+                    <p className="text-sm font-medium">
                       {selectedServer.version}
                     </p>
-                  </div>
+                  </DialogSection>
                 </div>
                 
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Category</h3>
-                  <div className="flex flex-wrap">
+                <DialogSection title="Category">
+                  <div className="flex flex-wrap gap-2">
                     {selectedServer.categories?.map(category => (
-                      <Badge key={category} variant="outline" className="mr-2 mb-2">
+                      <Badge key={category} variant="outline" className="rounded-full">
                         {category}
                       </Badge>
                     ))}
                   </div>
-                </div>
+                </DialogSection>
                 
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Features</h3>
-                  <ul className="list-disc list-inside text-sm space-y-1">
+                <DialogSection title="Features">
+                  <ul className="list-disc list-inside text-sm space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
                       <li key={index} className="text-muted-foreground">{feature}</li>
                     ))}
                   </ul>
-                </div>
+                </DialogSection>
                 
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Repository</h3>
+                <DialogSection title="Repository">
                   <a 
                     href="#" 
                     className="text-sm text-primary flex items-center hover:underline"
@@ -309,10 +312,10 @@ const Discovery = () => {
                     {selectedServer.repository}
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
-                </div>
+                </DialogSection>
               </div>
               
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end mt-6 border-t pt-4">
                 <div className="flex gap-3">
                   <DialogClose asChild>
                     <Button variant="outline">Close</Button>
