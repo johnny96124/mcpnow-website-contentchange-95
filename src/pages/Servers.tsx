@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -11,7 +12,8 @@ import {
   Globe,
   Terminal,
   AlertCircle,
-  Activity
+  Activity,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +64,7 @@ import {
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const Servers = () => {
   const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -70,6 +73,7 @@ const Servers = () => {
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const toggleInstanceStatus = (instanceId: string) => {
     setInstances(prevInstances => 
@@ -145,6 +149,18 @@ const Servers = () => {
       description: `${data.name} has been created successfully.`,
     });
   };
+
+  const handleNavigateToDiscovery = () => {
+    navigate('/discovery');
+  };
+
+  const handleAddLocalServer = () => {
+    // TODO: Implement local server addition logic
+    toast({
+      title: "Add Local Server",
+      description: "This feature is coming soon!",
+    });
+  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -156,14 +172,24 @@ const Servers = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Instance
-          </Button>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Define New Server
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add New Server
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleNavigateToDiscovery}>
+                <Search className="h-4 w-4 mr-2" />
+                Browse Discovery
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAddLocalServer}>
+                <Terminal className="h-4 w-4 mr-2" />
+                Add Local Server
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
