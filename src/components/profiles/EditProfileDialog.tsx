@@ -93,20 +93,24 @@ export function EditProfileDialog({
       .filter(Boolean) as string[];
   };
 
+  // Redesigned to be more selective about which instances can be added
   const getInstancesForDropdown = () => {
     const selectedDefIds = getSelectedDefinitionIds();
     
-    return allInstances.filter(instance => {
-      // Filter out already selected instances
-      if (selectedInstanceIds.includes(instance.id)) {
-        return false;
-      }
-      // If we already have an instance from this definition, disable it
-      return !selectedDefIds.includes(instance.definitionId);
-    }).slice(0, 10); // Limit to 10 instances
+    // Filter out already selected instances and show up to 10 available instances
+    return allInstances
+      .filter(instance => {
+        // Filter out already selected instances
+        if (selectedInstanceIds.includes(instance.id)) {
+          return false;
+        }
+        return true;
+      })
+      .slice(0, 10); // Limit to 10 instances
   };
 
-  const isInstanceDisabled = (instance: ServerInstance) => {
+  // Check if an instance would cause a duplicate definition
+  const wouldCauseDuplicateDefinition = (instance: ServerInstance) => {
     const selectedDefIds = getSelectedDefinitionIds();
     return selectedDefIds.includes(instance.definitionId);
   };
@@ -203,23 +207,20 @@ export function EditProfileDialog({
                     <CommandGroup>
                       {instancesForDropdown.length > 0 ? (
                         instancesForDropdown.map(instance => {
-                          const isDisabled = isInstanceDisabled(instance);
+                          const hasDuplicateDefinition = wouldCauseDuplicateDefinition(instance);
+                          
                           return (
                             <CommandItem
                               key={instance.id}
-                              disabled={isDisabled}
-                              className={cn(
-                                "flex items-center justify-between hover:bg-accent/50 transition-colors",
-                                isDisabled && "opacity-50 cursor-not-allowed"
-                              )}
+                              className="flex items-center justify-between py-2 cursor-pointer hover:bg-accent/50 transition-colors"
                               onSelect={() => {
-                                if (!isDisabled) {
+                                if (!hasDuplicateDefinition) {
                                   toggleInstance(instance.id);
                                   setSearchOpen(false);
                                 }
                               }}
                             >
-                              <div className="flex items-center gap-2 w-full cursor-pointer">
+                              <div className="flex items-center gap-2 w-full">
                                 <StatusIndicator 
                                   status={
                                     instance.status === 'running' ? 'active' : 
@@ -227,10 +228,7 @@ export function EditProfileDialog({
                                   } 
                                 />
                                 <div className="flex flex-col flex-1">
-                                  <span className={cn(
-                                    "font-medium",
-                                    isDisabled ? "text-muted-foreground" : ""
-                                  )}>
+                                  <span className="font-medium">
                                     {instance.name}
                                   </span>
                                   <span className="text-xs text-muted-foreground">
@@ -238,20 +236,29 @@ export function EditProfileDialog({
                                   </span>
                                 </div>
                                 
-                                {!isDisabled && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-primary hover:text-primary hover:bg-accent h-7 w-7 p-0 ml-2"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className={cn(
+                                    "h-7 w-7 p-0 ml-2",
+                                    hasDuplicateDefinition ? "text-muted-foreground cursor-not-allowed" : "text-primary hover:bg-accent"
+                                  )}
+                                  disabled={hasDuplicateDefinition}
+                                  title={hasDuplicateDefinition ? "Definition already added" : "Add instance"}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!hasDuplicateDefinition) {
                                       toggleInstance(instance.id);
                                       setSearchOpen(false);
-                                    }}
-                                  >
+                                    }
+                                  }}
+                                >
+                                  {hasDuplicateDefinition ? (
+                                    <X className="h-4 w-4" />
+                                  ) : (
                                     <Plus className="h-4 w-4" />
-                                  </Button>
-                                )}
+                                  )}
+                                </Button>
                               </div>
                             </CommandItem>
                           );
