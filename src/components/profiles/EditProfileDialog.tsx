@@ -56,6 +56,7 @@ export function EditProfileDialog({
   const [searchOpen, setSearchOpen] = useState(false);
   const [endpoint, setEndpoint] = useState(profile.endpoint);
   const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
+  const [availableInstances, setAvailableInstances] = useState<ServerInstance[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -63,25 +64,37 @@ export function EditProfileDialog({
       setSelectedInstanceIds([...profile.instances]);
       setEndpoint(profile.endpoint);
       setEndpointType(profile.endpointType);
+      updateAvailableInstances([...profile.instances]);
     }
-  }, [open, profile]);
+  }, [open, profile, allInstances]);
+
+  const updateAvailableInstances = (currentSelectedIds: string[]) => {
+    const available = allInstances.filter(
+      instance => !currentSelectedIds.includes(instance.id)
+    ).slice(0, 10); // Limit to 10 instances
+    setAvailableInstances(available);
+  };
 
   const handleSave = () => {
     onSave(profile, profileName, selectedInstanceIds, endpoint, endpointType);
     onOpenChange(false);
   };
 
-  const toggleInstance = (instanceId: string) => {
-    setSelectedInstanceIds(prev => {
-      if (prev.includes(instanceId)) {
-        if (prev.length <= 1) {
-          return prev;
-        }
-        return prev.filter(id => id !== instanceId);
-      } else {
-        return [...prev, instanceId];
-      }
-    });
+  const addInstance = (instanceId: string) => {
+    const newSelectedIds = [...selectedInstanceIds, instanceId];
+    setSelectedInstanceIds(newSelectedIds);
+    updateAvailableInstances(newSelectedIds);
+  };
+
+  const removeInstance = (instanceId: string) => {
+    // Prevent removing the last instance
+    if (selectedInstanceIds.length <= 1) {
+      return;
+    }
+    
+    const newSelectedIds = selectedInstanceIds.filter(id => id !== instanceId);
+    setSelectedInstanceIds(newSelectedIds);
+    updateAvailableInstances(newSelectedIds);
   };
 
   const getSelectedDefinitionIds = () => {
@@ -91,22 +104,6 @@ export function EditProfileDialog({
         return instance ? instance.definitionId : null;
       })
       .filter(Boolean) as string[];
-  };
-
-  // Redesigned to be more selective about which instances can be added
-  const getInstancesForDropdown = () => {
-    const selectedDefIds = getSelectedDefinitionIds();
-    
-    // Filter out already selected instances and show up to 10 available instances
-    return allInstances
-      .filter(instance => {
-        // Filter out already selected instances
-        if (selectedInstanceIds.includes(instance.id)) {
-          return false;
-        }
-        return true;
-      })
-      .slice(0, 10); // Limit to 10 instances
   };
 
   // Check if an instance would cause a duplicate definition
@@ -123,8 +120,6 @@ export function EditProfileDialog({
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
-
-  const instancesForDropdown = getInstancesForDropdown();
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onOpenChange(false)}>
@@ -205,35 +200,32 @@ export function EditProfileDialog({
                 <Command>
                   <CommandList>
                     <CommandGroup>
-                      {instancesForDropdown.length > 0 ? (
-                        instancesForDropdown.map(instance => {
+                      {availableInstances.length > 0 ? (
+                        availableInstances.map(instance => {
                           const hasDuplicateDefinition = wouldCauseDuplicateDefinition(instance);
                           
                           return (
                             <CommandItem
                               key={instance.id}
-                              className="flex items-center justify-between py-2 cursor-pointer hover:bg-accent/50 transition-colors"
-                              onSelect={() => {
-                                if (!hasDuplicateDefinition) {
-                                  toggleInstance(instance.id);
-                                  setSearchOpen(false);
-                                }
-                              }}
+                              className="py-2 cursor-default hover:bg-accent/50 transition-colors"
+                              onSelect={() => {}}
                             >
-                              <div className="flex items-center gap-2 w-full">
-                                <StatusIndicator 
-                                  status={
-                                    instance.status === 'running' ? 'active' : 
-                                    instance.status === 'error' ? 'error' : 'inactive'
-                                  } 
-                                />
-                                <div className="flex flex-col flex-1">
-                                  <span className="font-medium">
-                                    {instance.name}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {getDefinitionName(instance.definitionId)}
-                                  </span>
+                              <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                  <StatusIndicator 
+                                    status={
+                                      instance.status === 'running' ? 'active' : 
+                                      instance.status === 'error' ? 'error' : 'inactive'
+                                    } 
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-foreground">
+                                      {instance.name}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {getDefinitionName(instance.definitionId)}
+                                    </span>
+                                  </div>
                                 </div>
                                 
                                 <Button 
@@ -248,8 +240,7 @@ export function EditProfileDialog({
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     if (!hasDuplicateDefinition) {
-                                      toggleInstance(instance.id);
-                                      setSearchOpen(false);
+                                      addInstance(instance.id);
                                     }
                                   }}
                                 >
@@ -291,7 +282,7 @@ export function EditProfileDialog({
                           }
                         />
                         <div className="flex flex-col">
-                          <span className="font-medium">{instance.name}</span>
+                          <span className="font-medium text-foreground">{instance.name}</span>
                           <span className="text-xs text-muted-foreground">
                             {getDefinitionName(instance.definitionId)}
                           </span>
@@ -301,7 +292,7 @@ export function EditProfileDialog({
                         variant="ghost" 
                         size="sm" 
                         className="text-destructive hover:text-destructive"
-                        onClick={() => toggleInstance(instance.id)}
+                        onClick={() => removeInstance(instance.id)}
                         disabled={selectedInstanceIds.length <= 1}
                       >
                         <X className="h-4 w-4 mr-1" />
