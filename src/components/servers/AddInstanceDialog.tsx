@@ -5,12 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Terminal, AlertCircle } from "lucide-react";
+import { Terminal, AlertCircle, Info } from "lucide-react";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ServerDefinition } from "@/data/mockData";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -95,13 +101,22 @@ export function AddInstanceDialog({
                   <FormLabel className="flex items-center">
                     Instance Name
                     <span className="text-destructive ml-1">*</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 cursor-help">
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>A unique name to identify this server instance</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="My Server Instance" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    A unique name to identify this server instance
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -115,6 +130,18 @@ export function AddInstanceDialog({
                   <FormLabel className="flex items-center">
                     Command Arguments
                     <span className="text-destructive ml-1">*</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 cursor-help">
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Command line arguments to initialize the server</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </FormLabel>
                   <FormControl>
                     <Textarea 
@@ -123,9 +150,6 @@ export function AddInstanceDialog({
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription>
-                    Command line arguments to initialize the server
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -133,7 +157,21 @@ export function AddInstanceDialog({
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium">Environment Variables</h4>
+                <h4 className="text-sm font-medium flex items-center">
+                  Environment Variables
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="ml-1 cursor-help">
+                          <Info className="h-4 w-4 text-muted-foreground" />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>These variables will be passed to the server instance</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </h4>
                 <p className="text-xs text-muted-foreground">These variables will be passed to the server instance</p>
               </div>
               

@@ -133,7 +133,7 @@ const Servers = () => {
       connectionDetails: `localhost:${3000 + instances.length}`,
       requestCount: 0,
       environment: data.env,
-      arguments: data.args
+      arguments: [data.args] // Convert the string to an array with a single element
     };
     
     setInstances([...instances, newInstance]);
