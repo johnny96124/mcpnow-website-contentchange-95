@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,6 @@ interface AddInstanceDialogProps {
   onCreateInstance: (data: InstanceFormValues) => void;
 }
 
-// Define the schema for the form
 const instanceFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   args: z.string().min(1, { message: "Command arguments are required." }),
@@ -58,7 +56,6 @@ export function AddInstanceDialog({
   });
 
   const onSubmit = (data: InstanceFormValues) => {
-    // Add environment variables to the form data
     const envData: Record<string, string> = {};
     
     envFields.forEach(field => {
@@ -172,7 +169,6 @@ export function AddInstanceDialog({
                     </Tooltip>
                   </TooltipProvider>
                 </h4>
-                <p className="text-xs text-muted-foreground">These variables will be passed to the server instance</p>
               </div>
               
               {envFields.map((field, index) => (
