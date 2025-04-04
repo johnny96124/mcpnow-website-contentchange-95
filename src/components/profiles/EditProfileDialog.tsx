@@ -58,7 +58,7 @@ export function EditProfileDialog({
   const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
   const [availableInstances, setAvailableInstances] = useState<ServerInstance[]>([]);
 
-  // Update available instances whenever the selected instances change
+  // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
@@ -83,65 +83,29 @@ export function EditProfileDialog({
     onOpenChange(false);
   };
 
-  // Add an instance to the selected list and remove it from available list
+  // Add an instance to the selected list and update available instances
   const addInstance = (instanceId: string) => {
-    // Check if a definition with the same id already exists in the selected instances
-    const instanceToAdd = allInstances.find(inst => inst.id === instanceId);
-    
-    if (!instanceToAdd) return;
-    
-    // Check if we already have an instance with the same definition
-    const selectedDefinitionIds = getSelectedDefinitionIds();
-    if (selectedDefinitionIds.includes(instanceToAdd.definitionId)) {
-      // Don't allow adding multiple instances of the same definition
-      return;
-    }
-    
     const newSelectedIds = [...selectedInstanceIds, instanceId];
     setSelectedInstanceIds(newSelectedIds);
     updateAvailableInstances(newSelectedIds);
-    
-    // Close the dropdown after adding
-    setSearchOpen(false);
   };
 
-  // Remove an instance from the selected list and add it back to available list
+  // Remove an instance from the selected list and update available instances
   const removeInstance = (instanceId: string) => {
-    // Prevent removing the last instance
-    if (selectedInstanceIds.length <= 1) {
-      return;
-    }
-    
     const newSelectedIds = selectedInstanceIds.filter(id => id !== instanceId);
     setSelectedInstanceIds(newSelectedIds);
     updateAvailableInstances(newSelectedIds);
   };
-
-  // Helper to get all definition IDs currently selected
-  const getSelectedDefinitionIds = () => {
-    return selectedInstanceIds
-      .map(id => {
-        const instance = allInstances.find(inst => inst.id === id);
-        return instance ? instance.definitionId : null;
-      })
-      .filter(Boolean) as string[];
-  };
-
-  // Check if an instance would cause a duplicate definition
-  const wouldCauseDuplicateDefinition = (instance: ServerInstance) => {
-    const selectedDefIds = getSelectedDefinitionIds();
-    return selectedDefIds.includes(instance.definitionId);
-  };
-
-  const selectedInstances = allInstances.filter(
-    instance => selectedInstanceIds.includes(instance.id)
-  );
 
   // Helper to get definition name
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
+
+  const selectedInstances = allInstances.filter(
+    instance => selectedInstanceIds.includes(instance.id)
+  );
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onOpenChange(false)}>
@@ -199,7 +163,7 @@ export function EditProfileDialog({
           <Alert variant="default" className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-xs text-blue-700">
-              Each server definition can only be added once to a profile.
+              Each server instance can only be added once to a profile.
               At least one server instance must be in the profile.
             </AlertDescription>
           </Alert>
@@ -223,57 +187,44 @@ export function EditProfileDialog({
                   <CommandList>
                     <CommandGroup>
                       {availableInstances.length > 0 ? (
-                        availableInstances.map(instance => {
-                          const hasDuplicateDefinition = wouldCauseDuplicateDefinition(instance);
-                          
-                          return (
-                            <CommandItem
-                              key={instance.id}
-                              className="py-2 flex items-center justify-between"
-                              onSelect={() => {}} // We'll handle the click on the button instead
-                            >
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={
-                                    instance.status === 'running' ? 'active' : 
-                                    instance.status === 'error' ? 'error' : 'inactive'
-                                  } 
-                                />
-                                <div className="flex flex-col">
-                                  <span className="font-medium text-foreground">
-                                    {instance.name}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {getDefinitionName(instance.definitionId)}
-                                  </span>
-                                </div>
+                        availableInstances.map(instance => (
+                          <CommandItem
+                            key={instance.id}
+                            className="flex items-center justify-between py-2 px-2"
+                            onSelect={() => {}} // We'll handle the click manually via the button
+                            value={instance.name}
+                          >
+                            <div className="flex items-center gap-2">
+                              <StatusIndicator 
+                                status={
+                                  instance.status === 'running' ? 'active' : 
+                                  instance.status === 'error' ? 'error' : 'inactive'
+                                } 
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium text-foreground">
+                                  {instance.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {getDefinitionName(instance.definitionId)}
+                                </span>
                               </div>
-                              
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className={cn(
-                                  "h-7 w-7 p-0 ml-2",
-                                  hasDuplicateDefinition ? "text-muted-foreground cursor-not-allowed" : "text-primary hover:bg-accent"
-                                )}
-                                disabled={hasDuplicateDefinition}
-                                title={hasDuplicateDefinition ? "Definition already added" : "Add instance"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (!hasDuplicateDefinition) {
-                                    addInstance(instance.id);
-                                  }
-                                }}
-                              >
-                                {hasDuplicateDefinition ? (
-                                  <X className="h-4 w-4" />
-                                ) : (
-                                  <Plus className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </CommandItem>
-                          );
-                        })
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="ml-auto flex h-8 w-8 p-0 data-[state=open]:bg-accent"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addInstance(instance.id);
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
+                              <span className="sr-only">Add</span>
+                            </Button>
+                          </CommandItem>
+                        ))
                       ) : (
                         <CommandEmpty>No available instances</CommandEmpty>
                       )}
