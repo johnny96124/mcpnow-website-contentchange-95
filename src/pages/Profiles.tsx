@@ -123,21 +123,31 @@ const Profiles = () => {
 
   // Function to ensure the first profile has 5 instances
   const ensureFirstProfileHasFiveInstances = () => {
-    if (localProfiles.length > 0 && serverInstances.length >= 5) {
+    if (serverInstances.length >= 5) {
       setLocalProfiles(prev => {
+        // Create a copy of the current profiles
         const updatedProfiles = [...prev];
-        if (updatedProfiles[0]) {
+        
+        // If there's at least one profile, update it to have 5 instances
+        if (updatedProfiles.length > 0) {
+          // Take the first 5 server instances
+          const fiveInstanceIds = serverInstances.slice(0, 5).map(instance => instance.id);
+          
+          // Update the first profile to have these 5 instances
           updatedProfiles[0] = {
             ...updatedProfiles[0],
-            instances: serverInstances.slice(0, 5).map(instance => instance.id)
+            instances: fiveInstanceIds
           };
+          
+          console.log("Updated first profile with 5 instances:", updatedProfiles[0]);
         }
+        
         return updatedProfiles;
       });
     }
   };
 
-  // Ensure first profile has 5 instances on mount
+  // Ensure first profile has 5 instances when component mounts
   useEffect(() => {
     ensureFirstProfileHasFiveInstances();
   }, []);
@@ -168,7 +178,7 @@ const Profiles = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {localProfiles.map(profile => {
+        {localProfiles.map((profile, index) => {
           const instances = getServerInstances(profile);
           const runningInstancesCount = instances.filter(i => i?.status === 'running').length;
           const errorInstancesCount = instances.filter(i => i?.status === 'error').length;
