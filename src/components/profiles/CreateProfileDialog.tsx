@@ -263,15 +263,6 @@ export function CreateProfileDialog({
 
               {/* Server Instance Selection */}
               <div className="space-y-4">
-                <Label className="text-sm font-medium">Server Instances</Label>
-                
-                <Alert variant="default" className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-500" />
-                  <AlertDescription className="text-xs text-blue-700">
-                    You must select at least one server instance for the profile.
-                  </AlertDescription>
-                </Alert>
-
                 <div>
                   <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
                   <Popover open={searchOpen} onOpenChange={setSearchOpen}>
