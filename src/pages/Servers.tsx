@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -155,7 +154,6 @@ const Servers = () => {
   };
 
   const handleAddLocalServer = () => {
-    // TODO: Implement local server addition logic
     toast({
       title: "Add Local Server",
       description: "This feature is coming soon!",
@@ -397,10 +395,13 @@ const Servers = () => {
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground text-center">
-                  Define a new server template
+                  Add a new server definition
                 </p>
-                <Button className="mt-4 hover:scale-105 transition-all duration-300">
-                  Define New Server
+                <Button 
+                  className="mt-4 hover:scale-105 transition-all duration-300"
+                  onClick={handleNavigateToDiscovery}
+                >
+                  Add
                 </Button>
               </CardContent>
             </Card>
@@ -520,7 +521,7 @@ const Servers = () => {
               <CardContent className="flex flex-col items-center justify-center p-6">
                 <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground text-center">
-                  Define a new server template
+                  Add a new server definition
                 </p>
                 <Button className="mt-4">
                   Define New Server
