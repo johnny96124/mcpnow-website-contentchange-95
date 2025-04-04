@@ -115,6 +115,23 @@ export function EditProfileDialog({
     return availableInstances;
   };
 
+  // Get all instances for the dropdown, including those that are disabled
+  const getAllInstancesForDropdown = () => {
+    const selectedDefIds = getSelectedDefinitionIds();
+    
+    return allInstances.filter(instance => {
+      // Don't show instances that are already selected
+      return !selectedInstanceIds.includes(instance.id);
+    });
+  };
+
+  // Check if an instance should be disabled in the dropdown
+  const isInstanceDisabled = (instance: ServerInstance) => {
+    const selectedDefIds = getSelectedDefinitionIds();
+    // Disable if we already have an instance from this definition
+    return selectedDefIds.includes(instance.definitionId);
+  };
+
   // Get the selected instances
   const selectedInstances = allInstances.filter(
     instance => selectedInstanceIds.includes(instance.id)
@@ -200,11 +217,8 @@ export function EditProfileDialog({
                   role="combobox"
                   aria-expanded={searchOpen}
                   className="w-full justify-between"
-                  disabled={getGroupedInstances().length === 0}
                 >
-                  {getGroupedInstances().length > 0 
-                    ? "Select a server instance..." 
-                    : "No available instances"}
+                  Select a server instance...
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -214,30 +228,41 @@ export function EditProfileDialog({
                   <CommandEmpty>No instances found.</CommandEmpty>
                   <CommandList>
                     <CommandGroup>
-                      {getGroupedInstances().map(instance => (
-                        <CommandItem
-                          key={instance.id}
-                          onSelect={() => {
-                            toggleInstance(instance.id);
-                            setSearchOpen(false);
-                          }}
-                        >
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex flex-col">
-                              <span>{instance.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {getDefinitionName(instance.definitionId)}
-                              </span>
+                      {getAllInstancesForDropdown().map(instance => {
+                        const isDisabled = isInstanceDisabled(instance);
+                        return (
+                          <CommandItem
+                            key={instance.id}
+                            onSelect={() => {
+                              if (!isDisabled) {
+                                toggleInstance(instance.id);
+                                setSearchOpen(false);
+                              }
+                            }}
+                            disabled={isDisabled}
+                            className={cn(
+                              isDisabled && "opacity-50 cursor-not-allowed"
+                            )}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex flex-col">
+                                <span className={isDisabled ? "text-muted-foreground" : ""}>
+                                  {instance.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {getDefinitionName(instance.definitionId)}
+                                </span>
+                              </div>
+                              <StatusIndicator 
+                                status={
+                                  instance.status === 'running' ? 'active' : 
+                                  instance.status === 'error' ? 'error' : 'inactive'
+                                } 
+                              />
                             </div>
-                            <StatusIndicator 
-                              status={
-                                instance.status === 'running' ? 'active' : 
-                                instance.status === 'error' ? 'error' : 'inactive'
-                              } 
-                            />
-                          </div>
-                        </CommandItem>
-                      ))}
+                          </CommandItem>
+                        );
+                      })}
                     </CommandGroup>
                   </CommandList>
                 </Command>
