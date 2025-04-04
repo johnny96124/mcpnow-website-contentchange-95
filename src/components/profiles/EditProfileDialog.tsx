@@ -58,6 +58,7 @@ export function EditProfileDialog({
   const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
   const [availableInstances, setAvailableInstances] = useState<ServerInstance[]>([]);
 
+  // Update available instances whenever the selected instances change
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
@@ -68,10 +69,12 @@ export function EditProfileDialog({
     }
   }, [open, profile, allInstances]);
 
+  // Function to update available instances based on current selections
   const updateAvailableInstances = (currentSelectedIds: string[]) => {
+    // Filter out instances that are already selected
     const available = allInstances.filter(
       instance => !currentSelectedIds.includes(instance.id)
-    ).slice(0, 10); // Limit to 10 instances
+    );
     setAvailableInstances(available);
   };
 
@@ -80,12 +83,29 @@ export function EditProfileDialog({
     onOpenChange(false);
   };
 
+  // Add an instance to the selected list and remove it from available list
   const addInstance = (instanceId: string) => {
+    // Check if a definition with the same id already exists in the selected instances
+    const instanceToAdd = allInstances.find(inst => inst.id === instanceId);
+    
+    if (!instanceToAdd) return;
+    
+    // Check if we already have an instance with the same definition
+    const selectedDefinitionIds = getSelectedDefinitionIds();
+    if (selectedDefinitionIds.includes(instanceToAdd.definitionId)) {
+      // Don't allow adding multiple instances of the same definition
+      return;
+    }
+    
     const newSelectedIds = [...selectedInstanceIds, instanceId];
     setSelectedInstanceIds(newSelectedIds);
     updateAvailableInstances(newSelectedIds);
+    
+    // Close the dropdown after adding
+    setSearchOpen(false);
   };
 
+  // Remove an instance from the selected list and add it back to available list
   const removeInstance = (instanceId: string) => {
     // Prevent removing the last instance
     if (selectedInstanceIds.length <= 1) {
@@ -97,6 +117,7 @@ export function EditProfileDialog({
     updateAvailableInstances(newSelectedIds);
   };
 
+  // Helper to get all definition IDs currently selected
   const getSelectedDefinitionIds = () => {
     return selectedInstanceIds
       .map(id => {
@@ -116,6 +137,7 @@ export function EditProfileDialog({
     instance => selectedInstanceIds.includes(instance.id)
   );
 
+  // Helper to get definition name
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
@@ -207,50 +229,48 @@ export function EditProfileDialog({
                           return (
                             <CommandItem
                               key={instance.id}
-                              className="py-2 cursor-default hover:bg-accent/50 transition-colors"
-                              onSelect={() => {}}
+                              className="py-2 flex items-center justify-between"
+                              onSelect={() => {}} // We'll handle the click on the button instead
                             >
-                              <div className="flex items-center justify-between w-full">
-                                <div className="flex items-center gap-2">
-                                  <StatusIndicator 
-                                    status={
-                                      instance.status === 'running' ? 'active' : 
-                                      instance.status === 'error' ? 'error' : 'inactive'
-                                    } 
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="font-medium text-foreground">
-                                      {instance.name}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {getDefinitionName(instance.definitionId)}
-                                    </span>
-                                  </div>
+                              <div className="flex items-center gap-2">
+                                <StatusIndicator 
+                                  status={
+                                    instance.status === 'running' ? 'active' : 
+                                    instance.status === 'error' ? 'error' : 'inactive'
+                                  } 
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-foreground">
+                                    {instance.name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {getDefinitionName(instance.definitionId)}
+                                  </span>
                                 </div>
-                                
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className={cn(
-                                    "h-7 w-7 p-0 ml-2",
-                                    hasDuplicateDefinition ? "text-muted-foreground cursor-not-allowed" : "text-primary hover:bg-accent"
-                                  )}
-                                  disabled={hasDuplicateDefinition}
-                                  title={hasDuplicateDefinition ? "Definition already added" : "Add instance"}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!hasDuplicateDefinition) {
-                                      addInstance(instance.id);
-                                    }
-                                  }}
-                                >
-                                  {hasDuplicateDefinition ? (
-                                    <X className="h-4 w-4" />
-                                  ) : (
-                                    <Plus className="h-4 w-4" />
-                                  )}
-                                </Button>
                               </div>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className={cn(
+                                  "h-7 w-7 p-0 ml-2",
+                                  hasDuplicateDefinition ? "text-muted-foreground cursor-not-allowed" : "text-primary hover:bg-accent"
+                                )}
+                                disabled={hasDuplicateDefinition}
+                                title={hasDuplicateDefinition ? "Definition already added" : "Add instance"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!hasDuplicateDefinition) {
+                                    addInstance(instance.id);
+                                  }
+                                }}
+                              >
+                                {hasDuplicateDefinition ? (
+                                  <X className="h-4 w-4" />
+                                ) : (
+                                  <Plus className="h-4 w-4" />
+                                )}
+                              </Button>
                             </CommandItem>
                           );
                         })
