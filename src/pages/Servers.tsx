@@ -555,10 +555,12 @@ const Servers = () => {
                             <StatusIndicator 
                               status={
                                 instance.status === 'running' ? 'active' : 
+                                instance.status === 'connecting' ? 'warning' :
                                 instance.status === 'error' ? 'error' : 'inactive'
                               } 
                               label={
                                 instance.status === 'running' ? 'Running' : 
+                                instance.status === 'connecting' ? 'Connecting' :
                                 instance.status === 'error' ? 'Error' : 'Stopped'
                               }
                             />
@@ -587,12 +589,26 @@ const Servers = () => {
                         <td className="p-4 align-middle">
                           <div className="flex items-center gap-2">
                             {instance.status === 'running' ? (
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => toggleInstanceStatus(instance.id)}
+                                className="text-amber-500 hover:text-red-500 hover:border-red-500 transition-colors"
+                              >
                                 <StopCircle className="h-4 w-4 mr-1" />
                                 Stop
                               </Button>
+                            ) : instance.status === 'connecting' ? (
+                              <Button variant="outline" size="sm" disabled>
+                                <span className="animate-pulse">Connecting...</span>
+                              </Button>
                             ) : (
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => toggleInstanceStatus(instance.id)}
+                                className="text-emerald-500 hover:text-emerald-600 hover:border-emerald-500 transition-colors"
+                              >
                                 <PlayCircle className="h-4 w-4 mr-1" />
                                 Start
                               </Button>
@@ -604,10 +620,6 @@ const Servers = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                                <DropdownMenuItem>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <ExternalLink className="h-4 w-4 mr-2" />
                                   View Details
