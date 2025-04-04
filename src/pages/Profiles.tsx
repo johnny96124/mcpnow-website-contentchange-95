@@ -121,30 +121,25 @@ const Profiles = () => {
     });
   };
 
-  // Function to create a profile with 5 instances for demonstration
-  const createDemoProfile = () => {
-    // Check if we already have a demo profile with 5 instances
-    const existingDemoProfile = localProfiles.find(p => p.instances.length >= 5);
-    if (existingDemoProfile) return;
-
-    // If we have at least 5 instances, create a demo profile
-    if (serverInstances.length >= 5) {
-      const demoProfile: Profile = {
-        id: `demo-profile-${Date.now()}`,
-        name: "Demo Profile with 5 Instances",
-        endpointType: "HTTP_SSE",
-        endpoint: "http://localhost:8008/mcp",
-        enabled: true,
-        instances: serverInstances.slice(0, 5).map(instance => instance.id),
-      };
-      
-      setLocalProfiles(prev => [...prev, demoProfile]);
+  // Function to ensure the first profile has 5 instances
+  const ensureFirstProfileHasFiveInstances = () => {
+    if (localProfiles.length > 0 && serverInstances.length >= 5) {
+      setLocalProfiles(prev => {
+        const updatedProfiles = [...prev];
+        if (updatedProfiles[0]) {
+          updatedProfiles[0] = {
+            ...updatedProfiles[0],
+            instances: serverInstances.slice(0, 5).map(instance => instance.id)
+          };
+        }
+        return updatedProfiles;
+      });
     }
   };
 
-  // Create a demo profile with 5 instances on mount
+  // Ensure first profile has 5 instances on mount
   useEffect(() => {
-    createDemoProfile();
+    ensureFirstProfileHasFiveInstances();
   }, []);
 
   return (
@@ -156,7 +151,17 @@ const Profiles = () => {
             Create and manage MCP profiles to aggregate server instances.
           </p>
         </div>
-        <Button onClick={() => setIsCreateProfileOpen(true)}>
+        <Button onClick={() => {
+          if (serverInstances.length === 0) {
+            toast({
+              title: "No instances available",
+              description: "Please create at least one server instance first.",
+              variant: "destructive",
+            });
+            return;
+          }
+          setIsCreateProfileOpen(true);
+        }}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Create Profile
         </Button>
@@ -281,7 +286,20 @@ const Profiles = () => {
             <p className="text-muted-foreground text-center">
               Create a new profile to group server instances together
             </p>
-            <Button className="mt-4" onClick={() => setIsCreateProfileOpen(true)}>
+            <Button 
+              className="mt-4" 
+              onClick={() => {
+                if (serverInstances.length === 0) {
+                  toast({
+                    title: "No instances available",
+                    description: "Please create at least one server instance first.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                setIsCreateProfileOpen(true);
+              }}
+            >
               Create Profile
             </Button>
           </CardContent>
