@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, AlertCircle, Info } from "lucide-react";
+import { Check, ChevronsUpDown, AlertCircle, Info, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -58,7 +56,6 @@ export function EditProfileDialog({
   const [endpoint, setEndpoint] = useState(profile.endpoint);
   const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
 
-  // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
@@ -76,7 +73,6 @@ export function EditProfileDialog({
   const toggleInstance = (instanceId: string) => {
     setSelectedInstanceIds(prev => {
       if (prev.includes(instanceId)) {
-        // Don't allow removing if it's the last instance
         if (prev.length <= 1) {
           return prev;
         }
@@ -87,8 +83,6 @@ export function EditProfileDialog({
     });
   };
 
-  // Get the definition IDs that are already included in the profile
-  // This is to prevent adding multiple instances from the same definition
   const getSelectedDefinitionIds = () => {
     return selectedInstanceIds
       .map(id => {
@@ -98,46 +92,34 @@ export function EditProfileDialog({
       .filter(Boolean) as string[];
   };
 
-  // Get instances grouped by their definition ID
   const getGroupedInstances = () => {
     const selectedDefIds = getSelectedDefinitionIds();
     
-    // For each definition, check if we already have an instance from it
-    const availableInstances = allInstances.filter(instance => {
-      // If we already have an instance from this definition, filter it out
+    return allInstances.filter(instance => {
       if (selectedInstanceIds.includes(instance.id)) {
         return false;
       }
-      // If this definition already has an instance in the profile, filter it out
       return !selectedDefIds.includes(instance.definitionId);
     });
-
-    return availableInstances;
   };
 
-  // Get all instances for the dropdown, including those that are disabled
   const getAllInstancesForDropdown = () => {
     const selectedDefIds = getSelectedDefinitionIds();
     
     return allInstances.filter(instance => {
-      // Don't show instances that are already selected
       return !selectedInstanceIds.includes(instance.id);
     });
   };
 
-  // Check if an instance should be disabled in the dropdown
   const isInstanceDisabled = (instance: ServerInstance) => {
     const selectedDefIds = getSelectedDefinitionIds();
-    // Disable if we already have an instance from this definition
     return selectedDefIds.includes(instance.definitionId);
   };
 
-  // Get the selected instances
   const selectedInstances = allInstances.filter(
     instance => selectedInstanceIds.includes(instance.id)
   );
 
-  // Get definition name for an instance
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
@@ -154,7 +136,6 @@ export function EditProfileDialog({
         </DialogHeader>
 
         <div className="py-4 space-y-4">
-          {/* Profile name */}
           <div>
             <label className="text-sm font-medium mb-2 block">Profile Name</label>
             <Input 
@@ -164,7 +145,6 @@ export function EditProfileDialog({
             />
           </div>
 
-          {/* Connection endpoint configuration */}
           <div className="space-y-4">
             <Label className="text-sm font-medium">Connection Settings</Label>
             
@@ -198,7 +178,6 @@ export function EditProfileDialog({
             </div>
           </div>
 
-          {/* Info alert about instance selection */}
           <Alert variant="default" className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-xs text-blue-700">
@@ -207,7 +186,6 @@ export function EditProfileDialog({
             </AlertDescription>
           </Alert>
 
-          {/* Add new instance dropdown */}
           <div>
             <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
             <Popover open={searchOpen} onOpenChange={setSearchOpen}>
@@ -224,27 +202,26 @@ export function EditProfileDialog({
               </PopoverTrigger>
               <PopoverContent className="w-[400px] p-0">
                 <Command>
-                  <CommandInput placeholder="Search instances..." />
-                  <CommandEmpty>No instances found.</CommandEmpty>
                   <CommandList>
                     <CommandGroup>
-                      {getAllInstancesForDropdown().map(instance => {
-                        const isDisabled = isInstanceDisabled(instance);
-                        return (
-                          <CommandItem
-                            key={instance.id}
-                            onSelect={() => {
-                              if (!isDisabled) {
-                                toggleInstance(instance.id);
-                                setSearchOpen(false);
-                              }
-                            }}
-                            disabled={isDisabled}
-                            className={cn(
-                              isDisabled && "opacity-50 cursor-not-allowed"
-                            )}
-                          >
-                            <div className="flex items-center justify-between w-full">
+                      {getAllInstancesForDropdown().length > 0 ? (
+                        getAllInstancesForDropdown().map(instance => {
+                          const isDisabled = isInstanceDisabled(instance);
+                          return (
+                            <CommandItem
+                              key={instance.id}
+                              disabled={isDisabled}
+                              className={cn(
+                                "flex items-center justify-between",
+                                isDisabled && "opacity-50 cursor-not-allowed"
+                              )}
+                              onSelect={() => {
+                                if (!isDisabled) {
+                                  toggleInstance(instance.id);
+                                  setSearchOpen(false);
+                                }
+                              }}
+                            >
                               <div className="flex flex-col">
                                 <span className={isDisabled ? "text-muted-foreground" : ""}>
                                   {instance.name}
@@ -253,16 +230,34 @@ export function EditProfileDialog({
                                   {getDefinitionName(instance.definitionId)}
                                 </span>
                               </div>
-                              <StatusIndicator 
-                                status={
-                                  instance.status === 'running' ? 'active' : 
-                                  instance.status === 'error' ? 'error' : 'inactive'
-                                } 
-                              />
-                            </div>
-                          </CommandItem>
-                        );
-                      })}
+                              <div className="flex items-center gap-2">
+                                <StatusIndicator 
+                                  status={
+                                    instance.status === 'running' ? 'active' : 
+                                    instance.status === 'error' ? 'error' : 'inactive'
+                                  } 
+                                />
+                                {!isDisabled && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="text-primary hover:text-primary h-7 w-7 p-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleInstance(instance.id);
+                                      setSearchOpen(false);
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </CommandItem>
+                          );
+                        })
+                      ) : (
+                        <CommandEmpty>No available instances</CommandEmpty>
+                      )}
                     </CommandGroup>
                   </CommandList>
                 </Command>
@@ -270,7 +265,6 @@ export function EditProfileDialog({
             </Popover>
           </div>
 
-          {/* List of currently selected instances */}
           <div>
             <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
             <ScrollArea className="h-[200px] rounded-md border">
