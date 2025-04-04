@@ -209,8 +209,8 @@ export function EditProfileDialog({
                               key={instance.id}
                               disabled={isDisabled}
                               className={cn(
-                                "flex items-center justify-between cursor-pointer hover:bg-accent",
-                                isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent"
+                                "flex items-center justify-between",
+                                isDisabled && "opacity-50 cursor-not-allowed"
                               )}
                               onSelect={() => {
                                 if (!isDisabled) {
@@ -219,7 +219,7 @@ export function EditProfileDialog({
                                 }
                               }}
                             >
-                              <div className="flex flex-col py-1">
+                              <div className="flex flex-col">
                                 <span className={isDisabled ? "text-muted-foreground" : ""}>
                                   {instance.name}
                                 </span>
@@ -238,15 +238,14 @@ export function EditProfileDialog({
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="text-primary hover:text-primary hover:bg-primary/10 h-7 px-2 py-0 rounded-md"
+                                    className="text-primary hover:text-primary h-7 w-7 p-0"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       toggleInstance(instance.id);
                                       setSearchOpen(false);
                                     }}
                                   >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Add
+                                    <Plus className="h-4 w-4" />
                                   </Button>
                                 )}
                               </div>
