@@ -1,4 +1,3 @@
-
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -26,7 +25,7 @@ export interface ServerInstance {
   connectionDetails: string;
   environment?: Record<string, string>;
   arguments?: string[];
-  requestCount?: number; // Added request count field
+  requestCount?: number;
 }
 
 export interface Profile {
@@ -35,8 +34,8 @@ export interface Profile {
   endpointType: EndpointType;
   enabled: boolean;
   endpoint: string;
-  instances: string[]; // Array of ServerInstance IDs
-  description?: string; // Added missing description field
+  instances: string[];
+  description?: string;
 }
 
 export interface Host {
@@ -46,7 +45,7 @@ export interface Host {
   configStatus: 'configured' | 'misconfigured' | 'unknown';
   connectionStatus: ConnectionStatus;
   configPath?: string;
-  icon?: string; // This should remain optional
+  icon?: string;
 }
 
 export const serverDefinitions: ServerDefinition[] = [
@@ -104,6 +103,42 @@ export const serverDefinitions: ServerDefinition[] = [
     ],
     repository: 'https://github.com/mcp/local-file-assistant'
   },
+  {
+    id: 'code-assistant',
+    name: 'Code Assistant',
+    type: 'HTTP_SSE',
+    description: 'AI-powered code completion and suggestions',
+    author: 'MCP Community',
+    version: '2.1.0',
+    icon: '💻',
+    isOfficial: false,
+    categories: ['Development', 'AI', 'Productivity'],
+    features: [
+      'Code completion',
+      'Documentation generation',
+      'Code refactoring',
+      'Bug detection'
+    ],
+    repository: 'https://github.com/mcp-community/code-assistant'
+  },
+  {
+    id: 'docker-compose-tools',
+    name: 'Docker Compose Tools',
+    type: 'STDIO',
+    description: 'Tools for managing Docker Compose environments',
+    author: 'MCP Community',
+    version: '1.4.2',
+    icon: '🐋',
+    isOfficial: false,
+    categories: ['DevOps', 'Containers'],
+    features: [
+      'Environment management',
+      'Service scaling',
+      'Config validation',
+      'Performance monitoring'
+    ],
+    repository: 'https://github.com/mcp-community/docker-compose-tools'
+  },
 ];
 
 export const serverInstances: ServerInstance[] = [
@@ -117,7 +152,7 @@ export const serverInstances: ServerInstance[] = [
     environment: {
       'DB_URL': 'postgresql://dev:password@localhost:5432/dev'
     },
-    requestCount: 124 // Added request count
+    requestCount: 124
   },
   {
     id: 'postgres-prod',
@@ -129,7 +164,7 @@ export const serverInstances: ServerInstance[] = [
     environment: {
       'DB_URL': 'postgresql://prod:password@db.example.com:5432/prod'
     },
-    requestCount: 37 // Added request count
+    requestCount: 37
   },
   {
     id: 'github-copilot',
@@ -141,7 +176,7 @@ export const serverInstances: ServerInstance[] = [
     environment: {
       'GITHUB_TOKEN': 'github_pat_xxxxxxxxxxxx'
     },
-    requestCount: 892 // Added request count
+    requestCount: 892
   },
   {
     id: 'local-files',
@@ -151,7 +186,61 @@ export const serverInstances: ServerInstance[] = [
     enabled: true,
     connectionDetails: '/usr/local/bin/file-assistant',
     arguments: ['--watch', '/home/user/projects'],
-    requestCount: 56 // Added request count
+    requestCount: 56
+  },
+  {
+    id: 'code-assist-team1',
+    definitionId: 'code-assistant',
+    name: 'Team1 Code Assistant',
+    status: 'running',
+    enabled: true,
+    connectionDetails: 'http://localhost:8090/code-assist',
+    requestCount: 245
+  },
+  {
+    id: 'code-assist-team2',
+    definitionId: 'code-assistant',
+    name: 'Team2 Code Assistant',
+    status: 'error',
+    enabled: true,
+    connectionDetails: 'http://localhost:8091/code-assist',
+    requestCount: 178
+  },
+  {
+    id: 'code-assist-personal',
+    definitionId: 'code-assistant',
+    name: 'Personal Code Assistant',
+    status: 'stopped',
+    enabled: false,
+    connectionDetails: 'http://localhost:8092/code-assist',
+    requestCount: 57
+  },
+  {
+    id: 'docker-tools-dev',
+    definitionId: 'docker-compose-tools',
+    name: 'Development Docker Tools',
+    status: 'running',
+    enabled: true,
+    connectionDetails: '/usr/local/bin/docker-tools',
+    requestCount: 325
+  },
+  {
+    id: 'docker-tools-prod',
+    definitionId: 'docker-compose-tools',
+    name: 'Production Docker Tools',
+    status: 'stopped',
+    enabled: false,
+    connectionDetails: '/usr/local/bin/docker-tools',
+    requestCount: 112
+  },
+  {
+    id: 'docker-tools-test',
+    definitionId: 'docker-compose-tools',
+    name: 'Testing Docker Tools',
+    status: 'running',
+    enabled: true,
+    connectionDetails: '/usr/local/bin/docker-tools',
+    requestCount: 204
   },
 ];
 

@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, AlertCircle, Info, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, AlertCircle, Info, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,23 +93,17 @@ export function EditProfileDialog({
       .filter(Boolean) as string[];
   };
 
-  const getGroupedInstances = () => {
+  const getInstancesForDropdown = () => {
     const selectedDefIds = getSelectedDefinitionIds();
     
     return allInstances.filter(instance => {
+      // Filter out already selected instances
       if (selectedInstanceIds.includes(instance.id)) {
         return false;
       }
+      // If we already have an instance from this definition, disable it
       return !selectedDefIds.includes(instance.definitionId);
-    });
-  };
-
-  const getAllInstancesForDropdown = () => {
-    const selectedDefIds = getSelectedDefinitionIds();
-    
-    return allInstances.filter(instance => {
-      return !selectedInstanceIds.includes(instance.id);
-    });
+    }).slice(0, 10); // Limit to 10 instances
   };
 
   const isInstanceDisabled = (instance: ServerInstance) => {
@@ -124,6 +119,8 @@ export function EditProfileDialog({
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
+
+  const instancesForDropdown = getInstancesForDropdown();
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onOpenChange(false)}>
@@ -204,8 +201,8 @@ export function EditProfileDialog({
                 <Command>
                   <CommandList>
                     <CommandGroup>
-                      {getAllInstancesForDropdown().length > 0 ? (
-                        getAllInstancesForDropdown().map(instance => {
+                      {instancesForDropdown.length > 0 ? (
+                        instancesForDropdown.map(instance => {
                           const isDisabled = isInstanceDisabled(instance);
                           return (
                             <CommandItem
@@ -296,6 +293,7 @@ export function EditProfileDialog({
                         onClick={() => toggleInstance(instance.id)}
                         disabled={selectedInstanceIds.length <= 1}
                       >
+                        <X className="h-4 w-4 mr-1" />
                         Remove
                       </Button>
                     </div>
