@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -37,7 +36,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter
 } from "@/components/ui/table";
 import {
   AlertDialog,
@@ -62,11 +60,16 @@ import {
   ServerDefinition,
   ServerInstance
 } from "@/data/mockData";
+import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Servers = () => {
   const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [activeTab, setActiveTab] = useState("integrated");
+  const [addInstanceOpen, setAddInstanceOpen] = useState(false);
+  const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
+  const { toast } = useToast();
   
   const toggleInstanceStatus = (instanceId: string) => {
     setInstances(prevInstances => 
@@ -112,6 +115,34 @@ const Servers = () => {
   const truncateDescription = (description: string, maxLength = 100): string => {
     if (description.length <= maxLength) return description;
     return `${description.substring(0, maxLength)}...`;
+  };
+  
+  const handleOpenAddInstance = (definition: ServerDefinition) => {
+    setSelectedDefinition(definition);
+    setAddInstanceOpen(true);
+  };
+
+  const handleCreateInstance = (data: InstanceFormValues) => {
+    if (!selectedDefinition) return;
+    
+    const newInstance: ServerInstance = {
+      id: `instance-${Date.now()}`,
+      name: data.name,
+      definitionId: selectedDefinition.id,
+      status: 'stopped',
+      connectionDetails: `localhost:${3000 + instances.length}`,
+      requestCount: 0,
+      environment: data.env,
+      args: data.args
+    };
+    
+    setInstances([...instances, newInstance]);
+    setAddInstanceOpen(false);
+    
+    toast({
+      title: "Instance Created",
+      description: `${data.name} has been created successfully.`,
+    });
   };
   
   return (
@@ -166,6 +197,7 @@ const Servers = () => {
                         variant="ghost" 
                         size="sm" 
                         className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105 hover:shadow-md"
+                        onClick={() => handleOpenAddInstance(definition)}
                       >
                         <CirclePlus className="h-4 w-4 mr-1" />
                         Add Instance
@@ -285,7 +317,12 @@ const Servers = () => {
                       <div className="text-center p-8 border rounded-md bg-secondary/10 flex flex-col items-center">
                         <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-2" />
                         <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
-                        <Button variant="outline" size="sm" className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105"
+                          onClick={() => handleOpenAddInstance(definition)}
+                        >
                           <CirclePlus className="h-4 w-4 mr-1" />
                           Create First Instance
                         </Button>
@@ -439,7 +476,11 @@ const Servers = () => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                    <Button variant="default" size="sm">
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => handleOpenAddInstance(definition)}
+                    >
                       <CirclePlus className="h-4 w-4 mr-1" />
                       Create Instance
                     </Button>
@@ -560,6 +601,13 @@ const Servers = () => {
           </div>
         </TabsContent>
       </Tabs>
+      
+      <AddInstanceDialog
+        open={addInstanceOpen}
+        onOpenChange={setAddInstanceOpen}
+        serverDefinition={selectedDefinition}
+        onCreateInstance={handleCreateInstance}
+      />
     </div>
   );
 };
