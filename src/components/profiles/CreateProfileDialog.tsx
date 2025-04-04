@@ -44,7 +44,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface CreateProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateProfile: (data: { name: string; endpointType: EndpointType; endpoint: string }) => void;
+  onCreateProfile: (data: { name: string; endpointType: EndpointType; endpoint: string; instances: string[] }) => void;
   allInstances: ServerInstance[];
 }
 
@@ -75,6 +75,7 @@ export function CreateProfileDialog({
       name,
       endpointType,
       endpoint,
+      instances: selectedInstanceIds,
     });
     onOpenChange(false);
   };
@@ -208,18 +209,20 @@ export function CreateProfileDialog({
                           }}
                         >
                           <div className="flex items-center justify-between w-full">
-                            <div className="flex flex-col">
-                              <span>{instance.name}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {getDefinitionName(instance.definitionId)}
-                              </span>
+                            <div className="flex items-center">
+                              <StatusIndicator 
+                                status={
+                                  instance.status === 'running' ? 'active' : 
+                                  instance.status === 'error' ? 'error' : 'inactive'
+                                } 
+                              />
+                              <div className="flex flex-col ml-2">
+                                <span>{instance.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {getDefinitionName(instance.definitionId)}
+                                </span>
+                              </div>
                             </div>
-                            <StatusIndicator 
-                              status={
-                                instance.status === 'running' ? 'active' : 
-                                instance.status === 'error' ? 'error' : 'inactive'
-                              } 
-                            />
                           </div>
                         </CommandItem>
                       ))}
@@ -231,34 +234,48 @@ export function CreateProfileDialog({
           </div>
 
           {/* List of currently selected instances */}
-          {selectedInstanceIds.length > 0 && (
-            <div>
-              <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
-              <ScrollArea className="h-[150px] rounded-md border">
-                {selectedInstances.map(instance => (
-                  <div 
-                    key={instance.id}
-                    className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">{instance.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {getDefinitionName(instance.definitionId)}
-                      </span>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => toggleInstance(instance.id)}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
+            <ScrollArea className="h-[200px] rounded-md border">
+              {selectedInstances.length > 0 ? (
+                <div className="p-0">
+                  {selectedInstances.map(instance => (
+                    <div 
+                      key={instance.id}
+                      className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
                     >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
-          )}
+                      <div className="flex items-center">
+                        <StatusIndicator 
+                          status={
+                            instance.status === 'running' ? 'active' : 
+                            instance.status === 'error' ? 'error' : 'inactive'
+                          }
+                        />
+                        <div className="flex flex-col ml-2">
+                          <span className="font-medium">{instance.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {getDefinitionName(instance.definitionId)}
+                          </span>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => toggleInstance(instance.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No instances selected
+                </div>
+              )}
+            </ScrollArea>
+          </div>
         </div>
         
         <DialogFooter>

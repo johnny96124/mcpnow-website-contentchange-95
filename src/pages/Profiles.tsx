@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
@@ -114,14 +115,14 @@ const Profiles = () => {
     });
   };
 
-  const handleCreateProfile = ({ name, endpointType, endpoint }: { name: string; endpointType: EndpointType; endpoint: string }) => {
+  const handleCreateProfile = ({ name, endpointType, endpoint, instances }: { name: string; endpointType: EndpointType; endpoint: string; instances: string[] }) => {
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
       name,
       endpointType,
       endpoint,
       enabled: true,
-      instances: [],
+      instances,
     };
     
     setLocalProfiles(prev => [...prev, newProfile]);
@@ -209,29 +210,21 @@ const Profiles = () => {
                   <div>
                     <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
                     {instances.length > 0 ? (
-                      <Carousel className="w-full">
-                        <CarouselContent>
+                      <ScrollArea className="h-[120px]">
+                        <div className="space-y-2">
                           {instances.map(instance => instance && (
-                            <CarouselItem key={instance.id} className="basis-full md:basis-1/2">
-                              <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
-                                <div className="flex items-center gap-2">
-                                  <StatusIndicator 
-                                    status={
-                                      instance.status === 'running' ? 'active' : 
-                                      instance.status === 'error' ? 'error' : 'inactive'
-                                    }
-                                  />
-                                  <span className="text-sm font-medium truncate max-w-[150px]">{instance.name}</span>
-                                </div>
-                              </div>
-                            </CarouselItem>
+                            <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
+                              <StatusIndicator 
+                                status={
+                                  instance.status === 'running' ? 'active' : 
+                                  instance.status === 'error' ? 'error' : 'inactive'
+                                }
+                              />
+                              <span className="text-sm font-medium ml-2 truncate">{instance.name}</span>
+                            </div>
                           ))}
-                        </CarouselContent>
-                        <div className="flex justify-center mt-2">
-                          <CarouselPrevious className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
-                          <CarouselNext className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
                         </div>
-                      </Carousel>
+                      </ScrollArea>
                     ) : (
                       <div className="text-center p-2 text-muted-foreground text-sm">
                         No server instances added
@@ -242,7 +235,12 @@ const Profiles = () => {
               </CardContent>
               <CardFooter className="flex justify-end pt-0">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteProfile(profile.id)}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-destructive hover:bg-destructive/10 border-destructive" 
+                    onClick={() => handleDeleteProfile(profile.id)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEditProfile(profile)}>

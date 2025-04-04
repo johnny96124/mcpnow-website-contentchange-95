@@ -245,11 +245,19 @@ export function EditProfileDialog({
                       key={instance.id}
                       className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium">{instance.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {getDefinitionName(instance.definitionId)}
-                        </span>
+                      <div className="flex items-center">
+                        <StatusIndicator 
+                          status={
+                            instance.status === 'running' ? 'active' : 
+                            instance.status === 'error' ? 'error' : 'inactive'
+                          }
+                        />
+                        <div className="flex flex-col ml-2">
+                          <span className="font-medium">{instance.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {getDefinitionName(instance.definitionId)}
+                          </span>
+                        </div>
                       </div>
                       <Button 
                         variant="ghost" 
