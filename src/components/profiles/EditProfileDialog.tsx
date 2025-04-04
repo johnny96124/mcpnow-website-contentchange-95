@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, ServerIcon, AlertCircle, Info } from "lucide-react";
+import { Check, ChevronsUpDown, ServerIcon, AlertCircle, Info, Globe, TerminalSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,17 +29,26 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { 
   Profile, 
   ServerInstance, 
-  serverDefinitions
+  serverDefinitions,
+  EndpointType
 } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface EditProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile;
   allInstances: ServerInstance[];
-  onSave: (profile: Profile, newName: string, selectedInstanceIds: string[]) => void;
+  onSave: (profile: Profile, newName: string, selectedInstanceIds: string[], newEndpoint: string, newEndpointType: EndpointType) => void;
 }
 
 export function EditProfileDialog({
@@ -52,17 +61,21 @@ export function EditProfileDialog({
   const [profileName, setProfileName] = useState(profile.name);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>(profile.instances);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
+  const [endpoint, setEndpoint] = useState(profile.endpoint);
 
   // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
       setSelectedInstanceIds([...profile.instances]);
+      setEndpointType(profile.endpointType);
+      setEndpoint(profile.endpoint);
     }
   }, [open, profile]);
 
   const handleSave = () => {
-    onSave(profile, profileName, selectedInstanceIds);
+    onSave(profile, profileName, selectedInstanceIds, endpoint, endpointType);
     onOpenChange(false);
   };
 
@@ -80,15 +93,6 @@ export function EditProfileDialog({
     });
   };
 
-  // Group instances by their definition
-  const instancesByDefinition = allInstances.reduce((acc, instance) => {
-    if (!acc[instance.definitionId]) {
-      acc[instance.definitionId] = [];
-    }
-    acc[instance.definitionId].push(instance);
-    return acc;
-  }, {} as Record<string, ServerInstance[]>);
-  
   // Get already selected definition IDs
   const selectedDefinitionIds = new Set(
     selectedInstanceIds
@@ -120,18 +124,49 @@ export function EditProfileDialog({
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Modify the profile name and manage server instances.
+            Modify the profile name, endpoints, and manage server instances.
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
           {/* Profile name */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Profile Name</label>
+            <Label htmlFor="profile-name" className="text-sm font-medium mb-2 block">Profile Name</Label>
             <Input 
+              id="profile-name"
               value={profileName} 
               onChange={(e) => setProfileName(e.target.value)} 
               placeholder="Enter profile name"
+            />
+          </div>
+
+          {/* Endpoint Configuration */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium block">Connection Endpoint</Label>
+            <Select value={endpointType} onValueChange={(value: EndpointType) => setEndpointType(value)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select endpoint type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="HTTP_SSE">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-blue-500" />
+                    <span>HTTP SSE</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="TCP_SOCKET">
+                  <div className="flex items-center gap-2">
+                    <TerminalSquare className="h-4 w-4 text-purple-500" />
+                    <span>TCP Socket</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <Input 
+              value={endpoint} 
+              onChange={(e) => setEndpoint(e.target.value)} 
+              placeholder={endpointType === 'HTTP_SSE' ? "https://example.com/events" : "localhost:9000"}
+              className="mt-2"
             />
           </div>
 
@@ -244,7 +279,10 @@ export function EditProfileDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={!profileName.trim() || selectedInstanceIds.length === 0}>
+          <Button 
+            onClick={handleSave} 
+            disabled={!profileName.trim() || selectedInstanceIds.length === 0 || !endpoint.trim()}
+          >
             Save Changes
           </Button>
         </DialogFooter>

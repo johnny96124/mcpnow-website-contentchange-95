@@ -4,14 +4,10 @@ import {
   CircleCheck, 
   CircleX, 
   Edit, 
-  Link2, 
-  Link2Off, 
-  Loader2, 
   PlusCircle, 
-  TerminalSquare, 
   Trash2, 
   Globe,
-  UserPlus,
+  TerminalSquare,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -21,7 +17,6 @@ import { Switch } from "@/components/ui/switch";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
-import { ManageInstancesModal } from "@/components/profiles/ManageInstancesModal";
 import { useToast } from "@/hooks/use-toast";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 import { EditProfileDialog } from "@/components/profiles/EditProfileDialog";
@@ -32,14 +27,26 @@ import {
   CarouselNext,
   CarouselPrevious
 } from "@/components/ui/carousel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "react-router-dom";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const toggleProfile = (id: string) => {
     setLocalProfiles(prev => 
@@ -60,7 +67,24 @@ const Profiles = () => {
     setIsEditProfileOpen(true);
   };
 
-  const handleSaveProfileEdit = (editedProfile: Profile, newName: string, selectedInstanceIds: string[]) => {
+  const handleConfirmDeleteProfile = () => {
+    if (profileToDelete) {
+      setLocalProfiles(prev => prev.filter(p => p.id !== profileToDelete));
+      
+      toast({
+        title: "Profile deleted",
+        description: "The profile has been permanently removed",
+      });
+      
+      setProfileToDelete(null);
+    }
+  };
+
+  const handleDeleteProfile = (profileId: string) => {
+    setProfileToDelete(profileId);
+  };
+
+  const handleSaveProfileEdit = (editedProfile: Profile, newName: string, selectedInstanceIds: string[], newEndpoint: string, newEndpointType: EndpointType) => {
     if (selectedInstanceIds.length === 0) {
       toast({
         title: "Cannot save profile",
@@ -73,7 +97,13 @@ const Profiles = () => {
     setLocalProfiles(prev => 
       prev.map(p => 
         p.id === editedProfile.id 
-          ? { ...p, name: newName, instances: selectedInstanceIds } 
+          ? { 
+              ...p, 
+              name: newName, 
+              instances: selectedInstanceIds,
+              endpoint: newEndpoint,
+              endpointType: newEndpointType
+            } 
           : p
       )
     );
@@ -81,15 +111,6 @@ const Profiles = () => {
     toast({
       title: "Profile updated",
       description: `Updated ${editedProfile.name} profile`,
-    });
-  };
-
-  const handleDeleteProfile = (profileId: string) => {
-    setLocalProfiles(prev => prev.filter(p => p.id !== profileId));
-    
-    toast({
-      title: "Profile deleted",
-      description: "The profile has been permanently removed",
     });
   };
 
@@ -111,6 +132,21 @@ const Profiles = () => {
     });
   };
 
+  const handleCreateProfileClick = () => {
+    // Check if there are any server instances available
+    if (serverInstances.length === 0) {
+      toast({
+        title: "No server instances available",
+        description: "Please create at least one server instance first",
+        variant: "destructive",
+      });
+      navigate("/servers");
+      return;
+    }
+    
+    setIsCreateProfileOpen(true);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -120,7 +156,7 @@ const Profiles = () => {
             Create and manage MCP profiles to aggregate server instances.
           </p>
         </div>
-        <Button onClick={() => setIsCreateProfileOpen(true)}>
+        <Button onClick={handleCreateProfileClick}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Create Profile
         </Button>
@@ -173,57 +209,29 @@ const Profiles = () => {
                   <div>
                     <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
                     {instances.length > 0 ? (
-                      instances.length > 2 ? (
-                        <Carousel className="w-full">
-                          <CarouselContent>
-                            {instances.map(instance => instance && (
-                              <CarouselItem key={instance.id} className="basis-full md:basis-1/2">
-                                <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
-                                  <div className="flex items-center gap-2">
-                                    <StatusIndicator 
-                                      status={
-                                        instance.status === 'running' ? 'active' : 
-                                        instance.status === 'error' ? 'error' : 'inactive'
-                                      }
-                                    />
-                                    <span className="text-sm font-medium truncate max-w-[150px]">{instance.name}</span>
-                                  </div>
-                                  {instance.enabled ? (
-                                    <CircleCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                  ) : (
-                                    <CircleX className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                  )}
-                                </div>
-                              </CarouselItem>
-                            ))}
-                          </CarouselContent>
-                          <div className="flex justify-center mt-2">
-                            <CarouselPrevious className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
-                            <CarouselNext className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
-                          </div>
-                        </Carousel>
-                      ) : (
-                        <div className="space-y-2">
+                      <Carousel className="w-full">
+                        <CarouselContent>
                           {instances.map(instance => instance && (
-                            <div key={instance.id} className="flex items-center justify-between p-2 bg-secondary rounded-md">
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={
-                                    instance.status === 'running' ? 'active' : 
-                                    instance.status === 'error' ? 'error' : 'inactive'
-                                  }
-                                />
-                                <span className="text-sm font-medium">{instance.name}</span>
+                            <CarouselItem key={instance.id} className="basis-full md:basis-1/2">
+                              <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
+                                <div className="flex items-center gap-2">
+                                  <StatusIndicator 
+                                    status={
+                                      instance.status === 'running' ? 'active' : 
+                                      instance.status === 'error' ? 'error' : 'inactive'
+                                    }
+                                  />
+                                  <span className="text-sm font-medium truncate max-w-[150px]">{instance.name}</span>
+                                </div>
                               </div>
-                              {instance.enabled ? (
-                                <CircleCheck className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <CircleX className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
+                            </CarouselItem>
                           ))}
+                        </CarouselContent>
+                        <div className="flex justify-center mt-2">
+                          <CarouselPrevious className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
+                          <CarouselNext className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
                         </div>
-                      )
+                      </Carousel>
                     ) : (
                       <div className="text-center p-2 text-muted-foreground text-sm">
                         No server instances added
@@ -232,12 +240,9 @@ const Profiles = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between pt-0">
+              <CardFooter className="flex justify-end pt-0">
                 <div className="flex gap-2">
-                  {/* Moved buttons and swapped positions */}
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleDeleteProfile(profile.id)}>
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteProfile(profile.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEditProfile(profile)}>
@@ -256,7 +261,7 @@ const Profiles = () => {
             <p className="text-muted-foreground text-center">
               Create a new profile to group server instances together
             </p>
-            <Button className="mt-4" onClick={() => setIsCreateProfileOpen(true)}>
+            <Button className="mt-4" onClick={handleCreateProfileClick}>
               Create Profile
             </Button>
           </CardContent>
@@ -268,6 +273,7 @@ const Profiles = () => {
         open={isCreateProfileOpen}
         onOpenChange={setIsCreateProfileOpen}
         onCreateProfile={handleCreateProfile}
+        allInstances={serverInstances}
       />
       
       {/* Edit profile dialog */}
@@ -280,6 +286,28 @@ const Profiles = () => {
           onSave={handleSaveProfileEdit}
         />
       )}
+
+      {/* Delete profile confirmation dialog */}
+      <AlertDialog open={profileToDelete !== null} onOpenChange={(open) => !open && setProfileToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this profile?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the profile
+              and remove its data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmDeleteProfile}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
