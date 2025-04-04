@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { PlusCircle, AlertCircle } from "lucide-react";
+import { PlusCircle, AlertCircle, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ import { EndpointType, ServerInstance } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import { Label } from "@/components/ui/label";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
@@ -124,76 +125,85 @@ export function CreateProfileDialog({
             </Button>
           </div>
         ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 py-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Development, Production" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <div className="py-4 space-y-4">
+            {/* Profile name */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Profile Name</label>
+              <Input 
+                value={form.watch("name")} 
+                onChange={(e) => form.setValue("name", e.target.value)}
+                placeholder="Enter profile name"
               />
+              {form.formState.errors.name && (
+                <p className="text-sm font-medium text-destructive mt-1">
+                  {form.formState.errors.name.message}
+                </p>
+              )}
+            </div>
+
+            {/* Connection endpoint configuration */}
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">Connection Settings</Label>
               
-              <FormField
-                control={form.control}
-                name="endpointType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Endpoint Type</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an endpoint type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
-                        <SelectItem value="STDIO">Standard I/O</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-1.5 block">Endpoint Type</Label>
+                <Select 
+                  value={form.watch("endpointType")}
+                  onValueChange={(value) => form.setValue("endpointType", value as EndpointType)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select endpoint type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
+                    <SelectItem value="STDIO">Standard I/O</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.endpointType && (
+                  <p className="text-sm font-medium text-destructive mt-1">
+                    {form.formState.errors.endpointType.message}
+                  </p>
                 )}
-              />
+              </div>
               
-              <FormField
-                control={form.control}
-                name="endpoint"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Connection Endpoint</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder={
-                          form.watch("endpointType") === "HTTP_SSE" 
-                            ? "http://localhost:8008/mcp" 
-                            : "/usr/local/bin/mcp-stdio"
-                        } 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div>
+                <Label className="text-sm text-muted-foreground mb-1.5 block">Connection Endpoint</Label>
+                <Input 
+                  value={form.watch("endpoint")}
+                  onChange={(e) => form.setValue("endpoint", e.target.value)}
+                  placeholder={
+                    form.watch("endpointType") === "HTTP_SSE" 
+                      ? "http://localhost:8008/mcp" 
+                      : "/usr/local/bin/mcp-stdio"
+                  } 
+                />
+                {form.formState.errors.endpoint && (
+                  <p className="text-sm font-medium text-destructive mt-1">
+                    {form.formState.errors.endpoint.message}
+                  </p>
                 )}
-              />
-              
-              <DialogFooter className="pt-4">
-                <Button type="submit">
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Profile
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+              </div>
+            </div>
+
+            {/* Info alert about instance selection */}
+            <Alert variant="default" className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-500" />
+              <AlertDescription className="text-xs text-blue-700">
+                You'll be able to add server instances after creating the profile.
+              </AlertDescription>
+            </Alert>
+
+            <DialogFooter className="pt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button 
+                onClick={form.handleSubmit(handleSubmit)} 
+                disabled={!form.formState.isValid}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Profile
+              </Button>
+            </DialogFooter>
+          </div>
         )}
       </DialogContent>
     </Dialog>
