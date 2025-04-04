@@ -22,7 +22,7 @@ interface AddInstanceDialogProps {
 // Define the schema for the form
 const instanceFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  args: z.string().optional(),
+  args: z.string().min(1, { message: "Command arguments are required." }),
   env: z.record(z.string(), z.string()).optional(),
 });
 
@@ -92,7 +92,10 @@ export function AddInstanceDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Instance Name</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Instance Name
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="My Server Instance" {...field} />
                   </FormControl>
@@ -109,7 +112,10 @@ export function AddInstanceDialog({
               name="args"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Command Arguments</FormLabel>
+                  <FormLabel className="flex items-center">
+                    Command Arguments
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="npx -y @smithery/cli@latest install @block/server-type" 
@@ -149,7 +155,6 @@ export function AddInstanceDialog({
                         setEnvFields(newFields);
                       }}
                       placeholder={field.required ? "Required" : "Optional"}
-                      className={field.required ? "border-destructive/50 focus-visible:ring-destructive/30" : ""}
                     />
                   </div>
                 </div>
