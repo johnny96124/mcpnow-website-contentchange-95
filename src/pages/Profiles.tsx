@@ -1,19 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   CircleCheck, 
-  CircleX, 
   Edit, 
-  Link2, 
-  Link2Off, 
-  Loader2, 
-  PlusCircle, 
-  TerminalSquare, 
   Trash2, 
   Globe,
-  UserPlus,
-  ChevronLeft,
-  ChevronRight
+  TerminalSquare,
+  PlusCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,24 +14,19 @@ import { Switch } from "@/components/ui/switch";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
-import { ManageInstancesModal } from "@/components/profiles/ManageInstancesModal";
 import { useToast } from "@/hooks/use-toast";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 import { EditProfileDialog } from "@/components/profiles/EditProfileDialog";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious
-} from "@/components/ui/carousel";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const { toast } = useToast();
 
   const toggleProfile = (id: string) => {
@@ -60,7 +48,32 @@ const Profiles = () => {
     setIsEditProfileOpen(true);
   };
 
-  const handleSaveProfileEdit = (editedProfile: Profile, newName: string, selectedInstanceIds: string[]) => {
+  const handleDeleteClick = (profile: Profile) => {
+    setProfileToDelete(profile);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (profileToDelete) {
+      setLocalProfiles(prev => prev.filter(p => p.id !== profileToDelete.id));
+      
+      toast({
+        title: "Profile deleted",
+        description: "The profile has been permanently removed",
+      });
+
+      setIsDeleteDialogOpen(false);
+      setProfileToDelete(null);
+    }
+  };
+
+  const handleSaveProfileEdit = (
+    editedProfile: Profile, 
+    newName: string, 
+    selectedInstanceIds: string[],
+    newEndpoint: string,
+    newEndpointType: EndpointType
+  ) => {
     if (selectedInstanceIds.length === 0) {
       toast({
         title: "Cannot save profile",
@@ -73,7 +86,13 @@ const Profiles = () => {
     setLocalProfiles(prev => 
       prev.map(p => 
         p.id === editedProfile.id 
-          ? { ...p, name: newName, instances: selectedInstanceIds } 
+          ? { 
+              ...p, 
+              name: newName, 
+              instances: selectedInstanceIds,
+              endpoint: newEndpoint,
+              endpointType: newEndpointType
+            } 
           : p
       )
     );
@@ -81,15 +100,6 @@ const Profiles = () => {
     toast({
       title: "Profile updated",
       description: `Updated ${editedProfile.name} profile`,
-    });
-  };
-
-  const handleDeleteProfile = (profileId: string) => {
-    setLocalProfiles(prev => prev.filter(p => p.id !== profileId));
-    
-    toast({
-      title: "Profile deleted",
-      description: "The profile has been permanently removed",
     });
   };
 
@@ -110,6 +120,32 @@ const Profiles = () => {
       description: `The profile "${name}" has been created with ${endpointType} endpoint.`,
     });
   };
+
+  // Function to create a profile with 5 instances for demonstration
+  const createDemoProfile = () => {
+    // Check if we already have a demo profile with 5 instances
+    const existingDemoProfile = localProfiles.find(p => p.instances.length >= 5);
+    if (existingDemoProfile) return;
+
+    // If we have at least 5 instances, create a demo profile
+    if (serverInstances.length >= 5) {
+      const demoProfile: Profile = {
+        id: `demo-profile-${Date.now()}`,
+        name: "Demo Profile with 5 Instances",
+        endpointType: "HTTP_SSE",
+        endpoint: "http://localhost:8008/mcp",
+        enabled: true,
+        instances: serverInstances.slice(0, 5).map(instance => instance.id),
+      };
+      
+      setLocalProfiles(prev => [...prev, demoProfile]);
+    }
+  };
+
+  // Create a demo profile with 5 instances on mount
+  useEffect(() => {
+    createDemoProfile();
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -174,38 +210,27 @@ const Profiles = () => {
                     <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
                     {instances.length > 0 ? (
                       instances.length > 2 ? (
-                        <Carousel className="w-full">
-                          <CarouselContent>
+                        <ScrollArea className="h-32 rounded-md border">
+                          <div className="space-y-2 p-2">
                             {instances.map(instance => instance && (
-                              <CarouselItem key={instance.id} className="basis-full md:basis-1/2">
-                                <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
-                                  <div className="flex items-center gap-2">
-                                    <StatusIndicator 
-                                      status={
-                                        instance.status === 'running' ? 'active' : 
-                                        instance.status === 'error' ? 'error' : 'inactive'
-                                      }
-                                    />
-                                    <span className="text-sm font-medium truncate max-w-[150px]">{instance.name}</span>
-                                  </div>
-                                  {instance.enabled ? (
-                                    <CircleCheck className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                  ) : (
-                                    <CircleX className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                  )}
+                              <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
+                                <div className="flex items-center gap-2">
+                                  <StatusIndicator 
+                                    status={
+                                      instance.status === 'running' ? 'active' : 
+                                      instance.status === 'error' ? 'error' : 'inactive'
+                                    }
+                                  />
+                                  <span className="text-sm font-medium">{instance.name}</span>
                                 </div>
-                              </CarouselItem>
+                              </div>
                             ))}
-                          </CarouselContent>
-                          <div className="flex justify-center mt-2">
-                            <CarouselPrevious className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
-                            <CarouselNext className="relative inset-0 translate-y-0 translate-x-0 h-7 w-7 ml-1" />
                           </div>
-                        </Carousel>
+                        </ScrollArea>
                       ) : (
                         <div className="space-y-2">
                           {instances.map(instance => instance && (
-                            <div key={instance.id} className="flex items-center justify-between p-2 bg-secondary rounded-md">
+                            <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
                               <div className="flex items-center gap-2">
                                 <StatusIndicator 
                                   status={
@@ -215,11 +240,6 @@ const Profiles = () => {
                                 />
                                 <span className="text-sm font-medium">{instance.name}</span>
                               </div>
-                              {instance.enabled ? (
-                                <CircleCheck className="h-4 w-4 text-green-500" />
-                              ) : (
-                                <CircleX className="h-4 w-4 text-muted-foreground" />
-                              )}
                             </div>
                           ))}
                         </div>
@@ -234,10 +254,15 @@ const Profiles = () => {
               </CardContent>
               <CardFooter className="flex justify-between pt-0">
                 <div className="flex gap-2">
-                  {/* Moved buttons and swapped positions */}
+                  {/* Buttons can go here if needed */}
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleDeleteProfile(profile.id)}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-destructive border-destructive hover:bg-destructive/10"
+                    onClick={() => handleDeleteClick(profile)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEditProfile(profile)}>
@@ -268,6 +293,7 @@ const Profiles = () => {
         open={isCreateProfileOpen}
         onOpenChange={setIsCreateProfileOpen}
         onCreateProfile={handleCreateProfile}
+        instances={serverInstances}
       />
       
       {/* Edit profile dialog */}
@@ -278,6 +304,16 @@ const Profiles = () => {
           profile={selectedProfile}
           allInstances={serverInstances}
           onSave={handleSaveProfileEdit}
+        />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {profileToDelete && (
+        <DeleteProfileDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          profileName={profileToDelete.name}
+          onConfirmDelete={handleConfirmDelete}
         />
       )}
     </div>

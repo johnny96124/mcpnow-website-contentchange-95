@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, ServerIcon, AlertCircle, Info } from "lucide-react";
+import { Check, ChevronsUpDown, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,17 +29,20 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { 
   Profile, 
   ServerInstance, 
-  serverDefinitions
+  serverDefinitions,
+  EndpointType 
 } from "@/data/mockData";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile;
   allInstances: ServerInstance[];
-  onSave: (profile: Profile, newName: string, selectedInstanceIds: string[]) => void;
+  onSave: (profile: Profile, newName: string, selectedInstanceIds: string[], endpoint: string, endpointType: EndpointType) => void;
 }
 
 export function EditProfileDialog({
@@ -52,17 +55,21 @@ export function EditProfileDialog({
   const [profileName, setProfileName] = useState(profile.name);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>(profile.instances);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [endpoint, setEndpoint] = useState(profile.endpoint);
+  const [endpointType, setEndpointType] = useState<EndpointType>(profile.endpointType);
 
   // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
       setSelectedInstanceIds([...profile.instances]);
+      setEndpoint(profile.endpoint);
+      setEndpointType(profile.endpointType);
     }
   }, [open, profile]);
 
   const handleSave = () => {
-    onSave(profile, profileName, selectedInstanceIds);
+    onSave(profile, profileName, selectedInstanceIds, endpoint, endpointType);
     onOpenChange(false);
   };
 
@@ -80,28 +87,33 @@ export function EditProfileDialog({
     });
   };
 
-  // Group instances by their definition
-  const instancesByDefinition = allInstances.reduce((acc, instance) => {
-    if (!acc[instance.definitionId]) {
-      acc[instance.definitionId] = [];
-    }
-    acc[instance.definitionId].push(instance);
-    return acc;
-  }, {} as Record<string, ServerInstance[]>);
-  
-  // Get already selected definition IDs
-  const selectedDefinitionIds = new Set(
-    selectedInstanceIds
-      .map(id => allInstances.find(instance => instance.id === id)?.definitionId)
-      .filter(Boolean)
-  );
-  
-  // Filter available instances - exclude those whose definition is already included
-  const availableInstances = allInstances.filter(
-    instance => 
-      !selectedInstanceIds.includes(instance.id) && 
-      !selectedDefinitionIds.has(instance.definitionId)
-  );
+  // Get the definition IDs that are already included in the profile
+  // This is to prevent adding multiple instances from the same definition
+  const getSelectedDefinitionIds = () => {
+    return selectedInstanceIds
+      .map(id => {
+        const instance = allInstances.find(inst => inst.id === id);
+        return instance ? instance.definitionId : null;
+      })
+      .filter(Boolean) as string[];
+  };
+
+  // Get instances grouped by their definition ID
+  const getGroupedInstances = () => {
+    const selectedDefIds = getSelectedDefinitionIds();
+    
+    // For each definition, check if we already have an instance from it
+    const availableInstances = allInstances.filter(instance => {
+      // If we already have an instance from this definition, filter it out
+      if (selectedInstanceIds.includes(instance.id)) {
+        return false;
+      }
+      // If this definition already has an instance in the profile, filter it out
+      return !selectedDefIds.includes(instance.definitionId);
+    });
+
+    return availableInstances;
+  };
 
   // Get the selected instances
   const selectedInstances = allInstances.filter(
@@ -135,6 +147,40 @@ export function EditProfileDialog({
             />
           </div>
 
+          {/* Connection endpoint configuration */}
+          <div className="space-y-4">
+            <Label className="text-sm font-medium">Connection Settings</Label>
+            
+            <div>
+              <Label className="text-sm text-muted-foreground mb-1.5 block">Endpoint Type</Label>
+              <Select 
+                value={endpointType} 
+                onValueChange={(value) => setEndpointType(value as EndpointType)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select endpoint type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
+                  <SelectItem value="STDIO">Standard I/O</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label className="text-sm text-muted-foreground mb-1.5 block">Connection Endpoint</Label>
+              <Input 
+                value={endpoint} 
+                onChange={(e) => setEndpoint(e.target.value)} 
+                placeholder={
+                  endpointType === "HTTP_SSE" 
+                    ? "http://localhost:8008/mcp" 
+                    : "/usr/local/bin/mcp-stdio"
+                } 
+              />
+            </div>
+          </div>
+
           {/* Info alert about instance selection */}
           <Alert variant="default" className="bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-500" />
@@ -154,9 +200,9 @@ export function EditProfileDialog({
                   role="combobox"
                   aria-expanded={searchOpen}
                   className="w-full justify-between"
-                  disabled={availableInstances.length === 0}
+                  disabled={getGroupedInstances().length === 0}
                 >
-                  {availableInstances.length > 0 
+                  {getGroupedInstances().length > 0 
                     ? "Select a server instance..." 
                     : "No available instances"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -168,7 +214,7 @@ export function EditProfileDialog({
                   <CommandEmpty>No instances found.</CommandEmpty>
                   <CommandList>
                     <CommandGroup>
-                      {availableInstances.map(instance => (
+                      {getGroupedInstances().map(instance => (
                         <CommandItem
                           key={instance.id}
                           onSelect={() => {
@@ -210,11 +256,19 @@ export function EditProfileDialog({
                       key={instance.id}
                       className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium">{instance.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {getDefinitionName(instance.definitionId)}
-                        </span>
+                      <div className="flex items-center gap-2">
+                        <StatusIndicator 
+                          status={
+                            instance.status === 'running' ? 'active' : 
+                            instance.status === 'error' ? 'error' : 'inactive'
+                          }
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{instance.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {getDefinitionName(instance.definitionId)}
+                          </span>
+                        </div>
                       </div>
                       <Button 
                         variant="ghost" 
