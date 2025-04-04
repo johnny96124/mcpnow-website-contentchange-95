@@ -16,7 +16,7 @@ export interface ServerInstance {
   connectionDetails: string;
   requestCount?: number;
   environment?: Record<string, string>;
-  args?: string;
+  arguments?: string;
 }
 
 export const serverDefinitions: ServerDefinition[];

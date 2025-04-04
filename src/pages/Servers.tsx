@@ -133,7 +133,7 @@ const Servers = () => {
       connectionDetails: `localhost:${3000 + instances.length}`,
       requestCount: 0,
       environment: data.env,
-      args: data.args
+      arguments: data.args
     };
     
     setInstances([...instances, newInstance]);
