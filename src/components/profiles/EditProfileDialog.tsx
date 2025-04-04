@@ -209,7 +209,7 @@ export function EditProfileDialog({
                               key={instance.id}
                               disabled={isDisabled}
                               className={cn(
-                                "flex items-center justify-between",
+                                "flex items-center justify-between hover:bg-accent/50 transition-colors",
                                 isDisabled && "opacity-50 cursor-not-allowed"
                               )}
                               onSelect={() => {
@@ -219,26 +219,30 @@ export function EditProfileDialog({
                                 }
                               }}
                             >
-                              <div className="flex flex-col">
-                                <span className={isDisabled ? "text-muted-foreground" : ""}>
-                                  {instance.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {getDefinitionName(instance.definitionId)}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 w-full cursor-pointer">
                                 <StatusIndicator 
                                   status={
                                     instance.status === 'running' ? 'active' : 
                                     instance.status === 'error' ? 'error' : 'inactive'
                                   } 
                                 />
+                                <div className="flex flex-col flex-1">
+                                  <span className={cn(
+                                    "font-medium",
+                                    isDisabled ? "text-muted-foreground" : ""
+                                  )}>
+                                    {instance.name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {getDefinitionName(instance.definitionId)}
+                                  </span>
+                                </div>
+                                
                                 {!isDisabled && (
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="text-primary hover:text-primary h-7 w-7 p-0"
+                                    className="text-primary hover:text-primary hover:bg-accent h-7 w-7 p-0 ml-2"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       toggleInstance(instance.id);
