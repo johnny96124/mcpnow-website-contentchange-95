@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CircleCheck, 
@@ -103,37 +102,42 @@ const Profiles = () => {
     });
   };
 
-  const handleCreateProfile = ({ name, endpointType, endpoint }: { name: string; endpointType: EndpointType; endpoint: string }) => {
+  const handleCreateProfile = ({ 
+    name, 
+    endpointType, 
+    endpoint, 
+    instances 
+  }: { 
+    name: string; 
+    endpointType: EndpointType; 
+    endpoint: string;
+    instances: string[];
+  }) => {
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
       name,
       endpointType,
       endpoint,
       enabled: true,
-      instances: [],
+      instances,
     };
     
     setLocalProfiles(prev => [...prev, newProfile]);
     
     toast({
       title: "Profile created successfully",
-      description: `The profile "${name}" has been created with ${endpointType} endpoint.`,
+      description: `The profile "${name}" has been created with ${instances.length} server instance(s).`,
     });
   };
 
-  // Function to ensure the first profile has 5 instances
   const ensureFirstProfileHasFiveInstances = () => {
     if (serverInstances.length >= 5) {
       setLocalProfiles(prev => {
-        // Create a copy of the current profiles
         const updatedProfiles = [...prev];
         
-        // If there's at least one profile, update it to have 5 instances
         if (updatedProfiles.length > 0) {
-          // Take the first 5 server instances
           const fiveInstanceIds = serverInstances.slice(0, 5).map(instance => instance.id);
           
-          // Update the first profile to have these 5 instances
           updatedProfiles[0] = {
             ...updatedProfiles[0],
             instances: fiveInstanceIds
@@ -147,7 +151,6 @@ const Profiles = () => {
     }
   };
 
-  // Ensure first profile has 5 instances when component mounts
   useEffect(() => {
     ensureFirstProfileHasFiveInstances();
   }, []);
@@ -289,7 +292,6 @@ const Profiles = () => {
           );
         })}
         
-        {/* Create new profile card */}
         <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[400px]">
           <CardContent className="flex flex-col items-center justify-center p-6">
             <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
@@ -316,7 +318,6 @@ const Profiles = () => {
         </Card>
       </div>
       
-      {/* Create profile dialog */}
       <CreateProfileDialog
         open={isCreateProfileOpen}
         onOpenChange={setIsCreateProfileOpen}
@@ -324,7 +325,6 @@ const Profiles = () => {
         instances={serverInstances}
       />
       
-      {/* Edit profile dialog */}
       {selectedProfile && (
         <EditProfileDialog
           open={isEditProfileOpen}
@@ -335,7 +335,6 @@ const Profiles = () => {
         />
       )}
 
-      {/* Delete confirmation dialog */}
       {profileToDelete && (
         <DeleteProfileDialog
           open={isDeleteDialogOpen}
