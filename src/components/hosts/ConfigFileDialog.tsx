@@ -105,37 +105,38 @@ export function ConfigFileDialog({
     setIsModified(true);
   };
 
-  const resetJson = () => {
-    try {
-      // Generate default mcpnow config
-      if (profileEndpoint) {
-        const parsedConfig = JSON.parse(config);
-        
-        // Create or update mcpnow configuration
-        if (!parsedConfig.mcpServers) {
-          parsedConfig.mcpServers = {};
-        }
-        
-        parsedConfig.mcpServers.mcpnow = {
+  // Generate the default system configuration based on profile endpoint
+  const generateDefaultConfig = () => {
+    // Create a default configuration structure
+    const defaultConfig = {
+      mcpServers: {
+        mcpnow: {
           command: "npx",
           args: [
             "-y",
             "@modelcontextprotocol/mcpnow",
-            profileEndpoint
+            profileEndpoint || "http://localhost:8008/mcp"
           ]
-        };
-        
-        const formattedConfig = JSON.stringify(parsedConfig, null, 2);
-        setConfig(formattedConfig);
-        setIsModified(true);
-        setHasEndpointMismatch(false);
-        setError(null);
-      } else {
-        // Reset to original state if no profile endpoint
-        setConfig(originalConfig);
-        setIsModified(false);
-        setError(null);
+        }
       }
+    };
+    
+    return JSON.stringify(defaultConfig, null, 2);
+  };
+
+  const resetJson = () => {
+    try {
+      // Set the textarea to show the default system configuration
+      const defaultSystemConfig = generateDefaultConfig();
+      setConfig(defaultSystemConfig);
+      setIsModified(true);
+      setHasEndpointMismatch(false);
+      setError(null);
+      
+      toast({
+        title: "Configuration reset",
+        description: "The configuration has been reset to system defaults.",
+      });
     } catch (err) {
       if (err instanceof Error) {
         setError(`Cannot reset: ${err.message}`);
