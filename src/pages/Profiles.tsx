@@ -18,6 +18,7 @@ import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 import { EditProfileDialog } from "@/components/profiles/EditProfileDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
+import { ProfileBadge } from "@/components/profiles/ProfileBadge";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
@@ -190,7 +191,10 @@ const Profiles = () => {
             <Card key={profile.id} className={profile.enabled ? "" : "opacity-75"}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl">{profile.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <ProfileBadge name={profile.name} />
+                    <CardTitle className="text-xl">{profile.name}</CardTitle>
+                  </div>
                   <Switch 
                     checked={profile.enabled}
                     onCheckedChange={() => toggleProfile(profile.id)}

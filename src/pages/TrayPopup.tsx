@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
+import { ProfileBadge } from "@/components/profiles/ProfileBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -156,6 +157,7 @@ const TrayPopup = () => {
                         {profiles.map(profile => (
                           <SelectItem key={profile.id} value={profile.id}>
                             <div className="flex items-center gap-2">
+                              <ProfileBadge name={profile.name} />
                               <StatusIndicator 
                                 status={getStatusForProfile(profile.id)} 
                               />
