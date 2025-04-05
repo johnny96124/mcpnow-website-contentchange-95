@@ -58,7 +58,8 @@ export function HostCard({
 
   const getProfileStatus = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
-    return profile ? profile.status : null;
+    // Fix: Replace profile.status with profile.enabled
+    return profile ? (profile.enabled ? "active" : "inactive") : null;
   };
   
   const getStatusIcon = (status: 'configured' | 'misconfigured' | 'unknown') => {
