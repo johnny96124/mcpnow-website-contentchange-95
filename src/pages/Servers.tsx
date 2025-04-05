@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -219,15 +218,6 @@ const Servers = () => {
                           </CardDescription>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105 hover:shadow-md"
-                        onClick={() => handleOpenAddInstance(definition)}
-                      >
-                        <CirclePlus className="h-4 w-4 mr-1" />
-                        Add Instance
-                      </Button>
                     </div>
                   </CardHeader>
                   
