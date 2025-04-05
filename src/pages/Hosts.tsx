@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { PlusCircle, Search, RefreshCw, Desktop } from "lucide-react";
+import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
