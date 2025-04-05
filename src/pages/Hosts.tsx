@@ -43,7 +43,7 @@ const Hosts = () => {
   const [confirmAction, setConfirmAction] = useState<"create" | "update">("create");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen, closeConfigDialog } = useConfigDialog(mockJsonConfig);
+  const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -84,8 +84,6 @@ const Hosts = () => {
         title: "Configuration saved",
         description: `Config file saved to ${configDialog.configPath}`,
       });
-      
-      closeConfigDialog();
     }
   };
   
@@ -162,12 +160,6 @@ const Hosts = () => {
       });
       
       setConfirmDialogOpen(false);
-      setCreateConfigOpen(false);
-      setUpdateConfigOpen(false);
-      closeConfigDialog();
-      
-      setCurrentHostId(null);
-      setCurrentProfileId(null);
     }
   };
 
@@ -297,13 +289,7 @@ const Hosts = () => {
         )}
       </div>
       
-      <Dialog open={createConfigOpen} onOpenChange={(open) => {
-        if (!open) {
-          setCurrentHostId(null);
-          setCurrentProfileId(null);
-        }
-        setCreateConfigOpen(open);
-      }}>
+      <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Configuration File</DialogTitle>
@@ -350,13 +336,7 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={updateConfigOpen} onOpenChange={(open) => {
-        if (!open) {
-          setCurrentHostId(null);
-          setCurrentProfileId(null);
-        }
-        setUpdateConfigOpen(open);
-      }}>
+      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Update Configuration File</DialogTitle>
@@ -403,11 +383,7 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
       
-      <AlertDialog open={confirmDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-        }
-        setConfirmDialogOpen(open);
-      }}>
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -442,11 +418,7 @@ const Hosts = () => {
       
       <AddHostDialog 
         open={addHostDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-          }
-          setAddHostDialogOpen(open);
-        }}
+        onOpenChange={setAddHostDialogOpen}
         onAddHost={handleAddHost}
       />
     </div>
