@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, Desktop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -11,6 +11,7 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host } from "@/data/mockData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Mock JSON config data
 const mockJsonConfig = {
@@ -62,6 +63,7 @@ const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
@@ -109,6 +111,32 @@ const Hosts = () => {
     });
   };
 
+  const handleScanForHosts = () => {
+    setIsScanning(true);
+    
+    // Simulate scanning process
+    setTimeout(() => {
+      // Create a new host with default values
+      const newHostId = `host-${Date.now()}`;
+      const newHost: Host = {
+        id: newHostId,
+        name: "Local Host",
+        icon: "💻",
+        connectionStatus: "disconnected",
+        configStatus: "unknown",
+        configPath: "/etc/mcp-config.json"
+      };
+      
+      setHostsList(prevHosts => [...prevHosts, newHost]);
+      setIsScanning(false);
+      
+      toast({
+        title: "Host discovered",
+        description: "A new local host has been found and added to your hosts list.",
+      });
+    }, 2500);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -119,9 +147,18 @@ const Hosts = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Search className="h-4 w-4 mr-2" />
-            Scan for Hosts
+          <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
+            {isScanning ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Scanning...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" />
+                Scan for Hosts
+              </>
+            )}
           </Button>
           <Button onClick={() => setAddHostDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
@@ -145,6 +182,40 @@ const Hosts = () => {
             onOpenConfigDialog={handleOpenConfigDialog}
           />
         ))}
+        
+        {isScanning && (
+          <div className="border rounded-lg overflow-hidden shadow-sm">
+            <div className="bg-muted/50 p-6 pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <Skeleton className="h-6 w-32" />
+                </div>
+                <Skeleton className="h-6 w-24" />
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-9 w-1/2" />
+                  <Skeleton className="h-9 w-1/2" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <ConfigFileDialog
