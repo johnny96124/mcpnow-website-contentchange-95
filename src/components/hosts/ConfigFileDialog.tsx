@@ -8,16 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -47,7 +37,6 @@ export function ConfigFileDialog({
   const [pathModified, setPathModified] = useState(false);  // Track path modifications
   const [hasEndpointMismatch, setHasEndpointMismatch] = useState(false);
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
-  const [showPathChangeAlert, setShowPathChangeAlert] = useState(false);  // Alert for path changes
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -102,12 +91,6 @@ export function ConfigFileDialog({
       // Check for endpoint mismatch before saving
       if (hasEndpointMismatch) {
         setError("Cannot save: The endpoint in the mcpnow configuration doesn't match the selected profile's endpoint.");
-        return;
-      }
-      
-      // If path was modified, show confirmation dialog
-      if (pathModified && path !== configPath) {
-        setShowPathChangeAlert(true);
         return;
       }
       
@@ -204,126 +187,88 @@ export function ConfigFileDialog({
     if (!open && (isModified || pathModified)) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
-        setShowPathChangeAlert(false);
       }
     } else {
       onOpenChange(open);
-      setShowPathChangeAlert(false);
     }
-  };
-
-  // Confirm the path change and save
-  const confirmPathChange = () => {
-    setShowPathChangeAlert(false);
-    onSave(config, path);
-    setPathModified(false);
-    setIsModified(false);
-    onOpenChange(false);
   };
 
   // Only show the warning when both hasEndpointMismatch is true AND needsUpdate is true
   const showWarning = hasEndpointMismatch && needsUpdate;
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={handleCloseDialog}>
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Config File</DialogTitle>
-            <DialogDescription>
-              Edit configuration file details
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 min-h-[400px] flex flex-col space-y-3 mt-2">
-            {/* Configuration File Path Section */}
-            <div className="space-y-2">
-              <Label htmlFor="configPath">Configuration File Path</Label>
-              <Textarea
-                id="configPath"
-                value={path}
-                onChange={(e) => handlePathChange(e.target.value)}
-                rows={1}
-                className="font-mono text-sm"
-                readOnly={!allowPathEdit}
-              />
-              {allowPathEdit && (
-                <p className="text-xs text-muted-foreground">
-                  You can modify the path where this configuration will be saved.
-                </p>
-              )}
-            </div>
-
-            <div className="flex justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
-              </div>
-              <Button variant="outline" size="sm" onClick={resetJson}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset JSON
-              </Button>
-            </div>
-            
-            {showWarning && (
-              <Alert variant="destructive" className="py-2 px-3">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  Warning: The endpoint in the mcpnow configuration does not match the selected profile's endpoint.
-                  Click "Reset JSON" to fix this issue.
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            <ScrollArea className="h-[400px] border rounded-md">
-              <Textarea 
-                ref={textareaRef}
-                className="flex-1 font-mono text-sm min-h-[400px] border-0 resize-none"
-                value={config} 
-                onChange={(e) => handleChange(e.target.value)}
-                spellCheck={false}
-              />
-            </ScrollArea>
-            
-            {error && (
-              <div className="text-destructive text-sm bg-destructive/10 p-2 rounded border border-destructive/20">
-                {error}
-              </div>
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
+      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Config File</DialogTitle>
+          <DialogDescription>
+            Edit configuration file details
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="flex-1 min-h-[400px] flex flex-col space-y-3 mt-2">
+          {/* Configuration File Path Section */}
+          <div className="space-y-2">
+            <Label htmlFor="configPath">Configuration File Path</Label>
+            <Textarea
+              id="configPath"
+              value={path}
+              onChange={(e) => handlePathChange(e.target.value)}
+              rows={1}
+              className="font-mono text-sm"
+              readOnly={!allowPathEdit}
+            />
+            {allowPathEdit && (
+              <p className="text-xs text-muted-foreground">
+                You can modify the path where this configuration will be saved.
+              </p>
             )}
           </div>
-          
-          <DialogFooter className="flex justify-end space-x-2">
-            <Button onClick={handleSave} disabled={!!error}>
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
+
+          <div className="flex justify-between mb-2">
+            <div className="text-sm text-muted-foreground">
+              Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={resetJson}>
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset JSON
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Path Change Confirmation Dialog */}
-      <AlertDialog open={showPathChangeAlert} onOpenChange={setShowPathChangeAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm New Configuration Path</AlertDialogTitle>
-            <AlertDialogDescription>
-              You've modified the configuration file path. A new configuration file will be created at the specified location.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          <div className="my-4 p-2 bg-muted rounded">
-            <p className="text-sm font-mono">{path}</p>
           </div>
           
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowPathChangeAlert(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmPathChange}>
-              Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+          {showWarning && (
+            <Alert variant="destructive" className="py-2 px-3">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                Warning: The endpoint in the mcpnow configuration does not match the selected profile's endpoint.
+                Click "Reset JSON" to fix this issue.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <ScrollArea className="h-[400px] border rounded-md">
+            <Textarea 
+              ref={textareaRef}
+              className="flex-1 font-mono text-sm min-h-[400px] border-0 resize-none"
+              value={config} 
+              onChange={(e) => handleChange(e.target.value)}
+              spellCheck={false}
+            />
+          </ScrollArea>
+          
+          {error && (
+            <div className="text-destructive text-sm bg-destructive/10 p-2 rounded border border-destructive/20">
+              {error}
+            </div>
+          )}
+        </div>
+        
+        <DialogFooter className="flex justify-end space-x-2">
+          <Button onClick={handleSave} disabled={!!error}>
+            <Save className="mr-2 h-4 w-4" />
+            Save Changes
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
