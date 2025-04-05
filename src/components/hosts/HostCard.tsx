@@ -9,7 +9,6 @@ import { profiles } from "@/data/mockData";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { ProfileBadge } from "@/components/profiles/ProfileBadge";
 
 interface HostCardProps {
   host: {
@@ -63,11 +62,6 @@ export function HostCard({
     return profile ? (profile.enabled ? "active" : "inactive") : null;
   };
   
-  const getProfileName = (profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    return profile ? profile.name : "";
-  };
-  
   const getStatusIcon = (status: 'configured' | 'misconfigured' | 'unknown') => {
     switch (status) {
       case 'configured':
@@ -104,7 +98,6 @@ export function HostCard({
   const endpoint = getProfileEndpoint(profileId);
   const endpointType = getProfileEndpointType(profileId);
   const profileStatus = getProfileStatus(profileId);
-  const profileName = getProfileName(profileId);
   
   return (
     <Card className="overflow-hidden">
@@ -154,10 +147,7 @@ export function HostCard({
             <SelectContent>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
-                  <div className="flex items-center gap-2">
-                    <ProfileBadge name={profile.name} />
-                    {profile.name}
-                  </div>
+                  {profile.name}
                 </SelectItem>
               ))}
             </SelectContent>

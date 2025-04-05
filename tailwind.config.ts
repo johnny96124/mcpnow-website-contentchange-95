@@ -68,18 +68,6 @@ export default {
 					warning: 'hsl(var(--status-warning))',
 					error: 'hsl(var(--status-error))',
 					inactive: 'hsl(var(--status-inactive))'
-				},
-				profile: {
-					'red': '#ea384c',
-					'blue': '#3b82f6', 
-					'purple': '#8b5cf6',
-					'green': '#10b981',
-					'yellow': '#f59e0b',
-					'pink': '#ec4899',
-					'orange': '#f97316',
-					'teal': '#14b8a6',
-					'cyan': '#06b6d4',
-					'indigo': '#6366f1'
 				}
 			},
 			borderRadius: {
