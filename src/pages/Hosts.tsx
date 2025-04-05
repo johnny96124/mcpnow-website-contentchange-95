@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
-// Mock JSON config data
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -59,7 +57,7 @@ const Hosts = () => {
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
-      openConfigDialog(hostId, host.configPath, profileEndpoint);
+      openConfigDialog(hostId, host.configPath, profileEndpoint, host.needsUpdate);
     } else {
       toast({
         title: "No config file",
@@ -73,7 +71,6 @@ const Hosts = () => {
     if (configDialog.hostId) {
       console.log(`Saving config for host ${configDialog.hostId}:`, config);
       
-      // Update host status to configured
       setHostsList(prev => prev.map(host => 
         host.id === configDialog.hostId 
           ? { ...host, configStatus: 'configured', needsUpdate: false } 
@@ -115,14 +112,10 @@ const Hosts = () => {
       setCurrentHostId(hostId);
       setCurrentProfileId(profileId);
       
-      // Check if configuration already exists
       if (host.configPath) {
-        // For update scenario
         setConfigPath(host.configPath);
         setUpdateConfigOpen(true);
       } else {
-        // For create scenario
-        // Generate a default config path based on host name
         const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
         setConfigPath(defaultConfigPath);
         setCreateConfigOpen(true);
@@ -132,7 +125,6 @@ const Hosts = () => {
   
   const handleConfirmCreateConfig = () => {
     if (currentHostId && currentProfileId) {
-      // Update host with new config path and status
       setHostsList(prev => prev.map(host => 
         host.id === currentHostId 
           ? { 
@@ -155,7 +147,6 @@ const Hosts = () => {
 
   const handleConfirmUpdateConfig = () => {
     if (currentHostId && currentProfileId) {
-      // Update host configuration status
       setHostsList(prev => prev.map(host => 
         host.id === currentHostId 
           ? { 
@@ -178,9 +169,7 @@ const Hosts = () => {
   const handleScanForHosts = () => {
     setIsScanning(true);
     
-    // Simulate scanning process
     setTimeout(() => {
-      // Create a new host with default values
       const newHostId = `host-${Date.now()}`;
       const newHost: Host = {
         id: newHostId,
@@ -200,13 +189,11 @@ const Hosts = () => {
     }, 2500);
   };
 
-  // Generate default config based on profile
   const generateDefaultConfig = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     
     if (!profile) return "{}";
     
-    // Create the new structure with the endpoint from the profile
     const defaultConfig = {
       mcpServers: {
         mcpnow: {
@@ -305,7 +292,6 @@ const Hosts = () => {
         )}
       </div>
       
-      {/* Create Configuration Dialog */}
       <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
@@ -353,7 +339,6 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Update Configuration Dialog */}
       <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
         <DialogContent>
           <DialogHeader>
@@ -408,6 +393,7 @@ const Hosts = () => {
         initialConfig={configDialog.configContent}
         onSave={handleSaveConfig}
         profileEndpoint={configDialog.profileEndpoint}
+        needsUpdate={configDialog.needsUpdate}
       />
       
       <AddHostDialog 

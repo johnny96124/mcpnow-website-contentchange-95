@@ -7,6 +7,7 @@ interface ConfigDialogState {
   configPath: string;
   configContent: string;
   profileEndpoint?: string;
+  needsUpdate?: boolean;  // Added needsUpdate property
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -17,13 +18,14 @@ export function useConfigDialog(mockJsonConfig: any) {
     configContent: "",
   });
   
-  const openConfigDialog = (hostId: string, configPath: string, profileEndpoint?: string) => {
+  const openConfigDialog = (hostId: string, configPath: string, profileEndpoint?: string, needsUpdate?: boolean) => {
     setConfigDialog({
       isOpen: true,
       hostId,
       configPath,
       configContent: JSON.stringify(mockJsonConfig, null, 2),
-      profileEndpoint
+      profileEndpoint,
+      needsUpdate
     });
   };
   

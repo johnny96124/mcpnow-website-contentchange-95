@@ -15,6 +15,7 @@ interface ConfigFileDialogProps {
   initialConfig: string;
   onSave: (config: string) => void;
   profileEndpoint?: string;
+  needsUpdate?: boolean;  // Added this prop to know if host needs update
 }
 
 export function ConfigFileDialog({
@@ -23,7 +24,8 @@ export function ConfigFileDialog({
   configPath,
   initialConfig,
   onSave,
-  profileEndpoint
+  profileEndpoint,
+  needsUpdate = false  // Default to false if not provided
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [error, setError] = useState<string | null>(null);
@@ -174,6 +176,9 @@ export function ConfigFileDialog({
     }
   };
 
+  // Only show the warning when both hasEndpointMismatch is true AND needsUpdate is true
+  const showWarning = hasEndpointMismatch && needsUpdate;
+
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
@@ -195,7 +200,7 @@ export function ConfigFileDialog({
             </Button>
           </div>
           
-          {hasEndpointMismatch && (
+          {showWarning && (
             <Alert variant="destructive" className="py-2 px-3">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
