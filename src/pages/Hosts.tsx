@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -39,11 +38,9 @@ const Hosts = () => {
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<"create" | "update">("create");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
+  const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -84,11 +81,6 @@ const Hosts = () => {
         title: "Configuration saved",
         description: `Config file saved to ${configDialog.configPath}`,
       });
-      
-      // Close the dialog and reset its state after successful save
-      setTimeout(() => {
-        resetConfigDialog();
-      }, 300);
     }
   };
   
@@ -111,9 +103,6 @@ const Hosts = () => {
       title: "Host Added",
       description: `${newHost.name} has been added successfully`,
     });
-    
-    // Close the dialog completely
-    setAddHostDialogOpen(false);
   };
 
   const handleCreateConfig = (hostId: string, profileId: string) => {
@@ -134,26 +123,7 @@ const Hosts = () => {
     }
   };
   
-  const showConfirmDialog = (action: "create" | "update") => {
-    setConfirmAction(action);
-    setConfirmDialogOpen(true);
-    
-    // Close the other dialogs to prevent stacking
-    setCreateConfigOpen(false);
-    setUpdateConfigOpen(false);
-  };
-  
   const handleConfirmCreateConfig = () => {
-    setCreateConfigOpen(false);
-    showConfirmDialog("create");
-  };
-
-  const handleConfirmUpdateConfig = () => {
-    setUpdateConfigOpen(false);
-    showConfirmDialog("update");
-  };
-
-  const handleConfirmAction = () => {
     if (currentHostId && currentProfileId) {
       setHostsList(prev => prev.map(host => 
         host.id === currentHostId 
@@ -167,19 +137,32 @@ const Hosts = () => {
       ));
       
       toast({
-        title: confirmAction === "create" ? "Configuration created" : "Configuration updated",
-        description: `Config file ${confirmAction === "create" ? "created" : "updated"} at ${configPath}`,
+        title: "Configuration created",
+        description: `Config file created at ${configPath}`,
       });
       
-      // Make sure to reset all dialog states and clear temporary data
-      setConfirmDialogOpen(false);
+      setCreateConfigOpen(false);
+    }
+  };
+
+  const handleConfirmUpdateConfig = () => {
+    if (currentHostId && currentProfileId) {
+      setHostsList(prev => prev.map(host => 
+        host.id === currentHostId 
+          ? { 
+              ...host,
+              configStatus: 'configured',
+              needsUpdate: false
+            } 
+          : host
+      ));
       
-      // Complete reset of all state variables
-      setTimeout(() => {
-        setCurrentHostId(null);
-        setCurrentProfileId(null);
-        setConfigPath("");
-      }, 300);
+      toast({
+        title: "Configuration updated",
+        description: `Config file updated at ${configPath}`,
+      });
+      
+      setUpdateConfigOpen(false);
     }
   };
 
@@ -225,21 +208,6 @@ const Hosts = () => {
     };
     
     return JSON.stringify(defaultConfig, null, 2);
-  };
-
-  // Handle Cancel button in any dialog with proper state cleanup
-  const handleCancelDialog = () => {
-    // Close and reset all dialogs
-    setCreateConfigOpen(false);
-    setUpdateConfigOpen(false);
-    setConfirmDialogOpen(false);
-    
-    // Complete reset of all state variables with a delay
-    setTimeout(() => {
-      setCurrentHostId(null);
-      setCurrentProfileId(null);
-      setConfigPath("");
-    }, 300);
   };
 
   return (
@@ -324,10 +292,7 @@ const Hosts = () => {
         )}
       </div>
       
-      <Dialog open={createConfigOpen} onOpenChange={(open) => {
-        if (!open) handleCancelDialog();
-        else setCreateConfigOpen(open);
-      }}>
+      <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Configuration File</DialogTitle>
@@ -364,7 +329,7 @@ const Hosts = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancelDialog}>
+            <Button variant="outline" onClick={() => setCreateConfigOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleConfirmCreateConfig}>
@@ -374,10 +339,7 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={updateConfigOpen} onOpenChange={(open) => {
-        if (!open) handleCancelDialog();
-        else setUpdateConfigOpen(open);
-      }}>
+      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Update Configuration File</DialogTitle>
@@ -392,12 +354,12 @@ const Hosts = () => {
               <Textarea 
                 id="updateConfigPath"
                 value={configPath}
-                onChange={(e) => setConfigPath(e.target.value)}
+                readOnly
                 rows={1}
-                className="font-mono text-sm"
+                className="font-mono text-sm bg-muted"
               />
               <p className="text-xs text-muted-foreground">
-                You can modify the configuration file path if needed.
+                This configuration file will be updated with the latest profile settings.
               </p>
             </div>
             
@@ -414,7 +376,7 @@ const Hosts = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancelDialog}>
+            <Button variant="outline" onClick={() => setUpdateConfigOpen(false)}>
               Cancel
             </Button>
             <Button onClick={handleConfirmUpdateConfig}>
@@ -424,45 +386,9 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
       
-      <AlertDialog 
-        open={confirmDialogOpen} 
-        onOpenChange={(open) => {
-          if (!open) handleCancelDialog();
-          else setConfirmDialogOpen(open);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction === "create" ? "Create Configuration File" : "Update Configuration File"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will {confirmAction === "create" ? "create" : "update"} a configuration file at:
-              <code className="block mt-2 p-2 bg-muted rounded-md text-xs font-mono">
-                {configPath}
-              </code>
-              Are you sure you want to continue?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDialog}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>
-              {confirmAction === "create" ? "Create File" : "Update File"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
       <ConfigFileDialog
         open={configDialog.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDialogOpen(false);
-            setTimeout(() => resetConfigDialog(), 300);
-          } else {
-            setDialogOpen(open);
-          }
-        }}
+        onOpenChange={setDialogOpen}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
         onSave={handleSaveConfig}

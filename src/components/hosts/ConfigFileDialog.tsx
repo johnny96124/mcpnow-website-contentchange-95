@@ -15,7 +15,7 @@ interface ConfigFileDialogProps {
   initialConfig: string;
   onSave: (config: string) => void;
   profileEndpoint?: string;
-  needsUpdate?: boolean;
+  needsUpdate?: boolean;  // Added this prop to know if host needs update
 }
 
 export function ConfigFileDialog({
@@ -25,7 +25,7 @@ export function ConfigFileDialog({
   initialConfig,
   onSave,
   profileEndpoint,
-  needsUpdate = false
+  needsUpdate = false  // Default to false if not provided
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [error, setError] = useState<string | null>(null);
@@ -35,30 +35,12 @@ export function ConfigFileDialog({
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Update config when initialConfig changes or dialog opens
+  // Update config when initialConfig changes
   useEffect(() => {
-    if (open && initialConfig) {
-      setConfig(initialConfig);
-      setOriginalConfig(initialConfig);
-      setIsModified(false);
-      setError(null); // Clear any previous errors
-    }
+    setConfig(initialConfig);
+    setOriginalConfig(initialConfig);
+    setIsModified(false);
   }, [initialConfig, open]);
-
-  // Clean up state when dialog closes
-  useEffect(() => {
-    if (!open) {
-      // Reset state with a delay to allow for closing animations
-      const timeout = setTimeout(() => {
-        setConfig("");
-        setOriginalConfig("");
-        setIsModified(false);
-        setError(null);
-        setHasEndpointMismatch(false);
-      }, 300);
-      return () => clearTimeout(timeout);
-    }
-  }, [open]);
 
   // Check if the config has an endpoint that doesn't match the profile's endpoint
   useEffect(() => {
@@ -104,10 +86,12 @@ export function ConfigFileDialog({
       setError(null);
       onSave(config);
       
-      // Reset states
-      setIsModified(false);
+      toast({
+        title: "Configuration saved",
+        description: `Config file saved to ${configPath}`,
+      });
       
-      // Close dialog
+      setIsModified(false);
       onOpenChange(false);
     } catch (err) {
       if (err instanceof Error) {
@@ -125,6 +109,7 @@ export function ConfigFileDialog({
 
   // Generate the default system configuration based on profile endpoint
   const generateDefaultConfig = () => {
+    // Create a default configuration structure
     const defaultConfig = {
       mcpServers: {
         mcpnow: {
@@ -163,15 +148,17 @@ export function ConfigFileDialog({
     }
   };
 
-  // Apply syntax highlighting for mcpnow section (not implemented for textarea)
+  // Apply syntax highlighting for mcpnow section
   useEffect(() => {
     if (!textareaRef.current) return;
     
     try {
-      // Implementation for highlighting would typically use a proper code editor component
+      // Implementation for highlighting would typically be more complex with a proper editor
+      // Since we're using a textarea, we'll just focus on finding the mcpnow section
       const parsedConfig = JSON.parse(config);
       if (parsedConfig.mcpServers?.mcpnow) {
         // For a textarea, we can't apply direct highlighting
+        // In a real implementation, consider using a code editor component like Monaco, CodeMirror, etc.
       }
     } catch (e) {
       // Silently fail, validation error will be shown separately
@@ -183,8 +170,6 @@ export function ConfigFileDialog({
     if (!open && isModified) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
-        // Reset modified state to prevent dialog from appearing again
-        setIsModified(false);
       }
     } else {
       onOpenChange(open);
@@ -195,10 +180,7 @@ export function ConfigFileDialog({
   const showWarning = hasEndpointMismatch && needsUpdate;
 
   return (
-    <Dialog 
-      open={open} 
-      onOpenChange={handleCloseDialog}
-    >
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>

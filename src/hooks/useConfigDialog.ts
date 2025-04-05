@@ -7,7 +7,7 @@ interface ConfigDialogState {
   configPath: string;
   configContent: string;
   profileEndpoint?: string;
-  needsUpdate?: boolean;
+  needsUpdate?: boolean;  // Added needsUpdate property
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -30,41 +30,17 @@ export function useConfigDialog(mockJsonConfig: any) {
   };
   
   const closeConfigDialog = () => {
-    // First close the dialog visually
     setConfigDialog(prev => ({ ...prev, isOpen: false }));
-    
-    // Then reset all values with a small delay to allow for animations
-    setTimeout(() => {
-      resetConfigDialog();
-    }, 300);
   };
   
   const setDialogOpen = (isOpen: boolean) => {
-    // If dialog is being closed, start the reset process
-    if (!isOpen) {
-      closeConfigDialog();
-    } else {
-      setConfigDialog(prev => ({ ...prev, isOpen }));
-    }
-  };
-  
-  // Add a function to completely reset the dialog state
-  const resetConfigDialog = () => {
-    setConfigDialog({
-      isOpen: false,
-      hostId: null,
-      configPath: "",
-      configContent: "",
-      profileEndpoint: undefined,
-      needsUpdate: undefined
-    });
+    setConfigDialog(prev => ({ ...prev, isOpen }));
   };
   
   return {
     configDialog,
     openConfigDialog,
     closeConfigDialog,
-    setDialogOpen,
-    resetConfigDialog
+    setDialogOpen
   };
 }
