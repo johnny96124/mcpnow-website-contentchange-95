@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ const Hosts = () => {
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
@@ -117,6 +119,9 @@ const Hosts = () => {
       const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
       setConfigPath(host.configPath || defaultConfigPath);
       
+      // Check if this is an update operation
+      setIsUpdating(!!host.configPath && host.needsUpdate);
+      
       setCreateConfigOpen(true);
     }
   };
@@ -136,8 +141,8 @@ const Hosts = () => {
       ));
       
       toast({
-        title: "Configuration created",
-        description: `Config file created at ${configPath}`,
+        title: isUpdating ? "Configuration updated" : "Configuration created",
+        description: `Config file ${isUpdating ? 'updated' : 'created'} at ${configPath}`,
       });
       
       setCreateConfigOpen(false);
@@ -277,9 +282,11 @@ const Hosts = () => {
       <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Configuration File</DialogTitle>
+            <DialogTitle>{isUpdating ? "Update Configuration File" : "Create Configuration File"}</DialogTitle>
             <DialogDescription>
-              Specify the location where the host configuration file will be created.
+              {isUpdating 
+                ? "Update the host configuration to match the current profile settings." 
+                : "Specify the location where the host configuration file will be created."}
             </DialogDescription>
           </DialogHeader>
           
@@ -294,7 +301,7 @@ const Hosts = () => {
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                This is the location where the configuration file will be saved.
+                This is the location where the configuration file will be {isUpdating ? "updated" : "saved"}.
               </p>
             </div>
             
@@ -304,8 +311,9 @@ const Hosts = () => {
                 {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
               </pre>
               <p className="text-xs text-muted-foreground">
-                The configuration will be created with default values based on the selected profile.
-                You can edit it after creation.
+                {isUpdating 
+                  ? "The configuration will be updated with the current profile's connection endpoint." 
+                  : "The configuration will be created with default values based on the selected profile."}
               </p>
             </div>
           </div>
@@ -315,7 +323,7 @@ const Hosts = () => {
               Cancel
             </Button>
             <Button onClick={handleConfirmCreateConfig}>
-              Create Configuration
+              {isUpdating ? "Update Configuration" : "Create Configuration"}
             </Button>
           </DialogFooter>
         </DialogContent>
