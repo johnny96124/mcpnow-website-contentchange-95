@@ -114,6 +114,11 @@ export function HostCard({
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
                 host.connectionStatus === 'misconfigured' ? 'error' : 'warning'
               } 
+              label={
+                host.connectionStatus === 'connected' ? 'Connected' : 
+                host.connectionStatus === 'disconnected' ? 'Disconnected' : 
+                host.connectionStatus === 'misconfigured' ? 'Misconfigured' : 'Unknown'
+              }
             />
           </div>
         </div>
