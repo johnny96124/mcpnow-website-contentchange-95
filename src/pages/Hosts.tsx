@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -38,6 +39,8 @@ const Hosts = () => {
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<"create" | "update">("create");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
@@ -123,7 +126,22 @@ const Hosts = () => {
     }
   };
   
+  const showConfirmDialog = (action: "create" | "update") => {
+    setConfirmAction(action);
+    setConfirmDialogOpen(true);
+  };
+  
   const handleConfirmCreateConfig = () => {
+    setCreateConfigOpen(false);
+    showConfirmDialog("create");
+  };
+
+  const handleConfirmUpdateConfig = () => {
+    setUpdateConfigOpen(false);
+    showConfirmDialog("update");
+  };
+
+  const handleConfirmAction = () => {
     if (currentHostId && currentProfileId) {
       setHostsList(prev => prev.map(host => 
         host.id === currentHostId 
@@ -137,32 +155,11 @@ const Hosts = () => {
       ));
       
       toast({
-        title: "Configuration created",
-        description: `Config file created at ${configPath}`,
+        title: confirmAction === "create" ? "Configuration created" : "Configuration updated",
+        description: `Config file ${confirmAction === "create" ? "created" : "updated"} at ${configPath}`,
       });
       
-      setCreateConfigOpen(false);
-    }
-  };
-
-  const handleConfirmUpdateConfig = () => {
-    if (currentHostId && currentProfileId) {
-      setHostsList(prev => prev.map(host => 
-        host.id === currentHostId 
-          ? { 
-              ...host,
-              configStatus: 'configured',
-              needsUpdate: false
-            } 
-          : host
-      ));
-      
-      toast({
-        title: "Configuration updated",
-        description: `Config file updated at ${configPath}`,
-      });
-      
-      setUpdateConfigOpen(false);
+      setConfirmDialogOpen(false);
     }
   };
 
@@ -354,12 +351,12 @@ const Hosts = () => {
               <Textarea 
                 id="updateConfigPath"
                 value={configPath}
-                readOnly
+                onChange={(e) => setConfigPath(e.target.value)}
                 rows={1}
-                className="font-mono text-sm bg-muted"
+                className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                This configuration file will be updated with the latest profile settings.
+                You can modify the configuration file path if needed.
               </p>
             </div>
             
@@ -385,6 +382,29 @@ const Hosts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === "create" ? "Create Configuration File" : "Update Configuration File"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will {confirmAction === "create" ? "create" : "update"} a configuration file at:
+              <code className="block mt-2 p-2 bg-muted rounded-md text-xs font-mono">
+                {configPath}
+              </code>
+              Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>
+              {confirmAction === "create" ? "Create File" : "Update File"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <ConfigFileDialog
         open={configDialog.isOpen}
