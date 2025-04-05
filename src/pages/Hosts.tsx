@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,45 +18,13 @@ import { Label } from "@/components/ui/label";
 // Mock JSON config data
 const mockJsonConfig = {
   "mcpServers": {
-    "postgres": {
+    "mcpnow": {
       "command": "npx",
       "args": [
         "-y",
-        "@smithery/cli@latest",
-        "run",
-        "@smithery-ai/postgres",
-        "--config",
-        "\"{\\\"postgresConnectionString\\\":\\\"postgresql://postgres:postgres@localhost:5432/cobo_dev?gssencmode=disable\\\"}\""
+        "@modelcontextprotocol/mcpnow",
+        "http://localhost:8008/mcp"
       ]
-    },
-    "sequential thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@smithery/cli@latest",
-        "run",
-        "@smithery-ai/server-sequential-thinking",
-        "--config",
-        "\"{}\""
-      ]
-    },
-    "weather": {
-      "command": "node",
-      "args": [
-        "/Users/changhaojiang/tmp/mcp-node-server/build/index.js"
-      ], 
-      "env": {
-        "NODE_EXTRA_CA_CERTS": "/Users/changhaojiang/Downloads/Cloudflare_CA.pem"
-      }
-    },
-    "browser-tools": {
-      "command": "npx",
-      "args": [
-        "@agentdeskai/browser-tools-mcp@1.2.0"
-      ],
-      "env": {
-        "NODE_EXTRA_CA_CERTS": "/Users/changhaojiang/Downloads/Cloudflare_CA.pem"
-      }
     }
   }
 };

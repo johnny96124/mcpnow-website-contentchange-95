@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { profiles } from "@/data/mockData";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 interface HostCardProps {
   host: {
@@ -54,6 +55,11 @@ export function HostCard({
     const profile = profiles.find(p => p.id === profileId);
     return profile ? profile.endpointType : null;
   };
+
+  const getProfileStatus = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    return profile ? profile.status : null;
+  };
   
   const getStatusIcon = (status: 'configured' | 'misconfigured' | 'unknown') => {
     switch (status) {
@@ -90,6 +96,7 @@ export function HostCard({
 
   const endpoint = getProfileEndpoint(profileId);
   const endpointType = getProfileEndpointType(profileId);
+  const profileStatus = getProfileStatus(profileId);
   
   return (
     <Card className="overflow-hidden">
@@ -117,7 +124,18 @@ export function HostCard({
       </CardHeader>
       <CardContent className="pt-4 space-y-4">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium">Associated Profile</label>
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Associated Profile</label>
+            {profileId && profileStatus && (
+              <Badge variant={
+                profileStatus === 'active' ? 'success' : 
+                profileStatus === 'inactive' ? 'default' :
+                profileStatus === 'error' ? 'destructive' : 'outline'
+              }>
+                {profileStatus}
+              </Badge>
+            )}
+          </div>
           <Select
             value={profileId}
             onValueChange={handleProfileChange}
@@ -170,10 +188,12 @@ export function HostCard({
 
               {needsUpdate && host.configPath && (
                 <Alert variant="destructive" className="mt-2 py-2 px-3">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription className="text-xs">
-                    Profile changed. Configuration file needs update.
-                  </AlertDescription>
+                  <div className="flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <AlertDescription className="text-xs">
+                      Profile changed. Configuration file needs update.
+                    </AlertDescription>
+                  </div>
                 </Alert>
               )}
               
@@ -184,26 +204,28 @@ export function HostCard({
                     Create Config
                   </Button>
                 ) : (
-                  <Button 
-                    size="sm" 
-                    className="flex-1"
-                    variant={needsUpdate ? "destructive" : "default"}
-                    onClick={handleCreateConfig}
-                  >
-                    <Settings2 className="h-4 w-4 mr-2" />
-                    {needsUpdate ? "Update Config" : "Configure Host"}
-                  </Button>
+                  <>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => onOpenConfigDialog(host.id)}
+                      disabled={!host.configPath}
+                    >
+                      <FilePlus className="h-4 w-4 mr-2" />
+                      View Config File
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      variant={needsUpdate ? "destructive" : "default"}
+                      onClick={handleCreateConfig}
+                    >
+                      <Settings2 className="h-4 w-4 mr-2" />
+                      {needsUpdate ? "Update Config" : "Configure Host"}
+                    </Button>
+                  </>
                 )}
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => onOpenConfigDialog(host.id)}
-                  disabled={!host.configPath}
-                >
-                  <FilePlus className="h-4 w-4 mr-2" />
-                  View Config File
-                </Button>
               </div>
             </div>
           </>
