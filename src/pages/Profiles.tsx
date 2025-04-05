@@ -190,7 +190,17 @@ const Profiles = () => {
             <Card key={profile.id} className={profile.enabled ? "" : "opacity-75"}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl">{profile.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <StatusIndicator 
+                      status={
+                        profile.enabled ? 
+                          (errorInstancesCount > 0 ? "error" :
+                          runningInstancesCount > 0 ? "active" : "inactive") 
+                        : "inactive"
+                      } 
+                    />
+                    <CardTitle className="text-xl">{profile.name}</CardTitle>
+                  </div>
                   <Switch 
                     checked={profile.enabled}
                     onCheckedChange={() => toggleProfile(profile.id)}

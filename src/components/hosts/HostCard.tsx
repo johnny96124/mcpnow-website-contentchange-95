@@ -58,7 +58,6 @@ export function HostCard({
 
   const getProfileStatus = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
-    // Fix: Replace profile.status with profile.enabled
     return profile ? (profile.enabled ? "active" : "inactive") : null;
   };
   
@@ -98,6 +97,7 @@ export function HostCard({
   const endpoint = getProfileEndpoint(profileId);
   const endpointType = getProfileEndpointType(profileId);
   const profileStatus = getProfileStatus(profileId);
+  const selectedProfile = profiles.find(p => p.id === profileId);
   
   return (
     <Card className="overflow-hidden">
@@ -142,12 +142,26 @@ export function HostCard({
             onValueChange={handleProfileChange}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a profile" />
+              <SelectValue placeholder="Select a profile">
+                {selectedProfile && (
+                  <div className="flex items-center gap-2">
+                    <StatusIndicator 
+                      status={profileStatus === 'active' ? 'active' : 'inactive'} 
+                    />
+                    <span>{selectedProfile.name}</span>
+                  </div>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
-                  {profile.name}
+                  <div className="flex items-center gap-2">
+                    <StatusIndicator 
+                      status={profile.enabled ? 'active' : 'inactive'} 
+                    />
+                    <span>{profile.name}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

@@ -150,7 +150,16 @@ const TrayPopup = () => {
                       onValueChange={(value) => handleProfileChange(host.id, value)}
                     >
                       <SelectTrigger className="w-48 h-8 text-sm">
-                        <SelectValue placeholder="Select profile" />
+                        <SelectValue placeholder="Select profile">
+                          {currentProfile && (
+                            <div className="flex items-center gap-2">
+                              <StatusIndicator 
+                                status={getStatusForProfile(currentProfile.id)} 
+                              />
+                              <span>{currentProfile.name}</span>
+                            </div>
+                          )}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {profiles.map(profile => (
