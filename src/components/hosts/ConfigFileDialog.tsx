@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { Save } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Save, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface ConfigFileDialogProps {
   configPath: string;
   initialConfig: string;
   onSave: (config: string) => void;
+  profileEndpoint?: string;
 }
 
 export function ConfigFileDialog({
@@ -21,15 +23,51 @@ export function ConfigFileDialog({
   configPath,
   initialConfig,
   onSave,
+  profileEndpoint
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [error, setError] = useState<string | null>(null);
+  const [isModified, setIsModified] = useState(false);
+  const [hasEndpointMismatch, setHasEndpointMismatch] = useState(false);
   const { toast } = useToast();
 
   // Update config when initialConfig changes
   useEffect(() => {
     setConfig(initialConfig);
-  }, [initialConfig]);
+    setIsModified(false);
+  }, [initialConfig, open]);
+
+  // Check if the config has an endpoint that doesn't match the profile's endpoint
+  useEffect(() => {
+    if (profileEndpoint && config) {
+      try {
+        const parsedConfig = JSON.parse(config);
+        
+        // Check for endpoint mismatch in common config formats
+        let configHasEndpoint = false;
+        let configEndpoint = "";
+        
+        if (parsedConfig.endpoint) {
+          configHasEndpoint = true;
+          configEndpoint = parsedConfig.endpoint;
+        } else if (parsedConfig.connectionDetails) {
+          configHasEndpoint = true;
+          configEndpoint = parsedConfig.connectionDetails;
+        } else if (parsedConfig.url) {
+          configHasEndpoint = true;
+          configEndpoint = parsedConfig.url;
+        }
+        
+        setHasEndpointMismatch(
+          configHasEndpoint && 
+          configEndpoint !== profileEndpoint &&
+          configEndpoint.trim() !== ""
+        );
+      } catch (e) {
+        // Silently fail, validation error will be shown separately
+      }
+    }
+  }, [config, profileEndpoint]);
 
   const handleSave = () => {
     try {
@@ -43,6 +81,7 @@ export function ConfigFileDialog({
         description: `Config file saved to ${configPath}`,
       });
       
+      setIsModified(false);
       onOpenChange(false);
     } catch (err) {
       if (err instanceof Error) {
@@ -51,6 +90,11 @@ export function ConfigFileDialog({
         setError("Invalid JSON format");
       }
     }
+  };
+
+  const handleChange = (value: string) => {
+    setConfig(value);
+    setIsModified(true);
   };
 
   const formatJson = () => {
@@ -67,33 +111,19 @@ export function ConfigFileDialog({
     }
   };
 
-  // Function to convert JSON to syntax highlighted HTML
-  const renderHighlightedJson = () => {
-    try {
-      // Simple JSON syntax highlighting
-      return config
-        .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
-          let cls = 'text-blue-500'; // default for numbers
-          if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-              cls = 'text-gray-800 font-bold dark:text-gray-300'; // keys
-            } else {
-              cls = 'text-green-600 dark:text-green-400'; // strings
-            }
-          } else if (/true|false/.test(match)) {
-            cls = 'text-purple-600 dark:text-purple-400'; // booleans
-          } else if (/null/.test(match)) {
-            cls = 'text-red-600 dark:text-red-400'; // null
-          }
-          return `<span class="${cls}">${match}</span>`;
-        });
-    } catch (e) {
-      return config;
+  // Handle dialog close with unsaved changes
+  const handleCloseDialog = (open: boolean) => {
+    if (!open && isModified) {
+      if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
+        onOpenChange(false);
+      }
+    } else {
+      onOpenChange(open);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>
@@ -110,11 +140,20 @@ export function ConfigFileDialog({
             </Button>
           </div>
           
+          {hasEndpointMismatch && (
+            <Alert variant="destructive" className="py-2 px-3">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="text-xs">
+                Warning: The endpoint in this configuration does not match the selected profile's endpoint.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <ScrollArea className="h-[400px] border rounded-md">
             <Textarea 
               className="flex-1 font-mono text-sm min-h-[400px] border-0 resize-none"
               value={config} 
-              onChange={(e) => setConfig(e.target.value)}
+              onChange={(e) => handleChange(e.target.value)}
               spellCheck={false}
             />
           </ScrollArea>
@@ -126,12 +165,12 @@ export function ConfigFileDialog({
           )}
         </div>
         
-        <div className="flex justify-end space-x-2 mt-4">
-          <Button onClick={handleSave}>
+        <DialogFooter className="flex justify-end space-x-2">
+          <Button onClick={handleSave} disabled={!!error}>
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -1,33 +1,50 @@
 
-import { useState } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { profiles } from "@/data/mockData";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 
 interface HostCardProps {
   host: {
     id: string;
     name: string;
-    icon?: string; // Changed from required to optional
+    icon?: string;
     connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
     configStatus: 'configured' | 'misconfigured' | 'unknown';
     configPath?: string;
     profileId?: string;
+    needsUpdate?: boolean;
   };
   profileId: string;
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
+  onCreateConfig: (hostId: string, profileId: string) => void;
 }
 
 export function HostCard({ 
   host, 
   profileId, 
   onProfileChange, 
-  onOpenConfigDialog 
+  onOpenConfigDialog,
+  onCreateConfig
 }: HostCardProps) {
+  const [previousProfileId, setPreviousProfileId] = useState(profileId);
+  const [needsUpdate, setNeedsUpdate] = useState(host.needsUpdate || false);
+  const { toast } = useToast();
+  
+  // Track profile changes to detect when config needs update
+  useEffect(() => {
+    if (previousProfileId && profileId !== previousProfileId && host.configPath) {
+      setNeedsUpdate(true);
+    }
+    setPreviousProfileId(profileId);
+  }, [profileId, previousProfileId, host.configPath]);
+  
   const getProfileEndpoint = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     return profile ? profile.endpoint : "No profile selected";
@@ -48,6 +65,26 @@ export function HostCard({
         return <CircleMinus className="h-5 w-5 text-status-inactive" />;
       default:
         return null;
+    }
+  };
+
+  const handleProfileChange = (newProfileId: string) => {
+    if (host.configPath && profileId !== newProfileId) {
+      setNeedsUpdate(true);
+    }
+    onProfileChange(host.id, newProfileId);
+  };
+
+  const handleCreateConfig = () => {
+    if (profileId) {
+      onCreateConfig(host.id, profileId);
+      setNeedsUpdate(false);
+    } else {
+      toast({
+        title: "Profile required",
+        description: "Please select a profile before creating a configuration file",
+        variant: "destructive",
+      });
     }
   };
 
@@ -83,7 +120,7 @@ export function HostCard({
           <label className="text-sm font-medium">Associated Profile</label>
           <Select
             value={profileId}
-            onValueChange={(value) => onProfileChange(host.id, value)}
+            onValueChange={handleProfileChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a profile" />
@@ -130,17 +167,39 @@ export function HostCard({
                   Config file: {host.configPath}
                 </p>
               )}
+
+              {needsUpdate && host.configPath && (
+                <Alert variant="destructive" className="mt-2 py-2 px-3">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    Profile changed. Configuration file needs update.
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <div className="flex gap-2 mt-2">
-                <Button size="sm" className="flex-1">
-                  <Settings2 className="h-4 w-4 mr-2" />
-                  Configure Host
-                </Button>
+                {!host.configPath ? (
+                  <Button size="sm" className="flex-1" onClick={handleCreateConfig}>
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Create Config
+                  </Button>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    className="flex-1"
+                    variant={needsUpdate ? "destructive" : "default"}
+                    onClick={handleCreateConfig}
+                  >
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    {needsUpdate ? "Update Config" : "Configure Host"}
+                  </Button>
+                )}
                 <Button 
                   size="sm" 
                   variant="outline" 
                   className="flex-1"
                   onClick={() => onOpenConfigDialog(host.id)}
+                  disabled={!host.configPath}
                 >
                   <FilePlus className="h-4 w-4 mr-2" />
                   View Config File

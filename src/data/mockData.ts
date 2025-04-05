@@ -46,6 +46,7 @@ export interface Host {
   connectionStatus: ConnectionStatus;
   configPath?: string;
   icon?: string;
+  needsUpdate?: boolean;
 }
 
 export const serverDefinitions: ServerDefinition[] = [
@@ -291,7 +292,8 @@ export const hosts: Host[] = [
     configStatus: 'misconfigured',
     connectionStatus: 'disconnected',
     configPath: '/Users/user/Library/Application Support/Claude/config.json',
-    icon: '🧠'
+    icon: '🧠',
+    needsUpdate: true
   },
   {
     id: 'windsurf',

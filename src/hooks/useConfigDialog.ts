@@ -6,6 +6,7 @@ interface ConfigDialogState {
   hostId: string | null;
   configPath: string;
   configContent: string;
+  profileEndpoint?: string;
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -16,12 +17,13 @@ export function useConfigDialog(mockJsonConfig: any) {
     configContent: "",
   });
   
-  const openConfigDialog = (hostId: string, configPath: string) => {
+  const openConfigDialog = (hostId: string, configPath: string, profileEndpoint?: string) => {
     setConfigDialog({
       isOpen: true,
       hostId,
       configPath,
       configContent: JSON.stringify(mockJsonConfig, null, 2),
+      profileEndpoint
     });
   };
   
