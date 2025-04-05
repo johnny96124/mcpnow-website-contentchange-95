@@ -208,11 +208,18 @@ const Hosts = () => {
     
     if (!profile) return "{}";
     
+    // Create the new structure with the endpoint from the profile
     const defaultConfig = {
-      endpoint: profile.endpoint,
-      endpointType: profile.endpointType,
-      name: profile.name,
-      enabled: true,
+      mcpServers: {
+        mcpnow: {
+          command: "npx",
+          args: [
+            "-y",
+            "@modelcontextprotocol/mcpnow",
+            profile.endpoint
+          ]
+        }
+      }
     };
     
     return JSON.stringify(defaultConfig, null, 2);
