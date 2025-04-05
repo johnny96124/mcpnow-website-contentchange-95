@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [createConfigOpen, setCreateConfigOpen] = useState(false);
+  const [updateConfigOpen, setUpdateConfigOpen] = useState(false);
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
@@ -113,11 +115,18 @@ const Hosts = () => {
       setCurrentHostId(hostId);
       setCurrentProfileId(profileId);
       
-      // Generate a default config path based on host name
-      const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-      setConfigPath(host.configPath || defaultConfigPath);
-      
-      setCreateConfigOpen(true);
+      // Check if configuration already exists
+      if (host.configPath) {
+        // For update scenario
+        setConfigPath(host.configPath);
+        setUpdateConfigOpen(true);
+      } else {
+        // For create scenario
+        // Generate a default config path based on host name
+        const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+        setConfigPath(defaultConfigPath);
+        setCreateConfigOpen(true);
+      }
     }
   };
   
@@ -141,6 +150,28 @@ const Hosts = () => {
       });
       
       setCreateConfigOpen(false);
+    }
+  };
+
+  const handleConfirmUpdateConfig = () => {
+    if (currentHostId && currentProfileId) {
+      // Update host configuration status
+      setHostsList(prev => prev.map(host => 
+        host.id === currentHostId 
+          ? { 
+              ...host,
+              configStatus: 'configured',
+              needsUpdate: false
+            } 
+          : host
+      ));
+      
+      toast({
+        title: "Configuration updated",
+        description: `Config file updated at ${configPath}`,
+      });
+      
+      setUpdateConfigOpen(false);
     }
   };
 
@@ -274,6 +305,7 @@ const Hosts = () => {
         )}
       </div>
       
+      {/* Create Configuration Dialog */}
       <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
@@ -316,6 +348,54 @@ const Hosts = () => {
             </Button>
             <Button onClick={handleConfirmCreateConfig}>
               Create Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Configuration Dialog */}
+      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Configuration File</DialogTitle>
+            <DialogDescription>
+              Update the configuration for this host.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="updateConfigPath">Configuration File Path</Label>
+              <Textarea 
+                id="updateConfigPath"
+                value={configPath}
+                readOnly
+                rows={1}
+                className="font-mono text-sm bg-muted"
+              />
+              <p className="text-xs text-muted-foreground">
+                This configuration file will be updated with the latest profile settings.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Configuration Update Preview</Label>
+              <pre className="bg-muted p-2 rounded-md text-xs overflow-auto max-h-36">
+                {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
+              </pre>
+              <p className="text-xs text-muted-foreground">
+                The mcpnow section of your configuration will be updated to match the current profile settings.
+                Other sections of your configuration will remain unchanged.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUpdateConfigOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmUpdateConfig}>
+              Update Configuration
             </Button>
           </DialogFooter>
         </DialogContent>
