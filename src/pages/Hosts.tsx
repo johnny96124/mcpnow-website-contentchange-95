@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,26 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter, 
+  DialogDescription 
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -38,9 +56,11 @@ const Hosts = () => {
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
+  const [showPathChangeAlert, setShowPathChangeAlert] = useState(false);
+  const [newConfigPath, setNewConfigPath] = useState("");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
+  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -57,7 +77,8 @@ const Hosts = () => {
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
-      openConfigDialog(hostId, host.configPath, profileEndpoint, host.needsUpdate);
+      // Allow path editing for existing configurations
+      openConfigDialog(hostId, host.configPath, profileEndpoint, host.needsUpdate, true);
     } else {
       toast({
         title: "No config file",
@@ -67,21 +88,36 @@ const Hosts = () => {
     }
   };
   
-  const handleSaveConfig = (config: string) => {
+  const handleSaveConfig = (config: string, newPath: string) => {
     if (configDialog.hostId) {
-      console.log(`Saving config for host ${configDialog.hostId}:`, config);
+      // Check if the path has changed
+      if (newPath !== configDialog.configPath) {
+        setNewConfigPath(newPath);
+        setShowPathChangeAlert(true);
+        return;
+      }
       
-      setHostsList(prev => prev.map(host => 
-        host.id === configDialog.hostId 
-          ? { ...host, configStatus: 'configured', needsUpdate: false } 
-          : host
-      ));
-      
-      toast({
-        title: "Configuration saved",
-        description: `Config file saved to ${configDialog.configPath}`,
-      });
+      applyConfigChanges(configDialog.hostId, config, newPath);
     }
+  };
+  
+  const applyConfigChanges = (hostId: string, config: string, path: string) => {
+    console.log(`Saving config for host ${hostId} at path ${path}:`, config);
+    
+    setHostsList(prev => prev.map(host => 
+      host.id === hostId 
+        ? { ...host, configPath: path, configStatus: 'configured', needsUpdate: false } 
+        : host
+    ));
+    
+    toast({
+      title: "Configuration saved",
+      description: `Config file saved to ${path}`,
+    });
+    
+    // Reset dialog state
+    resetConfigDialog();
+    setShowPathChangeAlert(false);
   };
   
   const handleAddHost = (newHost: {
@@ -142,6 +178,13 @@ const Hosts = () => {
       });
       
       setCreateConfigOpen(false);
+      
+      // Reset state
+      setTimeout(() => {
+        setCurrentHostId(null);
+        setCurrentProfileId(null);
+        setConfigPath("");
+      }, 100);
     }
   };
 
@@ -151,6 +194,7 @@ const Hosts = () => {
         host.id === currentHostId 
           ? { 
               ...host,
+              configPath,
               configStatus: 'configured',
               needsUpdate: false
             } 
@@ -163,6 +207,13 @@ const Hosts = () => {
       });
       
       setUpdateConfigOpen(false);
+      
+      // Reset state
+      setTimeout(() => {
+        setCurrentHostId(null);
+        setCurrentProfileId(null);
+        setConfigPath("");
+      }, 100);
     }
   };
 
@@ -292,6 +343,35 @@ const Hosts = () => {
         )}
       </div>
       
+      {/* Path change confirmation dialog */}
+      <AlertDialog open={showPathChangeAlert} onOpenChange={setShowPathChangeAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm New Configuration Path</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've modified the configuration file path. A new configuration file will be created at the specified location.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="my-4 p-2 bg-muted rounded">
+            <p className="text-sm font-mono">{newConfigPath}</p>
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowPathChangeAlert(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (configDialog.hostId) {
+                applyConfigChanges(configDialog.hostId, configDialog.configContent, newConfigPath);
+              }
+            }}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
           <DialogHeader>
@@ -354,12 +434,12 @@ const Hosts = () => {
               <Textarea 
                 id="updateConfigPath"
                 value={configPath}
-                readOnly
+                onChange={(e) => setConfigPath(e.target.value)}
                 rows={1}
-                className="font-mono text-sm bg-muted"
+                className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                This configuration file will be updated with the latest profile settings.
+                You can modify the path where this configuration will be saved.
               </p>
             </div>
             
@@ -394,6 +474,7 @@ const Hosts = () => {
         onSave={handleSaveConfig}
         profileEndpoint={configDialog.profileEndpoint}
         needsUpdate={configDialog.needsUpdate}
+        allowPathEdit={configDialog.allowPathEdit}
       />
       
       <AddHostDialog 

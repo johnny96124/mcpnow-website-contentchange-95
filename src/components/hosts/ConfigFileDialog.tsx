@@ -7,15 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
 
 interface ConfigFileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   configPath: string;
   initialConfig: string;
-  onSave: (config: string) => void;
+  onSave: (config: string, configPath: string) => void;  // Updated to pass configPath
   profileEndpoint?: string;
-  needsUpdate?: boolean;  // Added this prop to know if host needs update
+  needsUpdate?: boolean;
+  allowPathEdit?: boolean;  // New prop to control path editing
 }
 
 export function ConfigFileDialog({
@@ -25,11 +27,14 @@ export function ConfigFileDialog({
   initialConfig,
   onSave,
   profileEndpoint,
-  needsUpdate = false  // Default to false if not provided
+  needsUpdate = false,
+  allowPathEdit = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
+  const [path, setPath] = useState(configPath);  // Added state for path
   const [error, setError] = useState<string | null>(null);
   const [isModified, setIsModified] = useState(false);
+  const [pathModified, setPathModified] = useState(false);  // Track path modifications
   const [hasEndpointMismatch, setHasEndpointMismatch] = useState(false);
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
   const { toast } = useToast();
@@ -41,6 +46,12 @@ export function ConfigFileDialog({
     setOriginalConfig(initialConfig);
     setIsModified(false);
   }, [initialConfig, open]);
+
+  // Update path when configPath changes
+  useEffect(() => {
+    setPath(configPath);
+    setPathModified(false);
+  }, [configPath, open]);
 
   // Check if the config has an endpoint that doesn't match the profile's endpoint
   useEffect(() => {
@@ -84,14 +95,15 @@ export function ConfigFileDialog({
       }
       
       setError(null);
-      onSave(config);
+      onSave(config, path);  // Pass both config and path
       
       toast({
         title: "Configuration saved",
-        description: `Config file saved to ${configPath}`,
+        description: `Config file saved to ${path}`,
       });
       
       setIsModified(false);
+      setPathModified(false);
       onOpenChange(false);
     } catch (err) {
       if (err instanceof Error) {
@@ -105,6 +117,11 @@ export function ConfigFileDialog({
   const handleChange = (value: string) => {
     setConfig(value);
     setIsModified(true);
+  };
+
+  const handlePathChange = (value: string) => {
+    setPath(value);
+    setPathModified(true);
   };
 
   // Generate the default system configuration based on profile endpoint
@@ -167,7 +184,7 @@ export function ConfigFileDialog({
 
   // Handle dialog close with unsaved changes
   const handleCloseDialog = (open: boolean) => {
-    if (!open && isModified) {
+    if (!open && (isModified || pathModified)) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
@@ -185,11 +202,29 @@ export function ConfigFileDialog({
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>
           <DialogDescription>
-            {configPath}
+            Edit configuration file details
           </DialogDescription>
         </DialogHeader>
         
         <div className="flex-1 min-h-[400px] flex flex-col space-y-3 mt-2">
+          {/* Configuration File Path Section */}
+          <div className="space-y-2">
+            <Label htmlFor="configPath">Configuration File Path</Label>
+            <Textarea
+              id="configPath"
+              value={path}
+              onChange={(e) => handlePathChange(e.target.value)}
+              rows={1}
+              className="font-mono text-sm"
+              readOnly={!allowPathEdit}
+            />
+            {allowPathEdit && (
+              <p className="text-xs text-muted-foreground">
+                You can modify the path where this configuration will be saved.
+              </p>
+            )}
+          </div>
+
           <div className="flex justify-between mb-2">
             <div className="text-sm text-muted-foreground">
               Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>

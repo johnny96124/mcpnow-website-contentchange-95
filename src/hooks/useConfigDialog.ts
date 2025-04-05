@@ -7,7 +7,8 @@ interface ConfigDialogState {
   configPath: string;
   configContent: string;
   profileEndpoint?: string;
-  needsUpdate?: boolean;  // Added needsUpdate property
+  needsUpdate?: boolean;
+  allowPathEdit?: boolean; // Added property for path editing
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -16,16 +17,24 @@ export function useConfigDialog(mockJsonConfig: any) {
     hostId: null,
     configPath: "",
     configContent: "",
+    allowPathEdit: false
   });
   
-  const openConfigDialog = (hostId: string, configPath: string, profileEndpoint?: string, needsUpdate?: boolean) => {
+  const openConfigDialog = (
+    hostId: string, 
+    configPath: string, 
+    profileEndpoint?: string, 
+    needsUpdate?: boolean,
+    allowPathEdit?: boolean
+  ) => {
     setConfigDialog({
       isOpen: true,
       hostId,
       configPath,
       configContent: JSON.stringify(mockJsonConfig, null, 2),
       profileEndpoint,
-      needsUpdate
+      needsUpdate,
+      allowPathEdit
     });
   };
   
@@ -37,10 +46,21 @@ export function useConfigDialog(mockJsonConfig: any) {
     setConfigDialog(prev => ({ ...prev, isOpen }));
   };
   
+  const resetConfigDialog = () => {
+    setConfigDialog({
+      isOpen: false,
+      hostId: null,
+      configPath: "",
+      configContent: "",
+      allowPathEdit: false
+    });
+  };
+  
   return {
     configDialog,
     openConfigDialog,
     closeConfigDialog,
-    setDialogOpen
+    setDialogOpen,
+    resetConfigDialog
   };
 }
