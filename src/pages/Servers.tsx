@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -355,37 +356,48 @@ const Servers = () => {
                     )}
                   </CardContent>
                   
-                  <CardFooter className="flex justify-end pt-4 pb-4 border-t mt-2 bg-secondary/10">
-                    {definitionInstances.length > 0 ? (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete Server
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete the server definition "{definition.name}" and all its {definitionInstances.length} instances. 
-                              This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    ) : (
-                      <Button variant="destructive" size="sm">
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete Server
-                      </Button>
-                    )}
+                  <CardFooter className="flex justify-between pt-4 pb-4 border-t mt-2 bg-secondary/10">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete the server definition "{definition.name}" 
+                                  {definitionInstances.length > 0 && ` and all its ${definitionInstances.length} instances`}. 
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete Server</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={() => handleOpenAddInstance(definition)}
+                    >
+                      <CirclePlus className="h-4 w-4 mr-1" />
+                      Add Instance
+                    </Button>
                   </CardFooter>
                 </Card>
               );
