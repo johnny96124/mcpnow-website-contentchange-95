@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -38,7 +37,6 @@ export function HostCard({
   const [needsUpdate, setNeedsUpdate] = useState(host.needsUpdate || false);
   const { toast } = useToast();
   
-  // Track profile changes to detect when config needs update
   useEffect(() => {
     if (previousProfileId && profileId !== previousProfileId && host.configPath) {
       setNeedsUpdate(true);
@@ -127,15 +125,6 @@ export function HostCard({
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
-            {profileId && profileStatus && (
-              <Badge variant={
-                profileStatus === 'active' ? 'success' : 
-                profileStatus === 'inactive' ? 'default' :
-                profileStatus === 'error' ? 'destructive' : 'outline'
-              }>
-                {profileStatus}
-              </Badge>
-            )}
           </div>
           <Select
             value={profileId}
