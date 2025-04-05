@@ -15,7 +15,7 @@ interface ConfigFileDialogProps {
   initialConfig: string;
   onSave: (config: string) => void;
   profileEndpoint?: string;
-  needsUpdate?: boolean;  // Added this prop to know if host needs update
+  needsUpdate?: boolean;
 }
 
 export function ConfigFileDialog({
@@ -25,7 +25,7 @@ export function ConfigFileDialog({
   initialConfig,
   onSave,
   profileEndpoint,
-  needsUpdate = false  // Default to false if not provided
+  needsUpdate = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [error, setError] = useState<string | null>(null);
@@ -35,11 +35,14 @@ export function ConfigFileDialog({
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // Update config when initialConfig changes
+  // Update config when initialConfig changes or dialog opens
   useEffect(() => {
-    setConfig(initialConfig);
-    setOriginalConfig(initialConfig);
-    setIsModified(false);
+    if (open && initialConfig) {
+      setConfig(initialConfig);
+      setOriginalConfig(initialConfig);
+      setIsModified(false);
+      setError(null); // Clear any previous errors
+    }
   }, [initialConfig, open]);
 
   // Check if the config has an endpoint that doesn't match the profile's endpoint
@@ -86,12 +89,12 @@ export function ConfigFileDialog({
       setError(null);
       onSave(config);
       
-      toast({
-        title: "Configuration saved",
-        description: `Config file saved to ${configPath}`,
-      });
+      // No need for toast here as it's handled in the parent component
       
+      // Reset states
       setIsModified(false);
+      
+      // Close dialog and reset state
       onOpenChange(false);
     } catch (err) {
       if (err instanceof Error) {
@@ -109,7 +112,6 @@ export function ConfigFileDialog({
 
   // Generate the default system configuration based on profile endpoint
   const generateDefaultConfig = () => {
-    // Create a default configuration structure
     const defaultConfig = {
       mcpServers: {
         mcpnow: {
@@ -148,17 +150,15 @@ export function ConfigFileDialog({
     }
   };
 
-  // Apply syntax highlighting for mcpnow section
+  // Apply syntax highlighting for mcpnow section (not implemented for textarea)
   useEffect(() => {
     if (!textareaRef.current) return;
     
     try {
-      // Implementation for highlighting would typically be more complex with a proper editor
-      // Since we're using a textarea, we'll just focus on finding the mcpnow section
+      // Implementation for highlighting would typically use a proper code editor component
       const parsedConfig = JSON.parse(config);
       if (parsedConfig.mcpServers?.mcpnow) {
         // For a textarea, we can't apply direct highlighting
-        // In a real implementation, consider using a code editor component like Monaco, CodeMirror, etc.
       }
     } catch (e) {
       // Silently fail, validation error will be shown separately
@@ -170,6 +170,8 @@ export function ConfigFileDialog({
     if (!open && isModified) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
+        // Reset modified state to prevent dialog from appearing again
+        setIsModified(false);
       }
     } else {
       onOpenChange(open);

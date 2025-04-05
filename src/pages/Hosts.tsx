@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ const Hosts = () => {
   const [confirmAction, setConfirmAction] = useState<"create" | "update">("create");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen } = useConfigDialog(mockJsonConfig);
+  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -84,6 +85,11 @@ const Hosts = () => {
         title: "Configuration saved",
         description: `Config file saved to ${configDialog.configPath}`,
       });
+      
+      // Close the dialog and reset its state after successful save
+      setTimeout(() => {
+        resetConfigDialog();
+      }, 100);
     }
   };
   
@@ -106,6 +112,9 @@ const Hosts = () => {
       title: "Host Added",
       description: `${newHost.name} has been added successfully`,
     });
+    
+    // Close the dialog completely
+    setAddHostDialogOpen(false);
   };
 
   const handleCreateConfig = (hostId: string, profileId: string) => {
@@ -129,6 +138,10 @@ const Hosts = () => {
   const showConfirmDialog = (action: "create" | "update") => {
     setConfirmAction(action);
     setConfirmDialogOpen(true);
+    
+    // Close the other dialogs to prevent stacking
+    setCreateConfigOpen(false);
+    setUpdateConfigOpen(false);
   };
   
   const handleConfirmCreateConfig = () => {
@@ -159,7 +172,15 @@ const Hosts = () => {
         description: `Config file ${confirmAction === "create" ? "created" : "updated"} at ${configPath}`,
       });
       
+      // Make sure to reset all dialog states and clear temporary data
       setConfirmDialogOpen(false);
+      
+      // Add a small delay to ensure proper UI update
+      setTimeout(() => {
+        setCurrentHostId(null);
+        setCurrentProfileId(null);
+        setConfigPath("");
+      }, 100);
     }
   };
 
@@ -205,6 +226,21 @@ const Hosts = () => {
     };
     
     return JSON.stringify(defaultConfig, null, 2);
+  };
+
+  // Handle Cancel button in any dialog
+  const handleCancelDialog = () => {
+    // Close and reset all dialogs
+    setCreateConfigOpen(false);
+    setUpdateConfigOpen(false);
+    setConfirmDialogOpen(false);
+    
+    // Add a small delay to ensure proper UI update
+    setTimeout(() => {
+      setCurrentHostId(null);
+      setCurrentProfileId(null);
+      setConfigPath("");
+    }, 100);
   };
 
   return (
@@ -289,7 +325,10 @@ const Hosts = () => {
         )}
       </div>
       
-      <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
+      <Dialog open={createConfigOpen} onOpenChange={(open) => {
+        if (!open) handleCancelDialog();
+        else setCreateConfigOpen(open);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create Configuration File</DialogTitle>
@@ -326,7 +365,7 @@ const Hosts = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateConfigOpen(false)}>
+            <Button variant="outline" onClick={handleCancelDialog}>
               Cancel
             </Button>
             <Button onClick={handleConfirmCreateConfig}>
@@ -336,7 +375,10 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
+      <Dialog open={updateConfigOpen} onOpenChange={(open) => {
+        if (!open) handleCancelDialog();
+        else setUpdateConfigOpen(open);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Update Configuration File</DialogTitle>
@@ -373,7 +415,7 @@ const Hosts = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setUpdateConfigOpen(false)}>
+            <Button variant="outline" onClick={handleCancelDialog}>
               Cancel
             </Button>
             <Button onClick={handleConfirmUpdateConfig}>
@@ -383,7 +425,13 @@ const Hosts = () => {
         </DialogContent>
       </Dialog>
       
-      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+      <AlertDialog 
+        open={confirmDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) handleCancelDialog();
+          else setConfirmDialogOpen(open);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
@@ -398,7 +446,7 @@ const Hosts = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDialog}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmAction}>
               {confirmAction === "create" ? "Create File" : "Update File"}
             </AlertDialogAction>
@@ -408,7 +456,15 @@ const Hosts = () => {
       
       <ConfigFileDialog
         open={configDialog.isOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            // When closing, reset the dialog state
+            setDialogOpen(false);
+            setTimeout(() => resetConfigDialog(), 150);
+          } else {
+            setDialogOpen(open);
+          }
+        }}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
         onSave={handleSaveConfig}

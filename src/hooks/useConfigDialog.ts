@@ -7,7 +7,7 @@ interface ConfigDialogState {
   configPath: string;
   configContent: string;
   profileEndpoint?: string;
-  needsUpdate?: boolean;  // Added needsUpdate property
+  needsUpdate?: boolean;
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -34,13 +34,35 @@ export function useConfigDialog(mockJsonConfig: any) {
   };
   
   const setDialogOpen = (isOpen: boolean) => {
-    setConfigDialog(prev => ({ ...prev, isOpen }));
+    // If dialog is being closed, fully reset the state
+    if (!isOpen) {
+      setConfigDialog(prev => ({ 
+        ...prev, 
+        isOpen: false,
+        // Don't reset hostId and other properties immediately to allow for transitions
+      }));
+    } else {
+      setConfigDialog(prev => ({ ...prev, isOpen }));
+    }
+  };
+  
+  // Add a function to completely reset the dialog state
+  const resetConfigDialog = () => {
+    setConfigDialog({
+      isOpen: false,
+      hostId: null,
+      configPath: "",
+      configContent: "",
+      profileEndpoint: undefined,
+      needsUpdate: undefined
+    });
   };
   
   return {
     configDialog,
     openConfigDialog,
     closeConfigDialog,
-    setDialogOpen
+    setDialogOpen,
+    resetConfigDialog
   };
 }
