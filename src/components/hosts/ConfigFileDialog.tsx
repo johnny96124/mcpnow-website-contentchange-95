@@ -45,6 +45,21 @@ export function ConfigFileDialog({
     }
   }, [initialConfig, open]);
 
+  // Clean up state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      // Reset state with a delay to allow for closing animations
+      const timeout = setTimeout(() => {
+        setConfig("");
+        setOriginalConfig("");
+        setIsModified(false);
+        setError(null);
+        setHasEndpointMismatch(false);
+      }, 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [open]);
+
   // Check if the config has an endpoint that doesn't match the profile's endpoint
   useEffect(() => {
     if (profileEndpoint && config) {
@@ -89,12 +104,10 @@ export function ConfigFileDialog({
       setError(null);
       onSave(config);
       
-      // No need for toast here as it's handled in the parent component
-      
       // Reset states
       setIsModified(false);
       
-      // Close dialog and reset state
+      // Close dialog
       onOpenChange(false);
     } catch (err) {
       if (err instanceof Error) {
@@ -182,7 +195,10 @@ export function ConfigFileDialog({
   const showWarning = hasEndpointMismatch && needsUpdate;
 
   return (
-    <Dialog open={open} onOpenChange={handleCloseDialog}>
+    <Dialog 
+      open={open} 
+      onOpenChange={handleCloseDialog}
+    >
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>

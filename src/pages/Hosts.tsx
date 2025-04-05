@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,7 @@ const Hosts = () => {
       // Close the dialog and reset its state after successful save
       setTimeout(() => {
         resetConfigDialog();
-      }, 100);
+      }, 300);
     }
   };
   
@@ -175,12 +174,12 @@ const Hosts = () => {
       // Make sure to reset all dialog states and clear temporary data
       setConfirmDialogOpen(false);
       
-      // Add a small delay to ensure proper UI update
+      // Complete reset of all state variables
       setTimeout(() => {
         setCurrentHostId(null);
         setCurrentProfileId(null);
         setConfigPath("");
-      }, 100);
+      }, 300);
     }
   };
 
@@ -228,19 +227,19 @@ const Hosts = () => {
     return JSON.stringify(defaultConfig, null, 2);
   };
 
-  // Handle Cancel button in any dialog
+  // Handle Cancel button in any dialog with proper state cleanup
   const handleCancelDialog = () => {
     // Close and reset all dialogs
     setCreateConfigOpen(false);
     setUpdateConfigOpen(false);
     setConfirmDialogOpen(false);
     
-    // Add a small delay to ensure proper UI update
+    // Complete reset of all state variables with a delay
     setTimeout(() => {
       setCurrentHostId(null);
       setCurrentProfileId(null);
       setConfigPath("");
-    }, 100);
+    }, 300);
   };
 
   return (
@@ -458,9 +457,8 @@ const Hosts = () => {
         open={configDialog.isOpen}
         onOpenChange={(open) => {
           if (!open) {
-            // When closing, reset the dialog state
             setDialogOpen(false);
-            setTimeout(() => resetConfigDialog(), 150);
+            setTimeout(() => resetConfigDialog(), 300);
           } else {
             setDialogOpen(open);
           }

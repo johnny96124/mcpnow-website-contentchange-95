@@ -30,17 +30,19 @@ export function useConfigDialog(mockJsonConfig: any) {
   };
   
   const closeConfigDialog = () => {
+    // First close the dialog visually
     setConfigDialog(prev => ({ ...prev, isOpen: false }));
+    
+    // Then reset all values with a small delay to allow for animations
+    setTimeout(() => {
+      resetConfigDialog();
+    }, 300);
   };
   
   const setDialogOpen = (isOpen: boolean) => {
-    // If dialog is being closed, fully reset the state
+    // If dialog is being closed, start the reset process
     if (!isOpen) {
-      setConfigDialog(prev => ({ 
-        ...prev, 
-        isOpen: false,
-        // Don't reset hostId and other properties immediately to allow for transitions
-      }));
+      closeConfigDialog();
     } else {
       setConfigDialog(prev => ({ ...prev, isOpen }));
     }
