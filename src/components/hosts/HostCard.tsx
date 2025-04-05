@@ -58,10 +58,7 @@ export function HostCard({
 
   const getProfileStatus = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
-    // Use optional chaining to safely access the status property
-    return profile?.enabled 
-      ? 'active'
-      : profile?.instances.length ? 'inactive' : 'error';
+    return profile ? profile.status : null;
   };
   
   const getStatusIcon = (status: 'configured' | 'misconfigured' | 'unknown') => {
@@ -210,15 +207,6 @@ export function HostCard({
                   <>
                     <Button 
                       size="sm" 
-                      className="flex-1"
-                      variant={needsUpdate ? "destructive" : "default"}
-                      onClick={handleCreateConfig}
-                    >
-                      <Settings2 className="h-4 w-4 mr-2" />
-                      {needsUpdate ? "Update Config" : "Configure Host"}
-                    </Button>
-                    <Button 
-                      size="sm" 
                       variant="outline" 
                       className="flex-1"
                       onClick={() => onOpenConfigDialog(host.id)}
@@ -226,6 +214,15 @@ export function HostCard({
                     >
                       <FilePlus className="h-4 w-4 mr-2" />
                       View Config File
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="flex-1"
+                      variant={needsUpdate ? "destructive" : "default"}
+                      onClick={handleCreateConfig}
+                    >
+                      <Settings2 className="h-4 w-4 mr-2" />
+                      {needsUpdate ? "Update Config" : "Configure Host"}
                     </Button>
                   </>
                 )}
