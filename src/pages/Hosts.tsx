@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,13 @@ const Hosts = () => {
   
   const handleSaveConfig = (config: string, newPath: string) => {
     if (configDialog.hostId) {
+      // Check if the path has changed
+      if (newPath !== configDialog.configPath) {
+        setNewConfigPath(newPath);
+        setShowPathChangeAlert(true);
+        return;
+      }
+      
       applyConfigChanges(configDialog.hostId, config, newPath);
     }
   };
@@ -109,6 +117,7 @@ const Hosts = () => {
     
     // Reset dialog state
     resetConfigDialog();
+    setShowPathChangeAlert(false);
   };
   
   const handleAddHost = (newHost: {
@@ -333,6 +342,129 @@ const Hosts = () => {
           </div>
         )}
       </div>
+      
+      {/* Path change confirmation dialog */}
+      <AlertDialog open={showPathChangeAlert} onOpenChange={setShowPathChangeAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm New Configuration Path</AlertDialogTitle>
+            <AlertDialogDescription>
+              You've modified the configuration file path. A new configuration file will be created at the specified location.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="my-4 p-2 bg-muted rounded">
+            <p className="text-sm font-mono">{newConfigPath}</p>
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowPathChangeAlert(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              if (configDialog.hostId) {
+                applyConfigChanges(configDialog.hostId, configDialog.configContent, newConfigPath);
+              }
+            }}>
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Configuration File</DialogTitle>
+            <DialogDescription>
+              Specify the location where the host configuration file will be created.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="configPath">Configuration File Path</Label>
+              <Textarea 
+                id="configPath"
+                value={configPath}
+                onChange={(e) => setConfigPath(e.target.value)}
+                rows={2}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                This is the location where the configuration file will be saved.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Configuration Preview</Label>
+              <pre className="bg-muted p-2 rounded-md text-xs overflow-auto max-h-36">
+                {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
+              </pre>
+              <p className="text-xs text-muted-foreground">
+                The configuration will be created with default values based on the selected profile.
+                You can edit it after creation.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateConfigOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmCreateConfig}>
+              Create Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Configuration File</DialogTitle>
+            <DialogDescription>
+              Update the configuration for this host.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="updateConfigPath">Configuration File Path</Label>
+              <Textarea 
+                id="updateConfigPath"
+                value={configPath}
+                onChange={(e) => setConfigPath(e.target.value)}
+                rows={1}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                You can modify the path where this configuration will be saved.
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Configuration Update Preview</Label>
+              <pre className="bg-muted p-2 rounded-md text-xs overflow-auto max-h-36">
+                {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
+              </pre>
+              <p className="text-xs text-muted-foreground">
+                The mcpnow section of your configuration will be updated to match the current profile settings.
+                Other sections of your configuration will remain unchanged.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUpdateConfigOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmUpdateConfig}>
+              Update Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <ConfigFileDialog
         open={configDialog.isOpen}

@@ -46,10 +46,6 @@ export function useConfigDialog(mockJsonConfig: any) {
     setConfigDialog(prev => ({ ...prev, isOpen }));
   };
   
-  const updateConfigPath = (newPath: string) => {
-    setConfigDialog(prev => ({ ...prev, configPath: newPath }));
-  };
-  
   const resetConfigDialog = () => {
     setConfigDialog({
       isOpen: false,
@@ -65,7 +61,6 @@ export function useConfigDialog(mockJsonConfig: any) {
     openConfigDialog,
     closeConfigDialog,
     setDialogOpen,
-    updateConfigPath,
     resetConfigDialog
   };
 }
