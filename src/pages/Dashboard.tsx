@@ -31,6 +31,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { useServerContext } from "@/context/ServerContext";
 import {
   Carousel,
   CarouselContent,
@@ -46,6 +47,8 @@ const Dashboard = () => {
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
+  
+  const { openAddInstanceDialog } = useServerContext();
   
   // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
@@ -270,11 +273,18 @@ const Dashboard = () => {
   };
 
   const handleInstall = (serverId: string) => {
+    const server = trendingServers.find(item => item.id === serverId);
+    if (!server) return;
+    
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
+    // Simulate installation
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
+      
+      // Open add instance dialog after installation
+      openAddInstanceDialog(server);
     }, 1500);
   };
 

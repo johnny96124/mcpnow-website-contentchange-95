@@ -1,37 +1,34 @@
 
 import { Outlet } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
+import { useServerContext } from "@/context/ServerContext";
+import { InstanceFormValues } from "@/components/servers/AddInstanceDialog";
+import { toast } from "sonner";
 
 const DefaultLayout = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(prev => !prev);
+  const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
+  
+  const handleCreateInstance = (data: InstanceFormValues) => {
+    toast.success(`Instance created: ${data.name}`);
+    closeAddInstanceDialog();
   };
-
+  
   return (
-    <div className="flex min-h-screen">
-      <div className={`relative transition-all duration-300 ease-in-out ${
-        isSidebarCollapsed ? "w-[70px]" : "w-[250px]"
-      }`}>
-        <MainSidebar collapsed={isSidebarCollapsed} />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute -right-3 top-5 rounded-full border shadow-sm bg-background z-10"
-          onClick={toggleSidebar}
-        >
-          {isSidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
-      </div>
-      <main className="flex-1 overflow-auto">
-        <div className="container py-6">
+    <div className="flex h-screen bg-background">
+      <MainSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container py-6 h-full">
           <Outlet />
         </div>
-      </main>
+      </div>
+      
+      <AddInstanceDialog 
+        open={showAddInstanceDialog} 
+        onOpenChange={closeAddInstanceDialog} 
+        serverDefinition={selectedServer} 
+        onCreateInstance={handleCreateInstance}
+      />
     </div>
   );
 };

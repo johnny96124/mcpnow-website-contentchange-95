@@ -29,6 +29,8 @@ import { CategoryFilter } from "@/components/discovery/CategoryFilter";
 import { EmptyState } from "@/components/discovery/EmptyState";
 import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
+import { useServerContext } from "@/context/ServerContext";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -56,6 +58,8 @@ const Discovery = () => {
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { openAddInstanceDialog } = useServerContext();
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -118,11 +122,18 @@ const Discovery = () => {
   };
 
   const handleInstall = (serverId: string) => {
+    const server = extendedItems.find(item => item.id === serverId);
+    if (!server) return;
+    
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
+    // Simulate installation
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
+      
+      // Open add instance dialog after installation
+      openAddInstanceDialog(server);
     }, 1500);
   };
 
