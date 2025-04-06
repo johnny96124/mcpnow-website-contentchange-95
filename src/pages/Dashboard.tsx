@@ -5,10 +5,13 @@ import {
   Database,
   ExternalLink,
   Info,
+  Loader2,
+  PackagePlus,
   Server, 
   Star,
   TrendingUp,
-  UsersRound 
+  UsersRound,
+  CheckCircle 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -19,10 +22,24 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import type { EndpointType, ServerDefinition } from "@/data/mockData";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 const Dashboard = () => {
   // State for time dimension selection
   const [timeMetric, setTimeMetric] = useState<"hour" | "day" | "month" | "all">("hour");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
+  const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
+  const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   
   // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
@@ -50,7 +67,14 @@ const Dashboard = () => {
       author: "AI Systems Inc",
       version: "1.3.0",
       categories: ["AI", "LLM", "NLP"],
-      isOfficial: true
+      isOfficial: true,
+      features: [
+        "High throughput streaming responses",
+        "Automatic model quantization",
+        "Multi-model support",
+        "Custom prompt templates"
+      ],
+      repository: "https://github.com/ai-systems/fastgpt-server"
     },
     { 
       id: "trend2", 
@@ -63,7 +87,14 @@ const Dashboard = () => {
       author: "DevTools Ltd",
       version: "2.1.1",
       categories: ["Development", "AI", "Code"],
-      isOfficial: true
+      isOfficial: true,
+      features: [
+        "Multi-language support",
+        "Context-aware completions",
+        "Semantic code search",
+        "Integration with popular IDEs"
+      ],
+      repository: "https://github.com/devtools/code-assistant"
     },
     { 
       id: "trend3", 
@@ -76,7 +107,14 @@ const Dashboard = () => {
       author: "PromptLabs",
       version: "1.0.4",
       categories: ["AI", "Prompting", "Testing"],
-      isOfficial: false
+      isOfficial: false,
+      features: [
+        "Prompt versioning",
+        "A/B testing framework",
+        "Performance analytics",
+        "Template library"
+      ],
+      repository: "https://github.com/promptlabs/prompt-wizard"
     },
     { 
       id: "trend4", 
@@ -89,9 +127,41 @@ const Dashboard = () => {
       author: "SearchTech",
       version: "0.9.2",
       categories: ["Search", "Embeddings", "Vector DB"],
-      isOfficial: false
+      isOfficial: false,
+      features: [
+        "Multiple vector DB integrations",
+        "Hybrid search capabilities",
+        "Custom embeddings support",
+        "Query optimization"
+      ],
+      repository: "https://github.com/searchtech/semantic-search"
     }
   ];
+  
+  const handleViewDetails = (server: ServerDefinition) => {
+    setSelectedServer(server);
+    setIsDialogOpen(true);
+  };
+
+  const handleInstall = (serverId: string) => {
+    setIsInstalling(prev => ({ ...prev, [serverId]: true }));
+    
+    setTimeout(() => {
+      setIsInstalling(prev => ({ ...prev, [serverId]: false }));
+      setInstalledServers(prev => ({ ...prev, [serverId]: true }));
+    }, 1500);
+  };
+
+  const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-6">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <h3 className="text-base font-medium p-4 border-b border-gray-100 dark:border-gray-700">{title}</h3>
+        <div className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -354,26 +424,120 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
                     <Info className="h-4 w-4 mr-1" />
                     Details
                   </Button>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                      <span className="text-sm font-medium">{server.stars}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <TrendingUp className="h-4 w-4" />
-                      <span>{server.downloads}</span>
-                    </div>
-                  </div>
+                  {installedServers[server.id] ? (
+                    <Button variant="outline" size="sm" disabled className="text-green-600">
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Installed
+                    </Button>
+                  ) : isInstalling[server.id] ? (
+                    <Button variant="outline" size="sm" disabled>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Installing...
+                    </Button>
+                  ) : (
+                    <Button size="sm" onClick={() => handleInstall(server.id)}>
+                      <PackagePlus className="h-4 w-4 mr-1" />
+                      Add Server
+                    </Button>
+                  )}
                 </CardFooter>
               </Card>
             ))}
           </div>
         </ScrollArea>
       </div>
+      
+      {/* Server Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          {selectedServer && (
+            <>
+              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
+                <div className="w-full">
+                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <EndpointLabel type={selectedServer.type} />
+                    {selectedServer.isOfficial && <OfficialBadge />}
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-6 mt-4">
+                <DialogSection title="Description">
+                  {selectedServer.description}
+                </DialogSection>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <DialogSection title="Author">
+                    {selectedServer.author}
+                  </DialogSection>
+                  
+                  <DialogSection title="Version">
+                    {selectedServer.version}
+                  </DialogSection>
+                </div>
+                
+                <DialogSection title="Category">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedServer.categories?.map(category => (
+                      <Badge key={category} variant="outline" className="rounded-full">
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+                </DialogSection>
+                
+                <DialogSection title="Features">
+                  <ul className="list-disc list-inside space-y-2">
+                    {selectedServer.features?.map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
+                  </ul>
+                </DialogSection>
+                
+                <DialogSection title="Repository">
+                  <a 
+                    href="#" 
+                    className="text-primary flex items-center hover:underline"
+                  >
+                    {selectedServer.repository}
+                    <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                  </a>
+                </DialogSection>
+              </div>
+              
+              <div className="flex justify-end mt-6 border-t pt-4">
+                <div className="flex gap-3">
+                  <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogClose>
+                  
+                  {installedServers[selectedServer.id] ? (
+                    <Button variant="outline" disabled className="text-green-600">
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Installed
+                    </Button>
+                  ) : isInstalling[selectedServer.id] ? (
+                    <Button disabled>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Installing...
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleInstall(selectedServer.id)}>
+                      <PackagePlus className="h-4 w-4 mr-1" />
+                      Add Server
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
