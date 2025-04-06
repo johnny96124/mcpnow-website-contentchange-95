@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ProfileChangeConfirmDialog } from "@/components/tray/ProfileChangeConfirmDialog";
+import { toast } from "sonner";
 
 const TrayPopup = () => {
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
@@ -26,12 +28,40 @@ const TrayPopup = () => {
 
   // Track active instances for each profile and definition combination
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
+  
+  // State for profile change confirmation dialog
+  const [profileChangeDialog, setProfileChangeDialog] = useState({
+    isOpen: false,
+    hostId: "",
+    profileId: "",
+    profileName: "",
+  });
 
   const handleProfileChange = (hostId: string, profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (profile) {
+      // Open confirmation dialog instead of immediately changing
+      setProfileChangeDialog({
+        isOpen: true,
+        hostId,
+        profileId,
+        profileName: profile.name,
+      });
+    }
+  };
+  
+  const confirmProfileChange = () => {
+    const { hostId, profileId } = profileChangeDialog;
+    
+    // Actually perform the profile change
     setSelectedProfileIds(prev => ({
       ...prev,
       [hostId]: profileId
     }));
+    
+    // Close dialog and show toast
+    setProfileChangeDialog(prev => ({ ...prev, isOpen: false }));
+    toast.success("Profile configuration updated successfully");
   };
 
   const getStatusForProfile = (profileId: string) => {
@@ -62,6 +92,7 @@ const TrayPopup = () => {
     
     // This would be where you'd make an API call to actually change the active instance
     console.log(`Changed instance for ${definitionId} to ${instanceId} in profile ${profileId}`);
+    toast.success("Server instance activated");
   };
 
   const getInstancesForDefinition = (profileId: string, definitionId: string) => {
@@ -156,7 +187,7 @@ const TrayPopup = () => {
                               <StatusIndicator 
                                 status={getStatusForProfile(currentProfile.id)} 
                               />
-                              <span>{currentProfile.name}</span>
+                              <span className="truncate max-w-[120px]">{currentProfile.name}</span>
                             </div>
                           )}
                         </SelectValue>
@@ -168,7 +199,7 @@ const TrayPopup = () => {
                               <StatusIndicator 
                                 status={getStatusForProfile(profile.id)} 
                               />
-                              <span>{profile.name}</span>
+                              <span className="truncate max-w-[120px]">{profile.name}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -204,48 +235,45 @@ const TrayPopup = () => {
                                 <span>{definition.name}</span>
                               </div>
                               
-                              {instancesForDef.length > 1 && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
+                              {/* Direct instance selection dropdown */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
+                                  >
+                                    <span>{activeInstance.name.split('-').pop()}</span>
+                                    <ChevronDown className="h-3 w-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40 bg-popover shadow-lg">
+                                  {instancesForDef.map(instance => (
+                                    <DropdownMenuItem
+                                      key={instance.id}
+                                      className={cn(
+                                        "text-xs flex items-center justify-between",
+                                        instance.id === activeInstanceId && "bg-accent"
+                                      )}
+                                      onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
+                                      disabled={instance.id === activeInstanceId}
                                     >
-                                      <span>{activeInstance.name.split('-').pop()}</span>
-                                      <ChevronDown className="h-3 w-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-40 bg-popover shadow-lg">
-                                    {instancesForDef.map(instance => (
-                                      <DropdownMenuItem
-                                        key={instance.id}
-                                        className={cn(
-                                          "text-xs flex items-center justify-between",
-                                          instance.id === activeInstanceId && "bg-accent"
-                                        )}
-                                        onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
-                                      >
-                                        <div className="flex items-center gap-1">
-                                          <StatusIndicator 
-                                            status={
-                                              instance.status === 'running' ? 'active' : 
-                                              instance.status === 'error' ? 'error' : 'inactive'
-                                            } 
-                                          />
-                                          <span>{instance.name.split('-').pop()}</span>
-                                        </div>
-                                        {instance.id === activeInstanceId && (
-                                          <Check className="h-3 w-3" />
-                                        )}
-                                      </DropdownMenuItem>
-                                    ))}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              )}
-                              {instancesForDef.length <= 1 && (
-                                <span className="text-xs text-muted-foreground">{activeInstance.name.split('-').pop()}</span>
-                              )}
+                                      <div className="flex items-center gap-1">
+                                        <StatusIndicator 
+                                          status={
+                                            instance.status === 'running' ? 'active' : 
+                                            instance.status === 'error' ? 'error' : 'inactive'
+                                          } 
+                                        />
+                                        <span>{instance.name.split('-').pop()}</span>
+                                      </div>
+                                      {instance.id === activeInstanceId && (
+                                        <Check className="h-3 w-3" />
+                                      )}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </li>
                           );
                         })}
@@ -258,6 +286,13 @@ const TrayPopup = () => {
           })}
         </div>
       )}
+      
+      <ProfileChangeConfirmDialog
+        open={profileChangeDialog.isOpen}
+        onOpenChange={(open) => setProfileChangeDialog(prev => ({ ...prev, isOpen: open }))}
+        onConfirm={confirmProfileChange}
+        profileName={profileChangeDialog.profileName}
+      />
     </div>
   );
 };
