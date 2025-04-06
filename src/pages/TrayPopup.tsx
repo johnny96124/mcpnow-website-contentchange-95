@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Check, ChevronDown, ExternalLink, MonitorCheck } from "lucide-react";
+import { Check, ChevronDown, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ProfileChangeConfirmDialog } from "@/components/tray/ProfileChangeConfirmDialog";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const TrayPopup = () => {
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
@@ -132,10 +133,14 @@ const TrayPopup = () => {
   );
 
   return (
-    <div className="w-80 p-2 bg-background rounded-lg shadow-lg animate-fade-in">
+    <div className="w-80 p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
       <div className="flex items-center justify-between p-2 mb-2">
         <div className="flex items-center gap-2">
-          <MonitorCheck className="h-5 w-5 text-primary" />
+          <img 
+            src="/lovable-uploads/0ad4c791-4d08-4e94-bbeb-3ac78aae67ef.png" 
+            alt="MCP Now Logo" 
+            className="h-6 w-6" 
+          />
           <h2 className="font-medium">MCP Now</h2>
         </div>
         <Button 
@@ -149,143 +154,147 @@ const TrayPopup = () => {
         </Button>
       </div>
       
-      {activeHosts.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">
-          <p>No active connections</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {activeHosts.map(host => {
-            const currentProfileId = selectedProfileIds[host.id] || '';
-            const currentProfile = profiles.find(p => p.id === currentProfileId);
-            const serverDefsInProfile = getServerDefinitionsInProfile(currentProfileId);
-            
-            return (
-              <Card key={host.id} className="overflow-hidden">
-                <CardHeader className="p-3 pb-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{host.icon}</span>
-                      <h3 className="font-medium">{host.name}</h3>
-                    </div>
-                    <StatusIndicator 
-                      status={host.connectionStatus === 'connected' ? 'active' : 'inactive'} 
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium">Profile:</span>
-                    <Select
-                      value={currentProfileId}
-                      onValueChange={(value) => handleProfileChange(host.id, value)}
-                    >
-                      <SelectTrigger className="w-48 h-8 text-sm">
-                        <SelectValue placeholder="Select profile">
-                          {currentProfile && (
-                            <div className="flex items-center gap-2">
-                              <StatusIndicator 
-                                status={getStatusForProfile(currentProfile.id)} 
-                              />
-                              <span className="truncate max-w-[120px]">{currentProfile.name}</span>
-                            </div>
-                          )}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {profiles.map(profile => (
-                          <SelectItem key={profile.id} value={profile.id}>
-                            <div className="flex items-center gap-2">
-                              <StatusIndicator 
-                                status={getStatusForProfile(profile.id)} 
-                              />
-                              <span className="truncate max-w-[120px]">{profile.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {currentProfile && serverDefsInProfile.length > 0 && (
-                    <div className="mt-2 bg-muted rounded-md p-2">
-                      <p className="text-xs text-muted-foreground mb-1">Active server instances:</p>
-                      <ul className="text-xs space-y-1">
-                        {serverDefsInProfile.map(definition => {
-                          const instancesForDef = getInstancesForDefinition(currentProfileId, definition.id);
-                          
-                          // Get the currently active instance for this definition in this profile
-                          const activeInstanceId = 
-                            (activeInstances[currentProfileId]?.[definition.id]) || 
-                            (instancesForDef[0]?.id);
-                          
-                          const activeInstance = instancesForDef.find(inst => inst.id === activeInstanceId) || instancesForDef[0];
-                          
-                          if (!activeInstance) return null;
-                          
-                          return (
-                            <li key={definition.id} className="flex items-center justify-between">
-                              <div className="flex items-center gap-1">
-                                <StatusIndicator 
-                                  status={
-                                    activeInstance.status === 'running' ? 'active' : 
-                                    activeInstance.status === 'error' ? 'error' : 'inactive'
-                                  } 
-                                />
-                                <span>{definition.name}</span>
-                              </div>
+      <ScrollArea className="h-full max-h-[calc(80vh-60px)]">
+        <div className="pr-3">
+          {activeHosts.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              <p>No active connections</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {activeHosts.map(host => {
+                const currentProfileId = selectedProfileIds[host.id] || '';
+                const currentProfile = profiles.find(p => p.id === currentProfileId);
+                const serverDefsInProfile = getServerDefinitionsInProfile(currentProfileId);
+                
+                return (
+                  <Card key={host.id} className="overflow-hidden">
+                    <CardHeader className="p-3 pb-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{host.icon}</span>
+                          <h3 className="font-medium">{host.name}</h3>
+                        </div>
+                        <StatusIndicator 
+                          status={host.connectionStatus === 'connected' ? 'active' : 'inactive'} 
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">Profile:</span>
+                        <Select
+                          value={currentProfileId}
+                          onValueChange={(value) => handleProfileChange(host.id, value)}
+                        >
+                          <SelectTrigger className="w-48 h-8 text-sm">
+                            <SelectValue placeholder="Select profile">
+                              {currentProfile && (
+                                <div className="flex items-center gap-2">
+                                  <StatusIndicator 
+                                    status={getStatusForProfile(currentProfile.id)} 
+                                  />
+                                  <span className="truncate max-w-[120px]">{currentProfile.name}</span>
+                                </div>
+                              )}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {profiles.map(profile => (
+                              <SelectItem key={profile.id} value={profile.id}>
+                                <div className="flex items-center gap-2">
+                                  <StatusIndicator 
+                                    status={getStatusForProfile(profile.id)} 
+                                  />
+                                  <span className="truncate max-w-[120px]">{profile.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {currentProfile && serverDefsInProfile.length > 0 && (
+                        <div className="mt-2 bg-muted rounded-md p-2">
+                          <p className="text-xs text-muted-foreground mb-1">Active server instances:</p>
+                          <ul className="text-xs space-y-1">
+                            {serverDefsInProfile.map(definition => {
+                              const instancesForDef = getInstancesForDefinition(currentProfileId, definition.id);
                               
-                              {/* Direct instance selection dropdown */}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
-                                  >
-                                    <span>{activeInstance.name.split('-').pop()}</span>
-                                    <ChevronDown className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-40 bg-popover shadow-lg">
-                                  {instancesForDef.map(instance => (
-                                    <DropdownMenuItem
-                                      key={instance.id}
-                                      className={cn(
-                                        "text-xs flex items-center justify-between",
-                                        instance.id === activeInstanceId && "bg-accent"
-                                      )}
-                                      onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
-                                      disabled={instance.id === activeInstanceId}
-                                    >
-                                      <div className="flex items-center gap-1">
-                                        <StatusIndicator 
-                                          status={
-                                            instance.status === 'running' ? 'active' : 
-                                            instance.status === 'error' ? 'error' : 'inactive'
-                                          } 
-                                        />
-                                        <span>{instance.name.split('-').pop()}</span>
-                                      </div>
-                                      {instance.id === activeInstanceId && (
-                                        <Check className="h-3 w-3" />
-                                      )}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+                              // Get the currently active instance for this definition in this profile
+                              const activeInstanceId = 
+                                (activeInstances[currentProfileId]?.[definition.id]) || 
+                                (instancesForDef[0]?.id);
+                              
+                              const activeInstance = instancesForDef.find(inst => inst.id === activeInstanceId) || instancesForDef[0];
+                              
+                              if (!activeInstance) return null;
+                              
+                              return (
+                                <li key={definition.id} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1">
+                                    <StatusIndicator 
+                                      status={
+                                        activeInstance.status === 'running' ? 'active' : 
+                                        activeInstance.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                    />
+                                    <span className="truncate max-w-[120px]">{definition.name}</span>
+                                  </div>
+                                  
+                                  {/* Direct instance selection dropdown */}
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
+                                      >
+                                        <span className="truncate max-w-[80px]">{activeInstance.name.split('-').pop()}</span>
+                                        <ChevronDown className="h-3 w-3 flex-shrink-0" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-40 bg-popover shadow-lg">
+                                      {instancesForDef.map(instance => (
+                                        <DropdownMenuItem
+                                          key={instance.id}
+                                          className={cn(
+                                            "text-xs flex items-center justify-between",
+                                            instance.id === activeInstanceId && "bg-accent"
+                                          )}
+                                          onClick={() => handleInstanceChange(currentProfileId, definition.id, instance.id)}
+                                          disabled={instance.id === activeInstanceId}
+                                        >
+                                          <div className="flex items-center gap-1">
+                                            <StatusIndicator 
+                                              status={
+                                                instance.status === 'running' ? 'active' : 
+                                                instance.status === 'error' ? 'error' : 'inactive'
+                                              } 
+                                            />
+                                            <span className="truncate max-w-[120px]">{instance.name.split('-').pop()}</span>
+                                          </div>
+                                          {instance.id === activeInstanceId && (
+                                            <Check className="h-3 w-3 flex-shrink-0" />
+                                          )}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </ScrollArea>
       
       <ProfileChangeConfirmDialog
         open={profileChangeDialog.isOpen}

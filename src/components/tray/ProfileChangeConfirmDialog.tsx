@@ -25,10 +25,10 @@ export function ProfileChangeConfirmDialog({
 }: ProfileChangeConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-[350px]">
         <AlertDialogHeader>
-          <AlertDialogTitle>Change Profile Configuration</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-base">Change Profile Configuration</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm">
             Switching to profile "{profileName}" requires modifying the configuration file.
             Do you want to proceed with this change?
           </AlertDialogDescription>

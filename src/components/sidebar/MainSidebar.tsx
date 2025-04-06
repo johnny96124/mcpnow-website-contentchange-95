@@ -5,7 +5,6 @@ import {
   Database, 
   GridIcon, 
   LayoutDashboard, 
-  MonitorCheck, 
   ScanLine, 
   Settings, 
   UsersRound 
@@ -32,7 +31,11 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
     <div className="border-r bg-sidebar h-full flex flex-col">
       <div className="p-4 border-b">
         <div className="flex items-center gap-2">
-          <MonitorCheck className="h-6 w-6 text-primary" />
+          <img 
+            src="/lovable-uploads/0ad4c791-4d08-4e94-bbeb-3ac78aae67ef.png" 
+            alt="MCP Now Logo" 
+            className="h-6 w-6" 
+          />
           {!collapsed && <h1 className="text-lg font-semibold">MCP Now</h1>}
         </div>
       </div>
