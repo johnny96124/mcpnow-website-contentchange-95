@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   ActivityIcon, 
@@ -32,6 +31,13 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const Dashboard = () => {
   // State for time dimension selection
@@ -54,7 +60,7 @@ const Dashboard = () => {
     all: { value: 347890, change: "—" }
   };
   
-  // Mock trending server data
+  // Mock trending server data - extended to 10 items
   const trendingServers = [
     { 
       id: "trend1", 
@@ -135,6 +141,126 @@ const Dashboard = () => {
         "Query optimization"
       ],
       repository: "https://github.com/searchtech/semantic-search"
+    },
+    { 
+      id: "trend5", 
+      name: "DocumentLoader", 
+      icon: "📄", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.5, 
+      downloads: 1150, 
+      description: "Document parsing and processing for various file formats",
+      author: "DocTools",
+      version: "1.2.0",
+      categories: ["Document", "Processing", "Parsing"],
+      isOfficial: true,
+      features: [
+        "Multi-format support (PDF, DOCX, TXT)",
+        "Extraction of structured data",
+        "Document chunking",
+        "Metadata extraction"
+      ],
+      repository: "https://github.com/doctools/document-loader"
+    },
+    { 
+      id: "trend6", 
+      name: "VectorStore", 
+      icon: "🔮", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.4, 
+      downloads: 1050, 
+      description: "High-performance vector database for AI applications",
+      author: "VectorTech",
+      version: "0.8.1",
+      categories: ["Database", "Vectors", "Storage"],
+      isOfficial: false,
+      features: [
+        "Fast similarity search",
+        "Efficient vector storage",
+        "Hybrid queries",
+        "Multi-tenancy support"
+      ],
+      repository: "https://github.com/vectortech/vector-store"
+    },
+    { 
+      id: "trend7", 
+      name: "ImageProcessor", 
+      icon: "🖼️", 
+      type: "STDIO" as EndpointType, 
+      stars: 4.3, 
+      downloads: 980, 
+      description: "Image analysis and transformation server",
+      author: "PixelWorks",
+      version: "2.0.1",
+      categories: ["Image", "Processing", "AI"],
+      isOfficial: true,
+      features: [
+        "Object detection",
+        "Image classification",
+        "Image transformations",
+        "Batch processing"
+      ],
+      repository: "https://github.com/pixelworks/image-processor"
+    },
+    { 
+      id: "trend8", 
+      name: "AudioTranscriber", 
+      icon: "🎵", 
+      type: "STDIO" as EndpointType, 
+      stars: 4.2, 
+      downloads: 920, 
+      description: "Speech-to-text and audio analysis server",
+      author: "AudioLabs",
+      version: "1.5.2",
+      categories: ["Audio", "Transcription", "Speech"],
+      isOfficial: false,
+      features: [
+        "Multi-language transcription",
+        "Speaker diarization",
+        "Noise reduction",
+        "Audio summarization"
+      ],
+      repository: "https://github.com/audiolabs/audio-transcriber"
+    },
+    { 
+      id: "trend9", 
+      name: "DataAnalyzer", 
+      icon: "📊", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.1, 
+      downloads: 870, 
+      description: "Data analysis and visualization server",
+      author: "DataWorks",
+      version: "3.0.0",
+      categories: ["Data", "Analysis", "Visualization"],
+      isOfficial: true,
+      features: [
+        "Statistical analysis",
+        "Data visualization",
+        "Automated insights",
+        "Report generation"
+      ],
+      repository: "https://github.com/dataworks/data-analyzer"
+    },
+    { 
+      id: "trend10", 
+      name: "ChatBot", 
+      icon: "💬", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.0, 
+      downloads: 820, 
+      description: "Conversational AI platform with multiple personalities",
+      author: "ChatTech",
+      version: "2.2.1",
+      categories: ["Chat", "Conversational", "AI"],
+      isOfficial: false,
+      features: [
+        "Multiple personality templates",
+        "Context management",
+        "Knowledge base integration",
+        "Multi-turn conversations"
+      ],
+      repository: "https://github.com/chattech/chatbot"
     }
   ];
   
@@ -388,67 +514,75 @@ const Dashboard = () => {
           </Button>
         </div>
         
-        <ScrollArea className="w-full">
-          <div className="flex space-x-4 pb-4">
-            {trendingServers.map(server => (
-              <Card key={server.id} className="min-w-[300px] max-w-[300px] flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl">{server.name}</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <EndpointLabel type={server.type} />
-                      {server.isOfficial && <OfficialBadge />}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {server.description}
-                  </p>
-                  
-                  <div className="mb-4">
-                    <CategoryList categories={server.categories || []} maxVisible={3} />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                      <p className="text-sm font-medium">{server.author}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                      <p className="text-sm font-medium">{server.version}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
-                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
-                    <Info className="h-4 w-4 mr-1" />
-                    Details
-                  </Button>
-                  {installedServers[server.id] ? (
-                    <Button variant="outline" size="sm" disabled className="text-green-600">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Installed
-                    </Button>
-                  ) : isInstalling[server.id] ? (
-                    <Button variant="outline" size="sm" disabled>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Installing...
-                    </Button>
-                  ) : (
-                    <Button size="sm" onClick={() => handleInstall(server.id)}>
-                      <PackagePlus className="h-4 w-4 mr-1" />
-                      Add Server
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="w-full">
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {trendingServers.map(server => (
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                  <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex flex-col">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-xl">{server.name}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <EndpointLabel type={server.type} />
+                          {server.isOfficial && <OfficialBadge />}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        {server.description}
+                      </p>
+                      
+                      <div className="mb-4">
+                        <CategoryList categories={server.categories || []} maxVisible={3} />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
+                          <p className="text-sm font-medium">{server.author}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
+                          <p className="text-sm font-medium">{server.version}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                      <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </Button>
+                      {installedServers[server.id] ? (
+                        <Button variant="outline" size="sm" disabled className="text-green-600">
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Installed
+                        </Button>
+                      ) : isInstalling[server.id] ? (
+                        <Button variant="outline" size="sm" disabled>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Installing...
+                        </Button>
+                      ) : (
+                        <Button size="sm" onClick={() => handleInstall(server.id)}>
+                          <PackagePlus className="h-4 w-4 mr-1" />
+                          Add Server
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center mt-4">
+              <CarouselPrevious className="relative -left-0 mx-2" />
+              <CarouselNext className="relative -right-0 mx-2" />
+            </div>
+          </Carousel>
+        </div>
       </div>
       
       {/* Server Details Dialog */}
