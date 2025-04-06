@@ -54,10 +54,10 @@ const Dashboard = () => {
   
   // Calculate requests based on selected time metric (mock data)
   const requestsData = {
-    hour: { value: 285, change: "+12%" },
-    day: { value: 2840, change: "+8%" },
-    month: { value: 85600, change: "+15%" },
-    all: { value: 347890, change: "—" }
+    hour: { value: 285, change: "+12%", changeClass: "text-green-600 dark:text-green-400" },
+    day: { value: 2840, change: "+8%", changeClass: "text-green-600 dark:text-green-400" },
+    month: { value: 85600, change: "+15%", changeClass: "text-green-600 dark:text-green-400" },
+    all: { value: 347890, change: "—", changeClass: "text-muted-foreground" }
   };
   
   // Mock trending server data - extended to 10 items
@@ -451,53 +451,61 @@ const Dashboard = () => {
       </div>
       
       {/* Requests Card with Time Dimension Selection */}
-      <Card>
+      <Card className="overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-medium">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <ActivityIcon className="h-5 w-5 text-primary" />
             Requests
           </CardTitle>
-          <ActivityIcon className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="hour" className="w-full" onValueChange={(value) => setTimeMetric(value as "hour" | "day" | "month" | "all")}>
-            <TabsList className="grid w-full grid-cols-4 mb-4">
-              <TabsTrigger value="hour">Last Hour</TabsTrigger>
-              <TabsTrigger value="day">Last Day</TabsTrigger>
-              <TabsTrigger value="month">Last Month</TabsTrigger>
-              <TabsTrigger value="all">All Time</TabsTrigger>
-            </TabsList>
-            <TabsContent value="hour">
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-bold">{requestsData.hour.value}</div>
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  {requestsData.hour.change} from previous hour
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="day">
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-bold">{requestsData.day.value}</div>
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  {requestsData.day.change} from previous day
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="month">
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-bold">{requestsData.month.value}</div>
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  {requestsData.month.change} from previous month
-                </p>
-              </div>
-            </TabsContent>
-            <TabsContent value="all">
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-bold">{requestsData.all.value}</div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {requestsData.all.change}
-                </p>
-              </div>
-            </TabsContent>
+            <div className="mb-6">
+              <TabsList className="w-full grid grid-cols-4 p-1">
+                <TabsTrigger value="hour" className="data-[state=active]:bg-primary/10">Last Hour</TabsTrigger>
+                <TabsTrigger value="day" className="data-[state=active]:bg-primary/10">Last Day</TabsTrigger>
+                <TabsTrigger value="month" className="data-[state=active]:bg-primary/10">Last Month</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-primary/10">All Time</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/30">
+              <TabsContent value="hour" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.hour.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.hour.changeClass}`}>
+                    {requestsData.hour.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.hour.change} from previous hour</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="day" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.day.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.day.changeClass}`}>
+                    {requestsData.day.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.day.change} from previous day</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="month" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.month.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.month.changeClass}`}>
+                    {requestsData.month.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.month.change} from previous month</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="all" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.all.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.all.changeClass}`}>
+                    <span>Total requests</span>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
           </Tabs>
         </CardContent>
       </Card>
