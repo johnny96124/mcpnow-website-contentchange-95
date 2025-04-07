@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -142,6 +141,10 @@ const Dashboard = () => {
       </div>
     </div>
   );
+  
+  const formatDownloadCount = (count: number = 1320) => {
+    return `${(count / 1000).toFixed(1)}K`;
+  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -329,7 +332,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center text-amber-600">
                     <Download className="h-5 w-5 mr-1" />
-                    <span className="font-medium">{(server.downloads / 1000).toFixed(1)}K</span>
+                    <span className="font-medium">{formatDownloadCount(server.downloads)}</span>
                   </div>
                   
                   <Button 
@@ -364,7 +367,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex items-center text-amber-600">
                     <Download className="h-5 w-5 mr-1" />
-                    <span className="font-medium">{(selectedServer.downloads / 1000).toFixed(1)}K</span>
+                    <span className="font-medium">{formatDownloadCount(selectedServer?.downloads)}</span>
                   </div>
                 </div>
               </DialogHeader>
