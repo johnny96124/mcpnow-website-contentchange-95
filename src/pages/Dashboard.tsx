@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { 
   CheckCircle,
@@ -290,7 +291,7 @@ const Dashboard = () => {
     navigate("/servers");
   };
 
-  const formatDownloadCount = (downloads: number) => {
+  const formatDownloadCount = (downloads: number | undefined) => {
     if (!downloads) return '0';
     return `${(downloads / 1000).toFixed(1)}K`;
   };
@@ -482,7 +483,7 @@ const Dashboard = () => {
                         </div>
                         <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                           <Download className="h-3 w-3" />
-                          {formatDownloadCount(server.downloads || 0)}
+                          {formatDownloadCount(server.downloads)}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -582,7 +583,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                     <Download className="h-3 w-3" />
-                    {formatDownloadCount(selectedServer.downloads || 0)}
+                    {formatDownloadCount(selectedServer.downloads)}
                   </Badge>
                   <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <X className="h-5 w-5" />
