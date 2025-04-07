@@ -1,16 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
-  ActivityIcon, 
+  CheckCircle,
   Database,
+  Download,
   ExternalLink,
   Info,
   Loader2,
   PackagePlus,
   Server, 
-  Star,
-  TrendingUp,
   UsersRound,
-  CheckCircle 
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -20,8 +19,7 @@ import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import type { EndpointType, ServerDefinition } from "@/data/mockData";
+import type { ServerDefinition } from "@/data/mockData";
 import { 
   Dialog, 
   DialogContent, 
@@ -41,27 +39,18 @@ import {
 } from "@/components/ui/carousel";
 
 const Dashboard = () => {
-  // State for time dimension selection
-  const [timeMetric, setTimeMetric] = useState<"hour" | "day" | "month" | "all">("hour");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   
   const { openAddInstanceDialog } = useServerContext();
+  const navigate = useNavigate();
   
   // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
-  
-  // Calculate requests based on selected time metric (mock data)
-  const requestsData = {
-    hour: { value: 285, change: "+12%", changeClass: "text-green-600 dark:text-green-400" },
-    day: { value: 2840, change: "+8%", changeClass: "text-green-600 dark:text-green-400" },
-    month: { value: 85600, change: "+15%", changeClass: "text-green-600 dark:text-green-400" },
-    all: { value: 347890, change: "—", changeClass: "text-muted-foreground" }
-  };
   
   // Mock trending server data - extended to 10 items
   const trendingServers = [
@@ -69,7 +58,7 @@ const Dashboard = () => {
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE" as const, 
       stars: 4.9, 
       downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
@@ -288,11 +277,20 @@ const Dashboard = () => {
     }, 1500);
   };
 
-  const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="mb-6">
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-        <h3 className="text-base font-medium p-4 border-b border-gray-100 dark:border-gray-700">{title}</h3>
-        <div className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+  const handleNavigateToServers = () => {
+    navigate("/servers");
+  };
+
+  const formatDownloadCount = (count: number | undefined) => {
+    if (!count) return "0";
+    return `${(count / 1000).toFixed(1)}K`;
+  };
+
+  const InfoSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-4">
+      <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg">
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1 px-4 pt-4">{title}</h3>
+        <div className="p-4 pt-0 text-gray-900 dark:text-gray-100">
           {children}
         </div>
       </div>
@@ -457,67 +455,7 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Requests Card with Time Dimension Selection */}
-      <Card className="overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <ActivityIcon className="h-5 w-5 text-primary" />
-            Requests
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="hour" className="w-full" onValueChange={(value) => setTimeMetric(value as "hour" | "day" | "month" | "all")}>
-            <div className="mb-6">
-              <TabsList className="w-full grid grid-cols-4 p-1">
-                <TabsTrigger value="hour" className="data-[state=active]:bg-primary/10">Last Hour</TabsTrigger>
-                <TabsTrigger value="day" className="data-[state=active]:bg-primary/10">Last Day</TabsTrigger>
-                <TabsTrigger value="month" className="data-[state=active]:bg-primary/10">Last Month</TabsTrigger>
-                <TabsTrigger value="all" className="data-[state=active]:bg-primary/10">All Time</TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <div className="bg-muted/30 rounded-lg p-4 border border-border/30">
-              <TabsContent value="hour" className="mt-0">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-bold">{requestsData.hour.value.toLocaleString()}</div>
-                  <div className={`flex items-center gap-1 font-medium ${requestsData.hour.changeClass}`}>
-                    {requestsData.hour.change !== "—" && <TrendingUp className="h-4 w-4" />}
-                    <span>{requestsData.hour.change} from previous hour</span>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="day" className="mt-0">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-bold">{requestsData.day.value.toLocaleString()}</div>
-                  <div className={`flex items-center gap-1 font-medium ${requestsData.day.changeClass}`}>
-                    {requestsData.day.change !== "—" && <TrendingUp className="h-4 w-4" />}
-                    <span>{requestsData.day.change} from previous day</span>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="month" className="mt-0">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-bold">{requestsData.month.value.toLocaleString()}</div>
-                  <div className={`flex items-center gap-1 font-medium ${requestsData.month.changeClass}`}>
-                    {requestsData.month.change !== "—" && <TrendingUp className="h-4 w-4" />}
-                    <span>{requestsData.month.change} from previous month</span>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="all" className="mt-0">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-bold">{requestsData.all.value.toLocaleString()}</div>
-                  <div className={`flex items-center gap-1 font-medium ${requestsData.all.changeClass}`}>
-                    <span>Total requests</span>
-                  </div>
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
-      
-      {/* Trending MCP Servers */}
+      {/* Trending MCP Servers (Updated to match Discovery page UI) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -534,19 +472,24 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="pb-3">
-                      <div className="flex flex-col">
-                        <div className="flex justify-between items-start">
+                  <Card className="flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-2 space-y-0">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
                           <CardTitle className="text-xl">{server.name}</CardTitle>
+                          <div className="flex items-center gap-1">
+                            <EndpointLabel type={server.type} />
+                            {server.isOfficial && <OfficialBadge />}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <EndpointLabel type={server.type} />
-                          {server.isOfficial && <OfficialBadge />}
-                        </div>
+                        <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                          <Download className="h-3 w-3" />
+                          {formatDownloadCount(server.downloads)}
+                        </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="flex-1">
+                    
+                    <CardContent className="flex-1 pt-4">
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                         {server.description}
                       </p>
@@ -566,25 +509,44 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                    
+                    <CardFooter className="flex justify-between border-t bg-gray-50 dark:bg-gray-800/50 p-3 mt-4">
                       <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
                         <Info className="h-4 w-4 mr-1" />
                         Details
                       </Button>
+                      
                       {installedServers[server.id] ? (
-                        <Button variant="outline" size="sm" disabled className="text-green-600">
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Installed
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Installed
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={handleNavigateToServers}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
                       ) : isInstalling[server.id] ? (
-                        <Button variant="outline" size="sm" disabled>
+                        <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200">
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                           Installing...
                         </Button>
                       ) : (
-                        <Button size="sm" onClick={() => handleInstall(server.id)}>
-                          <PackagePlus className="h-4 w-4 mr-1" />
-                          Add Server
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleInstall(server.id)}
+                          className="bg-blue-500 hover:bg-blue-600"
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Install
                         </Button>
                       )}
                     </CardFooter>
@@ -600,90 +562,116 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Server Details Dialog */}
+      {/* Server Details Dialog (Updated to match Discovery page) */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
-            <>
-              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
-                <div className="w-full">
-                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
-                  <div className="flex items-center gap-2 mt-2">
+            <div className="h-full">
+              <div className="flex justify-between items-center p-5 pb-2">
+                <div className="space-y-1">
+                  <DialogTitle className="text-2xl font-bold leading-tight">
+                    {selectedServer.name}
+                  </DialogTitle>
+                  <div className="flex items-center gap-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
                 </div>
-              </DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                    <Download className="h-3 w-3" />
+                    {formatDownloadCount(selectedServer.downloads)}
+                  </Badge>
+                  <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <X className="h-5 w-5" />
+                  </DialogClose>
+                </div>
+              </div>
               
-              <div className="space-y-6 mt-4">
-                <DialogSection title="Description">
-                  {selectedServer.description}
-                </DialogSection>
-                
-                <div className="grid grid-cols-2 gap-6">
-                  <DialogSection title="Author">
-                    {selectedServer.author}
-                  </DialogSection>
-                  
-                  <DialogSection title="Version">
-                    {selectedServer.version}
-                  </DialogSection>
+              <div className="px-5 space-y-4 pb-6">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Description</h3>
+                  <p>{selectedServer.description}</p>
                 </div>
                 
-                <DialogSection title="Category">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Author</h3>
+                    <p className="font-medium">
+                      {selectedServer.author || `${selectedServer.name.split(' ')[0]} Community`}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Version</h3>
+                    <p className="font-medium">
+                      {selectedServer.version}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Category</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedServer.categories?.map(category => (
-                      <Badge key={category} variant="outline" className="rounded-full">
+                      <Badge key={category} variant="outline" className="py-1 px-2 bg-gray-50 text-gray-700 border-gray-200">
                         {category}
                       </Badge>
                     ))}
                   </div>
-                </DialogSection>
+                </div>
                 
-                <DialogSection title="Features">
-                  <ul className="list-disc list-inside space-y-2">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Features</h3>
+                  <ul className="list-disc list-inside space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
-                      <li key={index}>{feature}</li>
+                      <li key={index} className="text-sm">{feature}</li>
                     ))}
                   </ul>
-                </DialogSection>
+                </div>
                 
-                <DialogSection title="Repository">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Repository</h3>
                   <a 
                     href="#" 
-                    className="text-primary flex items-center hover:underline"
+                    className="text-blue-500 flex items-center hover:underline text-sm"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {selectedServer.repository}
+                    {selectedServer.repository || 'github.com/example/repository'}
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
-                </DialogSection>
+                </div>
               </div>
               
-              <div className="flex justify-end mt-6 border-t pt-4">
-                <div className="flex gap-3">
-                  <DialogClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </DialogClose>
-                  
-                  {installedServers[selectedServer.id] ? (
-                    <Button variant="outline" disabled className="text-green-600">
+              <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
+                {installedServers[selectedServer.id] ? (
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Installed
                     </Button>
-                  ) : isInstalling[selectedServer.id] ? (
-                    <Button disabled>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Installing...
+                    <Button 
+                      variant="outline"
+                      onClick={handleNavigateToServers}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Check
                     </Button>
-                  ) : (
-                    <Button onClick={() => handleInstall(selectedServer.id)}>
-                      <PackagePlus className="h-4 w-4 mr-1" />
-                      Add Server
-                    </Button>
-                  )}
-                </div>
+                  </div>
+                ) : isInstalling[selectedServer.id] ? (
+                  <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Installing...
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
+                    <Download className="h-4 w-4 mr-1" />
+                    Install
+                  </Button>
+                )}
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
