@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
@@ -6,7 +5,8 @@ import {
   ExternalLink,
   Info, 
   Loader2, 
-  Search
+  Search,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 6;
 
-// Extend the items list for testing pagination
 const extendedItems = [
   ...discoveryItems,
   ...discoveryItems.map((item, index) => ({
@@ -127,12 +126,10 @@ const Discovery = () => {
     
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
-    // Simulate installation
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       
-      // Show toast notification instead of opening dialog
       toast({
         title: "Server installed",
         description: `${server.name} has been successfully installed.`,
@@ -149,11 +146,11 @@ const Discovery = () => {
     return `${(count / 1000).toFixed(1)}K`;
   };
 
-  const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="mb-6">
-      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-        <h3 className="text-base font-medium p-4 border-b border-gray-100 dark:border-gray-700">{title}</h3>
-        <div className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+  const InfoSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-4">
+      <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg">
+        <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1 px-4 pt-4">{title}</h3>
+        <div className="p-4 pt-0 text-gray-900 dark:text-gray-100">
           {children}
         </div>
       </div>
@@ -205,7 +202,7 @@ const Discovery = () => {
                       </div>
                       <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                         <Download className="h-3 w-3" />
-                        {formatDownloadCount(1320)} {/* Fixed: Using a fixed value instead of server.downloads */}
+                        {formatDownloadCount(1320)}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -281,88 +278,105 @@ const Discovery = () => {
       </ScrollArea>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-md p-0 overflow-hidden">
           {selectedServer && (
-            <>
-              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
-                <div className="w-full">
-                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
-                  <div className="flex items-center gap-2 mt-2">
+            <div className="h-full">
+              <div className="flex justify-between items-center p-5 pb-2">
+                <div className="space-y-1">
+                  <DialogTitle className="text-2xl font-bold leading-tight">
+                    {selectedServer.name}
+                  </DialogTitle>
+                  <div className="flex items-center gap-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
                 </div>
-              </DialogHeader>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                    <Download className="h-3 w-3" />
+                    {formatDownloadCount(1320)}
+                  </Badge>
+                  <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <X className="h-5 w-5" />
+                  </DialogClose>
+                </div>
+              </div>
               
-              <div className="space-y-6 mt-4">
-                <DialogSection title="Description">
-                  {selectedServer.description}
-                </DialogSection>
+              <div className="px-5 space-y-4 pb-6">
+                <InfoSection title="Description">
+                  <p>{selectedServer.description}</p>
+                </InfoSection>
                 
-                <div className="grid grid-cols-2 gap-6">
-                  <DialogSection title="Author">
-                    {selectedServer.author || `${selectedServer.name.split(' ')[0]} Community`}
-                  </DialogSection>
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoSection title="Author">
+                    <p className="font-medium">
+                      {selectedServer.author || `${selectedServer.name.split(' ')[0]} Community`}
+                    </p>
+                  </InfoSection>
                   
-                  <DialogSection title="Version">
-                    {selectedServer.version || (Math.random() > 0.5 ? '2.1.0' : '0.9.5')}
-                  </DialogSection>
+                  <InfoSection title="Version">
+                    <p className="font-medium">
+                      {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
+                    </p>
+                  </InfoSection>
                 </div>
                 
-                <DialogSection title="Category">
-                  <div className="flex flex-wrap gap-2">
+                <InfoSection title="Category">
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {selectedServer.categories?.map(category => (
-                      <Badge key={category} variant="outline" className="rounded-full">
+                      <Badge key={category} variant="outline" className="py-1 px-2 bg-gray-50 text-gray-700 border-gray-200">
                         {category}
                       </Badge>
                     ))}
                   </div>
-                </DialogSection>
+                </InfoSection>
                 
-                <DialogSection title="Features">
-                  <ul className="list-disc list-inside space-y-2">
+                <InfoSection title="Features">
+                  <ul className="list-disc list-inside space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
-                      <li key={index}>{feature}</li>
+                      <li key={index} className="text-sm">{feature}</li>
                     ))}
                   </ul>
-                </DialogSection>
+                </InfoSection>
                 
-                <DialogSection title="Repository">
+                <InfoSection title="Repository">
                   <a 
                     href="#" 
-                    className="text-primary flex items-center hover:underline"
+                    className="text-blue-500 flex items-center hover:underline text-sm"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {selectedServer.repository}
+                    {selectedServer.repository || 'github.com/Docker Community/docker assistant'}
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
-                </DialogSection>
+                </InfoSection>
               </div>
               
-              <div className="flex justify-end mt-6 border-t pt-4">
-                <div className="flex gap-3">
-                  <DialogClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </DialogClose>
-                  
-                  {installedServers[selectedServer.id] ? (
+              <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
+                {installedServers[selectedServer.id] ? (
+                  <div className="flex gap-2">
                     <Button variant="outline" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Installed
                     </Button>
-                  ) : isInstalling[selectedServer.id] ? (
-                    <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Installing...
+                    <Button variant="outline">
+                      <ExternalLink className="h-4 w-4 mr-1" />
+                      Check
                     </Button>
-                  ) : (
-                    <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
-                      <Download className="h-4 w-4 mr-1" />
-                      Install Server
-                    </Button>
-                  )}
-                </div>
+                  </div>
+                ) : isInstalling[selectedServer.id] ? (
+                  <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Installing...
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
+                    <Download className="h-4 w-4 mr-1" />
+                    Install Server
+                  </Button>
+                )}
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
