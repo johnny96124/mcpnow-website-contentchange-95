@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -33,6 +32,7 @@ const instanceFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   args: z.string().min(1, { message: "Command arguments are required." }),
   env: z.record(z.string(), z.string()).optional(),
+  instanceId: z.string().optional(),
 });
 
 export type InstanceFormValues = z.infer<typeof instanceFormSchema>;
@@ -64,6 +64,7 @@ export function AddInstanceDialog({
         `npx -y @smithery/cli@latest install @block/${serverDefinition.type.toLowerCase()} --client ${serverDefinition.name.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
         : "",
       env: {},
+      instanceId: instanceId,
     },
   });
 
@@ -77,7 +78,7 @@ export function AddInstanceDialog({
     });
     
     data.env = envData;
-    data.instanceId = instanceId; // Pass the instanceId for edit mode
+    data.instanceId = instanceId; // This should now be valid with the updated type
     onCreateInstance(data);
     if (!editMode) form.reset();
   };
