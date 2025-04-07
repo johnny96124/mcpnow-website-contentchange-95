@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   ActivityIcon, 
   Database,
@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   
   const { openAddInstanceDialog } = useServerContext();
+  const navigate = useNavigate();
   
   // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
