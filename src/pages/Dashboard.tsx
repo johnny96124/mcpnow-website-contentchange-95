@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { 
+  ActivityIcon, 
   Database,
   ExternalLink,
   Info,
@@ -7,18 +8,19 @@ import {
   PackagePlus,
   Server, 
   Star,
+  TrendingUp,
   UsersRound,
-  CheckCircle,
-  ArrowRight,
-  Download
+  CheckCircle 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import type { EndpointType, ServerDefinition } from "@/data/mockData";
 import { 
   Dialog, 
@@ -30,10 +32,17 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useServerContext } from "@/context/ServerContext";
-import { Separator } from "@/components/ui/separator";
-import { AlertDialogAction } from "@/components/ui/alert-dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const Dashboard = () => {
+  // State for time dimension selection
+  const [timeMetric, setTimeMetric] = useState<"hour" | "day" | "month" | "all">("hour");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
@@ -46,7 +55,15 @@ const Dashboard = () => {
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
-  // Mock trending server data - featured first 3 servers
+  // Calculate requests based on selected time metric (mock data)
+  const requestsData = {
+    hour: { value: 285, change: "+12%", changeClass: "text-green-600 dark:text-green-400" },
+    day: { value: 2840, change: "+8%", changeClass: "text-green-600 dark:text-green-400" },
+    month: { value: 85600, change: "+15%", changeClass: "text-green-600 dark:text-green-400" },
+    all: { value: 347890, change: "—", changeClass: "text-muted-foreground" }
+  };
+  
+  // Mock trending server data - extended to 10 items
   const trendingServers = [
     { 
       id: "trend1", 
@@ -54,7 +71,7 @@ const Dashboard = () => {
       icon: "🚀", 
       type: "HTTP_SSE" as EndpointType, 
       stars: 4.9, 
-      downloads: 1320, 
+      downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
       author: "AI Systems Inc",
       version: "1.3.0",
@@ -74,7 +91,7 @@ const Dashboard = () => {
       icon: "💻", 
       type: "STDIO" as EndpointType, 
       stars: 4.8, 
-      downloads: 1320, 
+      downloads: 1856, 
       description: "Code completion and analysis server with multiple language support",
       author: "DevTools Ltd",
       version: "2.1.1",
@@ -90,11 +107,31 @@ const Dashboard = () => {
     },
     { 
       id: "trend3", 
+      name: "PromptWizard", 
+      icon: "✨", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.7, 
+      downloads: 1543, 
+      description: "Advanced prompt engineering and testing server",
+      author: "PromptLabs",
+      version: "1.0.4",
+      categories: ["AI", "Prompting", "Testing"],
+      isOfficial: false,
+      features: [
+        "Prompt versioning",
+        "A/B testing framework",
+        "Performance analytics",
+        "Template library"
+      ],
+      repository: "https://github.com/promptlabs/prompt-wizard"
+    },
+    { 
+      id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
       type: "HTTP_SSE" as EndpointType, 
-      stars: 4.7, 
-      downloads: 1320, 
+      stars: 4.6, 
+      downloads: 1278, 
       description: "Vector database integration for semantic search capabilities",
       author: "SearchTech",
       version: "0.9.2",
@@ -107,6 +144,126 @@ const Dashboard = () => {
         "Query optimization"
       ],
       repository: "https://github.com/searchtech/semantic-search"
+    },
+    { 
+      id: "trend5", 
+      name: "DocumentLoader", 
+      icon: "📄", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.5, 
+      downloads: 1150, 
+      description: "Document parsing and processing for various file formats",
+      author: "DocTools",
+      version: "1.2.0",
+      categories: ["Document", "Processing", "Parsing"],
+      isOfficial: true,
+      features: [
+        "Multi-format support (PDF, DOCX, TXT)",
+        "Extraction of structured data",
+        "Document chunking",
+        "Metadata extraction"
+      ],
+      repository: "https://github.com/doctools/document-loader"
+    },
+    { 
+      id: "trend6", 
+      name: "VectorStore", 
+      icon: "🔮", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.4, 
+      downloads: 1050, 
+      description: "High-performance vector database for AI applications",
+      author: "VectorTech",
+      version: "0.8.1",
+      categories: ["Database", "Vectors", "Storage"],
+      isOfficial: false,
+      features: [
+        "Fast similarity search",
+        "Efficient vector storage",
+        "Hybrid queries",
+        "Multi-tenancy support"
+      ],
+      repository: "https://github.com/vectortech/vector-store"
+    },
+    { 
+      id: "trend7", 
+      name: "ImageProcessor", 
+      icon: "🖼️", 
+      type: "STDIO" as EndpointType, 
+      stars: 4.3, 
+      downloads: 980, 
+      description: "Image analysis and transformation server",
+      author: "PixelWorks",
+      version: "2.0.1",
+      categories: ["Image", "Processing", "AI"],
+      isOfficial: true,
+      features: [
+        "Object detection",
+        "Image classification",
+        "Image transformations",
+        "Batch processing"
+      ],
+      repository: "https://github.com/pixelworks/image-processor"
+    },
+    { 
+      id: "trend8", 
+      name: "AudioTranscriber", 
+      icon: "🎵", 
+      type: "STDIO" as EndpointType, 
+      stars: 4.2, 
+      downloads: 920, 
+      description: "Speech-to-text and audio analysis server",
+      author: "AudioLabs",
+      version: "1.5.2",
+      categories: ["Audio", "Transcription", "Speech"],
+      isOfficial: false,
+      features: [
+        "Multi-language transcription",
+        "Speaker diarization",
+        "Noise reduction",
+        "Audio summarization"
+      ],
+      repository: "https://github.com/audiolabs/audio-transcriber"
+    },
+    { 
+      id: "trend9", 
+      name: "DataAnalyzer", 
+      icon: "📊", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.1, 
+      downloads: 870, 
+      description: "Data analysis and visualization server",
+      author: "DataWorks",
+      version: "3.0.0",
+      categories: ["Data", "Analysis", "Visualization"],
+      isOfficial: true,
+      features: [
+        "Statistical analysis",
+        "Data visualization",
+        "Automated insights",
+        "Report generation"
+      ],
+      repository: "https://github.com/dataworks/data-analyzer"
+    },
+    { 
+      id: "trend10", 
+      name: "ChatBot", 
+      icon: "💬", 
+      type: "HTTP_SSE" as EndpointType, 
+      stars: 4.0, 
+      downloads: 820, 
+      description: "Conversational AI platform with multiple personalities",
+      author: "ChatTech",
+      version: "2.2.1",
+      categories: ["Chat", "Conversational", "AI"],
+      isOfficial: false,
+      features: [
+        "Multiple personality templates",
+        "Context management",
+        "Knowledge base integration",
+        "Multi-turn conversations"
+      ],
+      repository: "https://github.com/chattech/chatbot"
     }
   ];
   
@@ -141,10 +298,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-  
-  const formatDownloadCount = (count: number = 1320) => {
-    return `${(count / 1000).toFixed(1)}K`;
-  };
   
   return (
     <div className="space-y-6 animate-fade-in">
@@ -304,50 +457,146 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Trending MCP Servers - Updated design */}
+      {/* Requests Card with Time Dimension Selection */}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <ActivityIcon className="h-5 w-5 text-primary" />
+            Requests
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="hour" className="w-full" onValueChange={(value) => setTimeMetric(value as "hour" | "day" | "month" | "all")}>
+            <div className="mb-6">
+              <TabsList className="w-full grid grid-cols-4 p-1">
+                <TabsTrigger value="hour" className="data-[state=active]:bg-primary/10">Last Hour</TabsTrigger>
+                <TabsTrigger value="day" className="data-[state=active]:bg-primary/10">Last Day</TabsTrigger>
+                <TabsTrigger value="month" className="data-[state=active]:bg-primary/10">Last Month</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-primary/10">All Time</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/30">
+              <TabsContent value="hour" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.hour.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.hour.changeClass}`}>
+                    {requestsData.hour.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.hour.change} from previous hour</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="day" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.day.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.day.changeClass}`}>
+                    {requestsData.day.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.day.change} from previous day</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="month" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.month.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.month.changeClass}`}>
+                    {requestsData.month.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.month.change} from previous month</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="all" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.all.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.all.changeClass}`}>
+                    <span>Total requests</span>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
+      
+      {/* Trending MCP Servers */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
-          <Button variant="outline" size="sm" asChild className="gap-1">
+          <Button variant="outline" size="sm" asChild>
             <Link to="/discovery">
               View All
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-3">
-          {trendingServers.map((server) => (
-            <Card key={server.id} className="overflow-hidden border-gray-200">
-              <div className="p-6">
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold mb-2">{server.name}</h3>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    <EndpointLabel type={server.type} />
-                    {server.isOfficial && <OfficialBadge />}
-                  </div>
-                  <p className="text-muted-foreground line-clamp-2">{server.description}</p>
-                </div>
-                
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center text-amber-600">
-                    <Download className="h-5 w-5 mr-1" />
-                    <span className="font-medium">{formatDownloadCount(server.downloads)}</span>
-                  </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => handleViewDetails(server)}
-                    className="ml-auto"
-                  >
-                    <Info className="h-4 w-4 mr-1" /> 
-                    Details
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+        <div className="w-full">
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {trendingServers.map(server => (
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                  <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex flex-col">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-xl">{server.name}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <EndpointLabel type={server.type} />
+                          {server.isOfficial && <OfficialBadge />}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        {server.description}
+                      </p>
+                      
+                      <div className="mb-4">
+                        <CategoryList categories={server.categories || []} maxVisible={3} />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
+                          <p className="text-sm font-medium">{server.author}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
+                          <p className="text-sm font-medium">{server.version}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                      <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </Button>
+                      {installedServers[server.id] ? (
+                        <Button variant="outline" size="sm" disabled className="text-green-600">
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Installed
+                        </Button>
+                      ) : isInstalling[server.id] ? (
+                        <Button variant="outline" size="sm" disabled>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Installing...
+                        </Button>
+                      ) : (
+                        <Button size="sm" onClick={() => handleInstall(server.id)}>
+                          <PackagePlus className="h-4 w-4 mr-1" />
+                          Add Server
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center mt-4">
+              <CarouselPrevious className="relative -left-0 mx-2" />
+              <CarouselNext className="relative -right-0 mx-2" />
+            </div>
+          </Carousel>
         </div>
       </div>
       
@@ -356,23 +605,17 @@ const Dashboard = () => {
         <DialogContent className="max-w-2xl">
           {selectedServer && (
             <>
-              <DialogHeader className="border-b pb-4">
-                <div className="flex justify-between items-start w-full">
-                  <div>
-                    <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
-                    <div className="flex items-center gap-2 mt-2">
-                      <EndpointLabel type={selectedServer.type} />
-                      {selectedServer.isOfficial && <OfficialBadge />}
-                    </div>
-                  </div>
-                  <div className="flex items-center text-amber-600">
-                    <Download className="h-5 w-5 mr-1" />
-                    <span className="font-medium">{formatDownloadCount(selectedServer?.downloads)}</span>
+              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
+                <div className="w-full">
+                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
+                  <div className="flex items-center gap-2 mt-2">
+                    <EndpointLabel type={selectedServer.type} />
+                    {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
                 </div>
               </DialogHeader>
               
-              <div className="space-y-6 py-4">
+              <div className="space-y-6 mt-4">
                 <DialogSection title="Description">
                   {selectedServer.description}
                 </DialogSection>
@@ -423,17 +666,10 @@ const Dashboard = () => {
                   </DialogClose>
                   
                   {installedServers[selectedServer.id] ? (
-                    <div className="flex gap-2">
-                      <Button variant="outline" disabled className="text-green-600 bg-green-50">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Installed
-                      </Button>
-                      <Button asChild>
-                        <Link to="/servers">
-                          Check
-                        </Link>
-                      </Button>
-                    </div>
+                    <Button variant="outline" disabled className="text-green-600">
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Installed
+                    </Button>
                   ) : isInstalling[selectedServer.id] ? (
                     <Button disabled>
                       <Loader2 className="h-4 w-4 mr-1 animate-spin" />
