@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
   ExternalLink,
@@ -7,11 +8,17 @@ import {
   Globe,
   Terminal,
   AlertCircle,
-  Search
+  Search,
+  Grid2X2,
+  List,
+  Filter,
+  ArrowDown,
+  ArrowUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { 
   AlertDialog,
@@ -38,6 +45,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
   serverDefinitions, 
   serverInstances,
@@ -51,11 +70,19 @@ import { Link, useNavigate } from "react-router-dom";
 const Servers = () => {
   const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
-  const [activeTab, setActiveTab] = useState("integrated");
+  const [filteredInstances, setFilteredInstances] = useState<ServerInstance[]>(serverInstances);
+  const [filteredDefinitions, setFilteredDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
+  const [viewMode, setViewMode] = useState<"integrated" | "instances">("integrated");
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [editInstanceOpen, setEditInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [selectedInstance, setSelectedInstance] = useState<ServerInstance | null>(null);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -67,6 +94,69 @@ const Servers = () => {
     acc[definitionId].push(instance);
     return acc;
   }, {} as Record<string, ServerInstance[]>);
+
+  useEffect(() => {
+    // Filter instances based on search and filter type
+    let filtered = [...instances];
+    
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(instance => 
+        instance.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Apply type filter
+    if (filterType !== "all") {
+      filtered = filtered.filter(instance => {
+        const definition = definitions.find(d => d.id === instance.definitionId);
+        return definition?.type === filterType;
+      });
+    }
+    
+    // Apply sorting
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (sortConfig.key === "name") {
+          aValue = a.name;
+          bValue = b.name;
+        } else if (sortConfig.key === "type") {
+          const aDefinition = definitions.find(d => d.id === a.definitionId);
+          const bDefinition = definitions.find(d => d.id === b.definitionId);
+          aValue = aDefinition?.type || "";
+          bValue = bDefinition?.type || "";
+        } else if (sortConfig.key === "definition") {
+          const aDefinition = definitions.find(d => d.id === a.definitionId);
+          const bDefinition = definitions.find(d => d.id === b.definitionId);
+          aValue = aDefinition?.name || "";
+          bValue = bDefinition?.name || "";
+        } else {
+          aValue = a[sortConfig.key as keyof ServerInstance] || "";
+          bValue = b[sortConfig.key as keyof ServerInstance] || "";
+        }
+        
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    
+    setFilteredInstances(filtered);
+    
+    // Filter definitions based on instances
+    const definitionIds = new Set(filtered.map(instance => instance.definitionId));
+    const filteredDefs = definitions.filter(def => 
+      filterType === "all" || def.type === filterType
+    );
+    
+    setFilteredDefinitions(filteredDefs);
+  }, [instances, searchQuery, filterType, sortConfig, definitions]);
 
   const truncateText = (text: string, maxLength = 24): string => {
     if (text.length <= maxLength) return text;
@@ -156,11 +246,24 @@ const Servers = () => {
     navigate('/discovery');
   };
 
-  const handleAddLocalServer = () => {
-    toast({
-      title: "Add Local Server",
-      description: "This feature is coming soon!",
-    });
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    
+    setSortConfig({ key, direction });
+  };
+  
+  const getSortIcon = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return null;
+    }
+    
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp className="h-4 w-4 ml-1" /> 
+      : <ArrowDown className="h-4 w-4 ml-1" />;
   };
   
   return (
@@ -180,294 +283,367 @@ const Servers = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="integrated" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="integrated">Integrated View</TabsTrigger>
-          <TabsTrigger value="instances">Server Instances</TabsTrigger>
-        </TabsList>
+      <div className="flex items-center justify-between">
+        <ToggleGroup type="single" value={viewMode} onValueChange={(val) => val && setViewMode(val as "integrated" | "instances")}>
+          <ToggleGroupItem value="integrated" aria-label="Integrated View">
+            <Grid2X2 className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="instances" aria-label="Server Instances">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
         
-        <TabsContent value="integrated" className="mt-4">
-          <div className="grid gap-6 grid-cols-1">
-            {definitions.map(definition => {
-              const definitionInstances = instancesByDefinition[definition.id] || [];
-              
-              return (
-                <Card key={definition.id} className="overflow-hidden">
-                  <CardHeader className="pb-2 bg-secondary/30">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="flex items-center mb-4">
-                          {truncateText(definition.name)}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-3">
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <input
+              type="search"
+              placeholder="Search servers..."
+              className="pl-8 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56">
+              <div className="space-y-4">
+                <h4 className="font-medium">Filter by</h4>
+                <div className="space-y-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Type</label>
+                    <Select value={filterType} onValueChange={setFilterType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
+                        <SelectItem value="STDIO">STDIO</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+      
+      {viewMode === "integrated" ? (
+        <div className="grid gap-6 grid-cols-1">
+          {filteredDefinitions.map(definition => {
+            const definitionInstances = instancesByDefinition[definition.id] || [];
+            // Only show definition instances that match the current filters
+            const filteredDefInstances = definitionInstances.filter(
+              instance => filteredInstances.some(fi => fi.id === instance.id)
+            );
+            
+            return (
+              <Card key={definition.id} className="overflow-hidden">
+                <CardHeader className="pb-2 bg-secondary/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center mb-4">
+                        {truncateText(definition.name)}
+                        <div className="ml-2">
                           <EndpointLabel type={definition.type} />
-                          <CardDescription className="text-xs">
-                            v{definition.version}
-                          </CardDescription>
                         </div>
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-3">
+                        <CardDescription className="text-xs">
+                          v{definition.version}
+                        </CardDescription>
                       </div>
                     </div>
-                  </CardHeader>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-4">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                    {definition.description}
+                  </p>
                   
-                  <CardContent className="pt-4">
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                      {definition.description}
-                    </p>
-                    
-                    {definitionInstances.length > 0 && (
-                      <div className="border rounded-md overflow-hidden mt-6">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Instance Name</TableHead>
-                              <TableHead>Connection</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {definitionInstances.map(instance => (
-                              <TableRow key={instance.id}>
-                                <TableCell className="font-medium">
-                                  <div className="flex items-center gap-2">
-                                    {truncateText(instance.name)}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="flex items-center gap-2">
-                                          {definition.type === 'HTTP_SSE' ? (
-                                            <Globe className="h-4 w-4 text-blue-500" />
-                                          ) : (
-                                            <Terminal className="h-4 w-4 text-purple-500" />
-                                          )}
-                                          <code className="text-xs bg-muted px-2 py-1 rounded">
-                                            {truncateText(instance.connectionDetails, 20)}
-                                          </code>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-md">
-                                        <code className="text-xs">{instance.connectionDetails}</code>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                                      onClick={() => handleViewDetails(instance)}
-                                    >
-                                      <ExternalLink className="h-4 w-4 mr-1" />
-                                      View Details
-                                    </Button>
-                                    
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
-                                        >
-                                          <Trash2 className="h-4 w-4 mr-1" />
-                                          Delete
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will permanently delete the instance "{instance.name}". 
-                                            This action cannot be undone.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction 
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            onClick={() => handleDeleteInstance(instance.id)}
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                    
-                    {definitionInstances.length === 0 && (
-                      <div className="text-center p-8 border rounded-md bg-secondary/10 flex flex-col items-center">
-                        <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-2" />
-                        <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105"
-                          onClick={() => handleOpenAddInstance(definition)}
-                        >
-                          <CirclePlus className="h-4 w-4 mr-1" />
-                          Create First Instance
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                  
-                  <CardFooter className="flex justify-between pt-4 pb-4 border-t mt-2 bg-secondary/10">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete the server definition "{definition.name}" 
-                            {definitionInstances.length > 0 && ` and all its ${definitionInstances.length} instances`}. 
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleDeleteDefinition(definition.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => handleOpenAddInstance(definition)}
-                    >
-                      <CirclePlus className="h-4 w-4 mr-1" />
-                      Add Instance
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-            
-            <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-center">
-                  Add a new server definition
-                </p>
-                <Button 
-                  className="mt-4 hover:scale-105 transition-all duration-300"
-                  onClick={handleNavigateToDiscovery}
-                >
-                  Add
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="instances" className="mt-4">
-          <div className="rounded-md border">
-            <div className="relative w-full overflow-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead className="[&_tr]:border-b">
-                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
-                    <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
-                    <th className="h-10 px-4 text-left align-middle font-medium">Connection Details</th>
-                    <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="[&_tr:last-child]:border-0">
-                  {instances.map(instance => {
-                    const definition = definitions.find(d => d.id === instance.definitionId);
-                    return (
-                      <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
-                        <td className="p-4 align-middle">{truncateText(instance.name)}</td>
-                        <td className="p-4 align-middle">
-                          <div className="flex items-center gap-2">
-                            {definition?.icon && <span>{definition.icon}</span>}
-                            <span>{truncateText(definition?.name || 'Unknown')}</span>
-                          </div>
-                        </td>
-                        <td className="p-4 align-middle">
-                          <div className="flex items-center gap-2">
-                            {definition?.type === 'HTTP_SSE' ? (
-                              <Globe className="h-4 w-4 text-blue-500" />
-                            ) : (
-                              <Terminal className="h-4 w-4 text-purple-500" />
-                            )}
-                            <code className="text-xs bg-muted px-2 py-1 rounded">
-                              {truncateText(instance.connectionDetails, 20)}
-                            </code>
-                          </div>
-                        </td>
-                        <td className="p-4 align-middle">
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                              onClick={() => handleViewDetails(instance)}
-                            >
-                              <ExternalLink className="h-4 w-4 mr-1" />
-                              View Details
-                            </Button>
-                            
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-1" />
-                                  Delete
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This will permanently delete the instance "{instance.name}". 
-                                    This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    onClick={() => handleDeleteInstance(instance.id)}
+                  {filteredDefInstances.length > 0 && (
+                    <div className="border rounded-md overflow-hidden mt-6">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
+                              <div className="flex items-center">
+                                Instance Name
+                                {getSortIcon('name')}
+                              </div>
+                            </TableHead>
+                            <TableHead>Connection</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredDefInstances.map(instance => (
+                            <TableRow key={instance.id}>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  {truncateText(instance.name)}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-2">
+                                        {definition.type === 'HTTP_SSE' ? (
+                                          <Globe className="h-4 w-4 text-blue-500" />
+                                        ) : (
+                                          <Terminal className="h-4 w-4 text-purple-500" />
+                                        )}
+                                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                                          {truncateText(instance.connectionDetails, 20)}
+                                        </code>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-md">
+                                      <code className="text-xs">{instance.connectionDetails}</code>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                                    onClick={() => handleViewDetails(instance)}
                                   >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                                    <ExternalLink className="h-4 w-4 mr-1" />
+                                    View Details
+                                  </Button>
+                                  
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-1" />
+                                        Delete
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete the instance "{instance.name}". 
+                                          This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          onClick={() => handleDeleteInstance(instance.id)}
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                  
+                  {filteredDefInstances.length === 0 && (
+                    <div className="text-center p-8 border rounded-md bg-secondary/10 flex flex-col items-center">
+                      <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-2" />
+                      <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105"
+                        onClick={() => handleOpenAddInstance(definition)}
+                      >
+                        <CirclePlus className="h-4 w-4 mr-1" />
+                        Create First Instance
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+                
+                <CardFooter className="flex justify-between pt-4 pb-4 border-t mt-2 bg-secondary/10">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete the server definition "{definition.name}" 
+                          {definitionInstances.length > 0 && ` and all its ${definitionInstances.length} instances`}. 
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDeleteDefinition(definition.id)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => handleOpenAddInstance(definition)}
+                  >
+                    <CirclePlus className="h-4 w-4 mr-1" />
+                    Add Instance
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+          
+          <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
+            <CardContent className="flex flex-col items-center justify-center p-6">
+              <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground text-center">
+                Add a new server definition
+              </p>
+              <Button 
+                className="mt-4 hover:scale-105 transition-all duration-300"
+                onClick={handleNavigateToDiscovery}
+              >
+                Add
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <div className="relative w-full overflow-auto">
+            <table className="w-full caption-bottom text-sm">
+              <thead className="[&_tr]:border-b">
+                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <th className="h-10 px-4 text-left align-middle font-medium cursor-pointer" onClick={() => handleSort('name')}>
+                    <div className="flex items-center">
+                      Name
+                      {getSortIcon('name')}
+                    </div>
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium cursor-pointer" onClick={() => handleSort('definition')}>
+                    <div className="flex items-center">
+                      Definition
+                      {getSortIcon('definition')}
+                    </div>
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium cursor-pointer" onClick={() => handleSort('type')}>
+                    <div className="flex items-center">
+                      Type
+                      {getSortIcon('type')}
+                    </div>
+                  </th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Connection Details</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="[&_tr:last-child]:border-0">
+                {filteredInstances.map(instance => {
+                  const definition = definitions.find(d => d.id === instance.definitionId);
+                  return (
+                    <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
+                      <td className="p-4 align-middle">{truncateText(instance.name)}</td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center gap-2">
+                          {definition?.icon && <span>{definition.icon}</span>}
+                          <span>{truncateText(definition?.name || 'Unknown')}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle">
+                        <EndpointLabel type={definition?.type || 'STDIO'} />
+                      </td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center gap-2">
+                          {definition?.type === 'HTTP_SSE' ? (
+                            <Globe className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <Terminal className="h-4 w-4 text-purple-500" />
+                          )}
+                          <code className="text-xs bg-muted px-2 py-1 rounded">
+                            {truncateText(instance.connectionDetails, 20)}
+                          </code>
+                        </div>
+                      </td>
+                      <td className="p-4 align-middle">
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                            onClick={() => handleViewDetails(instance)}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            View Details
+                          </Button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete the instance "{instance.name}". 
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteInstance(instance.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
       
       <AddInstanceDialog
         open={addInstanceOpen}
