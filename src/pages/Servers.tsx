@@ -54,7 +54,9 @@ const Servers = () => {
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [activeTab, setActiveTab] = useState("integrated");
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
+  const [editInstanceOpen, setEditInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
+  const [selectedInstance, setSelectedInstance] = useState<ServerInstance | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -77,28 +79,58 @@ const Servers = () => {
     setAddInstanceOpen(true);
   };
 
+  const handleViewDetails = (instance: ServerInstance) => {
+    const definition = definitions.find(d => d.id === instance.definitionId);
+    if (!definition) return;
+    
+    setSelectedDefinition(definition);
+    setSelectedInstance(instance);
+    setEditInstanceOpen(true);
+  };
+
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
     
-    const newInstance: ServerInstance = {
-      id: `instance-${Date.now()}`,
-      name: data.name,
-      definitionId: selectedDefinition.id,
-      status: 'stopped',
-      enabled: true,
-      connectionDetails: `localhost:${3000 + instances.length}`,
-      requestCount: 0,
-      environment: data.env,
-      arguments: [data.args]
-    };
-    
-    setInstances([...instances, newInstance]);
-    setAddInstanceOpen(false);
-    
-    toast({
-      title: "Instance Created",
-      description: `${data.name} has been created successfully.`,
-    });
+    if (data.instanceId) {
+      // Edit mode
+      setInstances(prev => prev.map(instance => 
+        instance.id === data.instanceId 
+          ? { 
+              ...instance, 
+              name: data.name, 
+              environment: data.env,
+              arguments: [data.args] 
+            }
+          : instance
+      ));
+      
+      setEditInstanceOpen(false);
+      toast({
+        title: "Instance Updated",
+        description: `${data.name} has been updated successfully.`,
+      });
+    } else {
+      // Create mode
+      const newInstance: ServerInstance = {
+        id: `instance-${Date.now()}`,
+        name: data.name,
+        definitionId: selectedDefinition.id,
+        status: 'stopped',
+        enabled: true,
+        connectionDetails: `localhost:${3000 + instances.length}`,
+        requestCount: 0,
+        environment: data.env,
+        arguments: [data.args]
+      };
+      
+      setInstances([...instances, newInstance]);
+      setAddInstanceOpen(false);
+      
+      toast({
+        title: "Instance Created",
+        description: `${data.name} has been created successfully.`,
+      });
+    }
   };
 
   const handleDeleteInstance = (instanceId: string) => {
@@ -228,6 +260,7 @@ const Servers = () => {
                                       variant="outline" 
                                       size="sm" 
                                       className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                                      onClick={() => handleViewDetails(instance)}
                                     >
                                       <ExternalLink className="h-4 w-4 mr-1" />
                                       View Details
@@ -389,6 +422,7 @@ const Servers = () => {
                               variant="outline" 
                               size="sm" 
                               className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                              onClick={() => handleViewDetails(instance)}
                             >
                               <ExternalLink className="h-4 w-4 mr-1" />
                               View Details
@@ -441,6 +475,20 @@ const Servers = () => {
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
+      />
+
+      <AddInstanceDialog
+        open={editInstanceOpen}
+        onOpenChange={setEditInstanceOpen}
+        serverDefinition={selectedDefinition}
+        onCreateInstance={handleCreateInstance}
+        editMode={true}
+        initialValues={selectedInstance ? {
+          name: selectedInstance.name,
+          args: selectedInstance.arguments[0] || "",
+          env: selectedInstance.environment || {}
+        } : undefined}
+        instanceId={selectedInstance?.id}
       />
     </div>
   );

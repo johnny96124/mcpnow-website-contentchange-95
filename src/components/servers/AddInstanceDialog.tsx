@@ -24,6 +24,9 @@ interface AddInstanceDialogProps {
   onOpenChange: (open: boolean) => void;
   serverDefinition: ServerDefinition | null;
   onCreateInstance: (data: InstanceFormValues) => void;
+  editMode?: boolean;
+  initialValues?: InstanceFormValues;
+  instanceId?: string;
 }
 
 const instanceFormSchema = z.object({
@@ -38,17 +41,24 @@ export function AddInstanceDialog({
   open, 
   onOpenChange, 
   serverDefinition, 
-  onCreateInstance 
+  onCreateInstance,
+  editMode = false,
+  initialValues,
+  instanceId
 }: AddInstanceDialogProps) {
-  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([
-    { name: "API_KEY", value: "" },
-    { name: "MODEL_NAME", value: "" },
-    { name: "MAX_TOKENS", value: "4096" },
-  ]);
+  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>(
+    initialValues?.env 
+      ? Object.entries(initialValues.env).map(([name, value]) => ({ name, value }))
+      : [
+          { name: "API_KEY", value: "" },
+          { name: "MODEL_NAME", value: "" },
+          { name: "MAX_TOKENS", value: "4096" },
+        ]
+  );
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       name: serverDefinition ? `${serverDefinition.name} Instance` : "",
       args: serverDefinition ? 
         `npx -y @smithery/cli@latest install @block/${serverDefinition.type.toLowerCase()} --client ${serverDefinition.name.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
@@ -67,8 +77,9 @@ export function AddInstanceDialog({
     });
     
     data.env = envData;
+    data.instanceId = instanceId; // Pass the instanceId for edit mode
     onCreateInstance(data);
-    form.reset();
+    if (!editMode) form.reset();
   };
 
   if (!serverDefinition) return null;
@@ -77,13 +88,9 @@ export function AddInstanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <span>{serverDefinition.name}</span>
-            {serverDefinition.type === 'HTTP_SSE' ? (
-              <EndpointLabel type="HTTP_SSE" />
-            ) : (
-              <EndpointLabel type="STDIO" />
-            )}
+            <EndpointLabel type={serverDefinition.type} />
           </DialogTitle>
           <DialogDescription className="pt-2">
             {serverDefinition.description}
@@ -207,7 +214,7 @@ export function AddInstanceDialog({
               <Button 
                 type="submit"
               >
-                Create Instance
+                {editMode ? "Save Changes" : "Create Instance"}
               </Button>
             </DialogFooter>
           </form>
