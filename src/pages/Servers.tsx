@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   CirclePlus, 
@@ -99,7 +98,7 @@ const Servers = () => {
               ...instance, 
               name: data.name, 
               environment: data.env,
-              arguments: [data.args] 
+              arguments: data.args ? [data.args] : [] 
             }
           : instance
       ));
@@ -120,7 +119,7 @@ const Servers = () => {
         connectionDetails: `localhost:${3000 + instances.length}`,
         requestCount: 0,
         environment: data.env,
-        arguments: [data.args]
+        arguments: data.args ? [data.args] : []
       };
       
       setInstances([...instances, newInstance]);
@@ -485,7 +484,7 @@ const Servers = () => {
         editMode={true}
         initialValues={selectedInstance ? {
           name: selectedInstance.name,
-          args: selectedInstance.arguments[0] || "",
+          args: selectedInstance.arguments && selectedInstance.arguments.length > 0 ? selectedInstance.arguments[0] : "",
           env: selectedInstance.environment || {}
         } : undefined}
         instanceId={selectedInstance?.id}
