@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   CheckCircle,
@@ -40,12 +39,13 @@ import {
 } from "@/components/ui/carousel";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { EndpointType, ServerDefinition } from "@/data/mockData";
 
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedServer, setSelectedServer] = useState(null);
-  const [isInstalling, setIsInstalling] = useState({});
-  const [installedServers, setInstalledServers] = useState({});
+  const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
+  const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
+  const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   
   const { openAddInstanceDialog } = useServerContext();
   const { toast } = useToast();
@@ -57,12 +57,12 @@ const Dashboard = () => {
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
   // Mock trending server data - extended to 10 items
-  const trendingServers = [
+  const trendingServers: ServerDefinition[] = [
     { 
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.9, 
       downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
@@ -82,7 +82,7 @@ const Dashboard = () => {
       id: "trend2", 
       name: "CodeAssistant", 
       icon: "💻", 
-      type: "CLI_PROCESS", 
+      type: "CLI_PROCESS" as EndpointType, 
       stars: 4.8, 
       downloads: 1856, 
       description: "Code completion and analysis server with multiple language support",
@@ -102,7 +102,7 @@ const Dashboard = () => {
       id: "trend3", 
       name: "PromptWizard", 
       icon: "✨", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.7, 
       downloads: 1543, 
       description: "Advanced prompt engineering and testing server",
@@ -122,7 +122,7 @@ const Dashboard = () => {
       id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.6, 
       downloads: 1278, 
       description: "Vector database integration for semantic search capabilities",
@@ -142,7 +142,7 @@ const Dashboard = () => {
       id: "trend5", 
       name: "DocumentLoader", 
       icon: "📄", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.5, 
       downloads: 1150, 
       description: "Document parsing and processing for various file formats",
@@ -162,7 +162,7 @@ const Dashboard = () => {
       id: "trend6", 
       name: "VectorStore", 
       icon: "🔮", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.4, 
       downloads: 1050, 
       description: "High-performance vector database for AI applications",
@@ -182,7 +182,7 @@ const Dashboard = () => {
       id: "trend7", 
       name: "ImageProcessor", 
       icon: "🖼️", 
-      type: "CLI_PROCESS", 
+      type: "CLI_PROCESS" as EndpointType, 
       stars: 4.3, 
       downloads: 980, 
       description: "Image analysis and transformation server",
@@ -202,7 +202,7 @@ const Dashboard = () => {
       id: "trend8", 
       name: "AudioTranscriber", 
       icon: "🎵", 
-      type: "CLI_PROCESS", 
+      type: "CLI_PROCESS" as EndpointType, 
       stars: 4.2, 
       downloads: 920, 
       description: "Speech-to-text and audio analysis server",
@@ -222,7 +222,7 @@ const Dashboard = () => {
       id: "trend9", 
       name: "DataAnalyzer", 
       icon: "📊", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.1, 
       downloads: 870, 
       description: "Data analysis and visualization server",
@@ -242,7 +242,7 @@ const Dashboard = () => {
       id: "trend10", 
       name: "ChatBot", 
       icon: "💬", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.0, 
       downloads: 820, 
       description: "Conversational AI platform with multiple personalities",
@@ -260,12 +260,12 @@ const Dashboard = () => {
     }
   ];
   
-  const handleViewDetails = (server) => {
+  const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
   };
 
-  const handleInstall = (serverId) => {
+  const handleInstall = (serverId: string) => {
     const server = trendingServers.find(item => item.id === serverId);
     if (!server) return;
     
@@ -290,7 +290,7 @@ const Dashboard = () => {
     navigate("/servers");
   };
 
-  const formatDownloadCount = (downloads) => {
+  const formatDownloadCount = (downloads: number) => {
     if (!downloads) return '0';
     return `${(downloads / 1000).toFixed(1)}K`;
   };
@@ -482,7 +482,7 @@ const Dashboard = () => {
                         </div>
                         <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                           <Download className="h-3 w-3" />
-                          {formatDownloadCount(server.downloads)}
+                          {formatDownloadCount(server.downloads || 0)}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -582,7 +582,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                     <Download className="h-3 w-3" />
-                    {formatDownloadCount(selectedServer.downloads)}
+                    {formatDownloadCount(selectedServer.downloads || 0)}
                   </Badge>
                   <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <X className="h-5 w-5" />
