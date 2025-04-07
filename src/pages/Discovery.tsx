@@ -31,6 +31,8 @@ import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { useServerContext } from "@/context/ServerContext";
+import { useOnboarding } from "@/context/OnboardingContext";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -60,6 +62,7 @@ const Discovery = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { openAddInstanceDialog } = useServerContext();
+  const { isOnboarding, currentStep, setSelectedServerId, nextStep } = useOnboarding();
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -127,12 +130,18 @@ const Discovery = () => {
     
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
-    // Simulate installation
+    // 模拟安装过程
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       
-      // Open add instance dialog after installation
+      // 如果处于引导模式且当前是第一步，更新状态并继续
+      if (isOnboarding && currentStep === "discover") {
+        setSelectedServerId(serverId);
+        toast.success("服务器已安装成功，请继续创建实例");
+      }
+      
+      // 打开添加实例对话框
       openAddInstanceDialog(server);
     }, 1500);
   };
@@ -152,6 +161,15 @@ const Discovery = () => {
       </div>
     </div>
   );
+
+  // 引导流程的高亮提示
+  const renderOnboardingHighlight = (server: ServerDefinition) => {
+    if (!isOnboarding || currentStep !== "discover") return null;
+    
+    return (
+      <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none animate-pulse" />
+    );
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -186,11 +204,12 @@ const Discovery = () => {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {visibleServers.map(server => (
-                <Card key={server.id} className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
+                <Card key={server.id} className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
+                  {renderOnboardingHighlight(server)}
                   <CardHeader className="pb-3">
                     <div className="flex flex-col">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-xl">{server.name}</CardTitle>
+                        <CardTitle className="text-xl truncate" title={server.name}>{server.name}</CardTitle>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <EndpointLabel type={server.type} />
@@ -210,11 +229,11 @@ const Discovery = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                        <p className="text-sm font-medium">{server.author}</p>
+                        <p className="text-sm font-medium truncate" title={server.author}>{server.author}</p>
                       </div>
                       <div>
                         <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                        <p className="text-sm font-medium">{server.version}</p>
+                        <p className="text-sm font-medium truncate" title={server.version}>{server.version}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -234,7 +253,11 @@ const Discovery = () => {
                         Installing...
                       </Button>
                     ) : (
-                      <Button size="sm" onClick={() => handleInstall(server.id)}>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleInstall(server.id)}
+                        className={isOnboarding && currentStep === "discover" ? "animate-pulse" : ""}
+                      >
                         <PackagePlus className="h-4 w-4 mr-1" />
                         Add Server
                       </Button>
@@ -264,7 +287,7 @@ const Discovery = () => {
             <>
               <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
                 <div className="w-full">
-                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold truncate" title={selectedServer.name}>{selectedServer.name}</DialogTitle>
                   <div className="flex items-center gap-2 mt-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
@@ -279,11 +302,11 @@ const Discovery = () => {
                 
                 <div className="grid grid-cols-2 gap-6">
                   <DialogSection title="Author">
-                    {selectedServer.author}
+                    <div className="truncate" title={selectedServer.author}>{selectedServer.author}</div>
                   </DialogSection>
                   
                   <DialogSection title="Version">
-                    {selectedServer.version}
+                    <div className="truncate" title={selectedServer.version}>{selectedServer.version}</div>
                   </DialogSection>
                 </div>
                 
@@ -310,8 +333,8 @@ const Discovery = () => {
                     href="#" 
                     className="text-primary flex items-center hover:underline"
                   >
-                    {selectedServer.repository}
-                    <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                    <span className="truncate">{selectedServer.repository}</span>
+                    <ExternalLink className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
                   </a>
                 </DialogSection>
               </div>
@@ -333,7 +356,10 @@ const Discovery = () => {
                       Installing...
                     </Button>
                   ) : (
-                    <Button onClick={() => handleInstall(selectedServer.id)}>
+                    <Button 
+                      onClick={() => handleInstall(selectedServer.id)}
+                      className={isOnboarding && currentStep === "discover" ? "animate-pulse" : ""}
+                    >
                       <PackagePlus className="h-4 w-4 mr-1" />
                       Add Server
                     </Button>

@@ -173,7 +173,7 @@ const TrayPopup = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">{host.icon}</span>
-                          <h3 className="font-medium">{host.name}</h3>
+                          <h3 className="font-medium truncate" title={host.name}>{host.name}</h3>
                         </div>
                         <StatusIndicator 
                           status={host.connectionStatus === 'connected' ? 'active' : 'inactive'} 
@@ -194,7 +194,7 @@ const TrayPopup = () => {
                                   <StatusIndicator 
                                     status={getStatusForProfile(currentProfile.id)} 
                                   />
-                                  <span className="truncate max-w-[120px]">{currentProfile.name}</span>
+                                  <span className="truncate max-w-[120px]" title={currentProfile.name}>{currentProfile.name}</span>
                                 </div>
                               )}
                             </SelectValue>
@@ -206,7 +206,7 @@ const TrayPopup = () => {
                                   <StatusIndicator 
                                     status={getStatusForProfile(profile.id)} 
                                   />
-                                  <span className="truncate max-w-[120px]">{profile.name}</span>
+                                  <span className="truncate max-w-[120px]" title={profile.name}>{profile.name}</span>
                                 </div>
                               </SelectItem>
                             ))}
@@ -239,7 +239,7 @@ const TrayPopup = () => {
                                         activeInstance.status === 'error' ? 'error' : 'inactive'
                                       } 
                                     />
-                                    <span className="truncate max-w-[120px]">{definition.name}</span>
+                                    <span className="truncate max-w-[120px]" title={definition.name}>{definition.name}</span>
                                   </div>
                                   
                                   {/* Direct instance selection dropdown */}
@@ -250,7 +250,9 @@ const TrayPopup = () => {
                                         size="sm" 
                                         className="h-6 text-xs px-2 py-1 flex items-center gap-1 bg-secondary hover:bg-secondary/80"
                                       >
-                                        <span className="truncate max-w-[80px]">{activeInstance.name.split('-').pop()}</span>
+                                        <span className="truncate max-w-[80px]" title={activeInstance.name.split('-').pop()}>
+                                          {activeInstance.name.split('-').pop()}
+                                        </span>
                                         <ChevronDown className="h-3 w-3 flex-shrink-0" />
                                       </Button>
                                     </DropdownMenuTrigger>
@@ -272,7 +274,9 @@ const TrayPopup = () => {
                                                 instance.status === 'error' ? 'error' : 'inactive'
                                               } 
                                             />
-                                            <span className="truncate max-w-[120px]">{instance.name.split('-').pop()}</span>
+                                            <span className="truncate max-w-[120px]" title={instance.name.split('-').pop()}>
+                                              {instance.name.split('-').pop()}
+                                            </span>
                                           </div>
                                           {instance.id === activeInstanceId && (
                                             <Check className="h-3 w-3 flex-shrink-0" />
@@ -301,6 +305,8 @@ const TrayPopup = () => {
         onOpenChange={(open) => setProfileChangeDialog(prev => ({ ...prev, isOpen: open }))}
         onConfirm={confirmProfileChange}
         profileName={profileChangeDialog.profileName}
+        hostId={profileChangeDialog.hostId}
+        profileId={profileChangeDialog.profileId}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ServerDefinition } from "@/data/mockData";
+import { useOnboarding } from "@/context/OnboardingContext"; 
 import {
   Tooltip,
   TooltipContent,
@@ -44,6 +46,8 @@ export function AddInstanceDialog({
     { name: "MAX_TOKENS", required: false, value: "4096" },
   ]);
 
+  const { isOnboarding, currentStep, nextStep, setSelectedInstanceId } = useOnboarding();
+
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
     defaultValues: {
@@ -66,14 +70,27 @@ export function AddInstanceDialog({
     
     data.env = envData;
     onCreateInstance(data);
+    
+    // 如果处于引导模式且当前是第二步，更新状态并继续
+    if (isOnboarding && currentStep === "create-instance") {
+      setSelectedInstanceId("instance-" + Date.now()); // 模拟实例ID
+      nextStep();
+    }
+    
     form.reset();
   };
 
   if (!serverDefinition) return null;
 
+  // 添加引导高亮
+  const shouldHighlight = isOnboarding && currentStep === "create-instance";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] relative">
+        {shouldHighlight && (
+          <div className="absolute inset-0 border-2 border-primary rounded-lg pointer-events-none" style={{ zIndex: 1 }} />
+        )}
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {serverDefinition.type === 'HTTP_SSE' ? (
@@ -81,7 +98,7 @@ export function AddInstanceDialog({
             ) : (
               <span className="inline-flex items-center gap-1 text-purple-500"><Terminal className="h-5 w-5" /> CLI Server</span>
             )}
-            <span>- {serverDefinition.name}</span>
+            <span className="truncate">- {serverDefinition.name}</span>
           </DialogTitle>
           <DialogDescription className="pt-2">
             {serverDefinition.description}
@@ -213,6 +230,7 @@ export function AddInstanceDialog({
               <Button 
                 type="submit"
                 disabled={envFields.some(field => field.required && !field.value)}
+                className={shouldHighlight ? "animate-pulse" : ""}
               >
                 Create Instance
               </Button>
