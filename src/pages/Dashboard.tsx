@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
+import { ServerDefinition } from "@/data/mockData.d";
 import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
@@ -52,12 +52,12 @@ const Dashboard = () => {
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
   // Mock trending server data - extended to 10 items
-  const trendingServers = [
+  const trendingServers: ServerDefinition[] = [
     { 
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.9, 
       downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
@@ -77,7 +77,7 @@ const Dashboard = () => {
       id: "trend2", 
       name: "CodeAssistant", 
       icon: "💻", 
-      type: "CLI_PROCESS" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "CLI_PROCESS", 
       stars: 4.8, 
       downloads: 1856, 
       description: "Code completion and analysis server with multiple language support",
@@ -97,7 +97,7 @@ const Dashboard = () => {
       id: "trend3", 
       name: "PromptWizard", 
       icon: "✨", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.7, 
       downloads: 1543, 
       description: "Advanced prompt engineering and testing server",
@@ -117,7 +117,7 @@ const Dashboard = () => {
       id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.6, 
       downloads: 1278, 
       description: "Vector database integration for semantic search capabilities",
@@ -137,7 +137,7 @@ const Dashboard = () => {
       id: "trend5", 
       name: "DocumentLoader", 
       icon: "📄", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.5, 
       downloads: 1150, 
       description: "Document parsing and processing for various file formats",
@@ -157,7 +157,7 @@ const Dashboard = () => {
       id: "trend6", 
       name: "VectorStore", 
       icon: "🔮", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.4, 
       downloads: 1050, 
       description: "High-performance vector database for AI applications",
@@ -177,7 +177,7 @@ const Dashboard = () => {
       id: "trend7", 
       name: "ImageProcessor", 
       icon: "🖼️", 
-      type: "CLI_PROCESS" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "CLI_PROCESS", 
       stars: 4.3, 
       downloads: 980, 
       description: "Image analysis and transformation server",
@@ -197,7 +197,7 @@ const Dashboard = () => {
       id: "trend8", 
       name: "AudioTranscriber", 
       icon: "🎵", 
-      type: "CLI_PROCESS" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "CLI_PROCESS", 
       stars: 4.2, 
       downloads: 920, 
       description: "Speech-to-text and audio analysis server",
@@ -217,7 +217,7 @@ const Dashboard = () => {
       id: "trend9", 
       name: "DataAnalyzer", 
       icon: "📊", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.1, 
       downloads: 870, 
       description: "Data analysis and visualization server",
@@ -237,7 +237,7 @@ const Dashboard = () => {
       id: "trend10", 
       name: "ChatBot", 
       icon: "💬", 
-      type: "HTTP_SSE" as 'HTTP_SSE' | 'CLI_PROCESS', 
+      type: "HTTP_SSE", 
       stars: 4.0, 
       downloads: 820, 
       description: "Conversational AI platform with multiple personalities",

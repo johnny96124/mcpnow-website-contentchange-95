@@ -1,9 +1,8 @@
 
 import { cn } from "@/lib/utils";
-import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: EndpointType;
+  type: 'HTTP_SSE' | 'CLI_PROCESS'; // Updated to match ServerDefinition type
   className?: string;
 }
 
