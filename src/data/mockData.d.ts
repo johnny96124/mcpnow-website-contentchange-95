@@ -1,4 +1,5 @@
 
+
 export type EndpointType = 'HTTP_SSE' | 'CLI_PROCESS' | 'STDIO';
 
 export interface ServerDefinition {
@@ -30,3 +31,4 @@ export interface ServerInstance {
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
+
