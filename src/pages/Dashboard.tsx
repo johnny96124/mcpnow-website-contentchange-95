@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -8,8 +9,7 @@ import {
   Server, 
   Star,
   UsersRound,
-  CheckCircle,
-  Download
+  CheckCircle 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -38,12 +38,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -53,10 +47,12 @@ const Dashboard = () => {
   
   const { openAddInstanceDialog } = useServerContext();
   
+  // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
+  // Mock trending server data - extended to 10 items
   const trendingServers: ServerDefinition[] = [
     { 
       id: "trend1", 
@@ -259,7 +255,7 @@ const Dashboard = () => {
       repository: "https://github.com/chattech/chatbot"
     }
   ];
-
+  
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
@@ -271,19 +267,32 @@ const Dashboard = () => {
     
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
+    // Simulate installation
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       
+      // Open add instance dialog after installation
       openAddInstanceDialog(server);
     }, 1500);
   };
+
+  const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div className="mb-6">
+      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <h3 className="text-base font-medium p-4 border-b border-gray-100 dark:border-gray-700">{title}</h3>
+        <div className="p-4 text-gray-600 dark:text-gray-300 text-sm">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 
   const formatDownloadCount = (downloads?: number) => {
     if (!downloads) return '0';
     return downloads.toLocaleString();
   };
-
+  
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -295,7 +304,9 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Combined Cards */}
       <div className="grid gap-6 md:grid-cols-3">
+        {/* Hosts Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -348,6 +359,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Profiles Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -392,6 +404,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
+        {/* Servers Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -438,6 +451,7 @@ const Dashboard = () => {
         </Card>
       </div>
       
+      {/* Trending MCP Servers */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -454,73 +468,59 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="overflow-hidden h-full">
-                    <div className="relative">
-                      <div className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-2">
-                          <div className="text-xl">{server.icon}</div>
-                          <div className="font-medium text-md">{server.name}</div>
+                  <Card className="h-full flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex flex-col">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-xl">{server.name}</CardTitle>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-2">
                           <EndpointLabel type={server.type} />
                           {server.isOfficial && <OfficialBadge />}
                         </div>
                       </div>
-                      <CardContent className="p-4 pt-0">
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                          {server.description}
-                        </p>
-                        <div className="mt-2">
-                          <CategoryList categories={server.categories || []} maxVisible={2} />
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                        {server.description}
+                      </p>
+                      
+                      <div className="mb-4">
+                        <CategoryList categories={server.categories || []} maxVisible={3} />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
+                          <p className="text-sm font-medium">{server.author}</p>
                         </div>
-                      </CardContent>
-                    </div>
-                    <CardFooter className="flex justify-between items-center border-t p-4 bg-muted/30">
-                      <div className="flex items-center gap-4">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center text-muted-foreground">
-                                <Star className="h-3.5 w-3.5 mr-1" />
-                                <span className="text-xs">{server.stars}</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom">Rating</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center text-muted-foreground">
-                                <Download className="h-3.5 w-3.5 mr-1" />
-                                <span className="text-xs">{formatDownloadCount(server.downloads)}</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom">Downloads</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
+                          <p className="text-sm font-medium">{server.version}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleViewDetails(server)}>
-                          Details
+                    </CardContent>
+                    <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                      <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </Button>
+                      {installedServers[server.id] ? (
+                        <Button variant="outline" size="sm" disabled className="text-green-600">
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Installed
                         </Button>
-                        {installedServers[server.id] ? (
-                          <Button variant="outline" size="sm" className="text-green-600" disabled>
-                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                            Installed
-                          </Button>
-                        ) : isInstalling[server.id] ? (
-                          <Button variant="outline" size="sm" disabled>
-                            <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                            Installing...
-                          </Button>
-                        ) : (
-                          <Button size="sm" onClick={() => handleInstall(server.id)}>
-                            <PackagePlus className="h-3.5 w-3.5 mr-1" />
-                            Add
-                          </Button>
-                        )}
-                      </div>
+                      ) : isInstalling[server.id] ? (
+                        <Button variant="outline" size="sm" disabled>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          Installing...
+                        </Button>
+                      ) : (
+                        <Button size="sm" onClick={() => handleInstall(server.id)}>
+                          <PackagePlus className="h-4 w-4 mr-1" />
+                          Add Server
+                        </Button>
+                      )}
                     </CardFooter>
                   </Card>
                 </CarouselItem>
@@ -534,88 +534,71 @@ const Dashboard = () => {
         </div>
       </div>
       
+      {/* Server Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           {selectedServer && (
             <>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="text-2xl">{selectedServer.icon}</div>
-                    <DialogTitle className="text-xl font-semibold">{selectedServer.name}</DialogTitle>
-                  </div>
-                  <div className="flex items-center gap-2">
+              <DialogHeader className="flex flex-col items-start space-y-2 pb-2">
+                <div className="w-full">
+                  <DialogTitle className="text-2xl font-bold">{selectedServer.name}</DialogTitle>
+                  <div className="flex items-center gap-2 mt-2">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
                 </div>
-                <DialogDescription className="mt-2">
-                  {selectedServer.description}
-                </DialogDescription>
               </DialogHeader>
               
-              <div className="py-4">
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {selectedServer.categories?.map((category) => (
-                    <Badge key={category} variant="outline">
-                      {category}
-                    </Badge>
-                  ))}
+              <div className="space-y-6 mt-4">
+                <DialogSection title="Description">
+                  {selectedServer.description}
+                </DialogSection>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <DialogSection title="Author">
+                    {selectedServer.author}
+                  </DialogSection>
+                  
+                  <DialogSection title="Version">
+                    {selectedServer.version}
+                  </DialogSection>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Author</div>
-                    <div>{selectedServer.author}</div>
+                <DialogSection title="Category">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedServer.categories?.map(category => (
+                      <Badge key={category} variant="outline" className="rounded-full">
+                        {category}
+                      </Badge>
+                    ))}
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-muted-foreground">Version</div>
-                    <div>{selectedServer.version}</div>
-                  </div>
-                </div>
+                </DialogSection>
                 
-                <div className="space-y-2">
-                  <h4 className="font-medium">Features</h4>
-                  <ul className="list-disc pl-5 space-y-1">
+                <DialogSection title="Features">
+                  <ul className="list-disc list-inside space-y-2">
                     {selectedServer.features?.map((feature, index) => (
-                      <li key={index} className="text-sm text-muted-foreground">{feature}</li>
+                      <li key={index}>{feature}</li>
                     ))}
                   </ul>
-                </div>
+                </DialogSection>
                 
-                {selectedServer.repository && (
-                  <div className="mt-4">
-                    <h4 className="font-medium mb-1">Repository</h4>
-                    <a 
-                      href={selectedServer.repository} 
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="text-sm text-primary flex items-center hover:underline"
-                    >
-                      {selectedServer.repository}
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                    </a>
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-4 mt-4 pt-4 border-t">
-                  <div className="flex items-center text-muted-foreground">
-                    <Star className="h-4 w-4 mr-1" />
-                    <span>{selectedServer.stars}</span>
-                  </div>
-                  <div className="flex items-center text-muted-foreground">
-                    <Download className="h-4 w-4 mr-1" />
-                    <span>{formatDownloadCount(selectedServer.downloads)}</span>
-                  </div>
-                </div>
+                <DialogSection title="Repository">
+                  <a 
+                    href="#" 
+                    className="text-primary flex items-center hover:underline"
+                  >
+                    {selectedServer.repository}
+                    <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                  </a>
+                </DialogSection>
               </div>
               
-              <div className="flex justify-between mt-6 pt-4 border-t">
-                <DialogClose asChild>
-                  <Button variant="outline">Close</Button>
-                </DialogClose>
-                
-                <div>
+              <div className="flex justify-end mt-6 border-t pt-4">
+                <div className="flex gap-3">
+                  <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogClose>
+                  
                   {installedServers[selectedServer.id] ? (
                     <Button variant="outline" disabled className="text-green-600">
                       <CheckCircle className="h-4 w-4 mr-1" />
