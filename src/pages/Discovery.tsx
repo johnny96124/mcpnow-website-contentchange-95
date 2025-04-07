@@ -278,7 +278,7 @@ const Discovery = () => {
       </ScrollArea>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
             <div className="h-full">
               <div className="flex justify-between items-center p-5 pb-2">
@@ -303,43 +303,49 @@ const Discovery = () => {
               </div>
               
               <div className="px-5 space-y-4 pb-6">
-                <InfoSection title="Description">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Description</h3>
                   <p>{selectedServer.description}</p>
-                </InfoSection>
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <InfoSection title="Author">
+                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Author</h3>
                     <p className="font-medium">
                       {selectedServer.author || `${selectedServer.name.split(' ')[0]} Community`}
                     </p>
-                  </InfoSection>
+                  </div>
                   
-                  <InfoSection title="Version">
+                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Version</h3>
                     <p className="font-medium">
                       {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
                     </p>
-                  </InfoSection>
+                  </div>
                 </div>
                 
-                <InfoSection title="Category">
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Category</h3>
+                  <div className="flex flex-wrap gap-2">
                     {selectedServer.categories?.map(category => (
                       <Badge key={category} variant="outline" className="py-1 px-2 bg-gray-50 text-gray-700 border-gray-200">
                         {category}
                       </Badge>
                     ))}
                   </div>
-                </InfoSection>
+                </div>
                 
-                <InfoSection title="Features">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Features</h3>
                   <ul className="list-disc list-inside space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
                       <li key={index} className="text-sm">{feature}</li>
                     ))}
                   </ul>
-                </InfoSection>
+                </div>
                 
-                <InfoSection title="Repository">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Repository</h3>
                   <a 
                     href="#" 
                     className="text-blue-500 flex items-center hover:underline text-sm"
@@ -349,7 +355,7 @@ const Discovery = () => {
                     {selectedServer.repository || 'github.com/Docker Community/docker assistant'}
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
-                </InfoSection>
+                </div>
               </div>
               
               <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
