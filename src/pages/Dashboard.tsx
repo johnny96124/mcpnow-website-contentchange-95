@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   CheckCircle,
@@ -48,7 +47,7 @@ const Dashboard = () => {
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   
-  const { openAddInstanceDialog } = useServerContext();
+  const { openAddInstanceDialog, closeAddInstanceDialog } = useServerContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -281,6 +280,11 @@ const Dashboard = () => {
         title: "Server installed",
         description: `${server.name} has been successfully installed.`,
       });
+      
+      // Close details dialog if it's open
+      if (isDialogOpen) {
+        setIsDialogOpen(false);
+      }
       
       // Open add instance dialog after installation
       openAddInstanceDialog(server);
