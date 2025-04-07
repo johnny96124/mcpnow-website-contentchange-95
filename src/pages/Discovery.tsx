@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
@@ -30,6 +31,7 @@ import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -59,6 +61,7 @@ const Discovery = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -135,6 +138,10 @@ const Discovery = () => {
         description: `${server.name} has been successfully installed.`,
       });
     }, 1500);
+  };
+
+  const handleNavigateToServers = () => {
+    navigate("/servers");
   };
 
   const handleClearFilters = () => {
@@ -239,10 +246,24 @@ const Discovery = () => {
                     </Button>
                     
                     {installedServers[server.id] ? (
-                      <Button variant="outline" size="sm" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Installed
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          Installed
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleNavigateToServers}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          Open
+                        </Button>
+                      </div>
                     ) : isInstalling[server.id] ? (
                       <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200">
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -365,7 +386,10 @@ const Discovery = () => {
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Installed
                     </Button>
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      onClick={handleNavigateToServers}
+                    >
                       <ExternalLink className="h-4 w-4 mr-1" />
                       Check
                     </Button>
