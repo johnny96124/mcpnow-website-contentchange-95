@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { 
+  ActivityIcon, 
   Database,
   ExternalLink,
   Info,
@@ -7,6 +8,7 @@ import {
   PackagePlus,
   Server, 
   Star,
+  TrendingUp,
   UsersRound,
   CheckCircle 
 } from "lucide-react";
@@ -14,12 +16,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { ServerDefinition } from "@/data/mockData.d";
 import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import type { EndpointType, ServerDefinition } from "@/data/mockData";
 import { 
   Dialog, 
   DialogContent, 
@@ -39,6 +41,8 @@ import {
 } from "@/components/ui/carousel";
 
 const Dashboard = () => {
+  // State for time dimension selection
+  const [timeMetric, setTimeMetric] = useState<"hour" | "day" | "month" | "all">("hour");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
@@ -51,13 +55,21 @@ const Dashboard = () => {
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
+  // Calculate requests based on selected time metric (mock data)
+  const requestsData = {
+    hour: { value: 285, change: "+12%", changeClass: "text-green-600 dark:text-green-400" },
+    day: { value: 2840, change: "+8%", changeClass: "text-green-600 dark:text-green-400" },
+    month: { value: 85600, change: "+15%", changeClass: "text-green-600 dark:text-green-400" },
+    all: { value: 347890, change: "—", changeClass: "text-muted-foreground" }
+  };
+  
   // Mock trending server data - extended to 10 items
-  const trendingServers: ServerDefinition[] = [
+  const trendingServers = [
     { 
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.9, 
       downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
@@ -77,7 +89,7 @@ const Dashboard = () => {
       id: "trend2", 
       name: "CodeAssistant", 
       icon: "💻", 
-      type: "CLI_PROCESS", 
+      type: "STDIO" as EndpointType, 
       stars: 4.8, 
       downloads: 1856, 
       description: "Code completion and analysis server with multiple language support",
@@ -97,7 +109,7 @@ const Dashboard = () => {
       id: "trend3", 
       name: "PromptWizard", 
       icon: "✨", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.7, 
       downloads: 1543, 
       description: "Advanced prompt engineering and testing server",
@@ -117,7 +129,7 @@ const Dashboard = () => {
       id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.6, 
       downloads: 1278, 
       description: "Vector database integration for semantic search capabilities",
@@ -137,7 +149,7 @@ const Dashboard = () => {
       id: "trend5", 
       name: "DocumentLoader", 
       icon: "📄", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.5, 
       downloads: 1150, 
       description: "Document parsing and processing for various file formats",
@@ -157,7 +169,7 @@ const Dashboard = () => {
       id: "trend6", 
       name: "VectorStore", 
       icon: "🔮", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.4, 
       downloads: 1050, 
       description: "High-performance vector database for AI applications",
@@ -177,7 +189,7 @@ const Dashboard = () => {
       id: "trend7", 
       name: "ImageProcessor", 
       icon: "🖼️", 
-      type: "CLI_PROCESS", 
+      type: "STDIO" as EndpointType, 
       stars: 4.3, 
       downloads: 980, 
       description: "Image analysis and transformation server",
@@ -197,7 +209,7 @@ const Dashboard = () => {
       id: "trend8", 
       name: "AudioTranscriber", 
       icon: "🎵", 
-      type: "CLI_PROCESS", 
+      type: "STDIO" as EndpointType, 
       stars: 4.2, 
       downloads: 920, 
       description: "Speech-to-text and audio analysis server",
@@ -217,7 +229,7 @@ const Dashboard = () => {
       id: "trend9", 
       name: "DataAnalyzer", 
       icon: "📊", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.1, 
       downloads: 870, 
       description: "Data analysis and visualization server",
@@ -237,7 +249,7 @@ const Dashboard = () => {
       id: "trend10", 
       name: "ChatBot", 
       icon: "💬", 
-      type: "HTTP_SSE", 
+      type: "HTTP_SSE" as EndpointType, 
       stars: 4.0, 
       downloads: 820, 
       description: "Conversational AI platform with multiple personalities",
@@ -445,7 +457,65 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Removed the Requests Card section here */}
+      {/* Requests Card with Time Dimension Selection */}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <ActivityIcon className="h-5 w-5 text-primary" />
+            Requests
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="hour" className="w-full" onValueChange={(value) => setTimeMetric(value as "hour" | "day" | "month" | "all")}>
+            <div className="mb-6">
+              <TabsList className="w-full grid grid-cols-4 p-1">
+                <TabsTrigger value="hour" className="data-[state=active]:bg-primary/10">Last Hour</TabsTrigger>
+                <TabsTrigger value="day" className="data-[state=active]:bg-primary/10">Last Day</TabsTrigger>
+                <TabsTrigger value="month" className="data-[state=active]:bg-primary/10">Last Month</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-primary/10">All Time</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <div className="bg-muted/30 rounded-lg p-4 border border-border/30">
+              <TabsContent value="hour" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.hour.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.hour.changeClass}`}>
+                    {requestsData.hour.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.hour.change} from previous hour</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="day" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.day.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.day.changeClass}`}>
+                    {requestsData.day.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.day.change} from previous day</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="month" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.month.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.month.changeClass}`}>
+                    {requestsData.month.change !== "—" && <TrendingUp className="h-4 w-4" />}
+                    <span>{requestsData.month.change} from previous month</span>
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="all" className="mt-0">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold">{requestsData.all.value.toLocaleString()}</div>
+                  <div className={`flex items-center gap-1 font-medium ${requestsData.all.changeClass}`}>
+                    <span>Total requests</span>
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </CardContent>
+      </Card>
       
       {/* Trending MCP Servers */}
       <div className="space-y-4">
