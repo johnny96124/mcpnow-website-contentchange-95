@@ -205,7 +205,7 @@ const Discovery = () => {
                       </div>
                       <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                         <Download className="h-3 w-3" />
-                        {formatDownloadCount(server.downloads || 1320)}
+                        {formatDownloadCount(1320)} {/* Fixed: Using a fixed value instead of server.downloads */}
                       </Badge>
                     </div>
                   </CardHeader>
