@@ -1,11 +1,12 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Terminal, AlertCircle, Info } from "lucide-react";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Info } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -38,10 +40,10 @@ export function AddInstanceDialog({
   serverDefinition, 
   onCreateInstance 
 }: AddInstanceDialogProps) {
-  const [envFields, setEnvFields] = useState<{name: string; required: boolean; value: string}[]>([
-    { name: "API_KEY", required: true, value: "" },
-    { name: "MODEL_NAME", required: false, value: "" },
-    { name: "MAX_TOKENS", required: false, value: "4096" },
+  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([
+    { name: "API_KEY", value: "" },
+    { name: "MODEL_NAME", value: "" },
+    { name: "MAX_TOKENS", value: "4096" },
   ]);
 
   const form = useForm<InstanceFormValues>({
@@ -59,7 +61,7 @@ export function AddInstanceDialog({
     const envData: Record<string, string> = {};
     
     envFields.forEach(field => {
-      if (field.value || field.required) {
+      if (field.value) {
         envData[field.name] = field.value;
       }
     });
@@ -75,13 +77,13 @@ export function AddInstanceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center justify-between gap-2">
+            <span>{serverDefinition.name}</span>
             {serverDefinition.type === 'HTTP_SSE' ? (
-              <span className="inline-flex items-center gap-1 text-blue-500"><Terminal className="h-5 w-5" /> HTTP/SSE Server</span>
+              <EndpointLabel type="HTTP_SSE" />
             ) : (
-              <span className="inline-flex items-center gap-1 text-purple-500"><Terminal className="h-5 w-5" /> CLI Server</span>
+              <EndpointLabel type="STDIO" />
             )}
-            <span>- {serverDefinition.name}</span>
           </DialogTitle>
           <DialogDescription className="pt-2">
             {serverDefinition.description}
@@ -176,7 +178,6 @@ export function AddInstanceDialog({
                   <div className="col-span-5">
                     <Label className="flex items-center" htmlFor={`env-${index}`}>
                       {field.name}
-                      {field.required && <span className="text-destructive ml-1">*</span>}
                     </Label>
                   </div>
                   <div className="col-span-7">
@@ -188,18 +189,11 @@ export function AddInstanceDialog({
                         newFields[index].value = e.target.value;
                         setEnvFields(newFields);
                       }}
-                      placeholder={field.required ? "Required" : "Optional"}
+                      placeholder="Optional"
                     />
                   </div>
                 </div>
               ))}
-              
-              {envFields.some(field => field.required && !field.value) && (
-                <div className="flex items-center text-xs text-destructive gap-1 mt-1">
-                  <AlertCircle className="h-3 w-3" />
-                  <span>Required fields must be filled</span>
-                </div>
-              )}
             </div>
             
             <DialogFooter>
@@ -212,7 +206,6 @@ export function AddInstanceDialog({
               </Button>
               <Button 
                 type="submit"
-                disabled={envFields.some(field => field.required && !field.value)}
               >
                 Create Instance
               </Button>
