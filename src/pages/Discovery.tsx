@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
@@ -259,9 +258,9 @@ const Discovery = () => {
                           variant="outline" 
                           size="sm"
                           onClick={handleNavigateToServers}
+                          className="px-2"
                         >
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          Open
+                          <ExternalLink className="h-4 w-4" />
                         </Button>
                       </div>
                     ) : isInstalling[server.id] ? (
@@ -389,9 +388,9 @@ const Discovery = () => {
                     <Button 
                       variant="outline"
                       onClick={handleNavigateToServers}
+                      className="px-2"
                     >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Check
+                      <ExternalLink className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : isInstalling[selectedServer.id] ? (
