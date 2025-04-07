@@ -1,8 +1,9 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   CheckCircle,
   Download, 
-  ExternalLink, 
+  ExternalLink,
   Info, 
   Loader2, 
   Search,
@@ -259,7 +260,8 @@ const Discovery = () => {
                           size="sm"
                           onClick={handleNavigateToServers}
                         >
-                          <ExternalLink className="h-4 w-4" />
+                          <ExternalLink className="h-4 w-4 mr-1" />
+                          Open
                         </Button>
                       </div>
                     ) : isInstalling[server.id] ? (

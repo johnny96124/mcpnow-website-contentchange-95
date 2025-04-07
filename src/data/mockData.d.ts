@@ -1,10 +1,8 @@
 
-import { EndpointType } from "@/components/status/EndpointLabel";
-
 export interface ServerDefinition {
   id: string;
   name: string;
-  type: EndpointType;
+  type: 'HTTP_SSE' | 'CLI_PROCESS';
   version: string;
   description: string;
   icon?: string;
