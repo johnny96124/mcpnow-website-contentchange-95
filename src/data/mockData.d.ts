@@ -1,5 +1,4 @@
 
-
 export interface ServerDefinition {
   id: string;
   name: string;
@@ -29,4 +28,3 @@ export interface ServerInstance {
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
-
