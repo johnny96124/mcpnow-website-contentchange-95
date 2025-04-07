@@ -1,8 +1,10 @@
 
+export type EndpointType = 'HTTP_SSE' | 'STDIO';
+
 export interface ServerDefinition {
   id: string;
   name: string;
-  type: 'HTTP_SSE' | 'CLI_PROCESS';
+  type: EndpointType;
   version: string;
   description: string;
   icon?: string;
