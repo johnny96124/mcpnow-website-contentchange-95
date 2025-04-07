@@ -6,6 +6,13 @@ export interface ServerDefinition {
   version: string;
   description: string;
   icon?: string;
+  stars?: number;
+  downloads?: number;
+  author?: string;
+  categories?: string[];
+  isOfficial?: boolean;
+  features?: string[];
+  repository?: string;
 }
 
 export interface ServerInstance {
