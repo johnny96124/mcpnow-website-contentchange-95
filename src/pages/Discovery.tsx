@@ -6,7 +6,6 @@ import {
   ExternalLink,
   Info, 
   Loader2, 
-  PackagePlus, 
   Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,11 +28,12 @@ import { CategoryFilter } from "@/components/discovery/CategoryFilter";
 import { EmptyState } from "@/components/discovery/EmptyState";
 import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
-import { useServerContext } from "@/context/ServerContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const ITEMS_PER_PAGE = 6;
 
+// Extend the items list for testing pagination
 const extendedItems = [
   ...discoveryItems,
   ...discoveryItems.map((item, index) => ({
@@ -59,7 +59,7 @@ const Discovery = () => {
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { openAddInstanceDialog } = useServerContext();
+  const { toast } = useToast();
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -132,14 +132,21 @@ const Discovery = () => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       
-      // Open add instance dialog after installation
-      openAddInstanceDialog(server);
+      // Show toast notification instead of opening dialog
+      toast({
+        title: "Server installed",
+        description: `${server.name} has been successfully installed.`,
+      });
     }, 1500);
   };
 
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCategory(null);
+  };
+
+  const formatDownloadCount = (count: number) => {
+    return `${(count / 1000).toFixed(1)}K`;
   };
 
   const DialogSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -186,57 +193,72 @@ const Discovery = () => {
           <>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {visibleServers.map(server => (
-                <Card key={server.id} className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex flex-col">
-                      <div className="flex justify-between items-start">
+                <Card key={server.id} className="flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+                  <CardHeader className="pb-2 space-y-0">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
                         <CardTitle className="text-xl">{server.name}</CardTitle>
+                        <div className="flex items-center gap-1">
+                          <EndpointLabel type={server.type} />
+                          {server.isOfficial && <OfficialBadge />}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <EndpointLabel type={server.type} />
-                        {server.isOfficial && <OfficialBadge />}
-                      </div>
+                      <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                        <Download className="h-3 w-3" />
+                        {formatDownloadCount(server.downloads || 1320)}
+                      </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex-1">
+                  
+                  <CardContent className="flex-1 pt-4">
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                       {server.description}
                     </p>
                     
-                    <div className="mb-4">
-                      <CategoryList categories={server.categories || []} maxVisible={3} />
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {['DevOps', 'Containers', 'Infrastructure'].map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs py-1 bg-gray-50 text-gray-700 border-gray-200">
+                          {tag}
+                        </Badge>
+                      ))}
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-4 mt-2">
                       <div>
                         <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                        <p className="text-sm font-medium">{server.author}</p>
+                        <p className="text-sm font-medium">{server.author || `${server.name.split(' ')[0]} Community`}</p>
                       </div>
                       <div>
                         <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                        <p className="text-sm font-medium">{server.version}</p>
+                        <p className="text-sm font-medium">{server.version || (Math.random() > 0.5 ? '2.1.0' : '0.9.5')}</p>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between border-t bg-muted/50 p-3">
+                  
+                  <CardFooter className="flex justify-between border-t bg-gray-50 dark:bg-gray-800/50 p-3 mt-4">
                     <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
                       <Info className="h-4 w-4 mr-1" />
                       Details
                     </Button>
+                    
                     {installedServers[server.id] ? (
-                      <Button variant="outline" size="sm" disabled className="text-green-600">
+                      <Button variant="outline" size="sm" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
                         <CheckCircle className="h-4 w-4 mr-1" />
                         Installed
                       </Button>
                     ) : isInstalling[server.id] ? (
-                      <Button variant="outline" size="sm" disabled>
+                      <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200">
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         Installing...
                       </Button>
                     ) : (
-                      <Button size="sm" onClick={() => handleInstall(server.id)}>
-                        <PackagePlus className="h-4 w-4 mr-1" />
-                        Add Server
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleInstall(server.id)}
+                        className="bg-blue-500 hover:bg-blue-600"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        Install Server
                       </Button>
                     )}
                   </CardFooter>
@@ -279,11 +301,11 @@ const Discovery = () => {
                 
                 <div className="grid grid-cols-2 gap-6">
                   <DialogSection title="Author">
-                    {selectedServer.author}
+                    {selectedServer.author || `${selectedServer.name.split(' ')[0]} Community`}
                   </DialogSection>
                   
                   <DialogSection title="Version">
-                    {selectedServer.version}
+                    {selectedServer.version || (Math.random() > 0.5 ? '2.1.0' : '0.9.5')}
                   </DialogSection>
                 </div>
                 
@@ -323,19 +345,19 @@ const Discovery = () => {
                   </DialogClose>
                   
                   {installedServers[selectedServer.id] ? (
-                    <Button variant="outline" disabled className="text-green-600">
+                    <Button variant="outline" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Installed
                     </Button>
                   ) : isInstalling[selectedServer.id] ? (
-                    <Button disabled>
+                    <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
                       <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                       Installing...
                     </Button>
                   ) : (
-                    <Button onClick={() => handleInstall(selectedServer.id)}>
-                      <PackagePlus className="h-4 w-4 mr-1" />
-                      Add Server
+                    <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
+                      <Download className="h-4 w-4 mr-1" />
+                      Install Server
                     </Button>
                   )}
                 </div>
