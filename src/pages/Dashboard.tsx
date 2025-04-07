@@ -20,7 +20,7 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import type { ServerDefinition, EndpointType } from "@/data/mockData";
+import type { ServerDefinition } from "@/data/mockData";
 import { 
   Dialog, 
   DialogContent, 
@@ -53,12 +53,12 @@ const Dashboard = () => {
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
   // Mock trending server data - extended to 10 items
-  const trendingServers: ServerDefinition[] = [
+  const trendingServers = [
     { 
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.9, 
       downloads: 2342, 
       description: "High-performance GPT model server with streaming responses",
@@ -78,7 +78,7 @@ const Dashboard = () => {
       id: "trend2", 
       name: "CodeAssistant", 
       icon: "💻", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 4.8, 
       downloads: 1856, 
       description: "Code completion and analysis server with multiple language support",
@@ -98,7 +98,7 @@ const Dashboard = () => {
       id: "trend3", 
       name: "PromptWizard", 
       icon: "✨", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.7, 
       downloads: 1543, 
       description: "Advanced prompt engineering and testing server",
@@ -118,7 +118,7 @@ const Dashboard = () => {
       id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.6, 
       downloads: 1278, 
       description: "Vector database integration for semantic search capabilities",
@@ -138,7 +138,7 @@ const Dashboard = () => {
       id: "trend5", 
       name: "DocumentLoader", 
       icon: "📄", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.5, 
       downloads: 1150, 
       description: "Document parsing and processing for various file formats",
@@ -158,7 +158,7 @@ const Dashboard = () => {
       id: "trend6", 
       name: "VectorStore", 
       icon: "🔮", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.4, 
       downloads: 1050, 
       description: "High-performance vector database for AI applications",
@@ -178,7 +178,7 @@ const Dashboard = () => {
       id: "trend7", 
       name: "ImageProcessor", 
       icon: "🖼️", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 4.3, 
       downloads: 980, 
       description: "Image analysis and transformation server",
@@ -198,7 +198,7 @@ const Dashboard = () => {
       id: "trend8", 
       name: "AudioTranscriber", 
       icon: "🎵", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 4.2, 
       downloads: 920, 
       description: "Speech-to-text and audio analysis server",
@@ -218,7 +218,7 @@ const Dashboard = () => {
       id: "trend9", 
       name: "DataAnalyzer", 
       icon: "📊", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.1, 
       downloads: 870, 
       description: "Data analysis and visualization server",
@@ -238,7 +238,7 @@ const Dashboard = () => {
       id: "trend10", 
       name: "ChatBot", 
       icon: "💬", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 4.0, 
       downloads: 820, 
       description: "Conversational AI platform with multiple personalities",
