@@ -6,6 +6,7 @@ import {
   Globe,
   TerminalSquare,
   PlusCircle,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import { EditProfileDialog } from "@/components/profiles/EditProfileDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
@@ -25,6 +27,7 @@ const Profiles = () => {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   const getServerInstances = (profile: Profile) => {
@@ -148,6 +151,11 @@ const Profiles = () => {
     return instance ? instance.name.split(' ')[0] : 'Unknown';
   };
 
+  // Filter profiles based on search query
+  const filteredProfiles = localProfiles.filter(profile => 
+    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -172,9 +180,21 @@ const Profiles = () => {
           Create Profile
         </Button>
       </div>
+
+      <div className="flex items-center space-x-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search profiles..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {localProfiles.map((profile) => {
+        {filteredProfiles.map((profile) => {
           const instances = getServerInstances(profile);
           
           return (

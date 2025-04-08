@@ -137,6 +137,15 @@ export function CreateProfileDialog({
     return definition ? definition.name : 'Unknown Definition';
   };
 
+  // Filter out used definition IDs for each selection
+  const getAvailableDefinitionIds = (currentSelectionId: string) => {
+    const usedDefinitionIds = selections
+      .filter(s => s.id !== currentSelectionId && s.definitionId)
+      .map(s => s.definitionId);
+    
+    return definitionIds.filter(defId => !usedDefinitionIds.includes(defId));
+  };
+
   const handleSubmit = (values: ProfileFormValues) => {
     if (!hasInstances) {
       navigate("/servers");
@@ -243,7 +252,7 @@ export function CreateProfileDialog({
                   </Button>
                 </div>
 
-                {selections.map((selection, index) => (
+                {selections.map((selection) => (
                   <div key={selection.id} className="flex items-center gap-2">
                     <div className="flex-1">
                       <Select
@@ -254,7 +263,7 @@ export function CreateProfileDialog({
                           <SelectValue placeholder="Select definition" />
                         </SelectTrigger>
                         <SelectContent>
-                          {definitionIds.map(defId => (
+                          {getAvailableDefinitionIds(selection.id).map(defId => (
                             <SelectItem key={defId} value={defId}>
                               {getDefinitionName(defId)}
                             </SelectItem>
@@ -295,6 +304,13 @@ export function CreateProfileDialog({
                     </Button>
                   </div>
                 ))}
+
+                <Alert variant="default" className="bg-blue-50 border-blue-200 mt-2">
+                  <AlertDescription className="text-xs text-blue-700">
+                    Each server definition can only be selected once.
+                    At least one server instance must be selected for the profile.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <DialogFooter className="pt-4">
