@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Info } from "lucide-react";
+import { Info, Plus, Trash2 } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { Separator } from "@/components/ui/separator";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -30,8 +32,10 @@ interface AddInstanceDialogProps {
 
 const instanceFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  args: z.string().min(1, { message: "Command arguments are required." }),
+  args: z.string().optional(),
+  url: z.string().optional(),
   env: z.record(z.string(), z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   instanceId: z.string().optional(),
 });
 
@@ -46,6 +50,7 @@ export function AddInstanceDialog({
   initialValues,
   instanceId
 }: AddInstanceDialogProps) {
+  // For STDIO type
   const [envFields, setEnvFields] = useState<{name: string; value: string}[]>(
     initialValues?.env 
       ? Object.entries(initialValues.env).map(([name, value]) => ({ name, value }))
@@ -55,35 +60,92 @@ export function AddInstanceDialog({
           { name: "MAX_TOKENS", value: "4096" },
         ]
   );
+  
+  // For HTTP_SSE type
+  const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>(
+    initialValues?.headers 
+      ? Object.entries(initialValues.headers).map(([name, value]) => ({ name, value }))
+      : [
+          { name: "Authorization", value: "" },
+          { name: "Content-Type", value: "application/json" },
+        ]
+  );
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
     defaultValues: initialValues || {
       name: serverDefinition ? `${serverDefinition.name} Instance` : "",
-      args: serverDefinition ? 
-        `npx -y @smithery/cli@latest install @block/${serverDefinition.type.toLowerCase()} --client ${serverDefinition.name.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
+      args: serverDefinition?.type === 'STDIO' ? 
+        `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
         : "",
+      url: serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : "",
       env: {},
+      headers: {},
       instanceId: instanceId,
     },
   });
 
   const onSubmit = (data: InstanceFormValues) => {
-    const envData: Record<string, string> = {};
+    // Process environment variables for STDIO type
+    if (serverDefinition?.type === 'STDIO') {
+      const envData: Record<string, string> = {};
+      
+      envFields.forEach(field => {
+        if (field.value) {
+          envData[field.name] = field.value;
+        }
+      });
+      
+      data.env = envData;
+    }
     
-    envFields.forEach(field => {
-      if (field.value) {
-        envData[field.name] = field.value;
-      }
-    });
+    // Process HTTP headers for HTTP_SSE type
+    if (serverDefinition?.type === 'HTTP_SSE') {
+      const headerData: Record<string, string> = {};
+      
+      headerFields.forEach(field => {
+        if (field.value) {
+          headerData[field.name] = field.value;
+        }
+      });
+      
+      data.headers = headerData;
+    }
     
-    data.env = envData;
-    data.instanceId = instanceId; // This should now be valid with the updated type
+    data.instanceId = instanceId; 
     onCreateInstance(data);
     if (!editMode) form.reset();
   };
 
+  const addEnvField = () => {
+    setEnvFields([...envFields, { name: "", value: "" }]);
+  };
+
+  const addHeaderField = () => {
+    setHeaderFields([...headerFields, { name: "", value: "" }]);
+  };
+  
+  const removeEnvField = (index: number) => {
+    // Don't allow removing the default fields (first 3)
+    if (index < 3) return;
+    
+    const newFields = [...envFields];
+    newFields.splice(index, 1);
+    setEnvFields(newFields);
+  };
+
+  const removeHeaderField = (index: number) => {
+    // Don't allow removing the default fields (first 2)
+    if (index < 2) return;
+    
+    const newFields = [...headerFields];
+    newFields.splice(index, 1);
+    setHeaderFields(newFields);
+  };
+
   if (!serverDefinition) return null;
+
+  const isStdio = serverDefinition.type === 'STDIO';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,82 +191,230 @@ export function AddInstanceDialog({
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="args"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center">
-                    Command Arguments
-                    <span className="text-destructive ml-1">*</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="ml-1 cursor-help">
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Command line arguments to initialize the server</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="npx -y @smithery/cli@latest install @block/server-type" 
-                      className="font-mono text-sm h-20" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium flex items-center">
-                  Environment Variables
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="ml-1 cursor-help">
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>These variables will be passed to the server instance</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </h4>
-              </div>
-              
-              {envFields.map((field, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-start">
-                  <div className="col-span-5">
-                    <Label className="flex items-center" htmlFor={`env-${index}`}>
-                      {field.name}
-                    </Label>
+            {isStdio ? (
+              // STDIO specific fields
+              <>
+                <FormField
+                  control={form.control}
+                  name="args"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        Command Arguments
+                        <span className="text-destructive ml-1">*</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="ml-1 cursor-help">
+                                <Info className="h-4 w-4 text-muted-foreground" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Command line arguments to initialize the server</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="npx -y @smithery/cli@latest install @block/server-type" 
+                          className="font-mono text-sm h-20" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium flex items-center">
+                      Environment Variables
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1 cursor-help">
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>These variables will be passed to the server instance</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addEnvField}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Variable
+                    </Button>
                   </div>
-                  <div className="col-span-7">
-                    <Input
-                      id={`env-${index}`}
-                      value={field.value}
-                      onChange={(e) => {
-                        const newFields = [...envFields];
-                        newFields[index].value = e.target.value;
-                        setEnvFields(newFields);
-                      }}
-                      placeholder="Optional"
-                    />
+                  
+                  <div className="space-y-4 max-h-[200px] overflow-y-auto border rounded-md p-4">
+                    {envFields.map((field, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-2 items-start">
+                        <div className="col-span-5">
+                          <Input
+                            value={field.name}
+                            onChange={(e) => {
+                              const newFields = [...envFields];
+                              newFields[index].name = e.target.value;
+                              setEnvFields(newFields);
+                            }}
+                            placeholder="Variable Name"
+                            className="text-sm"
+                            disabled={index < 3} // Default fields are not editable
+                          />
+                        </div>
+                        <div className="col-span-6">
+                          <Input
+                            value={field.value}
+                            onChange={(e) => {
+                              const newFields = [...envFields];
+                              newFields[index].value = e.target.value;
+                              setEnvFields(newFields);
+                            }}
+                            placeholder="Value"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="col-span-1 flex justify-center items-center h-full">
+                          {index >= 3 && (
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-destructive"
+                              onClick={() => removeEnvField(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              // HTTP_SSE specific fields
+              <>
+                <FormField
+                  control={form.control}
+                  name="url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        URL
+                        <span className="text-destructive ml-1">*</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="ml-1 cursor-help">
+                                <Info className="h-4 w-4 text-muted-foreground" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>The URL endpoint for the HTTP SSE server</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="http://localhost:3000/api" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium flex items-center">
+                      HTTP Headers
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="ml-1 cursor-help">
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Headers to send with requests to the server</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addHeaderField}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Header
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4 max-h-[200px] overflow-y-auto border rounded-md p-4">
+                    {headerFields.map((field, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-2 items-start">
+                        <div className="col-span-5">
+                          <Input
+                            value={field.name}
+                            onChange={(e) => {
+                              const newFields = [...headerFields];
+                              newFields[index].name = e.target.value;
+                              setHeaderFields(newFields);
+                            }}
+                            placeholder="Header Name"
+                            className="text-sm"
+                            disabled={index < 2} // Default fields are not editable
+                          />
+                        </div>
+                        <div className="col-span-6">
+                          <Input
+                            value={field.value}
+                            onChange={(e) => {
+                              const newFields = [...headerFields];
+                              newFields[index].value = e.target.value;
+                              setHeaderFields(newFields);
+                            }}
+                            placeholder="Value"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="col-span-1 flex justify-center items-center h-full">
+                          {index >= 2 && (
+                            <Button 
+                              type="button" 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 text-destructive"
+                              onClick={() => removeHeaderField(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
             
-            <DialogFooter>
+            <DialogFooter className="pt-2">
               <Button 
                 type="button" 
                 variant="outline" 

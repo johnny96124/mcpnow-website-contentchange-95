@@ -2,7 +2,7 @@
 export interface ServerDefinition {
   id: string;
   name: string;
-  type: 'HTTP_SSE' | 'CLI_PROCESS';
+  type: 'HTTP_SSE' | 'STDIO';
   version: string;
   description: string;
   icon?: string;
@@ -24,9 +24,11 @@ export interface ServerInstance {
   requestCount?: number;
   environment?: Record<string, string>;
   arguments?: string;
+  url?: string;
+  headers?: Record<string, string>;
 }
 
-export type EndpointType = 'HTTP_SSE' | 'CLI_PROCESS';
+export type EndpointType = 'HTTP_SSE' | 'STDIO';
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
