@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -51,39 +51,110 @@ export function AddInstanceDialog({
   instanceId
 }: AddInstanceDialogProps) {
   // For STDIO type
-  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>(
-    initialValues?.env 
-      ? Object.entries(initialValues.env).map(([name, value]) => ({ name, value }))
-      : [
-          { name: "API_KEY", value: "" },
-          { name: "MODEL_NAME", value: "" },
-          { name: "MAX_TOKENS", value: "4096" },
-        ]
-  );
+  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([
+    { name: "API_KEY", value: "" },
+    { name: "MODEL_NAME", value: "" },
+    { name: "MAX_TOKENS", value: "4096" },
+  ]);
   
   // For HTTP_SSE type
-  const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>(
-    initialValues?.headers 
-      ? Object.entries(initialValues.headers).map(([name, value]) => ({ name, value }))
-      : [
-          { name: "Authorization", value: "" },
-          { name: "Content-Type", value: "application/json" },
-        ]
-  );
+  const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([
+    { name: "Authorization", value: "" },
+    { name: "Content-Type", value: "application/json" },
+  ]);
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
     defaultValues: {
-      name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
-      args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
-        `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
-        : ""),
-      url: initialValues?.url || (serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : ""),
-      env: initialValues?.env || {},
-      headers: initialValues?.headers || {},
+      name: '',
+      args: '',
+      url: '',
+      env: {},
+      headers: {},
       instanceId: instanceId,
     },
   });
+
+  // Effect to reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      // Initialize the form with proper defaults based on server definition
+      form.reset({
+        name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
+        args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
+          `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
+          : ""),
+        url: initialValues?.url || (serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : ""),
+        env: initialValues?.env || {},
+        headers: initialValues?.headers || {},
+        instanceId: instanceId,
+      });
+      
+      // Initialize env fields based on initialValues if in edit mode
+      if (editMode && initialValues?.env) {
+        const envEntries = Object.entries(initialValues.env);
+        const defaultEnvFields = [
+          { name: "API_KEY", value: "" },
+          { name: "MODEL_NAME", value: "" },
+          { name: "MAX_TOKENS", value: "4096" },
+        ];
+        
+        // Start with default env fields
+        let newEnvFields = [...defaultEnvFields];
+        
+        // Update default fields if they exist in initialValues
+        newEnvFields = newEnvFields.map(field => {
+          const initialValue = initialValues.env?.[field.name];
+          return initialValue !== undefined ? { ...field, value: initialValue } : field;
+        });
+        
+        // Add any additional env fields from initialValues
+        const additionalFields = envEntries
+          .filter(([key]) => !defaultEnvFields.some(field => field.name === key))
+          .map(([name, value]) => ({ name, value }));
+        
+        setEnvFields([...newEnvFields, ...additionalFields]);
+      } else if (serverDefinition?.type === 'STDIO') {
+        // Set default env fields for new STDIO instance
+        setEnvFields([
+          { name: "API_KEY", value: "" },
+          { name: "MODEL_NAME", value: "" },
+          { name: "MAX_TOKENS", value: "4096" },
+        ]);
+      }
+      
+      // Initialize header fields based on initialValues if in edit mode
+      if (editMode && initialValues?.headers) {
+        const headerEntries = Object.entries(initialValues.headers);
+        const defaultHeaderFields = [
+          { name: "Authorization", value: "" },
+          { name: "Content-Type", value: "application/json" },
+        ];
+        
+        // Start with default header fields
+        let newHeaderFields = [...defaultHeaderFields];
+        
+        // Update default fields if they exist in initialValues
+        newHeaderFields = newHeaderFields.map(field => {
+          const initialValue = initialValues.headers?.[field.name];
+          return initialValue !== undefined ? { ...field, value: initialValue } : field;
+        });
+        
+        // Add any additional header fields from initialValues
+        const additionalFields = headerEntries
+          .filter(([key]) => !defaultHeaderFields.some(field => field.name === key))
+          .map(([name, value]) => ({ name, value }));
+        
+        setHeaderFields([...newHeaderFields, ...additionalFields]);
+      } else if (serverDefinition?.type === 'HTTP_SSE') {
+        // Set default header fields for new HTTP_SSE instance
+        setHeaderFields([
+          { name: "Authorization", value: "" },
+          { name: "Content-Type", value: "application/json" },
+        ]);
+      }
+    }
+  }, [open, initialValues, serverDefinition, form, editMode, instanceId]);
 
   const onSubmit = (data: InstanceFormValues) => {
     // Process environment variables for STDIO type
@@ -91,7 +162,7 @@ export function AddInstanceDialog({
       const envData: Record<string, string> = {};
       
       envFields.forEach(field => {
-        if (field.value) {
+        if (field.name && field.value) {
           envData[field.name] = field.value;
         }
       });
@@ -104,7 +175,7 @@ export function AddInstanceDialog({
       const headerData: Record<string, string> = {};
       
       headerFields.forEach(field => {
-        if (field.value) {
+        if (field.name && field.value) {
           headerData[field.name] = field.value;
         }
       });
@@ -152,11 +223,11 @@ export function AddInstanceDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span>{serverDefinition.name}</span>
+            <span>{editMode ? "Edit Instance" : serverDefinition.name}</span>
             <EndpointLabel type={serverDefinition.type} />
           </DialogTitle>
           <DialogDescription className="pt-2">
-            {serverDefinition.description}
+            {editMode ? "Edit the instance settings" : serverDefinition.description}
           </DialogDescription>
         </DialogHeader>
         

@@ -2,22 +2,17 @@
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
-  ExternalLink,
   PlusCircle, 
   Trash2, 
   Globe,
   Terminal,
   AlertCircle,
   Search,
-  CheckCircle,
-  XCircle,
-  Clock,
   Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { 
   AlertDialog,
@@ -44,13 +39,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { 
   serverDefinitions, 
@@ -77,15 +65,9 @@ const Servers = () => {
     key: string;
     direction: 'asc' | 'desc';
   } | null>(null);
-  const [filterType, setFilterType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
-  const [connectionResultOpen, setConnectionResultOpen] = useState(false);
-  const [connectionResult, setConnectionResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -113,13 +95,6 @@ const Servers = () => {
       filtered = filtered.filter(instance => 
         instance.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    }
-    
-    if (filterType !== "all") {
-      filtered = filtered.filter(instance => {
-        const definition = definitions.find(d => d.id === instance.definitionId);
-        return definition?.type === filterType;
-      });
     }
     
     if (sortConfig) {
@@ -155,13 +130,8 @@ const Servers = () => {
     }
     
     setFilteredInstances(filtered);
-    
-    const filteredDefs = definitions.filter(def => 
-      filterType === "all" || def.type === filterType
-    );
-    
-    setFilteredDefinitions(filteredDefs);
-  }, [instances, searchQuery, filterType, sortConfig, definitions]);
+    setFilteredDefinitions(definitions);
+  }, [instances, searchQuery, sortConfig, definitions]);
 
   const truncateText = (text: string, maxLength = 24): string => {
     if (text.length <= maxLength) return text;
@@ -192,7 +162,10 @@ const Servers = () => {
               ...instance, 
               name: data.name, 
               environment: data.env,
-              arguments: data.args ? data.args.split(' ') : [] // Convert string to array
+              arguments: data.args ? data.args.split(' ') : [],
+              connectionDetails: selectedDefinition.type === 'HTTP_SSE' 
+                ? data.url || instance.connectionDetails
+                : instance.connectionDetails
             }
           : instance
       ));
@@ -214,7 +187,7 @@ const Servers = () => {
           : `localhost:${3000 + instances.length}`,
         requestCount: 0,
         environment: data.env,
-        arguments: data.args ? data.args.split(' ') : [] // Convert string to array
+        arguments: data.args ? data.args.split(' ') : []
       };
       
       setInstances([...instances, newInstance]);
@@ -291,13 +264,14 @@ const Servers = () => {
         [instanceId]: isSuccessful ? 'success' : 'failed'
       }));
       
-      setConnectionResult({
-        success: isSuccessful,
-        message: isSuccessful 
+      // Use toast instead of modal for connection results
+      toast({
+        title: isSuccessful ? "Connection Successful" : "Connection Failed",
+        description: isSuccessful 
           ? "The server instance is running properly." 
-          : "Could not connect to the server instance. Please check your configuration."
+          : "Could not connect to the server instance. Please check your configuration.",
+        variant: isSuccessful ? "default" : "destructive",
       });
-      setConnectionResultOpen(true);
     }, 2000);
   };
   
@@ -356,7 +330,7 @@ const Servers = () => {
                         <div className="flex items-center gap-1">
                           <EndpointLabel type={definition.type} />
                           {!definition.isOfficial && (
-                            <Badge variant="outline" className="text-gray-600 border-gray-300 rounded">
+                            <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
                               Custom
                             </Badge>
                           )}
@@ -412,7 +386,7 @@ const Servers = () => {
                                       disabled={instanceStatuses[instance.id] === 'connecting'}
                                     >
                                       {instanceStatuses[instance.id] === 'connecting' ? (
-                                        <Clock className="h-4 w-4 mr-1 animate-spin" />
+                                        <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
                                       ) : (
                                         <Terminal className="h-4 w-4 mr-1" />
                                       )}
@@ -585,7 +559,7 @@ const Servers = () => {
                           {definition?.icon && <span>{definition.icon}</span>}
                           <span>{truncateText(definition?.name || 'Unknown')}</span>
                           {!definition?.isOfficial && (
-                            <Badge variant="outline" className="text-gray-600 border-gray-300 rounded text-xs">
+                            <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md text-xs">
                               Custom
                             </Badge>
                           )}
@@ -617,7 +591,7 @@ const Servers = () => {
                             disabled={instanceStatuses[instance.id] === 'connecting'}
                           >
                             {instanceStatuses[instance.id] === 'connecting' ? (
-                              <Clock className="h-4 w-4 mr-1 animate-spin" />
+                              <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
                             ) : (
                               <Terminal className="h-4 w-4 mr-1" />
                             )}
@@ -704,24 +678,6 @@ const Servers = () => {
         onCreateServer={handleCreateServer}
         onNavigateToDiscovery={handleNavigateToDiscovery}
       />
-
-      <Dialog open={connectionResultOpen} onOpenChange={setConnectionResultOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {connectionResult?.success ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
-              ) : (
-                <XCircle className="h-5 w-5 text-red-500" />
-              )}
-              {connectionResult?.success ? "Connection Successful" : "Connection Failed"}
-            </DialogTitle>
-            <DialogDescription>
-              {connectionResult?.message}
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
