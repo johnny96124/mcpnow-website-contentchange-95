@@ -1,19 +1,17 @@
 import { Link } from "react-router-dom";
 import { 
-  Database,
   ExternalLink,
   Info,
   Loader2,
   Server, 
   UsersRound,
-  CheckCircle,
   Download,
-  X
+  X,
+  Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
   CarouselContent,
@@ -22,25 +20,24 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { useState } from "react";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { OfficialBadge } from "@/components/discovery/OfficialBadge";
-import { CategoryList } from "@/components/discovery/CategoryList";
+import { useState, useEffect } from "react";
 import { useServerContext } from "@/context/ServerContext";
-import type { ServerDefinition, EndpointType } from "@/data/mockData";
+import type { ServerDefinition } from "@/data/mockData";
+
+const AUTOPLAY_INTERVAL = 5000; // 5 seconds between slides
 
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
-  
+  const [showCarouselControls, setShowCarouselControls] = useState(false);
   const { openAddInstanceDialog } = useServerContext();
   
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
-  
+
   const trendingServers = [
     { 
       id: "trend1", 
@@ -243,7 +240,7 @@ const Dashboard = () => {
       repository: "https://github.com/chattech/chatbot"
     }
   ];
-  
+
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
@@ -261,34 +258,90 @@ const Dashboard = () => {
     }, 1500);
   };
 
-  const handleNavigateToServers = () => {
-  };
-
-  const formatDownloadCount = (count: number) => {
-    return `${(count / 1000).toFixed(1)}K`;
-  };
-  
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage your MCP profiles, servers, and host connections.
-          </p>
-        </div>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight mb-6">Dashboard</h1>
       </div>
       
+      <div className="relative group">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/discovery">
+              View All
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        
+        <div 
+          className="w-full relative group"
+          onMouseEnter={() => setShowCarouselControls(true)}
+          onMouseLeave={() => setShowCarouselControls(false)}
+        >
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+              skipSnaps: true,
+              startIndex: 1,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {trendingServers.map(server => (
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
+                  <Card className="relative group overflow-hidden border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+                    <CardHeader className="space-y-0 p-4">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                          {server.name}
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-4 p-4 pt-0">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {server.description}
+                      </p>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm flex items-center gap-1.5 text-muted-foreground">
+                          <Download className="h-4 w-4" />
+                          {(server.downloads / 1000).toFixed(1)}k
+                        </span>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleViewDetails(server)}
+                          className="hover:bg-primary hover:text-primary-foreground"
+                        >
+                          <Info className="h-4 w-4 mr-1" />
+                          Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            
+            <div className={`transition-opacity duration-300 ${showCarouselControls ? 'opacity-100' : 'opacity-0'}`}>
+              <CarouselPrevious className="absolute -left-4 hover:bg-primary hover:text-primary-foreground" />
+              <CarouselNext className="absolute -right-4 hover:bg-primary hover:text-primary-foreground" />
+            </div>
+          </Carousel>
+        </div>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="overflow-hidden flex flex-col">
+        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle className="text-lg font-medium">
-                Connected Hosts
-              </CardTitle>
-              <CardDescription>
-                {connectedHosts} of {hosts.length} hosts connected
-              </CardDescription>
+              <CardTitle className="text-lg font-medium">Connected Hosts</CardTitle>
+              <CardDescription>{connectedHosts} of {hosts.length} hosts connected</CardDescription>
             </div>
             <UsersRound className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -332,15 +385,11 @@ const Dashboard = () => {
           </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden flex flex-col">
+        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle className="text-lg font-medium">
-                Active Profiles
-              </CardTitle>
-              <CardDescription>
-                {activeProfiles} of {profiles.length} profiles enabled
-              </CardDescription>
+              <CardTitle className="text-lg font-medium">Active Profiles</CardTitle>
+              <CardDescription>{activeProfiles} of {profiles.length} profiles enabled</CardDescription>
             </div>
             <Database className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -376,15 +425,11 @@ const Dashboard = () => {
           </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden flex flex-col">
+        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle className="text-lg font-medium">
-                Server Instances
-              </CardTitle>
-              <CardDescription>
-                {runningInstances} of {serverInstances.length} instances running
-              </CardDescription>
+              <CardTitle className="text-lg font-medium">Server Instances</CardTitle>
+              <CardDescription>{runningInstances} of {serverInstances.length} instances running</CardDescription>
             </div>
             <Server className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
@@ -421,69 +466,7 @@ const Dashboard = () => {
           </CardFooter>
         </Card>
       </div>
-      
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/discovery">
-              View All
-              <ExternalLink className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        
-        <div className="w-full">
-          <Carousel className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="pb-2 space-y-0">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <CardTitle className="text-xl">{server.name}</CardTitle>
-                          <div className="flex items-center gap-1">
-                            <EndpointLabel type={server.type} />
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 pt-4">
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                        {server.description}
-                      </p>
-                    </CardContent>
-                    
-                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
-                      <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
-                        <Download className="h-3 w-3" />
-                        {formatDownloadCount(server.downloads)}
-                      </Badge>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleViewDetails(server)}
-                      >
-                        <Info className="h-4 w-4 mr-1" />
-                        Details
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex items-center justify-center mt-4">
-              <CarouselPrevious className="relative -left-0 mx-2" />
-              <CarouselNext className="relative -right-0 mx-2" />
-            </div>
-          </Carousel>
-        </div>
-      </div>
-      
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
