@@ -137,11 +137,11 @@ const TrayPopup = () => {
     definitions.forEach((definitionId, index) => {
       setTimeout(() => {
         setInstanceStatuses(prev => {
-          const hostStatuses = { ...prev[hostId] };
+          const hostStatuses = { ...prev[hostId] } || {};
           const currentStatus = hostStatuses[definitionId];
           
           // Only update if enabled
-          if (currentStatus.enabled) {
+          if (currentStatus && currentStatus.enabled) {
             // Random success chance (80% success)
             const success = Math.random() > 0.2;
             hostStatuses[definitionId] = {
@@ -190,15 +190,17 @@ const TrayPopup = () => {
 
   const handleInstanceToggle = (hostId: string, definitionId: string) => {
     setInstanceStatuses(prev => {
-      const hostStatuses = { ...prev[hostId] };
+      const hostStatuses = { ...(prev[hostId] || {}) };
       const currentStatus = hostStatuses[definitionId];
       
-      hostStatuses[definitionId] = {
-        ...currentStatus,
-        enabled: !currentStatus.enabled,
-        // If turning on, set to connecting, otherwise keep status
-        status: !currentStatus.enabled ? 'connecting' : currentStatus.status
-      };
+      if (currentStatus) {
+        hostStatuses[definitionId] = {
+          ...currentStatus,
+          enabled: !currentStatus.enabled,
+          // If turning on, set to connecting, otherwise keep status
+          status: !currentStatus.enabled ? 'connecting' : currentStatus.status
+        };
+      }
       
       return {
         ...prev,
@@ -211,16 +213,18 @@ const TrayPopup = () => {
     if (currentStatus && !currentStatus.enabled) {
       setTimeout(() => {
         setInstanceStatuses(prev => {
-          const hostStatuses = { ...prev[hostId] };
+          const hostStatuses = { ...(prev[hostId] || {}) };
           const currentStatus = hostStatuses[definitionId];
           
-          // Random success chance (80% success)
-          const success = Math.random() > 0.2;
-          
-          hostStatuses[definitionId] = {
-            ...currentStatus,
-            status: success ? 'connected' : 'error'
-          };
+          if (currentStatus) {
+            // Random success chance (80% success)
+            const success = Math.random() > 0.2;
+            
+            hostStatuses[definitionId] = {
+              ...currentStatus,
+              status: success ? 'connected' : 'error'
+            };
+          }
           
           return {
             ...prev,
@@ -250,7 +254,7 @@ const TrayPopup = () => {
     // Set the affected hosts' statuses for this definition to connecting
     affectedHosts.forEach(hostId => {
       setInstanceStatuses(prev => {
-        const hostStatuses = { ...prev[hostId] };
+        const hostStatuses = { ...(prev[hostId] || {}) };
         if (hostStatuses[definitionId] && hostStatuses[definitionId].enabled) {
           hostStatuses[definitionId] = {
             ...hostStatuses[definitionId],
@@ -269,7 +273,7 @@ const TrayPopup = () => {
     setTimeout(() => {
       affectedHosts.forEach(hostId => {
         setInstanceStatuses(prev => {
-          const hostStatuses = { ...prev[hostId] };
+          const hostStatuses = { ...(prev[hostId] || {}) };
           if (hostStatuses[definitionId] && hostStatuses[definitionId].enabled) {
             // 90% success chance for instance changes
             const success = Math.random() > 0.1;
