@@ -21,10 +21,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Slider } from "@/components/ui/slider";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
@@ -36,9 +34,6 @@ const Dashboard = () => {
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
-  const [autoplaySpeed, setAutoplaySpeed] = useState<number>(3000); // 3 seconds
-  const [isAutoplayOn, setIsAutoplayOn] = useState<boolean>(true);
-  const autoplayRef = useRef<NodeJS.Timeout | null>(null);
   
   const { openAddInstanceDialog } = useServerContext();
   
@@ -273,30 +268,6 @@ const Dashboard = () => {
     return `${(count / 1000).toFixed(1)}K`;
   };
   
-  const [carouselApi, setCarouselApi] = useState<any>(null);
-
-  useEffect(() => {
-    if (carouselApi && isAutoplayOn) {
-      if (autoplayRef.current) {
-        clearInterval(autoplayRef.current);
-      }
-      
-      autoplayRef.current = setInterval(() => {
-        if (carouselApi.canScrollNext()) {
-          carouselApi.scrollNext();
-        } else {
-          carouselApi.scrollTo(0);
-        }
-      }, autoplaySpeed);
-    }
-    
-    return () => {
-      if (autoplayRef.current) {
-        clearInterval(autoplayRef.current);
-      }
-    };
-  }, [carouselApi, autoplaySpeed, isAutoplayOn]);
-  
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -454,63 +425,25 @@ const Dashboard = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="h-8 px-2"
-                onClick={() => setIsAutoplayOn(!isAutoplayOn)}
-              >
-                {isAutoplayOn ? "Pause" : "Play"}
-              </Button>
-              <div className="w-24">
-                <Slider 
-                  defaultValue={[3]} 
-                  max={10}
-                  min={1}
-                  step={0.5}
-                  onValueChange={(value) => setAutoplaySpeed(value[0] * 1000)}
-                />
-              </div>
-            </div>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/discovery">
-                View All
-                <ExternalLink className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/discovery">
+              View All
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
         
         <div className="w-full">
-          <Carousel 
-            className="w-full" 
-            setApi={setCarouselApi}
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-          >
+          <Carousel className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-                  <Card 
-                    className="flex flex-col h-[300px] overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                    style={{ 
-                      background: `linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.1))`,
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                    }}
-                  >
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                  <Card className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
                     <CardHeader className="pb-2 space-y-0">
                       <div className="flex justify-between items-start">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{server.icon}</span>
-                            <CardTitle className="text-lg">{server.name}</CardTitle>
-                          </div>
-                          <div className="flex items-center gap-1 mt-1">
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl">{server.name}</CardTitle>
+                          <div className="flex items-center gap-1">
                             <EndpointLabel type={server.type} />
                             {server.isOfficial && <OfficialBadge />}
                           </div>
@@ -518,34 +451,13 @@ const Dashboard = () => {
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="flex-1 pt-2 pb-4">
+                    <CardContent className="flex-1 pt-4">
                       <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
                         {server.description}
                       </p>
-                      <div className="mt-2">
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {server.categories?.slice(0, 2).map(category => (
-                            <Badge 
-                              key={category} 
-                              variant="secondary" 
-                              className="text-xs py-0 px-1.5"
-                            >
-                              {category}
-                            </Badge>
-                          ))}
-                          {server.categories && server.categories.length > 2 && (
-                            <Badge 
-                              variant="secondary" 
-                              className="text-xs py-0 px-1.5"
-                            >
-                              +{server.categories.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
                     </CardContent>
                     
-                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t bg-muted/30">
+                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
                       <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                         <Download className="h-3 w-3" />
                         {formatDownloadCount(server.downloads)}
@@ -555,7 +467,6 @@ const Dashboard = () => {
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleViewDetails(server)}
-                        className="hover:bg-primary hover:text-primary-foreground transition-colors"
                       >
                         <Info className="h-4 w-4 mr-1" />
                         Details
@@ -565,7 +476,7 @@ const Dashboard = () => {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden sm:flex items-center justify-center mt-4">
+            <div className="flex items-center justify-center mt-4">
               <CarouselPrevious className="relative -left-0 mx-2" />
               <CarouselNext className="relative -right-0 mx-2" />
             </div>
@@ -579,13 +490,10 @@ const Dashboard = () => {
             <div className="h-full">
               <div className="flex justify-between items-center p-5 pb-2">
                 <div className="space-y-1">
+                  <DialogTitle className="text-2xl font-bold leading-tight">
+                    {selectedServer.name}
+                  </DialogTitle>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">{selectedServer.icon}</span>
-                    <DialogTitle className="text-2xl font-bold leading-tight">
-                      {selectedServer.name}
-                    </DialogTitle>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
                     <EndpointLabel type={selectedServer.type} />
                     {selectedServer.isOfficial && <OfficialBadge />}
                   </div>
@@ -601,13 +509,13 @@ const Dashboard = () => {
                 </div>
               </div>
               
-              <ScrollArea className="px-5 space-y-4 pb-6 max-h-[70vh]">
+              <div className="px-5 space-y-4 pb-6">
                 <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Description</h3>
                   <p>{selectedServer.description}</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Author</h3>
                     <p className="font-medium">
@@ -623,7 +531,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4 mt-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Category</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedServer.categories?.map(category => (
@@ -634,7 +542,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4 mt-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Features</h3>
                   <ul className="list-disc list-inside space-y-1 ml-1">
                     {selectedServer.features?.map((feature, index) => (
@@ -643,7 +551,7 @@ const Dashboard = () => {
                   </ul>
                 </div>
                 
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4 mt-4">
+                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
                   <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Repository</h3>
                   <a 
                     href="#" 
@@ -655,7 +563,7 @@ const Dashboard = () => {
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
                 </div>
-              </ScrollArea>
+              </div>
               
               <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
                 {installedServers[selectedServer.id] ? (
