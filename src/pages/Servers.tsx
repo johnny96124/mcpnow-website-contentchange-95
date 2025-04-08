@@ -48,6 +48,7 @@ import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddI
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
+import { ProfileReference, useHostProfiles } from "@/hooks/useHostProfiles";
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -66,6 +67,7 @@ const Servers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
+  const { instanceProfiles } = useHostProfiles();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -77,14 +79,6 @@ const Servers = () => {
     acc[definitionId].push(instance);
     return acc;
   }, {} as Record<string, ServerInstance[]>);
-
-  const instanceProfiles: Record<string, string[]> = {
-    "instance-1": ["General Development", "Research"],
-    "instance-2": ["Testing"],
-    "instance-3": [],
-    "instance-4": ["Production", "Research"],
-    "instance-5": [],
-  };
 
   useEffect(() => {
     let filtered = [...instances];
@@ -282,9 +276,54 @@ const Servers = () => {
       });
     }, 2000);
   };
+
+  // Function to render profile badges with count indicator
+  const renderProfileBadges = (instanceId: string) => {
+    const profiles = instanceProfiles[instanceId] || [];
+    
+    if (profiles.length === 0) {
+      return (
+        <span className="text-muted-foreground text-xs">Not in use</span>
+      );
+    }
+    
+    // Show the first profile, and if there are more, show a +n indicator
+    const firstProfile = profiles[0];
+    const remainingCount = profiles.length - 1;
+    
+    return (
+      <div className="flex flex-wrap gap-1 items-center">
+        <Badge variant="outline" className="text-xs">
+          {truncateText(firstProfile.name, 16)}
+        </Badge>
+        
+        {remainingCount > 0 && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="text-xs cursor-help">
+                  +{remainingCount}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">Other profiles using this instance:</p>
+                  <ul className="text-xs space-y-0.5">
+                    {profiles.slice(1).map((profile, idx) => (
+                      <li key={idx}>{profile.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
+    );
+  };
   
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
+    <div className="space-y-6 animate-fade-in pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Servers</h1>
@@ -359,110 +398,96 @@ const Servers = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
-                            <TableHead>Profile</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead className="w-[40%]">Profiles</TableHead>
+                            <TableHead className="text-right pr-6">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDefInstances.map(instance => {
-                            const profiles = instanceProfiles[instance.id] || [];
-                            
-                            return (
-                              <TableRow key={instance.id}>
-                                <TableCell className="font-medium">
-                                  {truncateText(instance.name)}
-                                </TableCell>
-                                <TableCell>
-                                  {profiles.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {profiles.map((profile, idx) => (
-                                        <Badge key={idx} variant="outline" className="text-xs">
-                                          {profile}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <span className="text-muted-foreground text-xs">Not in use</span>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                                      onClick={() => handleConnect(instance.id)}
-                                      disabled={instanceStatuses[instance.id] === 'connecting'}
-                                    >
-                                      {instanceStatuses[instance.id] === 'connecting' ? (
-                                        <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                                      ) : (
-                                        <Terminal className="h-4 w-4 mr-1" />
-                                      )}
-                                      Connect
-                                    </Button>
-                                    
+                          {filteredDefInstances.map(instance => (
+                            <TableRow key={instance.id}>
+                              <TableCell className="font-medium">
+                                {truncateText(instance.name)}
+                              </TableCell>
+                              <TableCell>
+                                {renderProfileBadges(instance.id)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                                    onClick={() => handleConnect(instance.id)}
+                                    disabled={instanceStatuses[instance.id] === 'connecting'}
+                                  >
+                                    {instanceStatuses[instance.id] === 'connecting' ? (
+                                      <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                                    ) : (
+                                      <Terminal className="h-4 w-4 mr-1" />
+                                    )}
+                                    Connect
+                                  </Button>
+                                  
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button 
+                                          variant="outline" 
+                                          size="icon"
+                                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
+                                          onClick={() => handleViewDetails(instance)}
+                                        >
+                                          <Info className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>View details</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                  
+                                  <AlertDialog>
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <Button 
-                                            variant="outline" 
-                                            size="icon"
-                                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
-                                            onClick={() => handleViewDetails(instance)}
-                                          >
-                                            <Info className="h-4 w-4" />
-                                          </Button>
+                                          <AlertDialogTrigger asChild>
+                                            <Button 
+                                              variant="outline" 
+                                              size="icon"
+                                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>View details</p>
+                                          <p>Delete instance</p>
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>
-                                    
-                                    <AlertDialog>
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <AlertDialogTrigger asChild>
-                                              <Button 
-                                                variant="outline" 
-                                                size="icon"
-                                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
-                                              >
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </AlertDialogTrigger>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p>Delete instance</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will permanently delete the instance "{instance.name}". 
-                                            This action cannot be undone.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction 
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            onClick={() => handleDeleteInstance(instance.id)}
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete the instance "{instance.name}". 
+                                          This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          onClick={() => handleDeleteInstance(instance.id)}
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -551,14 +576,13 @@ const Servers = () => {
                   <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Profiles</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium w-[30%]">Profiles</th>
+                  <th className="h-10 px-4 text-right align-middle font-medium pr-6">Actions</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {filteredInstances.map(instance => {
                   const definition = definitions.find(d => d.id === instance.definitionId);
-                  const profiles = instanceProfiles[instance.id] || [];
                   const isCustom = !definition?.isOfficial;
                   
                   return (
@@ -579,20 +603,10 @@ const Servers = () => {
                         <EndpointLabel type={definition?.type || 'STDIO'} />
                       </td>
                       <td className="p-4 align-middle">
-                        {profiles.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {profiles.map((profile, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {profile}
-                              </Badge>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">Not in use</span>
-                        )}
+                        {renderProfileBadges(instance.id)}
                       </td>
-                      <td className="p-4 align-middle">
-                        <div className="flex items-center gap-2">
+                      <td className="p-4 align-middle text-right">
+                        <div className="flex items-center justify-end gap-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -664,6 +678,7 @@ const Servers = () => {
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
+        clearFormOnOpen={true}
       />
 
       <AddInstanceDialog
