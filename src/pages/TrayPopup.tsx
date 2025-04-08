@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProfileChangeConfirmDialog } from "@/components/tray/ProfileChangeConfirmDialog";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
@@ -39,14 +38,6 @@ const TrayPopup = () => {
   // Track active instances for each profile and definition combination
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
   
-  // State for profile change confirmation dialog
-  const [profileChangeDialog, setProfileChangeDialog] = useState({
-    isOpen: false,
-    hostId: "",
-    profileId: "",
-    profileName: "",
-  });
-  
   // Track instance status for each profile
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
@@ -54,22 +45,7 @@ const TrayPopup = () => {
   const [expandedHosts, setExpandedHosts] = useState<Record<string, boolean>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    if (profile) {
-      // Open confirmation dialog instead of immediately changing
-      setProfileChangeDialog({
-        isOpen: true,
-        hostId,
-        profileId,
-        profileName: profile.name,
-      });
-    }
-  };
-  
-  const confirmProfileChange = () => {
-    const { hostId, profileId } = profileChangeDialog;
-    
-    // Actually perform the profile change
+    // Directly update profile without confirmation
     setSelectedProfileIds(prev => ({
       ...prev,
       [hostId]: profileId
@@ -78,9 +54,9 @@ const TrayPopup = () => {
     // Simulate connecting to new instances
     initializeProfileInstances(hostId, profileId);
     
-    // Close dialog and show toast
-    setProfileChangeDialog(prev => ({ ...prev, isOpen: false }));
-    toast.success("Profile configuration updated successfully");
+    // Show toast
+    const profile = profiles.find(p => p.id === profileId);
+    toast.success(`Profile changed to ${profile?.name}`);
   };
 
   // Initialize instance statuses for a host's profile
@@ -138,6 +114,8 @@ const TrayPopup = () => {
 
   // Toggle instance enabled state
   const toggleInstanceEnabled = (hostId: string, instanceId: string) => {
+    if (!instanceId) return; // Guard against undefined instance id
+    
     setInstanceStatuses(prev => {
       const hostInstances = [...(prev[hostId] || [])];
       const instanceIndex = hostInstances.findIndex(i => i.id === instanceId);
@@ -180,7 +158,9 @@ const TrayPopup = () => {
     });
     
     // Show toast
-    toast.success(`Server instance ${!instanceStatuses[hostId]?.find(i => i.id === instanceId)?.enabled ? 'enabled' : 'disabled'}`);
+    const instance = instanceStatuses[hostId]?.find(i => i.id === instanceId);
+    const action = instance && !instance.enabled ? 'enabled' : 'disabled';
+    toast.success(`Server instance ${action}`);
   };
 
   // Handle instance selection
@@ -197,6 +177,46 @@ const TrayPopup = () => {
     
     // This would be where you'd make an API call to actually change the active instance
     console.log(`Changed instance for ${definitionId} to ${instanceId} for host ${hostId}`);
+    
+    // Show status as connecting
+    setInstanceStatuses(prev => {
+      const hostInstances = [...(prev[hostId] || [])];
+      const instance = hostInstances.find(i => i.id === instanceId);
+      
+      if (instance && instance.enabled) {
+        const instanceIndex = hostInstances.findIndex(i => i.id === instanceId);
+        hostInstances[instanceIndex] = {
+          ...hostInstances[instanceIndex],
+          status: 'connecting'
+        };
+        
+        // Simulate connection after a delay
+        setTimeout(() => {
+          setInstanceStatuses(prevState => {
+            const updatedHostInstances = [...(prevState[hostId] || [])];
+            const idx = updatedHostInstances.findIndex(i => i.id === instanceId);
+            
+            if (idx !== -1 && updatedHostInstances[idx].status === 'connecting') {
+              updatedHostInstances[idx] = {
+                ...updatedHostInstances[idx],
+                status: Math.random() > 0.2 ? 'running' : 'error'
+              };
+            }
+            
+            return {
+              ...prevState,
+              [hostId]: updatedHostInstances
+            };
+          });
+        }, 1500);
+      }
+      
+      return {
+        ...prev,
+        [hostId]: hostInstances
+      };
+    });
+    
     toast.success("Server instance activated");
   };
 
@@ -245,7 +265,7 @@ const TrayPopup = () => {
       const activeInstanceId = activeInstances[hostId]?.[defId] || definitionInstances[0]?.id || '';
       
       // Get status for this definition
-      const status = hostStatusInstances.find(s => s.definitionId === defId);
+      const status = hostStatusInstances.find(s => s.id === activeInstanceId);
       
       result.push({
         definition,
@@ -336,7 +356,7 @@ const TrayPopup = () => {
                     </div>
                     
                     <div className="p-3 pt-2">
-                      {/* Profile selector */}
+                      {/* Profile selector - no confirmation dialog */}
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">Profile:</span>
                         <Select
@@ -377,12 +397,13 @@ const TrayPopup = () => {
                           <div className="space-y-2">
                             {displayInstances.map(({ definition, instances, activeInstanceId, status }) => (
                               <div key={definition.id} className="flex items-center justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-sm font-medium">{definition.name}</span>
+                                {/* Definition name with reduced font size and single line with truncation */}
+                                <div className="flex-1 min-w-0 mr-2">
+                                  <span className="text-xs font-medium truncate block">{definition.name}</span>
                                 </div>
                                 
                                 <div className="flex items-center gap-2">
-                                  {/* Instance selector */}
+                                  {/* Instance selector - redesigned dropdown */}
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button 
@@ -415,16 +436,7 @@ const TrayPopup = () => {
                                           onClick={() => handleInstanceChange(host.id, definition.id, instance.id)}
                                           disabled={instance.id === activeInstanceId}
                                         >
-                                          <div className="flex items-center gap-1">
-                                            <StatusIndicator 
-                                              status={
-                                                !status?.enabled ? 'inactive' :
-                                                instance.status === 'running' ? 'active' : 
-                                                instance.status === 'error' ? 'error' : 'inactive'
-                                              } 
-                                            />
-                                            <span className="truncate max-w-[120px]">{instance.name.split('-').pop()}</span>
-                                          </div>
+                                          <span className="truncate max-w-[120px]">{instance.name.split('-').pop()}</span>
                                           {instance.id === activeInstanceId && (
                                             <Check className="h-3 w-3" />
                                           )}
@@ -436,13 +448,13 @@ const TrayPopup = () => {
                                   {/* Toggle switch */}
                                   <Switch 
                                     checked={status?.enabled || false} 
-                                    onCheckedChange={() => toggleInstanceEnabled(host.id, instances.find(i => i.id === activeInstanceId)?.id || '')}
+                                    onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
                                   />
                                 </div>
                               </div>
                             ))}
                             
-                            {/* Expand/Collapse button */}
+                            {/* Expand/Collapse button - only show for more than 2 instances */}
                             {showExpandCollapse && (
                               <div className="flex justify-end mt-1">
                                 <Button 
@@ -490,13 +502,6 @@ const TrayPopup = () => {
           )}
         </div>
       </ScrollArea>
-      
-      <ProfileChangeConfirmDialog
-        open={profileChangeDialog.isOpen}
-        onOpenChange={(open) => setProfileChangeDialog(prev => ({ ...prev, isOpen: open }))}
-        onConfirm={confirmProfileChange}
-        profileName={profileChangeDialog.profileName}
-      />
     </div>
   );
 };
