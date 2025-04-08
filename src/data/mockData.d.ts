@@ -6,6 +6,13 @@ export interface ServerDefinition {
   version: string;
   description: string;
   icon?: string;
+  downloads?: number;
+  stars?: number;
+  author?: string;
+  categories?: string[];
+  isOfficial?: boolean;
+  features?: string[];
+  repository?: string;
 }
 
 export interface ServerInstance {
@@ -18,6 +25,8 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string;
 }
+
+export type EndpointType = 'HTTP_SSE' | 'CLI_PROCESS';
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
