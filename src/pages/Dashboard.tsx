@@ -440,85 +440,33 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="pb-2 space-y-0">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <CardTitle className="text-xl">{server.name}</CardTitle>
-                          <div className="flex items-center gap-1">
-                            <EndpointLabel type={server.type} />
-                            {server.isOfficial && <OfficialBadge />}
+                  <Card className="overflow-hidden border border-gray-200 dark:border-gray-800 rounded-xl hover:shadow-md transition-shadow duration-200">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <h3 className="text-2xl font-bold">{server.name}</h3>
+                        <div className="flex flex-wrap gap-2">
+                          <EndpointLabel type={server.type} className="py-1 px-3" />
+                          {server.isOfficial && <OfficialBadge />}
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-300 text-base">
+                          {server.description}
+                        </p>
+                        <div className="flex justify-between items-center pt-4">
+                          <div className="flex items-center text-amber-500">
+                            <Download className="h-5 w-5 mr-2" />
+                            <span className="font-bold text-lg">{formatDownloadCount(server.downloads)}</span>
                           </div>
-                        </div>
-                        <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
-                          <Download className="h-3 w-3" />
-                          {formatDownloadCount(server.downloads)}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 pt-4">
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                        {server.description}
-                      </p>
-                      
-                      <div className="mb-4">
-                        <CategoryList categories={server.categories || []} maxVisible={3} />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs font-medium text-muted-foreground mb-1">Author</p>
-                          <p className="text-sm font-medium">{server.author}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs font-medium text-muted-foreground mb-1">Version</p>
-                          <p className="text-sm font-medium">{server.version}</p>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => handleViewDetails(server)}
+                            className="flex items-center gap-2 px-6"
+                          >
+                            <Info className="h-5 w-5" />
+                            <span>Details</span>
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
-                    
-                    <CardFooter className="flex justify-between border-t bg-gray-50 dark:bg-gray-800/50 p-3 mt-4">
-                      <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)}>
-                        <Info className="h-4 w-4 mr-1" />
-                        Details
-                      </Button>
-                      
-                      {installedServers[server.id] ? (
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Installed
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={handleNavigateToServers}
-                            className="px-2"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : isInstalling[server.id] ? (
-                        <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200">
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                          Installing...
-                        </Button>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleInstall(server.id)}
-                          className="bg-blue-500 hover:bg-blue-600"
-                        >
-                          <Download className="h-4 w-4 mr-1" />
-                          Install Server
-                        </Button>
-                      )}
-                    </CardFooter>
                   </Card>
                 </CarouselItem>
               ))}
