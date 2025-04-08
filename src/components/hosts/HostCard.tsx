@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, serverInstances } from "@/data/mockData";
+import { profiles, serverInstances, serverDefinitions } from "@/data/mockData";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +15,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface InstanceStatus {
   id: string;
   name: string;
+  definitionId: string;
+  definitionName: string;
   status: 'connected' | 'connecting' | 'error' | 'disconnected';
   enabled: boolean;
 }
@@ -58,6 +60,12 @@ export function HostCard({
     return 'warning'; // Partially connected
   };
   
+  // Get definition name from id
+  const getDefinitionName = (definitionId: string) => {
+    const definition = serverDefinitions.find(def => def.id === definitionId);
+    return definition ? definition.name : 'Unknown';
+  };
+  
   // Simulate connection process when profile changes
   useEffect(() => {
     if (profileId) {
@@ -74,6 +82,8 @@ export function HostCard({
             return instance ? {
               id: instance.id,
               name: instance.name,
+              definitionId: instance.definitionId,
+              definitionName: getDefinitionName(instance.definitionId),
               status: 'connecting',
               enabled: true
             } : null;
@@ -139,7 +149,7 @@ export function HostCard({
   const selectedProfile = profiles.find(p => p.id === profileId);
   
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -164,7 +174,7 @@ export function HostCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4 space-y-4">
+      <CardContent className="pt-4 space-y-4 flex-1">
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
@@ -227,7 +237,11 @@ export function HostCard({
                               instance.status === 'error' ? 'error' : 'inactive'
                             }
                           />
-                          <span className="text-sm">{instance.name}</span>
+                          <div className="text-sm">
+                            <span className="font-medium">{instance.definitionName}</span>
+                            {' - '}
+                            <span className="text-muted-foreground">{instance.name}</span>
+                          </div>
                           {instance.status === 'connecting' && (
                             <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
                           )}
@@ -242,29 +256,6 @@ export function HostCard({
                 </ScrollArea>
               </div>
             )}
-            
-            <Separator className="my-2" />
-            
-            <div className="flex justify-end">
-              {!host.configPath ? (
-                <Button 
-                  onClick={() => onCreateConfig(host.id, profileId)}
-                  disabled={!profileId}
-                >
-                  <Settings2 className="h-4 w-4 mr-2" />
-                  Create Config
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  onClick={() => onOpenConfigDialog(host.id)}
-                  disabled={!host.configPath}
-                >
-                  <FilePlus className="h-4 w-4 mr-2" />
-                  View Config
-                </Button>
-              )}
-            </div>
           </>
         )}
         
@@ -276,6 +267,33 @@ export function HostCard({
           </div>
         )}
       </CardContent>
+      
+      <Separator className="mt-auto" />
+      
+      <CardFooter className="mt-2">
+        <div className="flex justify-end w-full">
+          {profileId && (
+            !host.configPath ? (
+              <Button 
+                onClick={() => onCreateConfig(host.id, profileId)}
+                disabled={!profileId}
+              >
+                <Settings2 className="h-4 w-4 mr-2" />
+                Create Config
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenConfigDialog(host.id)}
+                disabled={!host.configPath}
+              >
+                <FilePlus className="h-4 w-4 mr-2" />
+                View Config
+              </Button>
+            )
+          )}
+        </div>
+      </CardFooter>
     </Card>
   );
 }
