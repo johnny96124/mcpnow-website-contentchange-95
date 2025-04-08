@@ -4,7 +4,6 @@ import {
   ExternalLink,
   Info,
   Loader2,
-  PackagePlus,
   Server, 
   UsersRound,
   CheckCircle,
@@ -13,15 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { useState } from "react";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { OfficialBadge } from "@/components/discovery/OfficialBadge";
-import { CategoryList } from "@/components/discovery/CategoryList";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { useServerContext } from "@/context/ServerContext";
 import {
   Carousel,
   CarouselContent,
@@ -29,7 +21,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import type { ServerDefinition } from "@/data/mockData";
+import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
+import { useState } from "react";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { OfficialBadge } from "@/components/discovery/OfficialBadge";
+import { CategoryList } from "@/components/discovery/CategoryList";
+import { useServerContext } from "@/context/ServerContext";
+import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
