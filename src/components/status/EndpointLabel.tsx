@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: EndpointType | 'Custom';
+  type: EndpointType | 'Custom' | 'WS';
   className?: string;
 }
 
@@ -19,6 +19,10 @@ export function EndpointLabel({ type, className }: EndpointLabelProps) {
     case 'STDIO':
       labelText = 'STDIO';
       typeClasses = "bg-purple-50 text-purple-700 border border-purple-200";
+      break;
+    case 'WS':
+      labelText = 'WebSocket';
+      typeClasses = "bg-green-50 text-green-700 border border-green-200";
       break;
     case 'Custom':
       labelText = 'Custom';

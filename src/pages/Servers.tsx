@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -42,7 +41,8 @@ import {
   serverDefinitions, 
   serverInstances,
   ServerDefinition,
-  ServerInstance
+  ServerInstance,
+  profiles
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -78,13 +78,15 @@ const Servers = () => {
     return acc;
   }, {} as Record<string, ServerInstance[]>);
 
-  const instanceProfiles: Record<string, string[]> = {
-    "instance-1": ["General Development", "Research"],
-    "instance-2": ["Testing"],
-    "instance-3": [],
-    "instance-4": ["Production", "Research"],
-    "instance-5": [],
-  };
+  const realProfileAssociations = profiles.reduce((acc, profile) => {
+    profile.instances.forEach(instanceId => {
+      if (!acc[instanceId]) {
+        acc[instanceId] = [];
+      }
+      acc[instanceId].push(profile);
+    });
+    return acc;
+  }, {} as Record<string, typeof profiles>);
 
   useEffect(() => {
     let filtered = [...instances];
@@ -359,13 +361,13 @@ const Servers = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
-                            <TableHead>Profile</TableHead>
-                            <TableHead>Actions</TableHead>
+                            <TableHead className="w-[40%]">Profile</TableHead>
+                            <TableHead className="text-right pr-6">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {filteredDefInstances.map(instance => {
-                            const profiles = instanceProfiles[instance.id] || [];
+                            const associatedProfiles = realProfileAssociations[instance.id] || [];
                             
                             return (
                               <TableRow key={instance.id}>
@@ -373,11 +375,11 @@ const Servers = () => {
                                   {truncateText(instance.name)}
                                 </TableCell>
                                 <TableCell>
-                                  {profiles.length > 0 ? (
+                                  {associatedProfiles.length > 0 ? (
                                     <div className="flex flex-wrap gap-1">
-                                      {profiles.map((profile, idx) => (
-                                        <Badge key={idx} variant="outline" className="text-xs">
-                                          {profile}
+                                      {associatedProfiles.map((profile, idx) => (
+                                        <Badge key={idx} variant={profile.enabled ? "default" : "outline"} className="text-xs">
+                                          {profile.name}
                                         </Badge>
                                       ))}
                                     </div>
@@ -385,80 +387,78 @@ const Servers = () => {
                                     <span className="text-muted-foreground text-xs">Not in use</span>
                                   )}
                                 </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                                      onClick={() => handleConnect(instance.id)}
-                                      disabled={instanceStatuses[instance.id] === 'connecting'}
-                                    >
-                                      {instanceStatuses[instance.id] === 'connecting' ? (
-                                        <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                                      ) : (
-                                        <Terminal className="h-4 w-4 mr-1" />
-                                      )}
-                                      Connect
-                                    </Button>
-                                    
+                                <TableCell className="text-right space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                                    onClick={() => handleConnect(instance.id)}
+                                    disabled={instanceStatuses[instance.id] === 'connecting'}
+                                  >
+                                    {instanceStatuses[instance.id] === 'connecting' ? (
+                                      <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                                    ) : (
+                                      <Terminal className="h-4 w-4 mr-1" />
+                                    )}
+                                    Connect
+                                  </Button>
+                                  
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button 
+                                          variant="outline" 
+                                          size="icon"
+                                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
+                                          onClick={() => handleViewDetails(instance)}
+                                        >
+                                          <Info className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>View details</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                  
+                                  <AlertDialog>
                                     <TooltipProvider>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
-                                          <Button 
-                                            variant="outline" 
-                                            size="icon"
-                                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
-                                            onClick={() => handleViewDetails(instance)}
-                                          >
-                                            <Info className="h-4 w-4" />
-                                          </Button>
+                                          <AlertDialogTrigger asChild>
+                                            <Button 
+                                              variant="outline" 
+                                              size="icon"
+                                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>View details</p>
+                                          <p>Delete instance</p>
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>
-                                    
-                                    <AlertDialog>
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <AlertDialogTrigger asChild>
-                                              <Button 
-                                                variant="outline" 
-                                                size="icon"
-                                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
-                                              >
-                                                <Trash2 className="h-4 w-4" />
-                                              </Button>
-                                            </AlertDialogTrigger>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p>Delete instance</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will permanently delete the instance "{instance.name}". 
-                                            This action cannot be undone.
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction 
-                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            onClick={() => handleDeleteInstance(instance.id)}
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  </div>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete the instance "{instance.name}". 
+                                          This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction 
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                          onClick={() => handleDeleteInstance(instance.id)}
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
                                 </TableCell>
                               </TableRow>
                             );
@@ -551,14 +551,14 @@ const Servers = () => {
                   <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Profiles</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium w-[30%]">Profiles</th>
+                  <th className="h-10 px-4 text-right align-middle font-medium pr-8">Actions</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {filteredInstances.map(instance => {
                   const definition = definitions.find(d => d.id === instance.definitionId);
-                  const profiles = instanceProfiles[instance.id] || [];
+                  const associatedProfiles = realProfileAssociations[instance.id] || [];
                   const isCustom = !definition?.isOfficial;
                   
                   return (
@@ -579,11 +579,15 @@ const Servers = () => {
                         <EndpointLabel type={definition?.type || 'STDIO'} />
                       </td>
                       <td className="p-4 align-middle">
-                        {profiles.length > 0 ? (
+                        {associatedProfiles.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {profiles.map((profile, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {profile}
+                            {associatedProfiles.map((profile, idx) => (
+                              <Badge 
+                                key={idx} 
+                                variant={profile.enabled ? "default" : "outline"} 
+                                className="text-xs"
+                              >
+                                {profile.name}
                               </Badge>
                             ))}
                           </div>
@@ -591,64 +595,62 @@ const Servers = () => {
                           <span className="text-muted-foreground text-xs">Not in use</span>
                         )}
                       </td>
-                      <td className="p-4 align-middle">
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                            onClick={() => handleConnect(instance.id)}
-                            disabled={instanceStatuses[instance.id] === 'connecting'}
-                          >
-                            {instanceStatuses[instance.id] === 'connecting' ? (
-                              <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                            ) : (
-                              <Terminal className="h-4 w-4 mr-1" />
-                            )}
-                            Connect
-                          </Button>
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                            onClick={() => handleViewDetails(instance)}
-                          >
-                            <Info className="h-4 w-4 mr-1" />
-                            Details
-                          </Button>
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                      <td className="p-4 align-middle text-right space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                          onClick={() => handleConnect(instance.id)}
+                          disabled={instanceStatuses[instance.id] === 'connecting'}
+                        >
+                          {instanceStatuses[instance.id] === 'connecting' ? (
+                            <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                          ) : (
+                            <Terminal className="h-4 w-4 mr-1" />
+                          )}
+                          Connect
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                          onClick={() => handleViewDetails(instance)}
+                        >
+                          <Info className="h-4 w-4 mr-1" />
+                          Details
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the instance "{instance.name}". 
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDeleteInstance(instance.id)}
                               >
-                                <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete the instance "{instance.name}". 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => handleDeleteInstance(instance.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </td>
                     </tr>
                   );
