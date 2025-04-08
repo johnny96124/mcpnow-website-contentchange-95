@@ -1,5 +1,7 @@
-import { Link } from "react-router-dom";
+
+import { Link, useNavigate } from "react-router-dom";
 import { 
+  CheckCircle,
   ExternalLink,
   Info,
   Loader2,
@@ -10,6 +12,7 @@ import {
   Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import {
@@ -22,7 +25,17 @@ import {
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { useState, useEffect } from "react";
 import { useServerContext } from "@/context/ServerContext";
-import type { ServerDefinition } from "@/data/mockData";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { OfficialBadge } from "@/components/discovery/OfficialBadge";
+import type { ServerDefinition, EndpointType } from "@/data/mockData";
+
+// Utility function to format download count
+const formatDownloadCount = (count: number): string => {
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}k`;
+  }
+  return count.toString();
+};
 
 const AUTOPLAY_INTERVAL = 5000; // 5 seconds between slides
 
@@ -33,10 +46,15 @@ const Dashboard = () => {
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [showCarouselControls, setShowCarouselControls] = useState(false);
   const { openAddInstanceDialog } = useServerContext();
+  const navigate = useNavigate();
   
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
+
+  const handleNavigateToServers = () => {
+    navigate('/servers');
+  };
 
   const trendingServers = [
     { 
