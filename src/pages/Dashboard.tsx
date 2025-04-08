@@ -32,6 +32,10 @@ import type { ServerDefinition, EndpointType } from "@/data/mockData";
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
+  const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
+  const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
+  
+  const { openAddInstanceDialog } = useServerContext();
   
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
@@ -245,6 +249,23 @@ const Dashboard = () => {
     setIsDialogOpen(true);
   };
 
+  const handleInstall = (serverId: string) => {
+    const server = trendingServers.find(item => item.id === serverId);
+    if (!server) return;
+    
+    setIsInstalling(prev => ({ ...prev, [serverId]: true }));
+    
+    setTimeout(() => {
+      setIsInstalling(prev => ({ ...prev, [serverId]: false }));
+      setInstalledServers(prev => ({ ...prev, [serverId]: true }));
+      
+      openAddInstanceDialog(server);
+    }, 1500);
+  };
+
+  const handleNavigateToServers = () => {
+  };
+
   const formatDownloadCount = (count: number) => {
     return `${(count / 1000).toFixed(1)}K`;
   };
@@ -419,7 +440,7 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="flex flex-col border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 h-[280px]">
+                  <Card className="flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
                     <CardHeader className="pb-2 space-y-0">
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
@@ -432,13 +453,13 @@ const Dashboard = () => {
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="flex-1 pt-4 overflow-hidden">
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                    <CardContent className="flex-1 pt-4">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                         {server.description}
                       </p>
                     </CardContent>
                     
-                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
+                    <CardFooter className="flex justify-between items-center p-3 mt-auto">
                       <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                         <Download className="h-3 w-3" />
                         {formatDownloadCount(server.downloads)}
@@ -544,6 +565,34 @@ const Dashboard = () => {
                     <ExternalLink className="h-3.5 w-3.5 ml-1" />
                   </a>
                 </div>
+              </div>
+              
+              <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
+                {installedServers[selectedServer.id] ? (
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Installed
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={handleNavigateToServers}
+                      className="px-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : isInstalling[selectedServer.id] ? (
+                  <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Installing...
+                  </Button>
+                ) : (
+                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
+                    <Download className="h-4 w-4 mr-1" />
+                    Install Server
+                  </Button>
+                )}
               </div>
             </div>
           )}
