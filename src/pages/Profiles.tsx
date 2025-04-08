@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from "react";
 import { 
-  CircleCheck, 
   Edit, 
   Trash2, 
   Globe,
@@ -9,8 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +16,7 @@ import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 import { EditProfileDialog } from "@/components/profiles/EditProfileDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
+import { Separator } from "@/components/ui/separator";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
@@ -27,14 +26,6 @@ const Profiles = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const { toast } = useToast();
-
-  const toggleProfile = (id: string) => {
-    setLocalProfiles(prev => 
-      prev.map(profile => 
-        profile.id === id ? { ...profile, enabled: !profile.enabled } : profile
-      )
-    );
-  };
 
   const getServerInstances = (profile: Profile) => {
     return profile.instances.map(
@@ -104,20 +95,16 @@ const Profiles = () => {
 
   const handleCreateProfile = ({ 
     name, 
-    endpointType, 
-    endpoint, 
     instances 
   }: { 
     name: string; 
-    endpointType: EndpointType; 
-    endpoint: string;
     instances: string[];
   }) => {
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
       name,
-      endpointType,
-      endpoint,
+      endpointType: "HTTP_SSE",
+      endpoint: "http://localhost:8008/mcp",
       enabled: true,
       instances,
     };
@@ -155,6 +142,12 @@ const Profiles = () => {
     ensureFirstProfileHasFiveInstances();
   }, []);
 
+  // Helper function to get server definition name
+  const getDefinitionName = (definitionId: string) => {
+    const instance = serverInstances.find(inst => inst.definitionId === definitionId);
+    return instance ? instance.name.split(' ')[0] : 'Unknown';
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -181,122 +174,60 @@ const Profiles = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {localProfiles.map((profile, index) => {
+        {localProfiles.map((profile) => {
           const instances = getServerInstances(profile);
-          const runningInstancesCount = instances.filter(i => i?.status === 'running').length;
-          const errorInstancesCount = instances.filter(i => i?.status === 'error').length;
           
           return (
-            <Card key={profile.id} className={profile.enabled ? "" : "opacity-75"}>
+            <Card key={profile.id}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <StatusIndicator 
-                      status={
-                        profile.enabled ? 
-                          (errorInstancesCount > 0 ? "error" :
-                          runningInstancesCount > 0 ? "active" : "inactive") 
-                        : "inactive"
-                      } 
-                    />
-                    <CardTitle className="text-xl">{profile.name}</CardTitle>
-                  </div>
-                  <Switch 
-                    checked={profile.enabled}
-                    onCheckedChange={() => toggleProfile(profile.id)}
-                  />
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <EndpointLabel type={profile.endpointType} />
-                  {profile.enabled ? (
-                    <StatusIndicator 
-                      status={
-                        errorInstancesCount > 0 ? "error" :
-                        runningInstancesCount > 0 ? "active" : "inactive"
-                      } 
-                    />
-                  ) : (
-                    <StatusIndicator status="inactive" />
-                  )}
+                  <CardTitle className="text-xl">{profile.name}</CardTitle>
+                  <EndpointLabel type="HTTP_SSE" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Connection Endpoint</label>
-                    <div className="flex items-center gap-2 bg-muted p-2 rounded-md">
-                      {profile.endpointType === 'HTTP_SSE' ? (
-                        <Globe className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                      ) : (
-                        <TerminalSquare className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                      )}
-                      <code className="text-xs break-all">{profile.endpoint}</code>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
-                    {instances.length > 0 ? (
-                      instances.length > 2 ? (
-                        <ScrollArea className="h-32 rounded-md border">
-                          <div className="space-y-2 p-2">
-                            {instances.map(instance => instance && (
-                              <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
-                                <div className="flex items-center gap-2">
-                                  <StatusIndicator 
-                                    status={
-                                      instance.status === 'running' ? 'active' : 
-                                      instance.status === 'error' ? 'error' : 'inactive'
-                                    }
-                                  />
-                                  <span className="text-sm font-medium">{instance.name}</span>
-                                </div>
-                              </div>
-                            ))}
+                <div>
+                  <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
+                  {instances.length > 0 ? (
+                    <ScrollArea className="h-[200px] rounded-md border">
+                      <div className="space-y-1 p-1">
+                        {instances.map(instance => instance && (
+                          <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
+                            <span className="text-sm">
+                              <span className="font-medium">{getDefinitionName(instance.definitionId)}</span>
+                              {' - '}
+                              <span className="text-muted-foreground">{instance.name}</span>
+                            </span>
                           </div>
-                        </ScrollArea>
-                      ) : (
-                        <div className="space-y-2">
-                          {instances.map(instance => instance && (
-                            <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={
-                                    instance.status === 'running' ? 'active' : 
-                                    instance.status === 'error' ? 'error' : 'inactive'
-                                  }
-                                />
-                                <span className="text-sm font-medium">{instance.name}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )
-                    ) : (
-                      <div className="text-center p-2 text-muted-foreground text-sm">
-                        No server instances added
+                        ))}
                       </div>
-                    )}
-                  </div>
+                    </ScrollArea>
+                  ) : (
+                    <div className="text-center p-2 text-muted-foreground text-sm border rounded-md">
+                      No server instances added
+                    </div>
+                  )}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between pt-0">
-                <div className="flex gap-2">
-                  {/* Buttons can go here if needed */}
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-destructive border-destructive hover:bg-destructive/10"
-                    onClick={() => handleDeleteClick(profile)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEditProfile(profile)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </div>
+              <Separator />
+              <CardFooter className="flex justify-between pt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => handleDeleteClick(profile)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditProfile(profile)}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
               </CardFooter>
             </Card>
           );

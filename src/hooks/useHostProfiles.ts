@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { hosts, profiles, type Profile } from "@/data/mockData";
 

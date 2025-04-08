@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { PlusCircle, AlertCircle, Info, Plus, X } from "lucide-react";
+import { PlusCircle, Trash2, Plus, AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,29 +27,10 @@ import { EndpointType, ServerInstance, serverDefinitions } from "@/data/mockData
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { StatusIndicator } from "@/components/status/StatusIndicator";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
-  endpointType: z.enum(["HTTP_SSE", "STDIO"], { 
-    required_error: "Endpoint type is required" 
-  }),
-  endpoint: z.string().min(1, { message: "Endpoint URL or path is required" }),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -59,11 +40,15 @@ interface CreateProfileDialogProps {
   onOpenChange: (open: boolean) => void;
   onCreateProfile: (profile: {
     name: string;
-    endpointType: EndpointType;
-    endpoint: string;
     instances: string[];
   }) => void;
   instances: ServerInstance[];
+}
+
+interface InstanceSelection {
+  id: string;
+  definitionId: string;
+  instanceId: string;
 }
 
 export function CreateProfileDialog({ 
@@ -75,50 +60,75 @@ export function CreateProfileDialog({
   const { toast } = useToast();
   const navigate = useNavigate();
   const [hasInstances, setHasInstances] = useState(true);
-  const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
-  const [availableInstances, setAvailableInstances] = useState<ServerInstance[]>([]);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [selections, setSelections] = useState<InstanceSelection[]>([{ 
+    id: `selection-${Date.now()}`, 
+    definitionId: "", 
+    instanceId: "" 
+  }]);
+  
+  // Group instances by definition for easier selection
+  const instancesByDefinition = instances.reduce((acc, instance) => {
+    if (!acc[instance.definitionId]) {
+      acc[instance.definitionId] = [];
+    }
+    acc[instance.definitionId].push(instance);
+    return acc;
+  }, {} as Record<string, ServerInstance[]>);
+  
+  // Get unique definition IDs
+  const definitionIds = [...new Set(instances.map(instance => instance.definitionId))];
   
   useEffect(() => {
     setHasInstances(instances.length > 0);
     
-    // Reset selections and update available instances when dialog opens
+    // Reset selections when dialog opens
     if (open) {
-      setSelectedInstanceIds([]);
-      updateAvailableInstances([]);
+      setSelections([{ 
+        id: `selection-${Date.now()}`, 
+        definitionId: "", 
+        instanceId: "" 
+      }]);
     }
   }, [open, instances]);
-
-  // Function to update available instances based on current selections
-  const updateAvailableInstances = (currentSelectedIds: string[]) => {
-    // Filter out instances that are already selected
-    const available = instances.filter(
-      instance => !currentSelectedIds.includes(instance.id)
-    );
-    setAvailableInstances(available);
-  };
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: "",
-      endpointType: "HTTP_SSE",
-      endpoint: "",
     },
   });
 
-  // Add an instance to the selected list and update available instances
-  const addInstance = (instanceId: string) => {
-    const newSelectedIds = [...selectedInstanceIds, instanceId];
-    setSelectedInstanceIds(newSelectedIds);
-    updateAvailableInstances(newSelectedIds);
+  // Add a new instance selection row
+  const addSelection = () => {
+    setSelections([
+      ...selections, 
+      { 
+        id: `selection-${Date.now()}`, 
+        definitionId: "", 
+        instanceId: "" 
+      }
+    ]);
   };
 
-  // Remove an instance from the selected list and update available instances
-  const removeInstance = (instanceId: string) => {
-    const newSelectedIds = selectedInstanceIds.filter(id => id !== instanceId);
-    setSelectedInstanceIds(newSelectedIds);
-    updateAvailableInstances(newSelectedIds);
+  // Remove an instance selection row
+  const removeSelection = (id: string) => {
+    if (selections.length > 1) {
+      setSelections(selections.filter(selection => selection.id !== id));
+    }
+  };
+
+  // Update a selection's definition ID
+  const updateDefinitionId = (id: string, definitionId: string) => {
+    setSelections(selections.map(selection => 
+      selection.id === id ? { ...selection, definitionId, instanceId: "" } : selection
+    ));
+  };
+
+  // Update a selection's instance ID
+  const updateInstanceId = (id: string, instanceId: string) => {
+    setSelections(selections.map(selection => 
+      selection.id === id ? { ...selection, instanceId } : selection
+    ));
   };
 
   // Helper to get definition name
@@ -126,10 +136,6 @@ export function CreateProfileDialog({
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
-
-  const selectedInstances = instances.filter(
-    instance => selectedInstanceIds.includes(instance.id)
-  );
 
   const handleSubmit = (values: ProfileFormValues) => {
     if (!hasInstances) {
@@ -142,6 +148,11 @@ export function CreateProfileDialog({
       return;
     }
 
+    // Filter out incomplete selections and get only instance IDs
+    const selectedInstanceIds = selections
+      .filter(selection => selection.instanceId)
+      .map(selection => selection.instanceId);
+
     if (selectedInstanceIds.length === 0) {
       toast({
         title: "No instances selected",
@@ -153,13 +164,15 @@ export function CreateProfileDialog({
 
     onCreateProfile({
       name: values.name,
-      endpointType: values.endpointType,
-      endpoint: values.endpoint,
       instances: selectedInstanceIds,
     });
     
     form.reset();
-    setSelectedInstanceIds([]);
+    setSelections([{ 
+      id: `selection-${Date.now()}`, 
+      definitionId: "", 
+      instanceId: "" 
+    }]);
     onOpenChange(false);
     
     toast({
@@ -171,31 +184,37 @@ export function CreateProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New Profile</DialogTitle>
-          <DialogDescription>
-            Profiles allow you to group server instances and connect to hosts.
-          </DialogDescription>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Group server instances into a managed profile.
+            </DialogDescription>
+          </div>
+          <EndpointLabel type="HTTP_SSE" />
         </DialogHeader>
         
         {!hasInstances ? (
           <div className="py-4">
-            <Alert variant="destructive" className="mb-4">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 You need to create server instances before creating a profile.
               </AlertDescription>
             </Alert>
-            <Button onClick={() => {
-              navigate("/servers");
-              onOpenChange(false);
-            }} className="w-full">
+            <Button 
+              onClick={() => {
+                navigate("/servers");
+                onOpenChange(false);
+              }} 
+              className="w-full mt-4"
+            >
               Go to Servers Page
             </Button>
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
@@ -210,176 +229,79 @@ export function CreateProfileDialog({
                 )}
               />
 
-              {/* Connection endpoint configuration */}
-              <div className="space-y-4">
-                <Label className="text-sm font-medium">Connection Settings</Label>
-                
-                <FormField
-                  control={form.control}
-                  name="endpointType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-muted-foreground">Endpoint Type</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <FormLabel>Server Instances</FormLabel>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addSelection}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Instance
+                  </Button>
+                </div>
+
+                {selections.map((selection, index) => (
+                  <div key={selection.id} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Select
+                        value={selection.definitionId}
+                        onValueChange={(value) => updateDefinitionId(selection.id, value)}
                       >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select endpoint type" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select definition" />
+                        </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
-                          <SelectItem value="STDIO">Standard I/O</SelectItem>
+                          {definitionIds.map(defId => (
+                            <SelectItem key={defId} value={defId}>
+                              {getDefinitionName(defId)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="endpoint"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-muted-foreground">Connection Endpoint</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder={
-                            form.watch("endpointType") === "HTTP_SSE" 
-                              ? "http://localhost:8008/mcp" 
-                              : "/usr/local/bin/mcp-stdio"
-                          } 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+                    </div>
 
-              {/* Server Instance Selection */}
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
-                  <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={searchOpen}
-                        className="w-full justify-between"
+                    <div className="flex-1">
+                      <Select
+                        value={selection.instanceId}
+                        onValueChange={(value) => updateInstanceId(selection.id, value)}
+                        disabled={!selection.definitionId}
                       >
-                        Select a server instance...
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0">
-                      <Command>
-                        <CommandList>
-                          <CommandGroup>
-                            {availableInstances.length > 0 ? (
-                              availableInstances.map(instance => (
-                                <CommandItem
-                                  key={instance.id}
-                                  className="flex items-center justify-between py-2 px-2"
-                                  onSelect={() => {}} // We'll handle the click manually via the button
-                                  value={instance.name}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <StatusIndicator 
-                                      status={
-                                        instance.status === 'running' ? 'active' : 
-                                        instance.status === 'error' ? 'error' : 'inactive'
-                                      } 
-                                    />
-                                    <div className="flex flex-col">
-                                      <span className="font-medium">
-                                        {instance.name}
-                                      </span>
-                                      <span className="text-xs text-muted-foreground">
-                                        {getDefinitionName(instance.definitionId)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="ml-auto flex h-8 w-8 p-0 data-[state=open]:bg-accent"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addInstance(instance.id);
-                                    }}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                    <span className="sr-only">Add</span>
-                                  </Button>
-                                </CommandItem>
-                              ))
-                            ) : (
-                              <CommandEmpty>No available instances</CommandEmpty>
-                            )}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select instance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selection.definitionId && 
+                            instancesByDefinition[selection.definitionId]?.map(instance => (
+                              <SelectItem key={instance.id} value={instance.id}>
+                                {instance.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
-                  <ScrollArea className="h-[200px] rounded-md border">
-                    {selectedInstances.length > 0 ? (
-                      <div className="p-0">
-                        {selectedInstances.map(instance => (
-                          <div 
-                            key={instance.id}
-                            className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
-                          >
-                            <div className="flex items-center gap-2">
-                              <StatusIndicator 
-                                status={
-                                  instance.status === 'running' ? 'active' : 
-                                  instance.status === 'error' ? 'error' : 'inactive'
-                                }
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-medium">{instance.name}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {getDefinitionName(instance.definitionId)}
-                                </span>
-                              </div>
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => removeInstance(instance.id)}
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Remove
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-4 text-center text-sm text-muted-foreground">
-                        No instances selected
-                      </div>
-                    )}
-                  </ScrollArea>
-                </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeSelection(selection.id)}
+                      disabled={selections.length <= 1}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
 
               <DialogFooter className="pt-4">
                 <Button variant="outline" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
                 <Button 
                   type="submit"
-                  disabled={!form.formState.isValid || selectedInstanceIds.length === 0}
+                  disabled={!form.formState.isValid || selections.every(s => !s.instanceId)}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Profile
