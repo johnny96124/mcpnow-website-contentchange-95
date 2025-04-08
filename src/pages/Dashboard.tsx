@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -23,7 +22,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { CategoryList } from "@/components/discovery/CategoryList";
@@ -35,7 +34,6 @@ const Dashboard = () => {
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
-  const [carouselApi, setCarouselApi] = useState<any>(null);
   
   const { openAddInstanceDialog } = useServerContext();
   
@@ -246,17 +244,6 @@ const Dashboard = () => {
     }
   ];
   
-  // Auto rotate carousel
-  useEffect(() => {
-    if (!carouselApi) return;
-    
-    const interval = setInterval(() => {
-      carouselApi.scrollNext();
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [carouselApi]);
-  
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
@@ -292,111 +279,8 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Trending Servers Section - Moved to top */}
-      <div className="space-y-4 mb-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">
-            <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-              Trending MCP Servers
-            </span>
-          </h2>
-          <Button variant="outline" size="sm" asChild className="hover:scale-105 transition-transform">
-            <Link to="/discovery">
-              View All
-              <ExternalLink className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        
-        <div className="w-full relative">
-          <Carousel 
-            className="w-full"
-            setApi={setCarouselApi}
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <Card className="flex flex-col h-[290px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-blue-300 dark:hover:border-blue-500">
-                    <CardHeader className="pb-2 space-y-0 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <CardTitle className="text-xl truncate" title={server.name}>{server.name}</CardTitle>
-                          <div className="flex items-center gap-1">
-                            <EndpointLabel type={server.type} />
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 pt-4">
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                        {server.description}
-                      </p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {server.categories?.slice(0, 2).map(category => (
-                          <Badge key={category} variant="secondary" className="text-xs">
-                            {category}
-                          </Badge>
-                        ))}
-                        {server.categories && server.categories.length > 2 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{server.categories.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                    
-                    <CardFooter className="flex justify-between items-center px-4 py-3 mt-auto border-t">
-                      <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200 animate-pulse">
-                        <Download className="h-3 w-3" />
-                        {formatDownloadCount(server.downloads)}
-                      </Badge>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleViewDetails(server)}
-                        className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors"
-                      >
-                        <Info className="h-4 w-4 mr-1" />
-                        Details
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex items-center justify-center mt-4">
-              <CarouselPrevious className="relative -left-0 mx-2 hover:scale-110 transition-transform" />
-              <CarouselNext className="relative -right-0 mx-2 hover:scale-110 transition-transform" />
-            </div>
-          </Carousel>
-          
-          {/* Visual indicator for auto-rotation */}
-          <div className="w-full flex justify-center mt-2">
-            <div className="flex gap-1">
-              {[...Array(Math.min(5, trendingServers.length))].map((_, i) => (
-                <div key={i} className="w-8 h-1 rounded-full bg-blue-200 dark:bg-blue-800 overflow-hidden">
-                  <div className="h-full bg-blue-500 dark:bg-blue-400 animate-[progress_5s_ease-in-out_infinite] opacity-70" 
-                       style={{ 
-                         animationDelay: `${i * 1}s`,
-                       }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Stats Cards Section - Moved below trending */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -440,7 +324,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full hover:bg-blue-600 transition-colors">
+            <Button asChild className="w-full">
               <Link to="/hosts">
                 View All
               </Link>
@@ -448,7 +332,7 @@ const Dashboard = () => {
           </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -484,7 +368,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full hover:bg-blue-600 transition-colors">
+            <Button asChild className="w-full">
               <Link to="/profiles">
                 View All
               </Link>
@@ -492,7 +376,7 @@ const Dashboard = () => {
           </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -529,13 +413,75 @@ const Dashboard = () => {
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full hover:bg-blue-600 transition-colors">
+            <Button asChild className="w-full">
               <Link to="/servers">
                 View All
               </Link>
             </Button>
           </CardFooter>
         </Card>
+      </div>
+      
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/discovery">
+              View All
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        
+        <div className="w-full">
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {trendingServers.map(server => (
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
+                  <Card className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+                    <CardHeader className="pb-2 space-y-0">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl">{server.name}</CardTitle>
+                          <div className="flex items-center gap-1">
+                            <EndpointLabel type={server.type} />
+                            {server.isOfficial && <OfficialBadge />}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent className="flex-1 pt-4">
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                        {server.description}
+                      </p>
+                    </CardContent>
+                    
+                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
+                      <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                        <Download className="h-3 w-3" />
+                        {formatDownloadCount(server.downloads)}
+                      </Badge>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleViewDetails(server)}
+                      >
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center mt-4">
+              <CarouselPrevious className="relative -left-0 mx-2" />
+              <CarouselNext className="relative -right-0 mx-2" />
+            </div>
+          </Carousel>
+        </div>
       </div>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -640,7 +586,7 @@ const Dashboard = () => {
                     Installing...
                   </Button>
                 ) : (
-                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600 transition-colors">
+                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
                     <Download className="h-4 w-4 mr-1" />
                     Install Server
                   </Button>
@@ -650,14 +596,6 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
-
-      <style jsx>{`
-        @keyframes progress {
-          0% { transform: translateX(-100%); }
-          50% { transform: translateX(0); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 };
