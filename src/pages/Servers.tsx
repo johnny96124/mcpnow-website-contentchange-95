@@ -4,11 +4,9 @@ import {
   CirclePlus, 
   PlusCircle, 
   Trash2, 
-  Globe,
   Terminal,
-  AlertCircle,
-  Search,
-  Info
+  Info,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,7 +50,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 
 const Servers = () => {
-  const [definitions] = useState<ServerDefinition[]>(serverDefinitions);
+  const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [filteredInstances, setFilteredInstances] = useState<ServerInstance[]>(serverInstances);
   const [filteredDefinitions, setFilteredDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -130,7 +128,14 @@ const Servers = () => {
     }
     
     setFilteredInstances(filtered);
-    setFilteredDefinitions(definitions);
+    
+    let filteredDefs = [...definitions];
+    if (searchQuery) {
+      filteredDefs = filteredDefs.filter(def => 
+        def.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    setFilteredDefinitions(filteredDefs);
   }, [instances, searchQuery, sortConfig, definitions]);
 
   const truncateText = (text: string, maxLength = 24): string => {
@@ -214,6 +219,9 @@ const Servers = () => {
       setInstances(instances.filter(instance => instance.definitionId !== definitionId));
     }
     
+    setDefinitions(definitions.filter(def => def.id !== definitionId));
+    setFilteredDefinitions(filteredDefinitions.filter(def => def.id !== definitionId));
+    
     toast({
       title: "Server Deleted",
       description: "The server and its instances have been deleted successfully.",
@@ -240,6 +248,7 @@ const Servers = () => {
     };
     
     const updatedDefinitions = [...definitions, newDefinition];
+    setDefinitions(updatedDefinitions);
     setFilteredDefinitions(updatedDefinitions);
     
     toast({
@@ -264,7 +273,6 @@ const Servers = () => {
         [instanceId]: isSuccessful ? 'success' : 'failed'
       }));
       
-      // Use toast instead of modal for connection results
       toast({
         title: isSuccessful ? "Connection Successful" : "Connection Failed",
         description: isSuccessful 
@@ -276,7 +284,7 @@ const Servers = () => {
   };
   
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Servers</h1>
@@ -319,6 +327,7 @@ const Servers = () => {
             const filteredDefInstances = definitionInstances.filter(
               instance => filteredInstances.some(fi => fi.id === instance.id)
             );
+            const isCustom = !definition.isOfficial;
             
             return (
               <Card key={definition.id} className="overflow-hidden flex flex-col">
@@ -329,7 +338,7 @@ const Servers = () => {
                         {truncateText(definition.name)}
                         <div className="flex items-center gap-1">
                           <EndpointLabel type={definition.type} />
-                          {!definition.isOfficial && (
+                          {isCustom && (
                             <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
                               Custom
                             </Badge>
@@ -461,7 +470,7 @@ const Servers = () => {
                   
                   {filteredDefInstances.length === 0 && (
                     <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
-                      <AlertCircle className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                      <div className="h-8 w-8 text-muted-foreground/50 mb-2" />
                       <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
                       <Button 
                         variant="outline" 
@@ -550,6 +559,7 @@ const Servers = () => {
                 {filteredInstances.map(instance => {
                   const definition = definitions.find(d => d.id === instance.definitionId);
                   const profiles = instanceProfiles[instance.id] || [];
+                  const isCustom = !definition?.isOfficial;
                   
                   return (
                     <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
@@ -558,7 +568,7 @@ const Servers = () => {
                         <div className="flex items-center gap-2">
                           {definition?.icon && <span>{definition.icon}</span>}
                           <span>{truncateText(definition?.name || 'Unknown')}</span>
-                          {!definition?.isOfficial && (
+                          {isCustom && (
                             <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md text-xs">
                               Custom
                             </Badge>
@@ -664,7 +674,7 @@ const Servers = () => {
         editMode={true}
         initialValues={selectedInstance ? {
           name: selectedInstance.name,
-          args: selectedInstance.arguments ? selectedInstance.arguments.join(' ') : "",
+          args: Array.isArray(selectedInstance.arguments) ? selectedInstance.arguments.join(' ') : selectedInstance.arguments as string || "",
           url: selectedInstance.connectionDetails,
           env: selectedInstance.environment || {},
           headers: {}

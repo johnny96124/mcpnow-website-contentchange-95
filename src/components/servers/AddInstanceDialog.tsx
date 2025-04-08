@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -217,6 +218,7 @@ export function AddInstanceDialog({
   if (!serverDefinition) return null;
 
   const isStdio = serverDefinition.type === 'STDIO';
+  const isCustom = !serverDefinition.isOfficial;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -225,6 +227,11 @@ export function AddInstanceDialog({
           <DialogTitle className="flex items-center gap-2">
             <span>{editMode ? "Edit Instance" : serverDefinition.name}</span>
             <EndpointLabel type={serverDefinition.type} />
+            {isCustom && (
+              <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
+                Custom
+              </Badge>
+            )}
           </DialogTitle>
           <DialogDescription className="pt-2">
             {editMode ? "Edit the instance settings" : serverDefinition.description}

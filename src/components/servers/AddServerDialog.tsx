@@ -9,11 +9,11 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { ArrowRight, Download, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { type EndpointType } from "@/data/mockData";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ interface AddServerDialogProps {
 const serverFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
   type: z.enum(["HTTP_SSE", "STDIO"]),
-  description: z.string().optional(),
+  description: z.string().max(100, { message: "Description must not exceed 100 characters" }).optional(),
 });
 
 type ServerFormValues = z.infer<typeof serverFormSchema>;
@@ -36,7 +36,7 @@ export function AddServerDialog({
   onCreateServer,
   onNavigateToDiscovery
 }: AddServerDialogProps) {
-  const [activeTab, setActiveTab] = useState<"local" | "discovery">("local");
+  const [activeTab, setActiveTab] = useState<"local" | "discovery">("discovery");
   
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverFormSchema),
@@ -68,9 +68,31 @@ export function AddServerDialog({
         
         <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "local" | "discovery")}>
           <TabsList className="grid grid-cols-2 w-full mb-4">
+            <TabsTrigger value="discovery">Find in Discovery</TabsTrigger>
             <TabsTrigger value="local">Create Local Server</TabsTrigger>
-            <TabsTrigger value="discovery">Browse Discovery</TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="discovery" className="space-y-6">
+            <div className="grid gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <Download className="h-12 w-12 text-muted-foreground" />
+                    <div>
+                      <h3 className="text-lg font-semibold">Find in Discovery</h3>
+                      <CardDescription>
+                        Find and install pre-built servers from our official catalog
+                      </CardDescription>
+                    </div>
+                    <Button className="mt-2" onClick={handleDiscoveryNavigation}>
+                      Go to Discovery
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
           
           <TabsContent value="local" className="space-y-4">
             <Form {...form}>
@@ -99,47 +121,17 @@ export function AddServerDialog({
                       <FormLabel>
                         Server Type <span className="text-destructive">*</span>
                       </FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid grid-cols-2 gap-4"
-                        >
-                          <div>
-                            <RadioGroupItem 
-                              value="HTTP_SSE" 
-                              id="http_sse"
-                              className="peer sr-only"
-                            />
-                            <Label
-                              htmlFor="http_sse"
-                              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                            >
-                              <EndpointLabel type="HTTP_SSE" />
-                              <p className="text-sm text-center mt-2">
-                                HTTP Server Sent Events
-                              </p>
-                            </Label>
-                          </div>
-                          
-                          <div>
-                            <RadioGroupItem 
-                              value="STDIO" 
-                              id="stdio"
-                              className="peer sr-only"
-                            />
-                            <Label
-                              htmlFor="stdio"
-                              className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                            >
-                              <EndpointLabel type="STDIO" />
-                              <p className="text-sm text-center mt-2">
-                                Standard Input/Output
-                              </p>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select server type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="HTTP_SSE">HTTP SSE</SelectItem>
+                          <SelectItem value="STDIO">STDIO</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -173,28 +165,6 @@ export function AddServerDialog({
                 </DialogFooter>
               </form>
             </Form>
-          </TabsContent>
-          
-          <TabsContent value="discovery" className="space-y-6">
-            <div className="grid gap-4">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-col items-center gap-4 text-center">
-                    <Download className="h-12 w-12 text-muted-foreground" />
-                    <div>
-                      <h3 className="text-lg font-semibold">Browse from Discovery</h3>
-                      <CardDescription>
-                        Find and install pre-built servers from our official catalog
-                      </CardDescription>
-                    </div>
-                    <Button className="mt-2" onClick={handleDiscoveryNavigation}>
-                      Go to Discovery
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>

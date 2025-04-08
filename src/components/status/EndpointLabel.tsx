@@ -3,16 +3,30 @@ import { cn } from "@/lib/utils";
 import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: EndpointType;
+  type: EndpointType | 'Custom';
   className?: string;
 }
 
 export function EndpointLabel({ type, className }: EndpointLabelProps) {
-  const labelText = type === 'HTTP_SSE' ? 'HTTP SSE' : 'STDIO';
+  let labelText = '';
+  let typeClasses = '';
+  
+  switch(type) {
+    case 'HTTP_SSE':
+      labelText = 'HTTP SSE';
+      typeClasses = "bg-blue-50 text-blue-700 border border-blue-200";
+      break;
+    case 'STDIO':
+      labelText = 'STDIO';
+      typeClasses = "bg-purple-50 text-purple-700 border border-purple-200";
+      break;
+    case 'Custom':
+      labelText = 'Custom';
+      typeClasses = "bg-gray-50 text-gray-700 border border-gray-200";
+      break;
+  }
+  
   const baseClasses = "px-2 py-0.5 text-xs font-medium rounded-md";
-  const typeClasses = type === 'HTTP_SSE' 
-    ? "bg-blue-50 text-blue-700 border border-blue-200" 
-    : "bg-purple-50 text-purple-700 border border-purple-200";
   
   return (
     <span className={cn(baseClasses, typeClasses, className)}>
