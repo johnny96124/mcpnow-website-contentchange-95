@@ -258,8 +258,6 @@ const Dashboard = () => {
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
-      
-      openAddInstanceDialog(server);
     }, 1500);
   };
 
@@ -282,7 +280,7 @@ const Dashboard = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -294,7 +292,7 @@ const Dashboard = () => {
             </div>
             <UsersRound className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
               {hosts.slice(0, 3).map(host => (
                 <div 
@@ -324,17 +322,17 @@ const Dashboard = () => {
                 </p>
               )}
             </div>
-            <div className="flex">
-              <Button asChild className="flex-1">
-                <Link to="/hosts">
-                  View All
-                </Link>
-              </Button>
-            </div>
           </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/hosts">
+                View All
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -346,7 +344,7 @@ const Dashboard = () => {
             </div>
             <Database className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
               {profiles.slice(0, 3).map(profile => (
                 <div 
@@ -368,17 +366,17 @@ const Dashboard = () => {
                 </p>
               )}
             </div>
-            <div className="flex">
-              <Button asChild className="flex-1">
-                <Link to="/profiles">
-                  View All
-                </Link>
-              </Button>
-            </div>
           </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/profiles">
+                View All
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
         
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
@@ -390,7 +388,7 @@ const Dashboard = () => {
             </div>
             <Server className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
               {serverDefinitions.slice(0, 3).map(definition => (
                 <div 
@@ -413,14 +411,14 @@ const Dashboard = () => {
                 </p>
               )}
             </div>
-            <div className="flex">
-              <Button asChild className="flex-1">
-                <Link to="/servers">
-                  View All
-                </Link>
-              </Button>
-            </div>
           </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/servers">
+                View All
+              </Link>
+            </Button>
+          </CardFooter>
         </Card>
       </div>
       
@@ -440,7 +438,7 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+                  <Card className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
                     <CardHeader className="pb-2 space-y-0">
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
@@ -454,12 +452,12 @@ const Dashboard = () => {
                     </CardHeader>
                     
                     <CardContent className="flex-1 pt-4">
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
                         {server.description}
                       </p>
                     </CardContent>
                     
-                    <CardFooter className="flex justify-between items-center p-3 mt-auto">
+                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
                       <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                         <Download className="h-3 w-3" />
                         {formatDownloadCount(server.downloads)}
