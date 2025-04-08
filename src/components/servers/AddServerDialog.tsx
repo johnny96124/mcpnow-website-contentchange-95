@@ -25,9 +25,7 @@ interface AddServerDialogProps {
 const serverFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters long" }),
   type: z.enum(["HTTP_SSE", "STDIO"]),
-  description: z.string().max(100, { 
-    message: "Description must not exceed 100 characters" 
-  }).optional(),
+  description: z.string().max(100, { message: "Description must not exceed 100 characters" }).optional(),
 });
 
 type ServerFormValues = z.infer<typeof serverFormSchema>;

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { hosts, profiles, type Profile } from "@/data/mockData";
+
+import { useState } from "react";
+import { hosts } from "@/data/mockData";
 
 export function useHostProfiles() {
   const [hostProfiles, setHostProfiles] = useState(
@@ -8,21 +9,6 @@ export function useHostProfiles() {
       return acc;
     }, {} as Record<string, string>)
   );
-  
-  const [profileCache, setProfileCache] = useState<Record<string, Profile | null>>({});
-  
-  useEffect(() => {
-    const initialCache = profiles.reduce((acc, profile) => {
-      acc[profile.id] = profile;
-      return acc;
-    }, {} as Record<string, Profile>);
-    
-    setProfileCache(initialCache);
-  }, []);
-  
-  const getProfileById = (profileId: string): Profile | null => {
-    return profileCache[profileId] || null;
-  };
   
   const handleProfileChange = (hostId: string, profileId: string) => {
     setHostProfiles(prev => ({
@@ -33,7 +19,6 @@ export function useHostProfiles() {
   
   return {
     hostProfiles,
-    handleProfileChange,
-    getProfileById
+    handleProfileChange
   };
 }
