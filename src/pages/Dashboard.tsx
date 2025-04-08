@@ -37,12 +37,10 @@ const Dashboard = () => {
   
   const { openAddInstanceDialog } = useServerContext();
   
-  // Calculate summary stats
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
   
-  // Mock trending server data - extended to 10 items
   const trendingServers = [
     { 
       id: "trend1", 
@@ -257,18 +255,15 @@ const Dashboard = () => {
     
     setIsInstalling(prev => ({ ...prev, [serverId]: true }));
     
-    // Simulate installation
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       
-      // Open add instance dialog after installation
       openAddInstanceDialog(server);
     }, 1500);
   };
 
   const handleNavigateToServers = () => {
-    // This function is needed to match the style in Discovery
   };
 
   const formatDownloadCount = (count: number) => {
@@ -286,9 +281,7 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Combined Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Hosts Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -341,7 +334,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        {/* Profiles Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -386,7 +378,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        {/* Servers Combined Card */}
         <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -433,7 +424,6 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      {/* Trending MCP Servers - Updated to match Discovery page style */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -462,7 +452,7 @@ const Dashboard = () => {
                         </div>
                         <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                           <Download className="h-3 w-3" />
-                          {formatDownloadCount(server.downloads || 1320)}
+                          {formatDownloadCount(server.downloads)}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -541,7 +531,6 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Server Details Dialog - Updated to match Discovery dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
@@ -559,7 +548,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
                     <Download className="h-3 w-3" />
-                    {formatDownloadCount(selectedServer.downloads || 1320)}
+                    {formatDownloadCount(selectedServer.downloads)}
                   </Badge>
                   <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <X className="h-5 w-5" />

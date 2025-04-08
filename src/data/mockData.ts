@@ -14,6 +14,7 @@ export interface ServerDefinition {
   categories?: string[];
   features?: string[];
   repository?: string;
+  downloads?: number;
 }
 
 export interface ServerInstance {
@@ -66,7 +67,8 @@ export const serverDefinitions: ServerDefinition[] = [
       'Schema visualization',
       'Query optimizations'
     ],
-    repository: 'https://github.com/mcp/postgres-tool'
+    repository: 'https://github.com/mcp/postgres-tool',
+    downloads: 3500
   },
   {
     id: 'github-copilot-proxy',
@@ -84,7 +86,8 @@ export const serverDefinitions: ServerDefinition[] = [
       'Comment-to-code generation',
       'API integration'
     ],
-    repository: 'https://github.com/mcp/github-copilot-proxy'
+    repository: 'https://github.com/mcp/github-copilot-proxy',
+    downloads: 4200
   },
   {
     id: 'local-file-assistant',
@@ -102,7 +105,8 @@ export const serverDefinitions: ServerDefinition[] = [
       'File monitoring',
       'Batch operations'
     ],
-    repository: 'https://github.com/mcp/local-file-assistant'
+    repository: 'https://github.com/mcp/local-file-assistant',
+    downloads: 2800
   },
   {
     id: 'code-assistant',
@@ -120,7 +124,8 @@ export const serverDefinitions: ServerDefinition[] = [
       'Code refactoring',
       'Bug detection'
     ],
-    repository: 'https://github.com/mcp-community/code-assistant'
+    repository: 'https://github.com/mcp-community/code-assistant',
+    downloads: 3700
   },
   {
     id: 'docker-compose-tools',
@@ -138,7 +143,8 @@ export const serverDefinitions: ServerDefinition[] = [
       'Config validation',
       'Performance monitoring'
     ],
-    repository: 'https://github.com/mcp-community/docker-compose-tools'
+    repository: 'https://github.com/mcp-community/docker-compose-tools',
+    downloads: 2950
   },
 ];
 
@@ -323,7 +329,8 @@ export const discoveryItems: ServerDefinition[] = [
       'Real-time error checking',
       'Integrated debugging'
     ],
-    repository: 'https://github.com/AWS Community/aws toolkit'
+    repository: 'https://github.com/AWS Community/aws toolkit',
+    downloads: 4500
   },
   {
     id: 'docker-assistant',
@@ -341,7 +348,8 @@ export const discoveryItems: ServerDefinition[] = [
       'Network configuration',
       'Volume management'
     ],
-    repository: 'https://github.com/docker/assistant'
+    repository: 'https://github.com/docker/assistant',
+    downloads: 4000
   },
   {
     id: 'kubernetes-helper',
@@ -359,7 +367,8 @@ export const discoveryItems: ServerDefinition[] = [
       'Resource monitoring',
       'Deployment automation'
     ],
-    repository: 'https://github.com/k8s/helper'
+    repository: 'https://github.com/k8s/helper',
+    downloads: 3800
   },
   {
     id: 'frontend-dev-tools',
@@ -377,6 +386,7 @@ export const discoveryItems: ServerDefinition[] = [
       'Accessibility testing',
       'Performance optimization'
     ],
-    repository: 'https://github.com/webdev/frontend-tools'
+    repository: 'https://github.com/webdev/frontend-tools',
+    downloads: 3800
   },
 ];
