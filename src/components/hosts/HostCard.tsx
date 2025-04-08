@@ -9,12 +9,7 @@ import { profiles } from "@/data/mockData";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 interface HostCardProps {
   host: {
@@ -168,8 +163,9 @@ export function HostCard({
           <>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium">Connection Endpoint</label>
-              <div className="bg-muted p-2 rounded-md">
+              <div className="bg-muted p-2 rounded-md flex items-center justify-between">
                 <code className="text-xs break-all">{endpoint}</code>
+                {endpointType && <EndpointLabel type={endpointType} className="ml-2 flex-shrink-0" />}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {endpointType === 'HTTP_SSE' ? 

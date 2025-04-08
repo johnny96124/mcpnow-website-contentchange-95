@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -42,13 +41,13 @@ import {
   serverDefinitions, 
   serverInstances,
   ServerDefinition,
-  ServerInstance
+  ServerInstance,
+  profiles
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
-import { ProfileReference, useHostProfiles } from "@/hooks/useHostProfiles";
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -67,7 +66,6 @@ const Servers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
-  const { instanceProfiles } = useHostProfiles();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -79,6 +77,16 @@ const Servers = () => {
     acc[definitionId].push(instance);
     return acc;
   }, {} as Record<string, ServerInstance[]>);
+
+  const realProfileAssociations = profiles.reduce((acc, profile) => {
+    profile.instances.forEach(instanceId => {
+      if (!acc[instanceId]) {
+        acc[instanceId] = [];
+      }
+      acc[instanceId].push(profile);
+    });
+    return acc;
+  }, {} as Record<string, typeof profiles>);
 
   useEffect(() => {
     let filtered = [...instances];
@@ -276,54 +284,9 @@ const Servers = () => {
       });
     }, 2000);
   };
-
-  // Function to render profile badges with count indicator
-  const renderProfileBadges = (instanceId: string) => {
-    const profiles = instanceProfiles[instanceId] || [];
-    
-    if (profiles.length === 0) {
-      return (
-        <span className="text-muted-foreground text-xs">Not in use</span>
-      );
-    }
-    
-    // Show the first profile, and if there are more, show a +n indicator
-    const firstProfile = profiles[0];
-    const remainingCount = profiles.length - 1;
-    
-    return (
-      <div className="flex flex-wrap gap-1 items-center">
-        <Badge variant="outline" className="text-xs">
-          {truncateText(firstProfile.name, 16)}
-        </Badge>
-        
-        {remainingCount > 0 && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="secondary" className="text-xs cursor-help">
-                  +{remainingCount}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="space-y-1">
-                  <p className="text-xs font-medium">Other profiles using this instance:</p>
-                  <ul className="text-xs space-y-0.5">
-                    {profiles.slice(1).map((profile, idx) => (
-                      <li key={idx}>{profile.name}</li>
-                    ))}
-                  </ul>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
-    );
-  };
   
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Servers</h1>
@@ -398,21 +361,33 @@ const Servers = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
-                            <TableHead className="w-[40%]">Profiles</TableHead>
+                            <TableHead className="w-[40%]">Profile</TableHead>
                             <TableHead className="text-right pr-6">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDefInstances.map(instance => (
-                            <TableRow key={instance.id}>
-                              <TableCell className="font-medium">
-                                {truncateText(instance.name)}
-                              </TableCell>
-                              <TableCell>
-                                {renderProfileBadges(instance.id)}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex items-center justify-end gap-2">
+                          {filteredDefInstances.map(instance => {
+                            const associatedProfiles = realProfileAssociations[instance.id] || [];
+                            
+                            return (
+                              <TableRow key={instance.id}>
+                                <TableCell className="font-medium">
+                                  {truncateText(instance.name)}
+                                </TableCell>
+                                <TableCell>
+                                  {associatedProfiles.length > 0 ? (
+                                    <div className="flex flex-wrap gap-1">
+                                      {associatedProfiles.map((profile, idx) => (
+                                        <Badge key={idx} variant={profile.enabled ? "default" : "outline"} className="text-xs">
+                                          {profile.name}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <span className="text-muted-foreground text-xs">Not in use</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right space-x-2">
                                   <Button 
                                     variant="outline" 
                                     size="sm" 
@@ -484,10 +459,10 @@ const Servers = () => {
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
                                   </AlertDialog>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                         </TableBody>
                       </Table>
                     </div>
@@ -577,12 +552,13 @@ const Servers = () => {
                   <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
                   <th className="h-10 px-4 text-left align-middle font-medium w-[30%]">Profiles</th>
-                  <th className="h-10 px-4 text-right align-middle font-medium pr-6">Actions</th>
+                  <th className="h-10 px-4 text-right align-middle font-medium pr-8">Actions</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {filteredInstances.map(instance => {
                   const definition = definitions.find(d => d.id === instance.definitionId);
+                  const associatedProfiles = realProfileAssociations[instance.id] || [];
                   const isCustom = !definition?.isOfficial;
                   
                   return (
@@ -603,66 +579,78 @@ const Servers = () => {
                         <EndpointLabel type={definition?.type || 'STDIO'} />
                       </td>
                       <td className="p-4 align-middle">
-                        {renderProfileBadges(instance.id)}
-                      </td>
-                      <td className="p-4 align-middle text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                            onClick={() => handleConnect(instance.id)}
-                            disabled={instanceStatuses[instance.id] === 'connecting'}
-                          >
-                            {instanceStatuses[instance.id] === 'connecting' ? (
-                              <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                            ) : (
-                              <Terminal className="h-4 w-4 mr-1" />
-                            )}
-                            Connect
-                          </Button>
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                            onClick={() => handleViewDetails(instance)}
-                          >
-                            <Info className="h-4 w-4 mr-1" />
-                            Details
-                          </Button>
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                        {associatedProfiles.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {associatedProfiles.map((profile, idx) => (
+                              <Badge 
+                                key={idx} 
+                                variant={profile.enabled ? "default" : "outline"} 
+                                className="text-xs"
                               >
-                                <Trash2 className="h-4 w-4 mr-1" />
+                                {profile.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">Not in use</span>
+                        )}
+                      </td>
+                      <td className="p-4 align-middle text-right space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                          onClick={() => handleConnect(instance.id)}
+                          disabled={instanceStatuses[instance.id] === 'connecting'}
+                        >
+                          {instanceStatuses[instance.id] === 'connecting' ? (
+                            <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                          ) : (
+                            <Terminal className="h-4 w-4 mr-1" />
+                          )}
+                          Connect
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                          onClick={() => handleViewDetails(instance)}
+                        >
+                          <Info className="h-4 w-4 mr-1" />
+                          Details
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the instance "{instance.name}". 
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDeleteInstance(instance.id)}
+                              >
                                 Delete
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete the instance "{instance.name}". 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => handleDeleteInstance(instance.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </td>
                     </tr>
                   );
@@ -678,7 +666,6 @@ const Servers = () => {
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
-        clearFormOnOpen={true}
       />
 
       <AddInstanceDialog

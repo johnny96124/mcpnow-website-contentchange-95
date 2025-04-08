@@ -1,11 +1,5 @@
-
-import { useState } from "react";
-import { hosts } from "@/data/mockData";
-
-export interface ProfileReference {
-  id: string;
-  name: string;
-}
+import { useState, useEffect } from "react";
+import { hosts, profiles, type Profile } from "@/data/mockData";
 
 export function useHostProfiles() {
   const [hostProfiles, setHostProfiles] = useState(
@@ -15,22 +9,20 @@ export function useHostProfiles() {
     }, {} as Record<string, string>)
   );
   
-  // Map to track which profiles are using which server instances
-  const [instanceProfiles, setInstanceProfiles] = useState<Record<string, ProfileReference[]>>({
-    "instance-1": [
-      { id: "profile-1", name: "General Development" },
-      { id: "profile-2", name: "Research" }
-    ],
-    "instance-2": [
-      { id: "profile-3", name: "Testing" }
-    ],
-    "instance-3": [],
-    "instance-4": [
-      { id: "profile-4", name: "Production" }, 
-      { id: "profile-2", name: "Research" }
-    ],
-    "instance-5": []
-  });
+  const [profileCache, setProfileCache] = useState<Record<string, Profile | null>>({});
+  
+  useEffect(() => {
+    const initialCache = profiles.reduce((acc, profile) => {
+      acc[profile.id] = profile;
+      return acc;
+    }, {} as Record<string, Profile>);
+    
+    setProfileCache(initialCache);
+  }, []);
+  
+  const getProfileById = (profileId: string): Profile | null => {
+    return profileCache[profileId] || null;
+  };
   
   const handleProfileChange = (hostId: string, profileId: string) => {
     setHostProfiles(prev => ({
@@ -39,35 +31,9 @@ export function useHostProfiles() {
     }));
   };
   
-  const addProfileToInstance = (instanceId: string, profile: ProfileReference) => {
-    setInstanceProfiles(prev => {
-      const currentProfiles = prev[instanceId] || [];
-      // Check if profile is already associated with this instance
-      if (!currentProfiles.some(p => p.id === profile.id)) {
-        return {
-          ...prev,
-          [instanceId]: [...currentProfiles, profile]
-        };
-      }
-      return prev;
-    });
-  };
-  
-  const removeProfileFromInstance = (instanceId: string, profileId: string) => {
-    setInstanceProfiles(prev => {
-      const currentProfiles = prev[instanceId] || [];
-      return {
-        ...prev,
-        [instanceId]: currentProfiles.filter(p => p.id !== profileId)
-      };
-    });
-  };
-  
   return {
     hostProfiles,
-    instanceProfiles,
     handleProfileChange,
-    addProfileToInstance,
-    removeProfileFromInstance
+    getProfileById
   };
 }
