@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { 
   CheckCircle,
@@ -279,7 +278,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-6">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
+        <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
       </div>
       
       <div className="relative group">
@@ -310,7 +310,7 @@ const Dashboard = () => {
             <CarouselContent className="-ml-2 md:-ml-4">
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
-                  <Card className="relative group overflow-hidden border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50">
+                  <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300">
                     <CardHeader className="space-y-0 p-4">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-xl group-hover:text-primary transition-colors">
@@ -320,7 +320,7 @@ const Dashboard = () => {
                     </CardHeader>
                     
                     <CardContent className="space-y-4 p-4 pt-0">
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2 h-10">
                         {server.description}
                       </p>
                       
@@ -354,135 +354,138 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-lg font-medium">Connected Hosts</CardTitle>
-              <CardDescription>{connectedHosts} of {hosts.length} hosts connected</CardDescription>
-            </div>
-            <UsersRound className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-4 flex-1">
-            <div className="space-y-2">
-              {hosts.slice(0, 3).map(host => (
-                <div 
-                  key={host.id} 
-                  className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{host.icon}</span>
-                    <span className="font-medium">{host.name}</span>
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight mb-4">Status</h2>
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-lg font-medium">Connected Hosts</CardTitle>
+                <CardDescription>{connectedHosts} of {hosts.length} hosts connected</CardDescription>
+              </div>
+              <UsersRound className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <div className="space-y-2">
+                {hosts.slice(0, 3).map(host => (
+                  <div 
+                    key={host.id} 
+                    className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{host.icon}</span>
+                      <span className="font-medium">{host.name}</span>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      host.connectionStatus === 'connected' ? 
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
+                      host.connectionStatus === 'disconnected' ? 
+                      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' :
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                    }`}>
+                      {host.connectionStatus === 'connected' ? 'Connected' : 
+                      host.connectionStatus === 'disconnected' ? 'Disconnected' : 
+                      'Unknown'}
+                    </span>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    host.connectionStatus === 'connected' ? 
-                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
-                    host.connectionStatus === 'disconnected' ? 
-                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' :
-                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                  }`}>
-                    {host.connectionStatus === 'connected' ? 'Connected' : 
-                     host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                     'Unknown'}
-                  </span>
-                </div>
-              ))}
-              {hosts.length > 3 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  +{hosts.length - 3} more hosts
-                </p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full">
-              <Link to="/hosts">
-                View All
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-lg font-medium">Active Profiles</CardTitle>
-              <CardDescription>{activeProfiles} of {profiles.length} profiles enabled</CardDescription>
-            </div>
-            <Database className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-4 flex-1">
-            <div className="space-y-2">
-              {profiles.slice(0, 3).map(profile => (
-                <div 
-                  key={profile.id} 
-                  className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
-                >
-                  <span className="font-medium">{profile.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    profile.enabled ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
-                    'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                  }`}>
-                    {profile.enabled ? 'Enabled' : 'Disabled'}
-                  </span>
-                </div>
-              ))}
-              {profiles.length > 3 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  +{profiles.length - 3} more profiles
-                </p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full">
-              <Link to="/profiles">
-                View All
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div>
-              <CardTitle className="text-lg font-medium">Server Instances</CardTitle>
-              <CardDescription>{runningInstances} of {serverInstances.length} instances running</CardDescription>
-            </div>
-            <Server className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="space-y-4 flex-1">
-            <div className="space-y-2">
-              {serverDefinitions.slice(0, 3).map(definition => (
-                <div 
-                  key={definition.id} 
-                  className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
-                >
-                  <span className="font-medium">{definition.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    definition.type === 'HTTP_SSE' ? 
-                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 
-                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-                  }`}>
-                    {definition.type === 'HTTP_SSE' ? 'HTTP' : 'STDIO'}
-                  </span>
-                </div>
-              ))}
-              {serverDefinitions.length > 3 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  +{serverDefinitions.length - 3} more servers
-                </p>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="pt-2 mt-auto border-t">
-            <Button asChild className="w-full">
-              <Link to="/servers">
-                View All
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
+                ))}
+                {hosts.length > 3 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{hosts.length - 3} more hosts
+                  </p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 mt-auto border-t">
+              <Button asChild className="w-full">
+                <Link to="/hosts">
+                  View All
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-lg font-medium">Active Profiles</CardTitle>
+                <CardDescription>{activeProfiles} of {profiles.length} profiles enabled</CardDescription>
+              </div>
+              <Database className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <div className="space-y-2">
+                {profiles.slice(0, 3).map(profile => (
+                  <div 
+                    key={profile.id} 
+                    className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                  >
+                    <span className="font-medium">{profile.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      profile.enabled ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
+                      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                    }`}>
+                      {profile.enabled ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                ))}
+                {profiles.length > 3 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{profiles.length - 3} more profiles
+                  </p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 mt-auto border-t">
+              <Button asChild className="w-full">
+                <Link to="/profiles">
+                  View All
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+          
+          <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-lg font-medium">Server Instances</CardTitle>
+                <CardDescription>{runningInstances} of {serverInstances.length} instances running</CardDescription>
+              </div>
+              <Server className="h-5 w-5 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <div className="space-y-2">
+                {serverDefinitions.slice(0, 3).map(definition => (
+                  <div 
+                    key={definition.id} 
+                    className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                  >
+                    <span className="font-medium">{definition.name}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      definition.type === 'HTTP_SSE' ? 
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 
+                      'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                    }`}>
+                      {definition.type === 'HTTP_SSE' ? 'HTTP' : 'STDIO'}
+                    </span>
+                  </div>
+                ))}
+                {serverDefinitions.length > 3 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    +{serverDefinitions.length - 3} more servers
+                  </p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 mt-auto border-t">
+              <Button asChild className="w-full">
+                <Link to="/servers">
+                  View All
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
