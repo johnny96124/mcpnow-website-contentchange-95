@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -88,7 +87,6 @@ const Servers = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Group instances by definition for easier access
   const instancesByDefinition = instances.reduce((acc, instance) => {
     const { definitionId } = instance;
     if (!acc[definitionId]) {
@@ -98,7 +96,6 @@ const Servers = () => {
     return acc;
   }, {} as Record<string, ServerInstance[]>);
 
-  // Maps each instance to the profiles that reference it (mocked for now)
   const instanceProfiles: Record<string, string[]> = {
     "instance-1": ["General Development", "Research"],
     "instance-2": ["Testing"],
@@ -108,17 +105,14 @@ const Servers = () => {
   };
 
   useEffect(() => {
-    // Filter instances based on search and filter type
     let filtered = [...instances];
     
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(instance => 
         instance.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     
-    // Apply type filter
     if (filterType !== "all") {
       filtered = filtered.filter(instance => {
         const definition = definitions.find(d => d.id === instance.definitionId);
@@ -126,7 +120,6 @@ const Servers = () => {
       });
     }
     
-    // Apply sorting
     if (sortConfig) {
       filtered.sort((a, b) => {
         let aValue, bValue;
@@ -161,7 +154,6 @@ const Servers = () => {
     
     setFilteredInstances(filtered);
     
-    // Filter definitions based on instances
     const filteredDefs = definitions.filter(def => 
       filterType === "all" || def.type === filterType
     );
@@ -192,7 +184,6 @@ const Servers = () => {
     if (!selectedDefinition) return;
     
     if (data.instanceId) {
-      // Edit mode
       setInstances(prev => prev.map(instance => 
         instance.id === data.instanceId 
           ? { 
@@ -210,7 +201,6 @@ const Servers = () => {
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // Create mode
       const newInstance: ServerInstance = {
         id: `instance-${Date.now()}`,
         name: data.name,
@@ -264,7 +254,6 @@ const Servers = () => {
     type: 'HTTP_SSE' | 'STDIO';
     description: string;
   }) => {
-    // Create new server definition
     const newDefinition: ServerDefinition = {
       id: `def-${Date.now()}`,
       name: serverData.name,
@@ -275,7 +264,6 @@ const Servers = () => {
       isOfficial: false
     };
     
-    // Add to definitions
     const updatedDefinitions = [...definitions, newDefinition];
     setFilteredDefinitions(updatedDefinitions);
     
@@ -292,19 +280,15 @@ const Servers = () => {
   };
 
   const handleDebugInstance = (instanceId: string) => {
-    // Set the instance status to connecting
     setInstanceStatuses(prev => ({ ...prev, [instanceId]: 'connecting' }));
     
-    // Simulate the connection process
     setTimeout(() => {
-      // Randomly determine if connection was successful
       const isSuccessful = Math.random() > 0.3;
       setInstanceStatuses(prev => ({
         ...prev,
         [instanceId]: isSuccessful ? 'success' : 'failed'
       }));
       
-      // Show toast message
       toast({
         title: isSuccessful ? "Connection Successful" : "Connection Failed",
         description: isSuccessful 
@@ -415,7 +399,6 @@ const Servers = () => {
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {filteredDefinitions.map(definition => {
             const definitionInstances = instancesByDefinition[definition.id] || [];
-            // Only show definition instances that match the current filters
             const filteredDefInstances = definitionInstances.filter(
               instance => filteredInstances.some(fi => fi.id === instance.id)
             );
@@ -762,7 +745,7 @@ const Servers = () => {
         editMode={true}
         initialValues={selectedInstance ? {
           name: selectedInstance.name,
-          args: selectedInstance.arguments || "",
+          args: selectedInstance.arguments ? selectedInstance.arguments.join(' ') : "",
           url: selectedInstance.connectionDetails,
           env: selectedInstance.environment || {},
           headers: {}
