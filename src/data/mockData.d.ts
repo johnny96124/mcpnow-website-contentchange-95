@@ -23,9 +23,10 @@ export interface ServerInstance {
   connectionDetails: string;
   requestCount?: number;
   environment?: Record<string, string>;
-  arguments?: string;
+  arguments?: string[];  // Keep this as string[] to match mockData.ts
   url?: string;
   headers?: Record<string, string>;
+  enabled: boolean;  // Added to match usage in Servers.tsx
 }
 
 export type EndpointType = 'HTTP_SSE' | 'STDIO';

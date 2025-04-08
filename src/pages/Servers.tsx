@@ -199,7 +199,7 @@ const Servers = () => {
               ...instance, 
               name: data.name, 
               environment: data.env,
-              arguments: data.args 
+              arguments: data.args ? data.args.split(' ') : [] // Convert string to array
             }
           : instance
       ));
@@ -222,7 +222,7 @@ const Servers = () => {
           : `localhost:${3000 + instances.length}`,
         requestCount: 0,
         environment: data.env,
-        arguments: data.args
+        arguments: data.args ? data.args.split(' ') : [] // Convert string to array
       };
       
       setInstances([...instances, newInstance]);

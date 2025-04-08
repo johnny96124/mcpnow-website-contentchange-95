@@ -73,14 +73,14 @@ export function AddInstanceDialog({
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
-    defaultValues: initialValues || {
-      name: serverDefinition ? `${serverDefinition.name} Instance` : "",
-      args: serverDefinition?.type === 'STDIO' ? 
+    defaultValues: {
+      name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
+      args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
         `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
-        : "",
-      url: serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : "",
-      env: {},
-      headers: {},
+        : ""),
+      url: initialValues?.url || (serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : ""),
+      env: initialValues?.env || {},
+      headers: initialValues?.headers || {},
       instanceId: instanceId,
     },
   });
