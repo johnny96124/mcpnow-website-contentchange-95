@@ -29,6 +29,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
   Table,
   TableBody,
   TableCell,
@@ -143,6 +148,52 @@ const Servers = () => {
   const truncateText = (text: string, maxLength = 24): string => {
     if (text.length <= maxLength) return text;
     return `${text.substring(0, maxLength)}...`;
+  };
+
+  const renderProfileBadges = (instanceId: string) => {
+    const associatedProfiles = realProfileAssociations[instanceId] || [];
+    
+    if (associatedProfiles.length === 0) {
+      return <span className="text-muted-foreground text-xs">Not in use</span>;
+    }
+    
+    const firstProfile = associatedProfiles[0];
+    const remainingCount = associatedProfiles.length - 1;
+    
+    return (
+      <div className="flex items-center gap-1">
+        <Badge 
+          variant={firstProfile.enabled ? "default" : "outline"} 
+          className="text-xs"
+        >
+          {truncateText(firstProfile.name, 16)}
+        </Badge>
+        
+        {remainingCount > 0 && (
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Badge 
+                variant="secondary" 
+                className="text-xs cursor-pointer"
+              >
+                +{remainingCount}
+              </Badge>
+            </HoverCardTrigger>
+            <HoverCardContent className="p-2 w-auto max-w-[300px]">
+              <div className="text-sm font-medium mb-1">All profiles</div>
+              <div className="flex flex-col gap-1">
+                {associatedProfiles.map((profile, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${profile.enabled ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
+                    <span className="text-xs">{profile.name}</span>
+                  </div>
+                ))}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        )}
+      </div>
+    );
   };
 
   const handleOpenAddInstance = (definition: ServerDefinition) => {
@@ -362,107 +413,93 @@ const Servers = () => {
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
                             <TableHead className="w-[40%]">Profile</TableHead>
-                            <TableHead className="text-right pr-6">Actions</TableHead>
+                            <TableHead className="text-left">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDefInstances.map(instance => {
-                            const associatedProfiles = realProfileAssociations[instance.id] || [];
-                            
-                            return (
-                              <TableRow key={instance.id}>
-                                <TableCell className="font-medium">
-                                  {truncateText(instance.name)}
-                                </TableCell>
-                                <TableCell>
-                                  {associatedProfiles.length > 0 ? (
-                                    <div className="flex flex-wrap gap-1">
-                                      {associatedProfiles.map((profile, idx) => (
-                                        <Badge key={idx} variant={profile.enabled ? "default" : "outline"} className="text-xs">
-                                          {profile.name}
-                                        </Badge>
-                                      ))}
-                                    </div>
+                          {filteredDefInstances.map(instance => (
+                            <TableRow key={instance.id}>
+                              <TableCell className="font-medium">
+                                {truncateText(instance.name)}
+                              </TableCell>
+                              <TableCell>
+                                {renderProfileBadges(instance.id)}
+                              </TableCell>
+                              <TableCell className="space-x-1 flex">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                                  onClick={() => handleConnect(instance.id)}
+                                  disabled={instanceStatuses[instance.id] === 'connecting'}
+                                >
+                                  {instanceStatuses[instance.id] === 'connecting' ? (
+                                    <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
                                   ) : (
-                                    <span className="text-muted-foreground text-xs">Not in use</span>
+                                    <Terminal className="h-4 w-4 mr-1" />
                                   )}
-                                </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                                    onClick={() => handleConnect(instance.id)}
-                                    disabled={instanceStatuses[instance.id] === 'connecting'}
-                                  >
-                                    {instanceStatuses[instance.id] === 'connecting' ? (
-                                      <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                                    ) : (
-                                      <Terminal className="h-4 w-4 mr-1" />
-                                    )}
-                                    Connect
-                                  </Button>
-                                  
+                                  Connect
+                                </Button>
+                                
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="icon"
+                                        className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
+                                        onClick={() => handleViewDetails(instance)}
+                                      >
+                                        <Info className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>View details</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                                
+                                <AlertDialog>
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <Button 
-                                          variant="outline" 
-                                          size="icon"
-                                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
-                                          onClick={() => handleViewDetails(instance)}
-                                        >
-                                          <Info className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialogTrigger asChild>
+                                          <Button 
+                                            variant="outline" 
+                                            size="icon"
+                                            className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </AlertDialogTrigger>
                                       </TooltipTrigger>
                                       <TooltipContent>
-                                        <p>View details</p>
+                                        <p>Delete instance</p>
                                       </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
-                                  
-                                  <AlertDialog>
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <AlertDialogTrigger asChild>
-                                            <Button 
-                                              variant="outline" 
-                                              size="icon"
-                                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
-                                            >
-                                              <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                          </AlertDialogTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p>Delete instance</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will permanently delete the instance "{instance.name}". 
-                                          This action cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction 
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                          onClick={() => handleDeleteInstance(instance.id)}
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete the instance "{instance.name}". 
+                                        This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction 
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        onClick={() => handleDeleteInstance(instance.id)}
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
@@ -552,13 +589,12 @@ const Servers = () => {
                   <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
                   <th className="h-10 px-4 text-left align-middle font-medium w-[30%]">Profiles</th>
-                  <th className="h-10 px-4 text-right align-middle font-medium pr-8">Actions</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
                 {filteredInstances.map(instance => {
                   const definition = definitions.find(d => d.id === instance.definitionId);
-                  const associatedProfiles = realProfileAssociations[instance.id] || [];
                   const isCustom = !definition?.isOfficial;
                   
                   return (
@@ -579,23 +615,9 @@ const Servers = () => {
                         <EndpointLabel type={definition?.type || 'STDIO'} />
                       </td>
                       <td className="p-4 align-middle">
-                        {associatedProfiles.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {associatedProfiles.map((profile, idx) => (
-                              <Badge 
-                                key={idx} 
-                                variant={profile.enabled ? "default" : "outline"} 
-                                className="text-xs"
-                              >
-                                {profile.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">Not in use</span>
-                        )}
+                        {renderProfileBadges(instance.id)}
                       </td>
-                      <td className="p-4 align-middle text-right space-x-2">
+                      <td className="p-4 align-middle flex gap-1">
                         <Button 
                           variant="outline" 
                           size="sm" 
