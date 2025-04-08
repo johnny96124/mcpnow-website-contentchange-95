@@ -6,7 +6,7 @@ export interface ServerDefinition {
   version: string;
   description: string;
   icon?: string;
-  downloads?: number;
+  downloads: number;  // Changed from optional to required since it's being used
   stars?: number;
   author?: string;
   categories?: string[];
