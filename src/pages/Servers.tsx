@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -150,7 +151,7 @@ const Servers = () => {
     return `${text.substring(0, maxLength)}...`;
   };
 
-  const renderProfileBadges = (instanceId: string) => {
+  const renderProfileBadges = (instanceId: string, isTableView = false) => {
     const associatedProfiles = realProfileAssociations[instanceId] || [];
     
     if (associatedProfiles.length === 0) {
@@ -160,13 +161,16 @@ const Servers = () => {
     const firstProfile = associatedProfiles[0];
     const remainingCount = associatedProfiles.length - 1;
     
+    // Use different truncation length based on whether it's in table view
+    const maxLength = isTableView ? 20 : 16;
+    
     return (
       <div className="flex items-center gap-1">
         <Badge 
           variant={firstProfile.enabled ? "default" : "outline"} 
           className="text-xs"
         >
-          {truncateText(firstProfile.name, 16)}
+          {truncateText(firstProfile.name, maxLength)}
         </Badge>
         
         {remainingCount > 0 && (
@@ -179,13 +183,13 @@ const Servers = () => {
                 +{remainingCount}
               </Badge>
             </HoverCardTrigger>
-            <HoverCardContent className="p-2 w-auto max-w-[300px]">
-              <div className="text-sm font-medium mb-1">All profiles</div>
-              <div className="flex flex-col gap-1">
+            <HoverCardContent className="p-3 w-auto min-w-[220px] max-w-[300px]">
+              <div className="text-sm font-medium mb-2">All associated profiles</div>
+              <div className="flex flex-col gap-1.5">
                 {associatedProfiles.map((profile, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${profile.enabled ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                    <span className="text-xs">{profile.name}</span>
+                    <span className="text-sm">{profile.name}</span>
                   </div>
                 ))}
               </div>
@@ -412,7 +416,7 @@ const Servers = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
-                            <TableHead className="w-[40%]">Profile</TableHead>
+                            <TableHead className="w-[40%] pr-2">Profile</TableHead>
                             <TableHead className="text-left">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -422,7 +426,7 @@ const Servers = () => {
                               <TableCell className="font-medium">
                                 {truncateText(instance.name)}
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="pr-2">
                                 {renderProfileBadges(instance.id)}
                               </TableCell>
                               <TableCell className="space-x-1 flex">
@@ -587,8 +591,7 @@ const Servers = () => {
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium w-[30%]">Profiles</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium w-[30%] pl-8">Profiles</th>
                   <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
                 </tr>
               </thead>
@@ -601,78 +604,79 @@ const Servers = () => {
                     <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
                       <td className="p-4 align-middle">{truncateText(instance.name)}</td>
                       <td className="p-4 align-middle">
-                        <div className="flex items-center gap-2">
-                          {definition?.icon && <span>{definition.icon}</span>}
-                          <span>{truncateText(definition?.name || 'Unknown')}</span>
-                          {isCustom && (
-                            <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md text-xs">
-                              Custom
-                            </Badge>
-                          )}
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{truncateText(definition?.name || 'Unknown', 18)}</span>
+                          <div className="flex items-center gap-1">
+                            <EndpointLabel type={definition?.type || 'STDIO'} />
+                            {isCustom && (
+                              <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md text-xs">
+                                Custom
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td className="p-4 align-middle">
-                        <EndpointLabel type={definition?.type || 'STDIO'} />
+                      <td className="p-4 align-middle pl-8">
+                        {renderProfileBadges(instance.id, true)}
                       </td>
                       <td className="p-4 align-middle">
-                        {renderProfileBadges(instance.id)}
-                      </td>
-                      <td className="p-4 align-middle flex gap-1">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                          onClick={() => handleConnect(instance.id)}
-                          disabled={instanceStatuses[instance.id] === 'connecting'}
-                        >
-                          {instanceStatuses[instance.id] === 'connecting' ? (
-                            <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                          ) : (
-                            <Terminal className="h-4 w-4 mr-1" />
-                          )}
-                          Connect
-                        </Button>
-                        
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                          onClick={() => handleViewDetails(instance)}
-                        >
-                          <Info className="h-4 w-4 mr-1" />
-                          Details
-                        </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete the instance "{instance.name}". 
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                onClick={() => handleDeleteInstance(instance.id)}
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                            onClick={() => handleConnect(instance.id)}
+                            disabled={instanceStatuses[instance.id] === 'connecting'}
+                          >
+                            {instanceStatuses[instance.id] === 'connecting' ? (
+                              <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                            ) : (
+                              <Terminal className="h-4 w-4 mr-1" />
+                            )}
+                            Connect
+                          </Button>
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                            onClick={() => handleViewDetails(instance)}
+                          >
+                            <Info className="h-4 w-4 mr-1" />
+                            Details
+                          </Button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
                               >
+                                <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete the instance "{instance.name}". 
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteInstance(instance.id)}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </td>
                     </tr>
                   );
