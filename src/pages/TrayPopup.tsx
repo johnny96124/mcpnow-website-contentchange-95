@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
+import { profiles, hosts, serverInstances, serverDefinitions, type Status, type ConnectionStatus } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import {
   DropdownMenu,
@@ -17,6 +17,11 @@ import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { NoSearchResults } from "@/components/hosts/NoSearchResults";
+
+interface InstanceStatus {
+  status: 'connected' | 'connecting' | 'error' | 'disconnected';
+  enabled: boolean;
+}
 
 const TrayPopup = () => {
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
@@ -32,10 +37,7 @@ const TrayPopup = () => {
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
   
   // Track instance status including connection state and enabled state
-  const [instanceStatuses, setInstanceStatuses] = useState<Record<string, Record<string, {
-    status: 'connected' | 'connecting' | 'error' | 'disconnected';
-    enabled: boolean;
-  }>>({});
+  const [instanceStatuses, setInstanceStatuses] = useState<Record<string, Record<string, InstanceStatus>>>({});
 
   // Track search query
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,10 +99,7 @@ const TrayPopup = () => {
     const profile = profiles.find(p => p.id === profileId);
     if (!profile) return;
 
-    const initialStatuses: Record<string, {
-      status: 'connected' | 'connecting' | 'error' | 'disconnected';
-      enabled: boolean;
-    }> = {};
+    const initialStatuses: Record<string, InstanceStatus> = {};
     
     // Get all definitions in this profile
     const definitionsInProfile = getServerDefinitionsInProfile(profileId);
@@ -126,10 +125,7 @@ const TrayPopup = () => {
   const simulateConnectionProcess = (
     hostId: string, 
     profileId: string, 
-    initialStatuses: Record<string, {
-      status: 'connected' | 'connecting' | 'error' | 'disconnected';
-      enabled: boolean;
-    }>
+    initialStatuses: Record<string, InstanceStatus>
   ) => {
     const definitions = Object.keys(initialStatuses);
     
@@ -137,10 +133,10 @@ const TrayPopup = () => {
     definitions.forEach((definitionId, index) => {
       setTimeout(() => {
         setInstanceStatuses(prev => {
-          const hostStatuses = { ...prev[hostId] } || {};
+          const hostStatuses = { ...(prev[hostId] || {}) };
           const currentStatus = hostStatuses[definitionId];
           
-          // Only update if enabled
+          // Only update if enabled and status exists
           if (currentStatus && currentStatus.enabled) {
             // Random success chance (80% success)
             const success = Math.random() > 0.2;
