@@ -18,7 +18,8 @@ interface ConfigFileDialogProps {
   profileEndpoint?: string;
   needsUpdate?: boolean;
   allowPathEdit?: boolean;
-  isViewOnly?: boolean; // New prop to control view-only mode
+  isViewOnly?: boolean;
+  isFixMode?: boolean; // New prop to indicate if the dialog is in fix mode
 }
 
 export function ConfigFileDialog({
@@ -30,7 +31,8 @@ export function ConfigFileDialog({
   profileEndpoint,
   needsUpdate = false,
   allowPathEdit = false,
-  isViewOnly = false // Default to false for backward compatibility
+  isViewOnly = false,
+  isFixMode = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState(configPath);
@@ -184,7 +186,7 @@ export function ConfigFileDialog({
 
   // Handle dialog close with unsaved changes
   const handleCloseDialog = (open: boolean) => {
-    if (!open && (isModified || pathModified) && !isViewOnly) {
+    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
@@ -225,16 +227,31 @@ export function ConfigFileDialog({
     }
   };
 
+  // If in fix mode, set the config to a fixed version automatically
+  useEffect(() => {
+    if (isFixMode && open && hasEndpointMismatch) {
+      handleFixEndpoint();
+    } else if (isFixMode && open && needsUpdate) {
+      resetJson();
+    }
+  }, [isFixMode, open, needsUpdate]);
+
   // Only show the warning when both hasEndpointMismatch is true AND needsUpdate is true
   const showWarning = hasEndpointMismatch && needsUpdate;
+
+  // Prepare title and description based on mode
+  const dialogTitle = isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration");
+  const dialogDescription = isFixMode 
+    ? "Fix your configuration to match your selected profile"
+    : (isViewOnly ? "View configuration file details" : "Edit configuration file details");
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Config File</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
-            {isViewOnly ? "View configuration file details" : "Edit configuration file details"}
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
         
@@ -250,14 +267,23 @@ export function ConfigFileDialog({
               className="font-mono text-sm"
               readOnly={isViewOnly || !allowPathEdit}
             />
-            {allowPathEdit && !isViewOnly && (
+            {allowPathEdit && !isViewOnly && !isFixMode && (
               <p className="text-xs text-muted-foreground">
                 You can modify the path where this configuration will be saved.
               </p>
             )}
           </div>
 
-          {!isViewOnly && (
+          {isFixMode && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription className="text-blue-700">
+                We'll automatically update your configuration to match the selected profile. 
+                Click "Fix Configuration" when ready.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!isViewOnly && !isFixMode && (
             <div className="flex justify-between mb-2">
               <div className="text-sm text-muted-foreground">
                 Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
@@ -269,7 +295,7 @@ export function ConfigFileDialog({
             </div>
           )}
           
-          {showWarning && (
+          {showWarning && !isFixMode && (
             <Alert variant="destructive" className="py-2 px-3">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
@@ -286,7 +312,7 @@ export function ConfigFileDialog({
               value={config} 
               onChange={(e) => handleChange(e.target.value)}
               spellCheck={false}
-              readOnly={isViewOnly}
+              readOnly={isViewOnly || isFixMode}
             />
           </ScrollArea>
           
@@ -298,7 +324,16 @@ export function ConfigFileDialog({
         </div>
         
         <DialogFooter className="flex justify-end space-x-2">
-          {isViewOnly ? (
+          {isFixMode ? (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={!!error || !isModified}>
+                Fix Configuration
+              </Button>
+            </>
+          ) : isViewOnly ? (
             <>
               {hasEndpointMismatch && (
                 <Button onClick={handleFixEndpoint} variant="destructive">

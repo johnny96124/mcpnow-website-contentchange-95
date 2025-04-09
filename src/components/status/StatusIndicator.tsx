@@ -7,7 +7,7 @@ interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   className?: string;
-  iconOnly?: boolean; // Added option to show only the status icon without label
+  iconOnly?: boolean;
 }
 
 export function StatusIndicator({ 

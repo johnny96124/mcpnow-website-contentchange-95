@@ -37,6 +37,7 @@ interface HostCardProps {
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId: string) => void;
+  onFixConfig: (hostId: string) => void;
 }
 
 export function HostCard({ 
@@ -44,7 +45,8 @@ export function HostCard({
   profileId, 
   onProfileChange, 
   onOpenConfigDialog,
-  onCreateConfig
+  onCreateConfig,
+  onFixConfig
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
@@ -220,12 +222,10 @@ export function HostCard({
             {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
             
-            {host.configPath && (
-              <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
-                {configStatusInfo.icon}
-                {configStatusInfo.text}
-              </Badge>
-            )}
+            <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+              {configStatusInfo.icon}
+              {configStatusInfo.text}
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
             <StatusIndicator 
@@ -233,13 +233,14 @@ export function HostCard({
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
-                host.connectionStatus === 'misconfigured' ? 'error' : 'warning'
+                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'error' : 
+                host.configStatus === 'unknown' ? 'warning' : 'inactive'
               } 
               label={
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                host.connectionStatus === 'misconfigured' ? 'Misconfigured' : 'Unknown'
+                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Misconfigured' : 'Unknown'
               }
             />
           </div>
@@ -391,24 +392,24 @@ export function HostCard({
                 <Settings2 className="h-4 w-4 mr-2" />
                 Create Config
               </Button>
+            ) : host.configStatus === 'misconfigured' ? (
+              <Button 
+                variant="destructive"
+                onClick={() => onFixConfig(host.id)}
+                className="flex items-center gap-2"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                Fix Config
+              </Button>
             ) : (
               <Button 
-                variant={host.configStatus === 'misconfigured' ? 'destructive' : 'outline'}
+                variant="outline"
                 onClick={() => onOpenConfigDialog(host.id)}
                 disabled={!host.configPath}
                 className="flex items-center gap-2"
               >
-                {host.configStatus === 'misconfigured' ? (
-                  <>
-                    <AlertTriangle className="h-4 w-4" />
-                    Fix Config
-                  </>
-                ) : (
-                  <>
-                    <FilePlus className="h-4 w-4" />
-                    View Config
-                  </>
-                )}
+                <FilePlus className="h-4 w-4" />
+                View Config
               </Button>
             )
           )}
