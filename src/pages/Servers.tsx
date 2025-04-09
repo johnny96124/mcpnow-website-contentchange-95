@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -893,4 +894,144 @@ const Servers = () => {
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
-                  <th className="h-10 px-4 text-
+                  <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Type</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Profiles</th>
+                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredInstances.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-muted-foreground">
+                      No instances found. Try changing your search query.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredInstances.map(instance => {
+                    const definition = definitions.find(d => d.id === instance.definitionId);
+                    if (!definition) return null;
+                    
+                    return (
+                      <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
+                        <td className="p-4 align-middle font-medium">{instance.name}</td>
+                        <td className="p-4 align-middle">{definition.name}</td>
+                        <td className="p-4 align-middle">
+                          <EndpointLabel type={definition.type} compact />
+                        </td>
+                        <td className="p-4 align-middle">
+                          {renderProfileBadges(instance.id, true)}
+                        </td>
+                        <td className="p-4 align-middle">
+                          <div className="flex items-center space-x-1">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors h-8"
+                              onClick={() => handleConnect(instance.id)}
+                              disabled={instanceStatuses[instance.id] === 'connecting' || 
+                                       runtimeInstances.some(r => r.instanceId === instance.id && 
+                                                                (r.status === 'connected' || r.status === 'connecting'))}
+                            >
+                              {instanceStatuses[instance.id] === 'connecting' ? (
+                                <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                              ) : (
+                                <Terminal className="h-4 w-4 mr-1" />
+                              )}
+                              Connect
+                            </Button>
+                            
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="icon"
+                                    className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                                    onClick={() => handleViewDetails(instance)}
+                                  >
+                                    <Info className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>View details</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            
+                            <AlertDialog>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <AlertDialogTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive hover:text-destructive hover:border-destructive transition-colors"
+                                        disabled={runtimeInstances.some(r => r.instanceId === instance.id)}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Delete instance</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete the instance "{instance.name}". 
+                                    This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    onClick={() => handleDeleteInstance(instance.id)}
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      
+      <AddInstanceDialog 
+        open={addInstanceOpen} 
+        onOpenChange={setAddInstanceOpen}
+        definition={selectedDefinition}
+        instance={selectedInstance}
+        onCreateInstance={handleCreateInstance}
+      />
+      
+      <AddServerDialog
+        open={addServerDialogOpen}
+        onOpenChange={setAddServerDialogOpen}
+        onCreateServer={handleCreateServer}
+      />
+      
+      <EditServerDialog
+        open={editServerOpen}
+        onOpenChange={setEditServerOpen}
+        definition={selectedDefinition}
+        onUpdateServer={handleUpdateServer}
+      />
+    </div>
+  );
+};
+
+export default Servers;
