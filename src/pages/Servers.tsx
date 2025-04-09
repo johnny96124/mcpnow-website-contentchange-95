@@ -207,7 +207,6 @@ const Servers = () => {
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // For new instances, use the server definition's pre-configured values
       const connectionDetails = selectedDefinition.type === 'HTTP_SSE' 
         ? (data.url || selectedDefinition.url || `http://localhost:${3000 + instances.length}`) 
         : `localhost:${3000 + instances.length}`;
@@ -412,21 +411,21 @@ const Servers = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[35%]">Instance Name</TableHead>
-                          <TableHead className="w-[35%] px-4">Profile</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead className="w-[30%]">Instance Name</TableHead>
+                          <TableHead className="w-[30%] px-6">Profile</TableHead>
+                          <TableHead className="w-[40%] text-left pl-4">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredDefInstances.map(instance => (
                           <TableRow key={instance.id}>
                             <TableCell className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                              {instance.name}
+                              {truncateText(instance.name)}
                             </TableCell>
-                            <TableCell className="px-4">
+                            <TableCell className="px-6">
                               {renderProfileBadges(instance.id)}
                             </TableCell>
-                            <TableCell className="space-x-1 flex justify-end">
+                            <TableCell className="space-x-1 flex">
                               <Button 
                                 variant="outline" 
                                 size="sm" 
