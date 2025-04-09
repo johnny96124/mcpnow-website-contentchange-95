@@ -40,6 +40,7 @@
     --status-warning: 38 92% 50%;
     --status-error: 0 84% 60%;
     --status-inactive: 215 20% 65%;
+    --status-verified: 142 71% 45%;
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
@@ -86,6 +87,7 @@
     --status-warning: 38 92% 50%;
     --status-error: 0 84% 60%;
     --status-inactive: 215 20% 65%;
+    --status-verified: 142 71% 45%;
 
     /* Sidebar - Dark Mode */
     --sidebar-background: 222.2 84% 4.9%;
@@ -130,6 +132,10 @@
     @apply bg-[hsl(var(--status-inactive))];
   }
   
+  .status-verified {
+    @apply bg-[hsl(var(--status-verified))];
+  }
+  
   .card-hover {
     @apply transition-all duration-200 hover:bg-muted/50 hover:shadow-sm;
   }
@@ -157,5 +163,20 @@
   .endpoint-official {
     @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300;
   }
-}
 
+  /* Animation classes */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
