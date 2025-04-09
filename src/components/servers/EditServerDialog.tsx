@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ServerDefinition } from "@/data/mockData";
 import { Plus, X } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditServerDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function EditServerDialog({
   const [httpHeaders, setHttpHeaders] = useState<{ key: string, value: string }[]>([]);
   const [envKeyError, setEnvKeyError] = useState<string | null>(null);
   const [headerKeyError, setHeaderKeyError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const isHttpSse = serverDefinition?.type === "HTTP_SSE";
   
@@ -110,6 +112,25 @@ export function EditServerDialog({
   };
   
   const onSubmit = (formData: EditServerFormValues) => {
+    // Validate required fields based on server type
+    if (isHttpSse && (!formData.url || formData.url.trim() === '')) {
+      toast({
+        title: "Validation Error",
+        description: "URL is required for HTTP_SSE server types",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!isHttpSse && (!formData.commandArgs || formData.commandArgs.trim() === '')) {
+      toast({
+        title: "Validation Error",
+        description: "Command Arguments are required for STDIO server types",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Convert arrays to record objects
     const environment = envVars.reduce((acc, { key, value }) => {
       if (key.trim()) {
@@ -153,7 +174,10 @@ export function EditServerDialog({
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>URL</FormLabel>
+                      <FormLabel className="flex items-center">
+                        URL
+                        <span className="text-destructive ml-1">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="Enter server URL" {...field} />
                       </FormControl>
@@ -167,7 +191,10 @@ export function EditServerDialog({
                   name="commandArgs"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Command Arguments</FormLabel>
+                      <FormLabel className="flex items-center">
+                        Command Arguments
+                        <span className="text-destructive ml-1">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input placeholder="Enter command line arguments" {...field} />
                       </FormControl>
