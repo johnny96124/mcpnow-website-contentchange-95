@@ -49,3 +49,26 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
+
+// New types for Instance Runtime functionality
+export type RuntimeStatus = 'connecting' | 'connected' | 'failed' | 'disconnected';
+
+export interface RuntimeInstance {
+  id: string;
+  instanceId: string;
+  profileId: string;
+  hostId: string;
+  status: RuntimeStatus;
+  errorMessage?: string;
+  startedAt: Date;
+  requestCount: number;
+  lastActivityAt?: Date;
+}
+
+export interface RuntimeHost {
+  id: string;
+  name: string;
+  icon?: string;
+}
+
+export const runtimeInstances: RuntimeInstance[];

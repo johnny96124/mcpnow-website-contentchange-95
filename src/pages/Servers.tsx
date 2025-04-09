@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -49,13 +48,60 @@ import {
   serverInstances,
   ServerDefinition,
   ServerInstance,
-  profiles
+  profiles,
+  RuntimeStatus
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { EditServerDialog, EditServerFormValues } from "@/components/servers/EditServerDialog";
+import { RuntimeInstancesList } from "@/components/servers/RuntimeInstancesList";
+
+// Mock hosts data
+const mockHosts = [
+  { id: 'host-1', name: 'Cursor', icon: '⌨️' },
+  { id: 'host-2', name: 'Claude Desktop', icon: '🧠' },
+  { id: 'host-3', name: 'Windsurf', icon: '🏄' },
+];
+
+// Mock runtime instances for demonstration
+const generateMockRuntimeInstances = () => {
+  const now = new Date();
+  const runtimes = [
+    {
+      id: 'runtime-1',
+      instanceId: 'postgres-dev',
+      profileId: 'general-dev',
+      hostId: 'host-1',
+      status: 'connected' as RuntimeStatus,
+      startedAt: new Date(now.getTime() - 1000 * 60 * 30), // Started 30 minutes ago
+      requestCount: 42,
+      lastActivityAt: new Date(now.getTime() - 1000 * 60 * 5) // Activity 5 minutes ago
+    },
+    {
+      id: 'runtime-2',
+      instanceId: 'github-copilot',
+      profileId: 'database-ops',
+      hostId: 'host-3',
+      status: 'connecting' as RuntimeStatus,
+      startedAt: new Date(now.getTime() - 1000 * 20), // Started 20 seconds ago
+      requestCount: 0
+    },
+    {
+      id: 'runtime-3',
+      instanceId: 'docker-tools-dev',
+      profileId: 'project-x',
+      hostId: 'host-2',
+      status: 'failed' as RuntimeStatus,
+      errorMessage: 'Permission denied when accessing /var/run/docker.sock',
+      startedAt: new Date(now.getTime() - 1000 * 60 * 10), // Started 10 minutes ago
+      requestCount: 3,
+      lastActivityAt: new Date(now.getTime() - 1000 * 60 * 9) // Activity 9 minutes ago
+    }
+  ];
+  return runtimes;
+};
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -75,6 +121,10 @@ const Servers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
+  
+  // New state for runtime instances
+  const [runtimeInstances, setRuntimeInstances] = useState(generateMockRuntimeInstances());
+  
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -275,6 +325,12 @@ const Servers = () => {
 
   const handleDeleteInstance = (instanceId: string) => {
     setInstances(instances.filter(instance => instance.id !== instanceId));
+    
+    // Remove any associated runtime instances
+    setRuntimeInstances(runtimeInstances.filter(
+      runtime => runtime.instanceId !== instanceId
+    ));
+    
     toast({
       title: "Instance Deleted",
       description: "The instance has been deleted successfully.",
@@ -284,7 +340,15 @@ const Servers = () => {
   const handleDeleteDefinition = (definitionId: string) => {
     const definitionInstances = instancesByDefinition[definitionId] || [];
     if (definitionInstances.length > 0) {
+      const instanceIds = definitionInstances.map(i => i.id);
+      
+      // Remove instances
       setInstances(instances.filter(instance => instance.definitionId !== definitionId));
+      
+      // Remove any associated runtime instances
+      setRuntimeInstances(runtimeInstances.filter(
+        runtime => !instanceIds.includes(runtime.instanceId)
+      ));
     }
     
     setDefinitions(definitions.filter(def => def.id !== definitionId));
@@ -364,9 +428,53 @@ const Servers = () => {
     navigate('/discovery');
   };
 
+  // Handler for connecting instances was already here, but we'll modify it
+  // to create an actual runtime instance
   const handleConnect = (instanceId: string) => {
     setInstanceStatuses(prev => ({ ...prev, [instanceId]: 'connecting' }));
     
+    // Check if instance already has a runtime
+    const existingRuntime = runtimeInstances.find(r => r.instanceId === instanceId);
+    if (existingRuntime) {
+      toast({
+        title: "Already Running",
+        description: "This instance is already running in a runtime.",
+      });
+      setInstanceStatuses(prev => ({ ...prev, [instanceId]: 'success' }));
+      return;
+    }
+    
+    // Find a random profile that uses this instance
+    const instance = instances.find(i => i.id === instanceId);
+    if (!instance) return;
+    
+    const associatedProfiles = realProfileAssociations[instanceId] || [];
+    if (associatedProfiles.length === 0) {
+      toast({
+        title: "No Profile Found",
+        description: "This instance is not used by any profile.",
+        variant: "destructive",
+      });
+      setInstanceStatuses(prev => ({ ...prev, [instanceId]: 'failed' }));
+      return;
+    }
+    
+    // Pick a random enabled profile
+    const enabledProfiles = associatedProfiles.filter(p => p.enabled);
+    if (enabledProfiles.length === 0) {
+      toast({
+        title: "No Enabled Profile",
+        description: "No enabled profile is using this instance.",
+        variant: "destructive",
+      });
+      setInstanceStatuses(prev => ({ ...prev, [instanceId]: 'failed' }));
+      return;
+    }
+    
+    const profile = enabledProfiles[Math.floor(Math.random() * enabledProfiles.length)];
+    const host = mockHosts[Math.floor(Math.random() * mockHosts.length)];
+    
+    // Simulate connection delay
     setTimeout(() => {
       const isSuccessful = Math.random() > 0.3;
       setInstanceStatuses(prev => ({
@@ -374,14 +482,132 @@ const Servers = () => {
         [instanceId]: isSuccessful ? 'success' : 'failed'
       }));
       
-      toast({
-        title: isSuccessful ? "Connection Successful" : "Connection Failed",
-        description: isSuccessful 
-          ? "The server instance is running properly." 
-          : "Could not connect to the server instance. Please check your configuration.",
-        variant: isSuccessful ? "default" : "destructive",
-      });
+      // Create a new runtime instance
+      if (isSuccessful) {
+        const now = new Date();
+        const newRuntime = {
+          id: `runtime-${Date.now()}`,
+          instanceId,
+          profileId: profile.id,
+          hostId: host.id,
+          status: 'connected' as RuntimeStatus,
+          startedAt: now,
+          requestCount: 0,
+          lastActivityAt: now
+        };
+        
+        setRuntimeInstances(prev => [...prev, newRuntime]);
+        
+        toast({
+          title: "Connection Successful",
+          description: `The server instance is running on ${host.name} via ${profile.name} profile.`,
+        });
+      } else {
+        // Add a failed runtime instance
+        const now = new Date();
+        const newRuntime = {
+          id: `runtime-${Date.now()}`,
+          instanceId,
+          profileId: profile.id,
+          hostId: host.id,
+          status: 'failed' as RuntimeStatus,
+          errorMessage: "Connection refused. The server might be unavailable or blocked by a firewall.",
+          startedAt: now,
+          requestCount: 0
+        };
+        
+        setRuntimeInstances(prev => [...prev, newRuntime]);
+        
+        toast({
+          title: "Connection Failed",
+          description: "Could not connect to the server instance. Check logs for details.",
+          variant: "destructive",
+        });
+      }
     }, 2000);
+  };
+  
+  // New handlers for Runtime operations
+  const handleRuntimeDisconnect = (runtimeId: string) => {
+    const runtime = runtimeInstances.find(r => r.id === runtimeId);
+    if (!runtime) return;
+    
+    // If connecting, just remove it
+    if (runtime.status === 'connecting') {
+      setRuntimeInstances(prev => prev.filter(r => r.id !== runtimeId));
+      
+      toast({
+        title: "Connection Cancelled",
+        description: "The connection attempt was cancelled.",
+      });
+      return;
+    }
+    
+    // Set to disconnecting for animation
+    setRuntimeInstances(prev => 
+      prev.map(r => r.id === runtimeId ? { ...r, status: 'disconnected' as RuntimeStatus } : r)
+    );
+    
+    // After a short delay, remove the runtime
+    setTimeout(() => {
+      setRuntimeInstances(prev => prev.filter(r => r.id !== runtimeId));
+      
+      toast({
+        title: "Disconnected",
+        description: "The server instance has been disconnected.",
+      });
+    }, 1000);
+  };
+  
+  const handleRuntimeReconnect = (runtimeId: string) => {
+    const runtime = runtimeInstances.find(r => r.id === runtimeId);
+    if (!runtime) return;
+    
+    // Set to connecting
+    setRuntimeInstances(prev => 
+      prev.map(r => r.id === runtimeId ? { ...r, status: 'connecting' as RuntimeStatus } : r)
+    );
+    
+    // Simulate reconnection attempt
+    setTimeout(() => {
+      const isSuccessful = Math.random() > 0.2;
+      
+      if (isSuccessful) {
+        setRuntimeInstances(prev => 
+          prev.map(r => r.id === runtimeId 
+            ? { 
+                ...r, 
+                status: 'connected' as RuntimeStatus, 
+                errorMessage: undefined,
+                lastActivityAt: new Date()
+              } 
+            : r
+          )
+        );
+        
+        toast({
+          title: "Reconnection Successful",
+          description: "The server instance has been reconnected successfully.",
+        });
+      } else {
+        setRuntimeInstances(prev => 
+          prev.map(r => r.id === runtimeId 
+            ? { 
+                ...r, 
+                status: 'failed' as RuntimeStatus, 
+                errorMessage: "Reconnection failed. The server might be unavailable."
+              } 
+            : r
+          )
+        );
+        
+        toast({
+          title: "Reconnection Failed",
+          description: "Could not reconnect to the server instance.",
+          variant: "destructive",
+        });
+      }
+    }, 1500);
   };
   
   return (
@@ -400,6 +626,17 @@ const Servers = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Runtime Instances Section */}
+      <RuntimeInstancesList 
+        runtimeInstances={runtimeInstances}
+        serverInstances={instances}
+        serverDefinitions={definitions}
+        profiles={profiles}
+        hosts={mockHosts}
+        onReconnect={handleRuntimeReconnect}
+        onDisconnect={handleRuntimeDisconnect}
+      />
       
       <div className="flex items-center justify-between">
         <div className="relative flex-1 mr-4">
@@ -479,7 +716,9 @@ const Servers = () => {
                                   size="sm" 
                                   className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
                                   onClick={() => handleConnect(instance.id)}
-                                  disabled={instanceStatuses[instance.id] === 'connecting'}
+                                  disabled={instanceStatuses[instance.id] === 'connecting' || 
+                                           runtimeInstances.some(r => r.instanceId === instance.id && 
+                                                                    (r.status === 'connected' || r.status === 'connecting'))}
                                 >
                                   {instanceStatuses[instance.id] === 'connecting' ? (
                                     <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
@@ -516,6 +755,7 @@ const Servers = () => {
                                             variant="outline" 
                                             size="icon"
                                             className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
+                                            disabled={runtimeInstances.some(r => r.instanceId === instance.id)}
                                           >
                                             <Trash2 className="h-4 w-4" />
                                           </Button>
@@ -574,7 +814,14 @@ const Servers = () => {
                   <div className="flex space-x-2">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={definitionInstances.some(instance => 
+                            runtimeInstances.some(r => r.instanceId === instance.id)
+                          )}
+                        >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
@@ -646,141 +893,4 @@ const Servers = () => {
               <thead className="[&_tr]:border-b">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-10 px-4 text-left align-middle font-medium">Name</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Definition</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium w-[30%] pl-8">Profiles</th>
-                  <th className="h-10 px-4 text-left align-middle font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="[&_tr:last-child]:border-0">
-                {filteredInstances.map(instance => {
-                  const definition = definitions.find(d => d.id === instance.definitionId);
-                  const isCustom = !definition?.isOfficial;
-                  
-                  return (
-                    <tr key={instance.id} className="border-b transition-colors hover:bg-muted/50">
-                      <td className="p-4 align-middle">{truncateText(instance.name)}</td>
-                      <td className="p-4 align-middle">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{truncateText(definition?.name || 'Unknown', 18)}</span>
-                          <div className="flex items-center gap-1">
-                            <EndpointLabel type={definition?.type || 'STDIO'} />
-                            {isCustom && (
-                              <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md text-xs">
-                                Custom
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4 align-middle pl-8">
-                        {renderProfileBadges(instance.id, true)}
-                      </td>
-                      <td className="p-4 align-middle">
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
-                            onClick={() => handleConnect(instance.id)}
-                            disabled={instanceStatuses[instance.id] === 'connecting'}
-                          >
-                            {instanceStatuses[instance.id] === 'connecting' ? (
-                              <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
-                            ) : (
-                              <Terminal className="h-4 w-4 mr-1" />
-                            )}
-                            Connect
-                          </Button>
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors"
-                            onClick={() => handleViewDetails(instance)}
-                          >
-                            <Info className="h-4 w-4 mr-1" />
-                            Details
-                          </Button>
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="text-destructive hover:text-destructive hover:border-destructive transition-colors"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete the instance "{instance.name}". 
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => handleDeleteInstance(instance.id)}
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-      
-      <AddInstanceDialog
-        open={addInstanceOpen}
-        onOpenChange={setAddInstanceOpen}
-        serverDefinition={selectedDefinition}
-        onCreateInstance={handleCreateInstance}
-      />
-
-      <AddInstanceDialog
-        open={editInstanceOpen}
-        onOpenChange={setEditInstanceOpen}
-        serverDefinition={selectedDefinition}
-        onCreateInstance={handleCreateInstance}
-        editMode={true}
-        initialValues={selectedInstance ? {
-          name: selectedInstance.name,
-          args: Array.isArray(selectedInstance.arguments) ? selectedInstance.arguments.join(' ') : selectedInstance.arguments as string || "",
-          url: selectedInstance.connectionDetails,
-          env: selectedInstance.environment || {},
-          headers: {}
-        } : undefined}
-        instanceId={selectedInstance?.id}
-      />
-      
-      <AddServerDialog 
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onCreateServer={handleCreateServer}
-        onNavigateToDiscovery={handleNavigateToDiscovery}
-      />
-      
-      <EditServerDialog
-        open={editServerOpen}
-        onOpenChange={setEditServerOpen}
-        serverDefinition={selectedDefinition}
-        onUpdateServer={handleUpdateServer}
-      />
-    </div>
-  );
-};
-
-export default Servers;
+                  <th className="h-10 px-4 text-
