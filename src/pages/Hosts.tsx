@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,7 +66,10 @@ const Hosts = () => {
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
-      openConfigDialog(hostId, host.configPath, profileEndpoint, false, false);
+      
+      const needsUpdate = host.configStatus === 'misconfigured';
+      
+      openConfigDialog(hostId, host.configPath, profileEndpoint, needsUpdate, false, true);
     } else {
       toast({
         title: "No config file",
@@ -110,7 +112,6 @@ const Hosts = () => {
       
       setCreateConfigOpen(false);
       
-      // Reset state
       setTimeout(() => {
         setCurrentHostId(null);
         setCurrentProfileId(null);
@@ -182,6 +183,23 @@ const Hosts = () => {
     };
     
     return JSON.stringify(defaultConfig, null, 2);
+  };
+
+  const handleFixConfig = (config: string, configPath: string) => {
+    if (configDialog.hostId) {
+      setHostsList(prev => prev.map(host => 
+        host.id === configDialog.hostId
+          ? { ...host, configStatus: 'configured' }
+          : host
+      ));
+    }
+    
+    resetConfigDialog();
+    
+    toast({
+      title: "Configuration fixed",
+      description: "The configuration has been updated to match the profile.",
+    });
   };
 
   return (
@@ -322,10 +340,11 @@ const Hosts = () => {
         onOpenChange={setDialogOpen}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
-        onSave={resetConfigDialog}
+        onSave={handleFixConfig}
         profileEndpoint={configDialog.profileEndpoint}
         needsUpdate={configDialog.needsUpdate}
         allowPathEdit={configDialog.allowPathEdit}
+        isViewOnly={true}
       />
       
       <AddHostDialog 

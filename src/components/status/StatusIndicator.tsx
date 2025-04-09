@@ -7,12 +7,14 @@ interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   className?: string;
+  iconOnly?: boolean; // Added option to show only the status icon without label
 }
 
 export function StatusIndicator({ 
   status, 
   label,
-  className 
+  className,
+  iconOnly = false
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -25,7 +27,7 @@ export function StatusIndicator({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       {status !== 'none' && <span className={cn("status-dot", statusClass)}></span>}
-      {label && <span className="text-sm font-medium">{label}</span>}
+      {!iconOnly && label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );
 }

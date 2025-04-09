@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, AlertTriangle, FileCheck, FileWarning } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -13,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface InstanceStatus {
   id: string;
@@ -52,7 +52,6 @@ export function HostCard({
   
   const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
   
-  // Calculate overall profile connection status based on instance statuses
   const getProfileConnectionStatus = () => {
     if (!instanceStatuses.length) return 'disconnected';
     
@@ -64,22 +63,41 @@ export function HostCard({
     return 'warning'; // Partially connected
   };
   
-  // Get definition name from id
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown';
   };
   
-  // Simulate connection process when profile changes
+  const getConfigStatusInfo = () => {
+    switch(host.configStatus) {
+      case 'configured':
+        return { 
+          icon: <FileCheck className="h-4 w-4 text-green-500" />,
+          text: 'Correctly configured', 
+          color: 'bg-green-100 text-green-800 border-green-200'
+        };
+      case 'misconfigured':
+        return { 
+          icon: <FileWarning className="h-4 w-4 text-amber-500" />,
+          text: 'Misconfigured', 
+          color: 'bg-amber-100 text-amber-800 border-amber-200'
+        };
+      default:
+        return { 
+          icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
+          text: 'No config', 
+          color: 'bg-gray-100 text-gray-800 border-gray-200'
+        };
+    }
+  };
+  
   useEffect(() => {
     if (profileId) {
       const profile = profiles.find(p => p.id === profileId);
       
       if (profile) {
-        // Reset instance statuses
         setIsConnecting(true);
         
-        // Create initial instance statuses all in connecting state
         const initialStatuses: InstanceStatus[] = profile.instances
           .map(instanceId => {
             const instance = serverInstances.find(s => s.id === instanceId);
@@ -96,7 +114,6 @@ export function HostCard({
           
         setInstanceStatuses(initialStatuses);
         
-        // Simulate connecting instances with different timings
         initialStatuses.forEach((instance, index) => {
           setTimeout(() => {
             setInstanceStatuses(prev => {
@@ -104,7 +121,6 @@ export function HostCard({
               const instanceIndex = newStatuses.findIndex(i => i.id === instance.id);
               
               if (instanceIndex !== -1) {
-                // Randomly determine connection status (mostly successful)
                 const success = Math.random() > 0.2;
                 newStatuses[instanceIndex] = {
                   ...newStatuses[instanceIndex],
@@ -115,11 +131,10 @@ export function HostCard({
               return newStatuses;
             });
             
-            // After the last instance, set connecting to false
             if (index === initialStatuses.length - 1) {
               setIsConnecting(false);
             }
-          }, 1000 + (index * 500)); // Stagger the connections
+          }, 1000 + (index * 500));
         });
       }
     } else {
@@ -149,15 +164,11 @@ export function HostCard({
     });
   };
 
-  // Function to select an instance from the dropdown
   const handleSelectInstance = (instanceId: string, definitionId: string) => {
-    // Find all instances with this definition ID
     const definitionInstances = instanceStatuses.filter(i => i.definitionId === definitionId);
     
-    // Update the selected instance status
     setInstanceStatuses(prev => {
       return prev.map(instance => {
-        // If this is the selected instance, update it
         if (instance.id === instanceId) {
           return {
             ...instance,
@@ -168,7 +179,6 @@ export function HostCard({
       });
     });
     
-    // Simulate connection delay
     setTimeout(() => {
       setInstanceStatuses(prev => {
         return prev.map(instance => {
@@ -185,7 +195,6 @@ export function HostCard({
     }, 1000);
   };
   
-  // Group instances by definition ID
   const getInstancesByDefinition = () => {
     const definitionMap = new Map<string, InstanceStatus[]>();
     
@@ -201,6 +210,7 @@ export function HostCard({
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
+  const configStatusInfo = getConfigStatusInfo();
   
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -209,6 +219,13 @@ export function HostCard({
           <div className="flex items-center gap-2">
             {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
+            
+            {host.configPath && (
+              <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+                {configStatusInfo.icon}
+                {configStatusInfo.text}
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <StatusIndicator 
@@ -282,7 +299,6 @@ export function HostCard({
                 <ScrollArea className="h-[140px] border rounded-md p-1">
                   <div className="space-y-1">
                     {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
-                      // Get the first instance for display
                       const displayInstance = instances[0];
                       
                       return (
@@ -300,7 +316,6 @@ export function HostCard({
                             <div className="text-sm">
                               <span className="font-medium">{displayInstance.definitionName}</span>
                               
-                              {/* Instance selection dropdown */}
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <Button 
@@ -378,12 +393,22 @@ export function HostCard({
               </Button>
             ) : (
               <Button 
-                variant="outline" 
+                variant={host.configStatus === 'misconfigured' ? 'destructive' : 'outline'}
                 onClick={() => onOpenConfigDialog(host.id)}
                 disabled={!host.configPath}
+                className="flex items-center gap-2"
               >
-                <FilePlus className="h-4 w-4 mr-2" />
-                View Config
+                {host.configStatus === 'misconfigured' ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    Fix Config
+                  </>
+                ) : (
+                  <>
+                    <FilePlus className="h-4 w-4" />
+                    View Config
+                  </>
+                )}
               </Button>
             )
           )}

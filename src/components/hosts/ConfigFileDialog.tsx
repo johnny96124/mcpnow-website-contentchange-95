@@ -14,10 +14,11 @@ interface ConfigFileDialogProps {
   onOpenChange: (open: boolean) => void;
   configPath: string;
   initialConfig: string;
-  onSave: (config: string, configPath: string) => void;  // Updated to pass configPath
+  onSave: (config: string, configPath: string) => void;
   profileEndpoint?: string;
   needsUpdate?: boolean;
-  allowPathEdit?: boolean;  // New prop to control path editing
+  allowPathEdit?: boolean;
+  isViewOnly?: boolean; // New prop to control view-only mode
 }
 
 export function ConfigFileDialog({
@@ -28,13 +29,14 @@ export function ConfigFileDialog({
   onSave,
   profileEndpoint,
   needsUpdate = false,
-  allowPathEdit = false
+  allowPathEdit = false,
+  isViewOnly = false // Default to false for backward compatibility
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
-  const [path, setPath] = useState(configPath);  // Added state for path
+  const [path, setPath] = useState(configPath);
   const [error, setError] = useState<string | null>(null);
   const [isModified, setIsModified] = useState(false);
-  const [pathModified, setPathModified] = useState(false);  // Track path modifications
+  const [pathModified, setPathModified] = useState(false);
   const [hasEndpointMismatch, setHasEndpointMismatch] = useState(false);
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
   const { toast } = useToast();
@@ -95,7 +97,7 @@ export function ConfigFileDialog({
       }
       
       setError(null);
-      onSave(config, path);  // Pass both config and path
+      onSave(config, path);
       
       toast({
         title: "Configuration saved",
@@ -171,11 +173,9 @@ export function ConfigFileDialog({
     
     try {
       // Implementation for highlighting would typically be more complex with a proper editor
-      // Since we're using a textarea, we'll just focus on finding the mcpnow section
       const parsedConfig = JSON.parse(config);
       if (parsedConfig.mcpServers?.mcpnow) {
         // For a textarea, we can't apply direct highlighting
-        // In a real implementation, consider using a code editor component like Monaco, CodeMirror, etc.
       }
     } catch (e) {
       // Silently fail, validation error will be shown separately
@@ -184,12 +184,44 @@ export function ConfigFileDialog({
 
   // Handle dialog close with unsaved changes
   const handleCloseDialog = (open: boolean) => {
-    if (!open && (isModified || pathModified)) {
+    if (!open && (isModified || pathModified) && !isViewOnly) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
     } else {
       onOpenChange(open);
+    }
+  };
+
+  // Fix endpoint mismatch automatically
+  const handleFixEndpoint = () => {
+    try {
+      const parsedConfig = JSON.parse(config);
+      
+      if (parsedConfig.mcpServers?.mcpnow?.args && profileEndpoint) {
+        const args = [...parsedConfig.mcpServers.mcpnow.args];
+        // Update the endpoint (last argument)
+        args[args.length - 1] = profileEndpoint;
+        
+        parsedConfig.mcpServers.mcpnow.args = args;
+        const updatedConfig = JSON.stringify(parsedConfig, null, 2);
+        
+        setConfig(updatedConfig);
+        setIsModified(true);
+        setHasEndpointMismatch(false);
+        setError(null);
+        
+        toast({
+          title: "Endpoint updated",
+          description: "The configuration endpoint has been updated to match the profile.",
+        });
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(`Cannot update endpoint: ${err.message}`);
+      } else {
+        setError("Cannot update endpoint: Invalid JSON");
+      }
     }
   };
 
@@ -202,7 +234,7 @@ export function ConfigFileDialog({
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>
           <DialogDescription>
-            Edit configuration file details
+            {isViewOnly ? "View configuration file details" : "Edit configuration file details"}
           </DialogDescription>
         </DialogHeader>
         
@@ -216,31 +248,33 @@ export function ConfigFileDialog({
               onChange={(e) => handlePathChange(e.target.value)}
               rows={1}
               className="font-mono text-sm"
-              readOnly={!allowPathEdit}
+              readOnly={isViewOnly || !allowPathEdit}
             />
-            {allowPathEdit && (
+            {allowPathEdit && !isViewOnly && (
               <p className="text-xs text-muted-foreground">
                 You can modify the path where this configuration will be saved.
               </p>
             )}
           </div>
 
-          <div className="flex justify-between mb-2">
-            <div className="text-sm text-muted-foreground">
-              Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+          {!isViewOnly && (
+            <div className="flex justify-between mb-2">
+              <div className="text-sm text-muted-foreground">
+                Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={resetJson}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset JSON
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={resetJson}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset JSON
-            </Button>
-          </div>
+          )}
           
           {showWarning && (
             <Alert variant="destructive" className="py-2 px-3">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
                 Warning: The endpoint in the mcpnow configuration does not match the selected profile's endpoint.
-                Click "Reset JSON" to fix this issue.
+                {!isViewOnly ? " Click \"Reset JSON\" to fix this issue." : " This configuration needs to be updated."}
               </AlertDescription>
             </Alert>
           )}
@@ -252,6 +286,7 @@ export function ConfigFileDialog({
               value={config} 
               onChange={(e) => handleChange(e.target.value)}
               spellCheck={false}
+              readOnly={isViewOnly}
             />
           </ScrollArea>
           
@@ -263,10 +298,24 @@ export function ConfigFileDialog({
         </div>
         
         <DialogFooter className="flex justify-end space-x-2">
-          <Button onClick={handleSave} disabled={!!error}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
-          </Button>
+          {isViewOnly ? (
+            <>
+              {hasEndpointMismatch && (
+                <Button onClick={handleFixEndpoint} variant="destructive">
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Fix Endpoint Mismatch
+                </Button>
+              )}
+              <Button onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
+            </>
+          ) : (
+            <Button onClick={handleSave} disabled={!!error}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Changes
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

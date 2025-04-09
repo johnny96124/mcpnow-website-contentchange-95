@@ -8,7 +8,8 @@ interface ConfigDialogState {
   configContent: string;
   profileEndpoint?: string;
   needsUpdate?: boolean;
-  allowPathEdit?: boolean; // Added property for path editing
+  allowPathEdit?: boolean;
+  isViewOnly?: boolean; // Added property for view-only mode
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -17,7 +18,8 @@ export function useConfigDialog(mockJsonConfig: any) {
     hostId: null,
     configPath: "",
     configContent: "",
-    allowPathEdit: false
+    allowPathEdit: false,
+    isViewOnly: false
   });
   
   const openConfigDialog = (
@@ -25,7 +27,8 @@ export function useConfigDialog(mockJsonConfig: any) {
     configPath: string, 
     profileEndpoint?: string, 
     needsUpdate?: boolean,
-    allowPathEdit?: boolean
+    allowPathEdit?: boolean,
+    isViewOnly?: boolean
   ) => {
     setConfigDialog({
       isOpen: true,
@@ -34,7 +37,8 @@ export function useConfigDialog(mockJsonConfig: any) {
       configContent: JSON.stringify(mockJsonConfig, null, 2),
       profileEndpoint,
       needsUpdate,
-      allowPathEdit
+      allowPathEdit,
+      isViewOnly
     });
   };
   
@@ -52,7 +56,8 @@ export function useConfigDialog(mockJsonConfig: any) {
       hostId: null,
       configPath: "",
       configContent: "",
-      allowPathEdit: false
+      allowPathEdit: false,
+      isViewOnly: false
     });
   };
   
