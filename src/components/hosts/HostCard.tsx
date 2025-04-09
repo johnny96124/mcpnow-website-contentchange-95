@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -11,6 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface InstanceStatus {
   id: string;
@@ -146,9 +148,59 @@ export function HostCard({
       });
     });
   };
+
+  // Function to select an instance from the dropdown
+  const handleSelectInstance = (instanceId: string, definitionId: string) => {
+    // Find all instances with this definition ID
+    const definitionInstances = instanceStatuses.filter(i => i.definitionId === definitionId);
+    
+    // Update the selected instance status
+    setInstanceStatuses(prev => {
+      return prev.map(instance => {
+        // If this is the selected instance, update it
+        if (instance.id === instanceId) {
+          return {
+            ...instance,
+            status: 'connecting'
+          };
+        }
+        return instance;
+      });
+    });
+    
+    // Simulate connection delay
+    setTimeout(() => {
+      setInstanceStatuses(prev => {
+        return prev.map(instance => {
+          if (instance.id === instanceId) {
+            const success = Math.random() > 0.2;
+            return {
+              ...instance,
+              status: success ? 'connected' : 'error'
+            };
+          }
+          return instance;
+        });
+      });
+    }, 1000);
+  };
+  
+  // Group instances by definition ID
+  const getInstancesByDefinition = () => {
+    const definitionMap = new Map<string, InstanceStatus[]>();
+    
+    instanceStatuses.forEach(instance => {
+      const defInstances = definitionMap.get(instance.definitionId) || [];
+      defInstances.push(instance);
+      definitionMap.set(instance.definitionId, defInstances);
+    });
+    
+    return definitionMap;
+  };
   
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
+  const instancesByDefinition = getInstancesByDefinition();
   
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -189,15 +241,16 @@ export function HostCard({
               <SelectValue placeholder="Select a profile">
                 {selectedProfile && (
                   <div className="flex items-center gap-2">
-                    <StatusIndicator 
-                      status={
-                        isHostDisconnected ? 'none' : 
-                        isConnecting ? 'warning' :
-                        profileConnectionStatus === 'connected' ? 'active' : 
-                        profileConnectionStatus === 'warning' ? 'warning' : 
-                        'error'
-                      } 
-                    />
+                    {!isHostDisconnected && (
+                      <StatusIndicator 
+                        status={
+                          isConnecting ? 'warning' :
+                          profileConnectionStatus === 'connected' ? 'active' : 
+                          profileConnectionStatus === 'warning' ? 'warning' : 
+                          'error'
+                        } 
+                      />
+                    )}
                     <span>{selectedProfile.name}</span>
                   </div>
                 )}
@@ -228,35 +281,72 @@ export function HostCard({
                 <label className="text-sm font-medium">Server Instances</label>
                 <ScrollArea className="h-[140px] border rounded-md p-1">
                   <div className="space-y-1">
-                    {instanceStatuses.map(instance => (
-                      <div key={instance.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                        <div className="flex items-center gap-2">
-                          <StatusIndicator 
-                            status={
-                              isHostDisconnected ? 'none' :
-                              !instance.enabled ? 'inactive' :
-                              instance.status === 'connected' ? 'active' :
-                              instance.status === 'connecting' ? 'warning' :
-                              instance.status === 'error' ? 'error' : 'inactive'
-                            }
-                          />
-                          <div className="text-sm">
-                            <span className="font-medium">{instance.definitionName}</span>
-                            {' - '}
-                            <span className="text-muted-foreground">{instance.name}</span>
+                    {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
+                      // Get the first instance for display
+                      const displayInstance = instances[0];
+                      
+                      return (
+                        <div key={definitionId} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                          <div className="flex items-center gap-2">
+                            <StatusIndicator 
+                              status={
+                                isHostDisconnected ? 'none' :
+                                !displayInstance.enabled ? 'inactive' :
+                                displayInstance.status === 'connected' ? 'active' :
+                                displayInstance.status === 'connecting' ? 'warning' :
+                                displayInstance.status === 'error' ? 'error' : 'inactive'
+                              }
+                            />
+                            <div className="text-sm">
+                              <span className="font-medium">{displayInstance.definitionName}</span>
+                              
+                              {/* Instance selection dropdown */}
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 px-1 py-0 ml-1"
+                                  >
+                                    <span className="text-xs text-muted-foreground">
+                                      {displayInstance.name.split('-').pop()}
+                                    </span>
+                                    <ChevronDown className="h-3 w-3 ml-1" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-48 p-1">
+                                  <div className="space-y-1">
+                                    {instances.map(instance => (
+                                      <Button
+                                        key={instance.id}
+                                        variant={displayInstance.id === instance.id ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className={cn(
+                                          "w-full justify-start text-xs",
+                                          displayInstance.id === instance.id && "font-medium"
+                                        )}
+                                        onClick={() => handleSelectInstance(instance.id, definitionId)}
+                                      >
+                                        {instance.name.split('-').pop()}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                            {!isHostDisconnected && displayInstance.status === 'connecting' && (
+                              <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                            )}
                           </div>
-                          {!isHostDisconnected && instance.status === 'connecting' && (
-                            <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                          {!isHostDisconnected && (
+                            <Switch 
+                              checked={displayInstance.enabled} 
+                              onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                            />
                           )}
                         </div>
-                        {!isHostDisconnected && (
-                          <Switch 
-                            checked={instance.enabled} 
-                            onCheckedChange={() => toggleInstanceEnabled(instance.id)}
-                          />
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </ScrollArea>
               </div>
