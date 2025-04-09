@@ -15,15 +15,15 @@ export function StatusIndicator({
   className 
 }: StatusIndicatorProps) {
   const statusClass = {
-    'active': 'bg-green-500',
-    'warning': 'bg-yellow-500',
-    'error': 'bg-red-500',
-    'inactive': 'bg-gray-400'
+    'active': 'status-active',
+    'warning': 'status-warning',
+    'error': 'status-error',
+    'inactive': 'status-inactive'
   }[status];
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("h-2.5 w-2.5 rounded-full", statusClass)}></span>
+      <span className={cn("status-dot", statusClass)}></span>
       {label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );

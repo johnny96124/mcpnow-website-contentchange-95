@@ -5,15 +5,9 @@ import type { EndpointType } from "@/data/mockData";
 interface EndpointLabelProps {
   type: EndpointType | 'Custom' | 'WS';
   className?: string;
-  showLabel?: boolean;
 }
 
-export function EndpointLabel({ type, className, showLabel = false }: EndpointLabelProps) {
-  // If showLabel is false, don't render the component
-  if (!showLabel) {
-    return null;
-  }
-  
+export function EndpointLabel({ type, className }: EndpointLabelProps) {
   let labelText = '';
   let typeClasses = '';
   

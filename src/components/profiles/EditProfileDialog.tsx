@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Profile, ServerInstance, serverDefinitions } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -158,11 +159,14 @@ export function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
-          <DialogDescription>
-            Modify profile name and server instances.
-          </DialogDescription>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Modify profile name and server instances.
+            </DialogDescription>
+          </div>
+          <EndpointLabel type="HTTP_SSE" />
         </DialogHeader>
 
         <div className="py-4 space-y-6">

@@ -27,6 +27,7 @@ import { EndpointType, ServerInstance, serverDefinitions } from "@/data/mockData
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
@@ -192,11 +193,14 @@ export function CreateProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New Profile</DialogTitle>
-          <DialogDescription>
-            Group server instances into a managed profile.
-          </DialogDescription>
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Group server instances into a managed profile.
+            </DialogDescription>
+          </div>
+          <EndpointLabel type="HTTP_SSE" />
         </DialogHeader>
         
         {!hasInstances ? (
