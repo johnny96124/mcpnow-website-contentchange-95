@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { type EndpointType } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -41,6 +42,9 @@ export function AddServerDialog({
   onNavigateToDiscovery
 }: AddServerDialogProps) {
   const [activeTab, setActiveTab] = useState<"local" | "discovery">("local");
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [commandArgsError, setCommandArgsError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverFormSchema),
@@ -59,12 +63,44 @@ export function AddServerDialog({
   useEffect(() => {
     if (serverType === "HTTP_SSE") {
       form.setValue("commandArgs", "");
+      setCommandArgsError(null);
     } else {
       form.setValue("url", "");
+      setUrlError(null);
     }
   }, [serverType, form]);
   
+  const validateRequiredFields = () => {
+    let isValid = true;
+    
+    if (serverType === "HTTP_SSE") {
+      const url = form.getValues("url");
+      if (!url || url.trim() === "") {
+        setUrlError("URL is required for HTTP_SSE server types");
+        isValid = false;
+      } else {
+        setUrlError(null);
+      }
+    } else {
+      const commandArgs = form.getValues("commandArgs");
+      if (!commandArgs || commandArgs.trim() === "") {
+        setCommandArgsError("Command Arguments are required for STDIO server types");
+        isValid = false;
+      } else {
+        setCommandArgsError(null);
+      }
+    }
+    
+    return isValid;
+  };
+  
   const onSubmit = (data: ServerFormValues) => {
+    // Validate required fields based on server type
+    if (!validateRequiredFields()) {
+      // Don't proceed if validation fails
+      return;
+    }
+    
     onCreateServer(data);
   };
   
@@ -144,9 +180,18 @@ export function AddServerDialog({
                         <FormControl>
                           <Input 
                             placeholder="Enter server URL (e.g., http://localhost:3000/stream)"
-                            {...field} 
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (e.target.value.trim() !== "") {
+                                setUrlError(null);
+                              }
+                            }} 
                           />
                         </FormControl>
+                        {urlError && (
+                          <p className="text-sm font-medium text-destructive">{urlError}</p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -165,9 +210,18 @@ export function AddServerDialog({
                         <FormControl>
                           <Input 
                             placeholder="Enter command line arguments (e.g., --port 3000 --verbose)"
-                            {...field} 
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (e.target.value.trim() !== "") {
+                                setCommandArgsError(null);
+                              }
+                            }}
                           />
                         </FormControl>
+                        {commandArgsError && (
+                          <p className="text-sm font-medium text-destructive">{commandArgsError}</p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}

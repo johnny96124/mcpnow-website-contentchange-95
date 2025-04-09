@@ -38,6 +38,8 @@ export function EditServerDialog({
   const [httpHeaders, setHttpHeaders] = useState<{ key: string, value: string }[]>([]);
   const [envKeyError, setEnvKeyError] = useState<string | null>(null);
   const [headerKeyError, setHeaderKeyError] = useState<string | null>(null);
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [commandArgsError, setCommandArgsError] = useState<string | null>(null);
   const { toast } = useToast();
   
   const isHttpSse = serverDefinition?.type === "HTTP_SSE";
@@ -111,23 +113,34 @@ export function EditServerDialog({
     setHeaderKeyError(null);
   };
   
-  const onSubmit = (formData: EditServerFormValues) => {
-    // Validate required fields based on server type
-    if (isHttpSse && (!formData.url || formData.url.trim() === '')) {
-      toast({
-        title: "Validation Error",
-        description: "URL is required for HTTP_SSE server types",
-        variant: "destructive"
-      });
-      return;
+  const validateRequiredFields = () => {
+    let isValid = true;
+    
+    if (isHttpSse) {
+      const url = form.getValues("url");
+      if (!url || url.trim() === "") {
+        setUrlError("URL is required for HTTP_SSE server types");
+        isValid = false;
+      } else {
+        setUrlError(null);
+      }
+    } else {
+      const commandArgs = form.getValues("commandArgs");
+      if (!commandArgs || commandArgs.trim() === "") {
+        setCommandArgsError("Command Arguments are required for STDIO server types");
+        isValid = false;
+      } else {
+        setCommandArgsError(null);
+      }
     }
     
-    if (!isHttpSse && (!formData.commandArgs || formData.commandArgs.trim() === '')) {
-      toast({
-        title: "Validation Error",
-        description: "Command Arguments are required for STDIO server types",
-        variant: "destructive"
-      });
+    return isValid;
+  };
+  
+  const onSubmit = (formData: EditServerFormValues) => {
+    // Validate required fields based on server type
+    if (!validateRequiredFields()) {
+      // Don't proceed if validation fails
       return;
     }
 
@@ -179,8 +192,20 @@ export function EditServerDialog({
                         <span className="text-destructive ml-1">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter server URL" {...field} />
+                        <Input 
+                          placeholder="Enter server URL" 
+                          {...field} 
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value.trim() !== "") {
+                              setUrlError(null);
+                            }
+                          }} 
+                        />
                       </FormControl>
+                      {urlError && (
+                        <p className="text-sm font-medium text-destructive">{urlError}</p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -196,8 +221,20 @@ export function EditServerDialog({
                         <span className="text-destructive ml-1">*</span>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter command line arguments" {...field} />
+                        <Input 
+                          placeholder="Enter command line arguments" 
+                          {...field} 
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value.trim() !== "") {
+                              setCommandArgsError(null);
+                            }
+                          }} 
+                        />
                       </FormControl>
+                      {commandArgsError && (
+                        <p className="text-sm font-medium text-destructive">{commandArgsError}</p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}
