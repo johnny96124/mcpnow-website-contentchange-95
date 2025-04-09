@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Edit, 
@@ -10,7 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
@@ -145,13 +143,11 @@ const Profiles = () => {
     ensureFirstProfileHasFiveInstances();
   }, []);
 
-  // Helper function to get server definition name
   const getDefinitionName = (definitionId: string) => {
     const instance = serverInstances.find(inst => inst.definitionId === definitionId);
     return instance ? instance.name.split(' ')[0] : 'Unknown';
   };
 
-  // Filter profiles based on search query
   const filteredProfiles = localProfiles.filter(profile => 
     profile.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -202,7 +198,6 @@ const Profiles = () => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-xl">{profile.name}</CardTitle>
-                  <EndpointLabel type="HTTP_SSE" />
                 </div>
               </CardHeader>
               <CardContent>

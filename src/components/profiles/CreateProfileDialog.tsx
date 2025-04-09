@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -27,7 +26,6 @@ import { EndpointType, ServerInstance, serverDefinitions } from "@/data/mockData
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
@@ -66,7 +64,6 @@ export function CreateProfileDialog({
     instanceId: "" 
   }]);
   
-  // Group instances by definition for easier selection
   const instancesByDefinition = instances.reduce((acc, instance) => {
     if (!acc[instance.definitionId]) {
       acc[instance.definitionId] = [];
@@ -75,13 +72,11 @@ export function CreateProfileDialog({
     return acc;
   }, {} as Record<string, ServerInstance[]>);
   
-  // Get unique definition IDs
   const definitionIds = [...new Set(instances.map(instance => instance.definitionId))];
   
   useEffect(() => {
     setHasInstances(instances.length > 0);
     
-    // Reset selections when dialog opens
     if (open) {
       setSelections([{ 
         id: `selection-${Date.now()}`, 
@@ -98,7 +93,6 @@ export function CreateProfileDialog({
     },
   });
 
-  // Add a new instance selection row
   const addSelection = () => {
     setSelections([
       ...selections, 
@@ -110,34 +104,29 @@ export function CreateProfileDialog({
     ]);
   };
 
-  // Remove an instance selection row
   const removeSelection = (id: string) => {
     if (selections.length > 1) {
       setSelections(selections.filter(selection => selection.id !== id));
     }
   };
 
-  // Update a selection's definition ID
   const updateDefinitionId = (id: string, definitionId: string) => {
     setSelections(selections.map(selection => 
       selection.id === id ? { ...selection, definitionId, instanceId: "" } : selection
     ));
   };
 
-  // Update a selection's instance ID
   const updateInstanceId = (id: string, instanceId: string) => {
     setSelections(selections.map(selection => 
       selection.id === id ? { ...selection, instanceId } : selection
     ));
   };
 
-  // Helper to get definition name
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
 
-  // Filter out used definition IDs for each selection
   const getAvailableDefinitionIds = (currentSelectionId: string) => {
     const usedDefinitionIds = selections
       .filter(s => s.id !== currentSelectionId && s.definitionId)
@@ -157,7 +146,6 @@ export function CreateProfileDialog({
       return;
     }
 
-    // Filter out incomplete selections and get only instance IDs
     const selectedInstanceIds = selections
       .filter(selection => selection.instanceId)
       .map(selection => selection.instanceId);
@@ -193,14 +181,11 @@ export function CreateProfileDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <div>
-            <DialogTitle>Create New Profile</DialogTitle>
-            <DialogDescription>
-              Group server instances into a managed profile.
-            </DialogDescription>
-          </div>
-          <EndpointLabel type="HTTP_SSE" />
+        <DialogHeader>
+          <DialogTitle>Create New Profile</DialogTitle>
+          <DialogDescription>
+            Group server instances into a managed profile.
+          </DialogDescription>
         </DialogHeader>
         
         {!hasInstances ? (

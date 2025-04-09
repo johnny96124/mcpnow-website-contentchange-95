@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Trash2, Plus, AlertCircle, Info } from "lucide-react";
 import {
@@ -15,7 +14,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Profile, ServerInstance, serverDefinitions } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -42,7 +40,6 @@ export function EditProfileDialog({
   const [profileName, setProfileName] = useState(profile.name);
   const [selections, setSelections] = useState<InstanceSelection[]>([]);
   
-  // Group instances by definition for easier selection
   const instancesByDefinition = allInstances.reduce((acc, instance) => {
     if (!acc[instance.definitionId]) {
       acc[instance.definitionId] = [];
@@ -51,23 +48,18 @@ export function EditProfileDialog({
     return acc;
   }, {} as Record<string, ServerInstance[]>);
   
-  // Get unique definition IDs
   const definitionIds = [...new Set(allInstances.map(instance => instance.definitionId))];
 
-  // Reset state when dialog opens with profile data
   useEffect(() => {
     if (open) {
       setProfileName(profile.name);
       
-      // Convert profile instances to selections format
       const initialSelections: InstanceSelection[] = [];
       
-      // Get all selected instances with their details
       const selectedInstances = profile.instances.map(
         instanceId => allInstances.find(inst => inst.id === instanceId)
       ).filter(Boolean) as ServerInstance[];
       
-      // Create selection objects for each instance
       selectedInstances.forEach(instance => {
         initialSelections.push({
           id: `selection-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -76,7 +68,6 @@ export function EditProfileDialog({
         });
       });
       
-      // If no instances, add an empty selection
       if (initialSelections.length === 0) {
         initialSelections.push({ 
           id: `selection-${Date.now()}`, 
@@ -89,7 +80,6 @@ export function EditProfileDialog({
     }
   }, [open, profile, allInstances]);
 
-  // Add a new instance selection row
   const addSelection = () => {
     setSelections([
       ...selections, 
@@ -101,34 +91,29 @@ export function EditProfileDialog({
     ]);
   };
 
-  // Remove an instance selection row
   const removeSelection = (id: string) => {
     if (selections.length > 1) {
       setSelections(selections.filter(selection => selection.id !== id));
     }
   };
 
-  // Update a selection's definition ID
   const updateDefinitionId = (id: string, definitionId: string) => {
     setSelections(selections.map(selection => 
       selection.id === id ? { ...selection, definitionId, instanceId: "" } : selection
     ));
   };
 
-  // Update a selection's instance ID
   const updateInstanceId = (id: string, instanceId: string) => {
     setSelections(selections.map(selection => 
       selection.id === id ? { ...selection, instanceId } : selection
     ));
   };
 
-  // Helper to get definition name
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown Definition';
   };
 
-  // Filter out used definition IDs for each selection
   const getAvailableDefinitionIds = (currentSelectionId: string) => {
     const usedDefinitionIds = selections
       .filter(s => s.id !== currentSelectionId && s.definitionId)
@@ -138,7 +123,6 @@ export function EditProfileDialog({
   };
 
   const handleSave = () => {
-    // Filter out incomplete selections and get only instance IDs
     const selectedInstanceIds = selections
       .filter(selection => selection.instanceId)
       .map(selection => selection.instanceId);
@@ -159,14 +143,11 @@ export function EditProfileDialog({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onOpenChange(false)}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <div>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Modify profile name and server instances.
-            </DialogDescription>
-          </div>
-          <EndpointLabel type="HTTP_SSE" />
+        <DialogHeader>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogDescription>
+            Modify profile name and server instances.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-6">
