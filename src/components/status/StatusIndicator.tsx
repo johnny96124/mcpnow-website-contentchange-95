@@ -7,23 +7,25 @@ interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   className?: string;
+  showIndicator?: boolean; // New prop to control indicator visibility
 }
 
 export function StatusIndicator({ 
   status, 
   label,
-  className 
+  className,
+  showIndicator = true // Default to true to maintain backward compatibility
 }: StatusIndicatorProps) {
   const statusClass = {
-    'active': 'status-active',
-    'warning': 'status-warning',
-    'error': 'status-error',
-    'inactive': 'status-inactive'
+    'active': 'status-dot-active',
+    'warning': 'status-dot-warning',
+    'error': 'status-dot-error',
+    'inactive': 'status-dot-inactive'
   }[status];
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("status-dot", statusClass)}></span>
+      {showIndicator && <span className={cn("status-dot", statusClass)}></span>}
       {label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );
