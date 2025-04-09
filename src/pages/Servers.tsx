@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -7,7 +6,8 @@ import {
   Terminal,
   Info,
   Search,
-  Edit
+  Edit,
+  XCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,13 +56,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { EditServerDialog, EditServerFormValues } from "@/components/servers/EditServerDialog";
+import { RuntimeInstancesList, RuntimeInstance } from "@/components/servers/RuntimeInstancesList";
+import { RuntimeLogsDialog } from "@/components/servers/RuntimeLogsDialog";
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
   const [filteredInstances, setFilteredInstances] = useState<ServerInstance[]>(serverInstances);
   const [filteredDefinitions, setFilteredDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
-  const [activeTab, setActiveTab] = useState<"definitions" | "instances">("definitions");
+  const [activeTab, setActiveTab] = useState<"definitions" | "instances" | "runtime">("definitions");
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [editInstanceOpen, setEditInstanceOpen] = useState(false);
   const [editServerOpen, setEditServerOpen] = useState(false);
@@ -75,6 +77,11 @@ const Servers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
+  const [runtimeInstances, setRuntimeInstances] = useState<RuntimeInstance[]>([]);
+  const [isLoadingRuntimes, setIsLoadingRuntimes] = useState(false);
+  const [selectedRuntime, setSelectedRuntime] = useState<RuntimeInstance | null>(null);
+  const [runtimeLogsDialogOpen, setRuntimeLogsDialogOpen] = useState(false);
+  
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -96,6 +103,57 @@ const Servers = () => {
     });
     return acc;
   }, {} as Record<string, typeof profiles>);
+
+  useEffect(() => {
+    if (activeTab === "runtime") {
+      loadRuntimeInstances();
+    }
+  }, [activeTab]);
+
+  const loadRuntimeInstances = () => {
+    setIsLoadingRuntimes(true);
+    
+    setTimeout(() => {
+      const mockRuntimeInstances: RuntimeInstance[] = [];
+      
+      const connectedHosts = ['host-1', 'host-2'];
+      const sampleInstances = instances.slice(0, 3);
+      
+      sampleInstances.forEach((instance, index) => {
+        const definition = definitions.find(d => d.id === instance.definitionId);
+        const associatedProfiles = realProfileAssociations[instance.id] || [];
+        
+        if (definition && associatedProfiles.length > 0) {
+          const profile = associatedProfiles[0];
+          const hostId = connectedHosts[index % connectedHosts.length];
+          const hostName = hostId === 'host-1' ? 'Local Host' : 'Remote Server';
+          
+          const status = index === 0 ? 'connected' : index === 1 ? 'connecting' : 'failed';
+          
+          mockRuntimeInstances.push({
+            id: `runtime-${instance.id}`,
+            instanceId: instance.id,
+            instanceName: instance.name,
+            definitionId: definition.id,
+            definitionName: definition.name,
+            definitionType: definition.type,
+            profileId: profile.id,
+            profileName: profile.name,
+            hostId: hostId,
+            hostName: hostName,
+            status: status,
+            errorMessage: status === 'failed' ? 'Connection refused: endpoint not accessible' : undefined,
+            connectionDetails: instance.connectionDetails,
+            startedAt: new Date(Date.now() - (index + 1) * 60000 * (index + 1)),
+            requestCount: index === 0 ? 42 : index === 1 ? 8 : 0
+          });
+        }
+      });
+      
+      setRuntimeInstances(mockRuntimeInstances);
+      setIsLoadingRuntimes(false);
+    }, 1200);
+  };
 
   useEffect(() => {
     let filtered = [...instances];
@@ -164,7 +222,6 @@ const Servers = () => {
     const firstProfile = associatedProfiles[0];
     const remainingCount = associatedProfiles.length - 1;
     
-    // Use different truncation length based on whether it's in table view
     const maxLength = isTableView ? 20 : 16;
     
     return (
@@ -246,7 +303,6 @@ const Servers = () => {
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // For new instances, use the server definition's pre-configured values
       const connectionDetails = selectedDefinition.type === 'HTTP_SSE' 
         ? (data.url || selectedDefinition.url || `http://localhost:${3000 + instances.length}`) 
         : `localhost:${3000 + instances.length}`;
@@ -384,6 +440,58 @@ const Servers = () => {
     }, 2000);
   };
   
+  const handleDisconnectRuntime = (runtimeId: string) => {
+    setRuntimeInstances(prev => prev.filter(runtime => runtime.id !== runtimeId));
+    
+    toast({
+      title: "Instance Disconnected",
+      description: "The runtime instance has been successfully disconnected.",
+    });
+  };
+
+  const handleReconnectRuntime = (runtimeId: string) => {
+    setRuntimeInstances(prev => prev.map(runtime => 
+      runtime.id === runtimeId 
+        ? { 
+            ...runtime, 
+            status: 'connecting',
+            errorMessage: undefined 
+          } 
+        : runtime
+    ));
+    
+    setTimeout(() => {
+      const success = Math.random() > 0.3;
+      
+      setRuntimeInstances(prev => prev.map(runtime => 
+        runtime.id === runtimeId 
+          ? { 
+              ...runtime, 
+              status: success ? 'connected' : 'failed',
+              errorMessage: success ? undefined : 'Connection failed after retry. Network timeout.',
+              requestCount: success ? runtime.requestCount + 1 : runtime.requestCount
+            } 
+          : runtime
+      ));
+      
+      toast({
+        title: success ? "Reconnection Successful" : "Reconnection Failed",
+        description: success 
+          ? "The runtime instance has been successfully reconnected." 
+          : "Failed to reconnect the runtime instance. Please check network connectivity.",
+        variant: success ? "default" : "destructive",
+      });
+    }, 2000);
+  };
+
+  const handleViewLogs = (runtimeId: string) => {
+    const runtime = runtimeInstances.find(r => r.id === runtimeId);
+    if (runtime) {
+      setSelectedRuntime(runtime);
+      setRuntimeLogsDialogOpen(true);
+    }
+  };
+  
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -413,15 +521,33 @@ const Servers = () => {
           />
         </div>
         
-        <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "definitions" | "instances")}>
+        <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as "definitions" | "instances" | "runtime")}>
           <TabsList>
             <TabsTrigger value="definitions">Server Definitions</TabsTrigger>
             <TabsTrigger value="instances">Server Instances</TabsTrigger>
+            <TabsTrigger value="runtime" className="relative">
+              Runtime
+              {runtimeInstances.length > 0 && (
+                <Badge className="ml-1.5 bg-primary text-primary-foreground text-xs py-0 px-1.5 absolute -right-2 -top-2">
+                  {runtimeInstances.length}
+                </Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
       
-      {activeTab === "definitions" ? (
+      <TabsContent value="runtime" className="mt-0">
+        <RuntimeInstancesList 
+          runtimeInstances={runtimeInstances}
+          isLoading={isLoadingRuntimes}
+          onDisconnect={handleDisconnectRuntime}
+          onReconnect={handleReconnectRuntime}
+          onViewLogs={handleViewLogs}
+        />
+      </TabsContent>
+      
+      <TabsContent value="definitions" className="mt-0">
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {filteredDefinitions.map(definition => {
             const definitionInstances = instancesByDefinition[definition.id] || [];
@@ -556,7 +682,9 @@ const Servers = () => {
                   {filteredDefInstances.length === 0 && (
                     <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
                       <div className="h-8 w-8 text-muted-foreground/50 mb-2" />
-                      <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
+                      <p className="text-muted-foreground text-center">
+                        No instances created for this server definition
+                      </p>
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -639,7 +767,9 @@ const Servers = () => {
             </CardContent>
           </Card>
         </div>
-      ) : (
+      </TabsContent>
+      
+      <TabsContent value="instances" className="mt-0">
         <div className="rounded-md border">
           <div className="relative w-full overflow-auto">
             <table className="w-full caption-bottom text-sm">
@@ -741,7 +871,7 @@ const Servers = () => {
             </table>
           </div>
         </div>
-      )}
+      </TabsContent>
       
       <AddInstanceDialog
         open={addInstanceOpen}
@@ -778,6 +908,12 @@ const Servers = () => {
         onOpenChange={setEditServerOpen}
         serverDefinition={selectedDefinition}
         onUpdateServer={handleUpdateServer}
+      />
+      
+      <RuntimeLogsDialog
+        open={runtimeLogsDialogOpen}
+        onOpenChange={setRuntimeLogsDialogOpen}
+        runtimeInstance={selectedRuntime}
       />
     </div>
   );

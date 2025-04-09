@@ -33,6 +33,24 @@ export interface ServerInstance {
   enabled: boolean;
 }
 
+export interface RuntimeInstance {
+  id: string;
+  instanceId: string;
+  instanceName: string;
+  definitionId: string;
+  definitionName: string;
+  definitionType: 'HTTP_SSE' | 'STDIO';
+  profileId: string;
+  profileName: string;
+  hostId: string;
+  hostName: string;
+  status: 'connecting' | 'connected' | 'failed';
+  errorMessage?: string;
+  connectionDetails: string;
+  startedAt: Date;
+  requestCount: number;
+}
+
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 
 export const serverDefinitions: ServerDefinition[];
@@ -49,3 +67,16 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
+
+export interface Host {
+  id: string;
+  name: string;
+  icon: string;
+  connectionStatus: ConnectionStatus;
+  configStatus: "configured" | "misconfigured" | "unknown";
+  configPath?: string;
+}
+
+export type ConnectionStatus = "connected" | "disconnected" | "error";
+
+export const hosts: Host[];
