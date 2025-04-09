@@ -280,7 +280,7 @@ const Hosts = () => {
           ))}
           
           {isScanning && (
-            <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
+            <div className="border rounded-lg overflow-hidden shadow-sm h-[480px]">
               <div className="bg-muted/50 p-6 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ const Hosts = () => {
                 </div>
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-[180px] w-full" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">

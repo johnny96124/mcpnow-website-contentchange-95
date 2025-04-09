@@ -150,7 +150,7 @@ export function HostCard({
   const selectedProfile = profiles.find(p => p.id === profileId);
   
   return (
-    <Card className="overflow-hidden flex flex-col h-[400px]">
+    <Card className="overflow-hidden flex flex-col h-[480px]">
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -188,14 +188,6 @@ export function HostCard({
               <SelectValue placeholder="Select a profile">
                 {selectedProfile && (
                   <div className="flex items-center gap-2">
-                    <StatusIndicator 
-                      status={
-                        isConnecting ? 'warning' :
-                        profileConnectionStatus === 'connected' ? 'active' : 
-                        profileConnectionStatus === 'warning' ? 'warning' : 
-                        'error'
-                      } 
-                    />
                     <span>{selectedProfile.name}</span>
                   </div>
                 )}
@@ -222,7 +214,7 @@ export function HostCard({
             {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Server Instances</label>
-                <ScrollArea className="h-[140px] border rounded-md p-1">
+                <ScrollArea className="h-[180px] border rounded-md p-1">
                   <div className="space-y-1">
                     {instanceStatuses.map(instance => (
                       <div key={instance.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
@@ -293,7 +285,7 @@ export function HostCard({
         )}
         
         {!profileId && (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
+          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md h-[250px]">
             <p className="text-muted-foreground text-center">
               Select a profile to view connection details
             </p>
