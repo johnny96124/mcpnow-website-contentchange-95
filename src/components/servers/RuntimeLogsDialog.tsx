@@ -1,341 +1,260 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle,
+  DialogTitle, 
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { Terminal, Download, Copy, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { RuntimeInstance, ServerInstance, ServerDefinition } from "@/data/mockData";
+import { Badge } from "@/components/ui/badge";
+import { Clock, RefreshCw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RuntimeInstance } from "./RuntimeInstancesList";
 
 interface LogEntry {
+  id: string;
   timestamp: Date;
-  level: 'info' | 'warning' | 'error';
+  level: "info" | "warn" | "error" | "debug";
   message: string;
 }
 
 interface RuntimeLogsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  runtime: RuntimeInstance | null;
-  instance: ServerInstance | null;
-  definition: ServerDefinition | null;
+  runtimeInstance: RuntimeInstance | null;
 }
 
 export function RuntimeLogsDialog({
   open,
   onOpenChange,
-  runtime,
-  instance,
-  definition
+  runtimeInstance
 }: RuntimeLogsDialogProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [activeTab, setActiveTab] = useState<'logs' | 'details'>('logs');
-  const [autoScroll, setAutoScroll] = useState(true);
-  const { toast } = useToast();
-  
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Generate mock logs for the demo
   useEffect(() => {
-    if (open && runtime && instance) {
+    if (open && runtimeInstance) {
+      fetchLogs();
+      
+      let interval: NodeJS.Timeout;
+      if (autoRefresh) {
+        interval = setInterval(appendNewLog, 3000);
+      }
+      
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [open, runtimeInstance, autoRefresh]);
+
+  const fetchLogs = () => {
+    setIsLoading(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      if (!runtimeInstance) return;
+      
       const mockLogs: LogEntry[] = [];
       const now = new Date();
       
-      mockLogs.push({
-        timestamp: new Date(now.getTime() - 120000), // 2 minutes ago
-        level: 'info',
-        message: `Initializing connection to ${instance.name}`
-      });
+      // Generate mock log entries that look like real server logs
+      const logMessages = [
+        { level: "info", msg: `Server instance '${runtimeInstance.instanceName}' started` },
+        { level: "info", msg: "Loading configuration..." },
+        { level: "debug", msg: `Using profile: ${runtimeInstance.profileName}` },
+        { level: "info", msg: "Initialization complete" },
+        { level: "info", msg: `Listening on ${runtimeInstance.connectionDetails}` },
+        { level: "debug", msg: "Connected to host" },
+        { level: "info", msg: "Ready to process requests" },
+        { level: "debug", msg: "Checking configuration..." },
+        { level: "debug", msg: "Configuration valid" },
+        { level: "info", msg: "First client connected" },
+        { level: "info", msg: "Processed request: GET /status" },
+        { level: "debug", msg: "Memory usage: 24.5MB" },
+        { level: "warn", msg: "Slow response detected (324ms)" },
+        { level: "info", msg: "Processed request: POST /data" },
+        { level: "debug", msg: "Memory usage: 26.8MB" }
+      ];
       
-      mockLogs.push({
-        timestamp: new Date(now.getTime() - 119000),
-        level: 'info',
-        message: `Resolving endpoint: ${instance.connectionDetails}`
-      });
-      
-      if (definition?.type === 'HTTP_SSE') {
+      for (let i = 0; i < logMessages.length; i++) {
+        const pastTime = new Date(now.getTime() - (logMessages.length - i) * 5000);
         mockLogs.push({
-          timestamp: new Date(now.getTime() - 118000),
-          level: 'info',
-          message: `Establishing HTTP connection with headers: ${JSON.stringify(instance.headers || {})}`
+          id: `log-${i}`,
+          timestamp: pastTime,
+          level: logMessages[i].level as "info" | "warn" | "error" | "debug",
+          message: logMessages[i].msg
         });
-        
-        if (runtime.status === 'failed') {
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 115000),
-            level: 'warning',
-            message: 'Connection attempt timed out after 3000ms'
-          });
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 114000),
-            level: 'error',
-            message: runtime.errorMessage || 'Failed to establish connection'
-          });
-        } else {
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 115000),
-            level: 'info',
-            message: 'SSE connection established successfully'
-          });
-          
-          for (let i = 0; i < 5; i++) {
-            mockLogs.push({
-              timestamp: new Date(now.getTime() - (90000 - i * 15000)),
-              level: 'info',
-              message: `Processed request #${i + 1} successfully`
-            });
-          }
-        }
-      } else {
-        mockLogs.push({
-          timestamp: new Date(now.getTime() - 118000),
-          level: 'info',
-          message: `Launching process with arguments: ${instance.arguments?.join(' ') || 'none'}`
-        });
-        
-        if (runtime.status === 'failed') {
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 117000),
-            level: 'warning',
-            message: 'Process exited with code 1'
-          });
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 116000),
-            level: 'error',
-            message: runtime.errorMessage || 'Failed to start process'
-          });
-        } else {
-          mockLogs.push({
-            timestamp: new Date(now.getTime() - 117000),
-            level: 'info',
-            message: 'Process started successfully with PID 12345'
-          });
-          
-          for (let i = 0; i < 7; i++) {
-            mockLogs.push({
-              timestamp: new Date(now.getTime() - (100000 - i * 12000)),
-              level: Math.random() > 0.8 ? 'warning' : 'info',
-              message: Math.random() > 0.8 
-                ? `Warning: operation took longer than expected (${Math.floor(Math.random() * 1000)}ms)`
-                : `Operation completed in ${Math.floor(Math.random() * 200)}ms`
-            });
-          }
-        }
       }
       
-      setLogs(mockLogs.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()));
-    }
-  }, [open, runtime, instance, definition]);
-
-  const formatLogTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLogs(mockLogs);
+      setIsLoading(false);
+    }, 800);
   };
 
-  const getLevelClass = (level: 'info' | 'warning' | 'error') => {
+  const appendNewLog = () => {
+    if (!runtimeInstance || !open) return;
+    
+    const logTypes = [
+      { level: "info", msgs: [
+        "Processed request: GET /status", 
+        `Client request from ${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+        "Cache hit for request"
+      ]},
+      { level: "debug", msgs: [
+        `Memory usage: ${(24 + Math.random() * 10).toFixed(1)}MB`,
+        "Garbage collection completed",
+        "Configuration reloaded"
+      ]},
+      { level: "warn", msgs: [
+        `Slow response detected (${Math.floor(300 + Math.random() * 500)}ms)`,
+        "High CPU usage",
+        "Connection pool nearly full"
+      ]},
+      { level: "error", msgs: [
+        "Failed to process request: timeout",
+        "Database connection error",
+        "Invalid request format"
+      ]}
+    ];
+    
+    // Weighted selection to make info and debug more common
+    const weights = [0.5, 0.3, 0.15, 0.05];
+    const rand = Math.random();
+    let cumulativeWeight = 0;
+    let selectedType = 0;
+    
+    for (let i = 0; i < weights.length; i++) {
+      cumulativeWeight += weights[i];
+      if (rand <= cumulativeWeight) {
+        selectedType = i;
+        break;
+      }
+    }
+    
+    const logType = logTypes[selectedType];
+    const randomMessage = logType.msgs[Math.floor(Math.random() * logType.msgs.length)];
+    
+    const newLog: LogEntry = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date(),
+      level: logType.level as "info" | "warn" | "error" | "debug",
+      message: randomMessage
+    };
+    
+    setLogs(prevLogs => [...prevLogs, newLog]);
+  };
+
+  const handleRefresh = () => {
+    fetchLogs();
+  };
+
+  const handleClearLogs = () => {
+    setLogs([]);
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toTimeString().substring(0, 8);
+  };
+
+  const getLevelBadge = (level: "info" | "warn" | "error" | "debug") => {
     switch (level) {
-      case 'info': return 'text-blue-600';
-      case 'warning': return 'text-yellow-600';
-      case 'error': return 'text-red-600';
+      case "info":
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">INFO</Badge>;
+      case "warn":
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">WARN</Badge>;
+      case "error":
+        return <Badge variant="secondary" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">ERROR</Badge>;
+      case "debug":
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">DEBUG</Badge>;
     }
   };
-
-  const handleCopyLogs = () => {
-    const logText = logs.map(log => 
-      `[${formatLogTime(log.timestamp)}] [${log.level.toUpperCase()}] ${log.message}`
-    ).join('\n');
-    
-    navigator.clipboard.writeText(logText).then(() => {
-      toast({
-        title: "Logs copied",
-        description: "The logs have been copied to clipboard.",
-      });
-    });
-  };
-
-  const handleDownloadLogs = () => {
-    const logText = logs.map(log => 
-      `[${log.timestamp.toISOString()}] [${log.level.toUpperCase()}] ${log.message}`
-    ).join('\n');
-    
-    const blob = new Blob([logText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${instance?.name || 'runtime'}-logs.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  if (!runtime || !instance || !definition) {
-    return null;
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl h-[700px] flex flex-col">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Terminal className="h-5 w-5" />
-            <span>Runtime Logs: {instance.name}</span>
-            <EndpointLabel type={definition.type} className="ml-2" />
-          </DialogTitle>
-          <DialogDescription>
-            Activity logs and details for this runtime instance
+          <DialogTitle>Instance Logs</DialogTitle>
+          <DialogDescription className="flex flex-col gap-1">
+            {runtimeInstance && (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{runtimeInstance.instanceName}</span>
+                  <span className="text-muted-foreground">•</span>
+                  <span>{runtimeInstance.definitionName}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Connected via <span className="font-medium">{runtimeInstance.hostName}</span> on profile <span className="font-medium">{runtimeInstance.profileName}</span>
+                </div>
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         
-        <Tabs 
-          defaultValue="logs"
-          className="flex-grow flex flex-col mt-2" 
-          value={activeTab} 
-          onValueChange={(val) => setActiveTab(val as 'logs' | 'details')}
-        >
-          <TabsList>
-            <TabsTrigger value="logs">Logs</TabsTrigger>
-            <TabsTrigger value="details">Runtime Details</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="logs" className="flex-grow flex flex-col border rounded-md mt-2">
-            <div className="bg-muted/30 p-2 border-b flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Badge variant={runtime.status === 'connected' ? 'default' : 'destructive'}>
-                  {runtime.status}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5 inline mr-1" />
-                  Started {new Date(runtime.startedAt).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={handleCopyLogs}>
-                  <Copy className="h-3.5 w-3.5 mr-1" />
-                  Copy
-                </Button>
-                <Button size="sm" variant="outline" onClick={handleDownloadLogs}>
-                  <Download className="h-3.5 w-3.5 mr-1" />
-                  Download
-                </Button>
-              </div>
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="auto-refresh"
+                checked={autoRefresh}
+                onCheckedChange={setAutoRefresh}
+              />
+              <Label htmlFor="auto-refresh">Auto refresh</Label>
             </div>
-            
-            <ScrollArea className="flex-grow bg-black/95 p-2 font-mono text-sm">
-              <div className="p-2 space-y-1">
-                {logs.map((log, i) => (
-                  <div key={i} className="whitespace-pre-wrap break-all">
-                    <span className="text-gray-400">[{formatLogTime(log.timestamp)}]</span>{' '}
-                    <span className={getLevelClass(log.level)}>
-                      [{log.level.toUpperCase()}]
-                    </span>{' '}
-                    <span className="text-gray-200">{log.message}</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleClearLogs}
+          >
+            Clear logs
+          </Button>
+        </div>
+
+        <div className="border rounded-md h-[400px] bg-muted/20">
+          <ScrollArea className="h-full p-0">
+            {logs.length > 0 ? (
+              <div className="font-mono text-sm p-1">
+                {logs.map((log) => (
+                  <div key={log.id} className="flex items-start gap-2 p-1 hover:bg-muted/30 rounded">
+                    <div className="text-muted-foreground flex items-center shrink-0">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>{formatTime(log.timestamp)}</span>
+                    </div>
+                    <div className="shrink-0">
+                      {getLevelBadge(log.level)}
+                    </div>
+                    <div className="flex-1 break-all">{log.message}</div>
                   </div>
                 ))}
               </div>
-            </ScrollArea>
-          </TabsContent>
-          
-          <TabsContent value="details" className="border rounded-md p-4 mt-2">
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-medium mb-2">Runtime Information</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Status:</span>
-                      <span className="font-medium">
-                        {runtime.status.charAt(0).toUpperCase() + runtime.status.slice(1)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Started At:</span>
-                      <span>{runtime.startedAt.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Request Count:</span>
-                      <span>{runtime.requestCount}</span>
-                    </div>
-                    {runtime.lastActivityAt && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Last Activity:</span>
-                        <span>{runtime.lastActivityAt.toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium mb-2">Instance Details</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Server:</span>
-                      <span className="font-medium">{definition.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Type:</span>
-                      <EndpointLabel type={definition.type} />
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Connection:</span>
-                      <span className="truncate max-w-[200px]" title={instance.connectionDetails}>
-                        {instance.connectionDetails}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                {isLoading ? "Loading logs..." : "No logs available"}
               </div>
-              
-              {definition.type === 'STDIO' && instance.arguments && instance.arguments.length > 0 && (
-                <div>
-                  <h3 className="font-medium mb-2">Arguments</h3>
-                  <div className="bg-muted/30 p-2 rounded-md text-sm font-mono">
-                    {instance.arguments.join(' ')}
-                  </div>
-                </div>
-              )}
-              
-              {definition.type === 'HTTP_SSE' && instance.headers && Object.keys(instance.headers).length > 0 && (
-                <div>
-                  <h3 className="font-medium mb-2">Headers</h3>
-                  <div className="bg-muted/30 p-2 rounded-md text-sm">
-                    <pre className="whitespace-pre-wrap">
-                      {JSON.stringify(instance.headers, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-              
-              {instance.environment && Object.keys(instance.environment).length > 0 && (
-                <div>
-                  <h3 className="font-medium mb-2">Environment Variables</h3>
-                  <div className="bg-muted/30 p-2 rounded-md text-sm">
-                    <pre className="whitespace-pre-wrap">
-                      {JSON.stringify(instance.environment, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-              
-              {runtime.errorMessage && (
-                <div>
-                  <h3 className="font-medium text-red-600 mb-2">Error Details</h3>
-                  <div className="bg-red-50 border border-red-200 text-red-600 p-2 rounded-md text-sm">
-                    {runtime.errorMessage}
-                  </div>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
-        
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+            )}
+          </ScrollArea>
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

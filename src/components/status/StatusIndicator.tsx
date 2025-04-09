@@ -2,36 +2,41 @@
 import { cn } from "@/lib/utils";
 
 type StatusType = 'active' | 'warning' | 'error' | 'inactive';
-type RuntimeStatusType = 'connecting' | 'connected' | 'failed' | 'disconnected';
 
 interface StatusIndicatorProps {
-  status: StatusType | RuntimeStatusType;
+  status: StatusType;
   label?: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function StatusIndicator({ 
   status, 
   label,
-  className 
+  className,
+  size = 'md'
 }: StatusIndicatorProps) {
-  const statusConfig = {
-    // Server instance statuses
-    'active': { class: 'bg-green-500', dotClass: 'status-active' },
-    'warning': { class: 'bg-yellow-500', dotClass: 'status-warning' },
-    'error': { class: 'bg-red-500', dotClass: 'status-error' },
-    'inactive': { class: 'bg-slate-300', dotClass: 'status-inactive' },
-    
-    // Runtime statuses
-    'connected': { class: 'bg-green-500', dotClass: 'status-active' },
-    'connecting': { class: 'bg-blue-500', dotClass: 'status-connecting animate-pulse' },
-    'failed': { class: 'bg-red-500', dotClass: 'status-error' },
-    'disconnected': { class: 'bg-slate-300', dotClass: 'status-inactive' }
+  const statusClass = {
+    'active': 'status-active',
+    'warning': 'status-warning',
+    'error': 'status-error',
+    'inactive': 'status-inactive'
   }[status];
+
+  const sizeClass = {
+    'sm': 'w-1.5 h-1.5',
+    'md': 'w-2 h-2',
+    'lg': 'w-2.5 h-2.5'
+  }[size];
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("h-2.5 w-2.5 rounded-full", statusConfig.class, statusConfig.dotClass)}></span>
+      <span className={cn("rounded-full flex-shrink-0", sizeClass, {
+        'bg-green-500': status === 'active',
+        'bg-yellow-500': status === 'warning',
+        'bg-red-500': status === 'error',
+        'bg-gray-400': status === 'inactive',
+      })}></span>
       {label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );

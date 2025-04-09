@@ -1,23 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, serverInstances, serverDefinitions, EndpointType } from "@/data/mockData";
+import { profiles, serverInstances, serverDefinitions } from "@/data/mockData";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { FileText } from "lucide-react";
 
 interface InstanceStatus {
   id: string;
@@ -26,10 +19,6 @@ interface InstanceStatus {
   definitionName: string;
   status: 'connected' | 'connecting' | 'error' | 'disconnected';
   enabled: boolean;
-  errorMessage?: string;
-  requestCount: number;
-  startedAt: Date;
-  lastActivityAt?: Date;
 }
 
 interface HostCardProps {
@@ -46,7 +35,6 @@ interface HostCardProps {
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId: string) => void;
-  onViewLogs?: (instanceId: string, hostId: string) => void;
 }
 
 export function HostCard({ 
@@ -54,8 +42,7 @@ export function HostCard({
   profileId, 
   onProfileChange, 
   onOpenConfigDialog,
-  onCreateConfig,
-  onViewLogs
+  onCreateConfig
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
@@ -79,12 +66,6 @@ export function HostCard({
     return definition ? definition.name : 'Unknown';
   };
   
-  // Get definition type from id
-  const getDefinitionType = (definitionId: string) => {
-    const definition = serverDefinitions.find(def => def.id === definitionId);
-    return definition ? definition.type : 'Custom';
-  };
-  
   // Simulate connection process when profile changes
   useEffect(() => {
     if (profileId) {
@@ -104,11 +85,7 @@ export function HostCard({
               definitionId: instance.definitionId,
               definitionName: getDefinitionName(instance.definitionId),
               status: 'connecting',
-              enabled: instance.enabled,
-              requestCount: 0,
-              startedAt: new Date(),
-              lastActivityAt: undefined,
-              errorMessage: undefined
+              enabled: true
             } : null;
           })
           .filter(Boolean) as InstanceStatus[];
@@ -125,22 +102,10 @@ export function HostCard({
               if (instanceIndex !== -1) {
                 // Randomly determine connection status (mostly successful)
                 const success = Math.random() > 0.2;
-                const now = new Date();
-                
-                if (success) {
-                  newStatuses[instanceIndex] = {
-                    ...newStatuses[instanceIndex],
-                    status: 'connected',
-                    requestCount: Math.floor(Math.random() * 15) + 1,
-                    lastActivityAt: new Date(now.getTime() - Math.floor(Math.random() * 300000))
-                  };
-                } else {
-                  newStatuses[instanceIndex] = {
-                    ...newStatuses[instanceIndex],
-                    status: 'error',
-                    errorMessage: `Failed to connect: ${Math.random() > 0.5 ? 'Connection timeout' : 'Invalid endpoint configuration'}`
-                  };
-                }
+                newStatuses[instanceIndex] = {
+                  ...newStatuses[instanceIndex],
+                  status: success ? 'connected' : 'error'
+                };
               }
               
               return newStatuses;
@@ -170,64 +135,18 @@ export function HostCard({
     setInstanceStatuses(prev => {
       return prev.map(instance => {
         if (instance.id === instanceId) {
-          if (instance.enabled) {
-            // If disabling, set to disconnected
-            return {
-              ...instance,
-              enabled: false,
-              status: 'disconnected'
-            };
-          } else {
-            // If enabling, set to connecting and simulate connection process
-            setTimeout(() => {
-              setInstanceStatuses(prevState => {
-                return prevState.map(inst => {
-                  if (inst.id === instanceId && inst.status === 'connecting') {
-                    const success = Math.random() > 0.2;
-                    return {
-                      ...inst,
-                      status: success ? 'connected' : 'error',
-                      errorMessage: success ? undefined : 'Failed to connect: Connection refused',
-                      requestCount: success ? Math.floor(Math.random() * 10) : 0
-                    };
-                  }
-                  return inst;
-                });
-              });
-            }, 1500);
-            
-            return {
-              ...instance,
-              enabled: true,
-              status: 'connecting',
-              startedAt: new Date()
-            };
-          }
+          return {
+            ...instance,
+            enabled: !instance.enabled
+          };
         }
         return instance;
       });
     });
   };
   
-  const handleViewInstanceLogs = (instanceId: string) => {
-    if (onViewLogs) {
-      onViewLogs(instanceId, host.id);
-    }
-  };
-  
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
-  
-  // Format time diff for "last seen" display
-  const formatTimeDiff = (date?: Date) => {
-    if (!date) return 'Never';
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - date.getTime()) / 1000); // seconds
-    
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    return `${Math.floor(diff / 3600)}h ago`;
-  };
   
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -240,7 +159,7 @@ export function HostCard({
           <div className="flex items-center gap-2">
             <StatusIndicator 
               status={
-                isConnecting ? 'connecting' :
+                isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
                 host.connectionStatus === 'misconfigured' ? 'error' : 'warning'
@@ -270,7 +189,7 @@ export function HostCard({
                   <div className="flex items-center gap-2">
                     <StatusIndicator 
                       status={
-                        isConnecting ? 'connecting' :
+                        isConnecting ? 'warning' :
                         profileConnectionStatus === 'connected' ? 'active' : 
                         profileConnectionStatus === 'warning' ? 'warning' : 
                         'error'
@@ -304,85 +223,33 @@ export function HostCard({
           <>
             {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Runtime Instances</label>
-                  {isConnecting && (
-                    <span className="text-xs flex items-center text-muted-foreground">
-                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                      Connecting...
-                    </span>
-                  )}
-                </div>
-                <ScrollArea className="h-[180px] border rounded-md p-1">
-                  <div className="space-y-2">
+                <label className="text-sm font-medium">Server Instances</label>
+                <ScrollArea className="h-[140px] border rounded-md p-1">
+                  <div className="space-y-1">
                     {instanceStatuses.map(instance => (
-                      <div key={instance.id} className="p-2 bg-muted/50 rounded">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <StatusIndicator 
-                              status={
-                                !instance.enabled ? 'disconnected' :
-                                instance.status === 'connected' ? 'connected' :
-                                instance.status === 'connecting' ? 'connecting' :
-                                instance.status === 'error' ? 'failed' : 'disconnected'
-                              }
-                            />
-                            <div className="text-sm font-medium">
-                              {instance.definitionName}
-                              <EndpointLabel 
-                                type={getDefinitionType(instance.definitionId) as EndpointType} 
-                                compact 
-                                className="ml-2" 
-                              />
-                            </div>
+                      <div key={instance.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                        <div className="flex items-center gap-2">
+                          <StatusIndicator 
+                            status={
+                              !instance.enabled ? 'inactive' :
+                              instance.status === 'connected' ? 'active' :
+                              instance.status === 'connecting' ? 'warning' :
+                              instance.status === 'error' ? 'error' : 'inactive'
+                            }
+                          />
+                          <div className="text-sm">
+                            <span className="font-medium">{instance.definitionName}</span>
+                            {' - '}
+                            <span className="text-muted-foreground">{instance.name}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {instance.status === 'connected' && (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      className="h-6 w-6" 
-                                      onClick={() => handleViewInstanceLogs(instance.id)}
-                                    >
-                                      <FileText className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>View logs</TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            )}
-                            <Switch 
-                              checked={instance.enabled} 
-                              onCheckedChange={() => toggleInstanceEnabled(instance.id)}
-                              className="data-[state=checked]:bg-green-500"
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="text-xs text-muted-foreground flex flex-col">
-                          <div className="flex justify-between">
-                            <span>{instance.name}</span>
-                            {instance.status === 'connected' && (
-                              <span>{instance.requestCount} requests</span>
-                            )}
-                          </div>
-                          
-                          {instance.status === 'connected' && instance.lastActivityAt && (
-                            <div className="text-right">
-                              Last activity: {formatTimeDiff(instance.lastActivityAt)}
-                            </div>
-                          )}
-                          
-                          {instance.status === 'error' && instance.errorMessage && (
-                            <div className="flex items-center gap-1 text-red-500 mt-1">
-                              <AlertCircle className="h-3 w-3" />
-                              <span>{instance.errorMessage}</span>
-                            </div>
+                          {instance.status === 'connecting' && (
+                            <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
                           )}
                         </div>
+                        <Switch 
+                          checked={instance.enabled} 
+                          onCheckedChange={() => toggleInstanceEnabled(instance.id)}
+                        />
                       </div>
                     ))}
                   </div>

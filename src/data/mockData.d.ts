@@ -33,6 +33,24 @@ export interface ServerInstance {
   enabled: boolean;
 }
 
+export interface RuntimeInstance {
+  id: string;
+  instanceId: string;
+  instanceName: string;
+  definitionId: string;
+  definitionName: string;
+  definitionType: 'HTTP_SSE' | 'STDIO';
+  profileId: string;
+  profileName: string;
+  hostId: string;
+  hostName: string;
+  status: 'connecting' | 'connected' | 'failed';
+  errorMessage?: string;
+  connectionDetails: string;
+  startedAt: Date;
+  requestCount: number;
+}
+
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 
 export const serverDefinitions: ServerDefinition[];
@@ -50,38 +68,15 @@ export interface Profile {
 
 export const profiles: Profile[];
 
-// Runtime types for Instance Runtime functionality
-export type RuntimeStatus = 'connecting' | 'connected' | 'failed' | 'disconnected';
-
-export interface RuntimeInstance {
-  id: string;
-  instanceId: string;
-  profileId: string;
-  hostId: string;
-  status: RuntimeStatus;
-  errorMessage?: string;
-  startedAt: Date;
-  requestCount: number;
-  lastActivityAt?: Date; // Make this optional to fix type errors
-}
-
-export interface RuntimeHost {
-  id: string;
-  name: string;
-  icon?: string;
-}
-
 export interface Host {
   id: string;
   name: string;
-  icon?: string;
-  connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown' | 'connecting';
-  configStatus: 'configured' | 'misconfigured' | 'unknown';
+  icon: string;
+  connectionStatus: ConnectionStatus;
+  configStatus: "configured" | "misconfigured" | "unknown";
   configPath?: string;
-  profileId?: string;
 }
 
-export const runtimeInstances: RuntimeInstance[];
+export type ConnectionStatus = "connected" | "disconnected" | "error";
+
 export const hosts: Host[];
-export const connectionStatus: ConnectionStatus;
-export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown' | 'connecting';
