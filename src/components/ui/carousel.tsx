@@ -66,6 +66,16 @@ const Carousel = React.forwardRef<
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
 
+    React.useEffect(() => {
+      if (!api || !opts?.loop) return
+
+      const intervalId = setInterval(() => {
+        api.scrollNext()
+      }, 5000) // Scroll every 5 seconds
+
+      return () => clearInterval(intervalId)
+    }, [api, opts?.loop])
+
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
         return

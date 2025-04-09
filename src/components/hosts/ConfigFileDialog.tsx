@@ -198,7 +198,7 @@ export function ConfigFileDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
-      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>Config File</DialogTitle>
           <DialogDescription>
@@ -206,7 +206,7 @@ export function ConfigFileDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 min-h-[400px] flex flex-col space-y-3 mt-2">
+        <div className="flex-1 flex flex-col space-y-3 mt-2">
           {/* Configuration File Path Section */}
           <div className="space-y-2">
             <Label htmlFor="configPath">Configuration File Path</Label>
@@ -245,10 +245,10 @@ export function ConfigFileDialog({
             </Alert>
           )}
           
-          <ScrollArea className="h-[400px] border rounded-md">
+          <ScrollArea className="h-[300px] border rounded-md">
             <Textarea 
               ref={textareaRef}
-              className="flex-1 font-mono text-sm min-h-[400px] border-0 resize-none"
+              className="flex-1 font-mono text-sm min-h-[300px] border-0 resize-none"
               value={config} 
               onChange={(e) => handleChange(e.target.value)}
               spellCheck={false}

@@ -7,6 +7,7 @@ import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { HostCard } from "@/components/hosts/HostCard";
 import { HostSearch } from "@/components/hosts/HostSearch";
+import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
@@ -22,16 +23,6 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -52,12 +43,9 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [createConfigOpen, setCreateConfigOpen] = useState(false);
-  const [updateConfigOpen, setUpdateConfigOpen] = useState(false);
   const [currentHostId, setCurrentHostId] = useState<string | null>(null);
   const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
   const [configPath, setConfigPath] = useState("");
-  const [showPathChangeAlert, setShowPathChangeAlert] = useState(false);
-  const [newConfigPath, setNewConfigPath] = useState("");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -66,6 +54,8 @@ const Hosts = () => {
   const filteredHosts = hostsList.filter(host => 
     host.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const clearSearch = () => setSearchQuery("");
 
   const getProfileEndpoint = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
@@ -77,8 +67,11 @@ const Hosts = () => {
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
-      // Allow path editing for existing configurations
-      openConfigDialog(hostId, host.configPath, profileEndpoint, host.needsUpdate, true);
+      
+      // Check if the configuration needs updates
+      const needsUpdate = host.configStatus === 'misconfigured';
+      
+      openConfigDialog(hostId, host.configPath, profileEndpoint, needsUpdate, false);
     } else {
       toast({
         title: "No config file",
@@ -88,59 +81,6 @@ const Hosts = () => {
     }
   };
   
-  const handleSaveConfig = (config: string, newPath: string) => {
-    if (configDialog.hostId) {
-      // Check if the path has changed
-      if (newPath !== configDialog.configPath) {
-        setNewConfigPath(newPath);
-        setShowPathChangeAlert(true);
-        return;
-      }
-      
-      applyConfigChanges(configDialog.hostId, config, newPath);
-    }
-  };
-  
-  const applyConfigChanges = (hostId: string, config: string, path: string) => {
-    console.log(`Saving config for host ${hostId} at path ${path}:`, config);
-    
-    setHostsList(prev => prev.map(host => 
-      host.id === hostId 
-        ? { ...host, configPath: path, configStatus: 'configured', needsUpdate: false } 
-        : host
-    ));
-    
-    toast({
-      title: "Configuration saved",
-      description: `Config file saved to ${path}`,
-    });
-    
-    // Reset dialog state
-    resetConfigDialog();
-    setShowPathChangeAlert(false);
-  };
-  
-  const handleAddHost = (newHost: {
-    name: string;
-    configPath?: string;
-    icon?: string;
-    configStatus: "configured" | "misconfigured" | "unknown";
-    connectionStatus: ConnectionStatus;
-  }) => {
-    const id = `host-${Date.now()}`;
-    const host: Host = {
-      id,
-      ...newHost
-    };
-    
-    setHostsList([...hostsList, host]);
-    
-    toast({
-      title: "Host Added",
-      description: `${newHost.name} has been added successfully`,
-    });
-  };
-
   const handleCreateConfig = (hostId: string, profileId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     
@@ -148,14 +88,9 @@ const Hosts = () => {
       setCurrentHostId(hostId);
       setCurrentProfileId(profileId);
       
-      if (host.configPath) {
-        setConfigPath(host.configPath);
-        setUpdateConfigOpen(true);
-      } else {
-        const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-        setConfigPath(defaultConfigPath);
-        setCreateConfigOpen(true);
-      }
+      const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+      setConfigPath(defaultConfigPath);
+      setCreateConfigOpen(true);
     }
   };
   
@@ -167,7 +102,7 @@ const Hosts = () => {
               ...host, 
               configPath, 
               configStatus: 'configured',
-              needsUpdate: false
+              connectionStatus: 'connected'
             } 
           : host
       ));
@@ -178,35 +113,6 @@ const Hosts = () => {
       });
       
       setCreateConfigOpen(false);
-      
-      // Reset state
-      setTimeout(() => {
-        setCurrentHostId(null);
-        setCurrentProfileId(null);
-        setConfigPath("");
-      }, 100);
-    }
-  };
-
-  const handleConfirmUpdateConfig = () => {
-    if (currentHostId && currentProfileId) {
-      setHostsList(prev => prev.map(host => 
-        host.id === currentHostId 
-          ? { 
-              ...host,
-              configPath,
-              configStatus: 'configured',
-              needsUpdate: false
-            } 
-          : host
-      ));
-      
-      toast({
-        title: "Configuration updated",
-        description: `Config file updated at ${configPath}`,
-      });
-      
-      setUpdateConfigOpen(false);
       
       // Reset state
       setTimeout(() => {
@@ -238,6 +144,70 @@ const Hosts = () => {
         description: "A new local host has been found and added to your hosts list.",
       });
     }, 2500);
+  };
+
+  const handleAddHost = (newHost: {
+    name: string;
+    configPath?: string;
+    icon?: string;
+    configStatus: "configured" | "misconfigured" | "unknown";
+    connectionStatus: ConnectionStatus;
+  }) => {
+    const id = `host-${Date.now()}`;
+    const host: Host = {
+      id,
+      ...newHost
+    };
+    
+    setHostsList([...hostsList, host]);
+    
+    toast({
+      title: "Host Added",
+      description: `${newHost.name} has been added successfully`,
+    });
+  };
+
+  const handleSaveConfigFile = (configContent: string, configPath: string) => {
+    try {
+      // Validate JSON format
+      const parsedConfig = JSON.parse(configContent);
+      
+      // Check if the config is valid based on some criteria
+      // For example, check if it contains the required mcpServers section
+      const isValidConfig = !!parsedConfig.mcpServers;
+      
+      if (currentHostId) {
+        // Update host config status based on validation
+        setHostsList(prev => prev.map(host => 
+          host.id === currentHostId 
+            ? { 
+                ...host, 
+                configPath,
+                configStatus: isValidConfig ? 'configured' : 'misconfigured',
+                connectionStatus: isValidConfig ? 'connected' : 'misconfigured'
+              } 
+            : host
+        ));
+      }
+      
+      toast({
+        title: isValidConfig ? "Configuration saved" : "Configuration saved with issues",
+        description: isValidConfig 
+          ? `Config file saved successfully to ${configPath}`
+          : "The configuration was saved but may have issues that need to be addressed.",
+        variant: isValidConfig ? "default" : "destructive",
+      });
+      
+      resetConfigDialog();
+      
+    } catch (err) {
+      // Handle JSON parsing error
+      toast({
+        title: "Configuration Error",
+        description: "Failed to save configuration: Invalid JSON format",
+        variant: "destructive",
+      });
+    }
   };
 
   const generateDefaultConfig = (profileId: string) => {
@@ -296,81 +266,56 @@ const Hosts = () => {
         onSearchChange={setSearchQuery} 
       />
       
-      <div className="grid gap-6 md:grid-cols-2">
-        {filteredHosts.map(host => (
-          <HostCard
-            key={host.id}
-            host={host}
-            profileId={hostProfiles[host.id] || ''}
-            onProfileChange={handleProfileChange}
-            onOpenConfigDialog={handleOpenConfigDialog}
-            onCreateConfig={handleCreateConfig}
-          />
-        ))}
-        
-        {isScanning && (
-          <div className="border rounded-lg overflow-hidden shadow-sm">
-            <div className="bg-muted/50 p-6 pb-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-6 w-6 rounded-full" />
-                  <Skeleton className="h-6 w-32" />
+      {filteredHosts.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2">
+          {filteredHosts.map(host => (
+            <HostCard
+              key={host.id}
+              host={host}
+              profileId={hostProfiles[host.id] || ''}
+              onProfileChange={handleProfileChange}
+              onOpenConfigDialog={handleOpenConfigDialog}
+              onCreateConfig={handleCreateConfig}
+            />
+          ))}
+          
+          {isScanning && (
+            <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
+              <div className="bg-muted/50 p-6 pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-24" />
                 </div>
-                <Skeleton className="h-6 w-24" />
               </div>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
+              <div className="p-6 space-y-4">
+                <div className="space-y-2">
                   <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-10 w-full" />
                 </div>
-                <div className="flex gap-2">
-                  <Skeleton className="h-9 w-1/2" />
-                  <Skeleton className="h-9 w-1/2" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-1/2" />
+                    <Skeleton className="h-9 w-1/2" />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Path change confirmation dialog */}
-      <AlertDialog open={showPathChangeAlert} onOpenChange={setShowPathChangeAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm New Configuration Path</AlertDialogTitle>
-            <AlertDialogDescription>
-              You've modified the configuration file path. A new configuration file will be created at the specified location.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          <div className="my-4 p-2 bg-muted rounded">
-            <p className="text-sm font-mono">{newConfigPath}</p>
-          </div>
-          
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowPathChangeAlert(false)}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (configDialog.hostId) {
-                applyConfigChanges(configDialog.hostId, configDialog.configContent, newConfigPath);
-              }
-            }}>
-              Confirm
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          )}
+        </div>
+      ) : (
+        <NoSearchResults query={searchQuery} onClear={clearSearch} />
+      )}
       
       <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
         <DialogContent>
@@ -418,60 +363,13 @@ const Hosts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={updateConfigOpen} onOpenChange={setUpdateConfigOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Configuration File</DialogTitle>
-            <DialogDescription>
-              Update the configuration for this host.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="updateConfigPath">Configuration File Path</Label>
-              <Textarea 
-                id="updateConfigPath"
-                value={configPath}
-                onChange={(e) => setConfigPath(e.target.value)}
-                rows={1}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                You can modify the path where this configuration will be saved.
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Configuration Update Preview</Label>
-              <pre className="bg-muted p-2 rounded-md text-xs overflow-auto max-h-36">
-                {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
-              </pre>
-              <p className="text-xs text-muted-foreground">
-                The mcpnow section of your configuration will be updated to match the current profile settings.
-                Other sections of your configuration will remain unchanged.
-              </p>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUpdateConfigOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmUpdateConfig}>
-              Update Configuration
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       
       <ConfigFileDialog
         open={configDialog.isOpen}
         onOpenChange={setDialogOpen}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
-        onSave={handleSaveConfig}
+        onSave={handleSaveConfigFile}
         profileEndpoint={configDialog.profileEndpoint}
         needsUpdate={configDialog.needsUpdate}
         allowPathEdit={configDialog.allowPathEdit}
