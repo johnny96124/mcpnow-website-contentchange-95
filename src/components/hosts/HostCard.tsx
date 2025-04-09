@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -11,14 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { cn } from "@/lib/utils";
 
 interface InstanceStatus {
   id: string;
@@ -54,11 +46,7 @@ export function HostCard({
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
-  const [availableInstances, setAvailableInstances] = useState<Record<string, typeof serverInstances>>({});
   const navigate = useNavigate();
-  
-  // Get profile connection status based on connected status
-  const isConnected = host.connectionStatus === 'connected' || host.connectionStatus === 'connecting';
   
   // Calculate overall profile connection status based on instance statuses
   const getProfileConnectionStatus = () => {
@@ -78,22 +66,6 @@ export function HostCard({
     return definition ? definition.name : 'Unknown';
   };
   
-  // Group instances by definition ID
-  const getInstancesByDefinition = () => {
-    const result: Record<string, typeof serverInstances> = {};
-    
-    // Get all definition IDs from instances
-    serverInstances.forEach(instance => {
-      if (!result[instance.definitionId]) {
-        result[instance.definitionId] = [];
-      }
-      
-      result[instance.definitionId].push(instance);
-    });
-    
-    return result;
-  };
-  
   // Simulate connection process when profile changes
   useEffect(() => {
     if (profileId) {
@@ -102,10 +74,6 @@ export function HostCard({
       if (profile) {
         // Reset instance statuses
         setIsConnecting(true);
-        
-        // Get available instances grouped by definition
-        const instancesByDefinition = getInstancesByDefinition();
-        setAvailableInstances(instancesByDefinition);
         
         // Create initial instance statuses all in connecting state
         const initialStatuses: InstanceStatus[] = profile.instances
@@ -151,9 +119,6 @@ export function HostCard({
         });
       }
     } else {
-      // Still load available instances even without a profile selected
-      const instancesByDefinition = getInstancesByDefinition();
-      setAvailableInstances(instancesByDefinition);
       setInstanceStatuses([]);
     }
   }, [profileId]);
@@ -178,55 +143,6 @@ export function HostCard({
         return instance;
       });
     });
-  };
-  
-  // Switch to a different instance for the same definition
-  const handleInstanceSwitch = (currentInstanceId: string, newInstanceId: string) => {
-    if (currentInstanceId === newInstanceId) return;
-    
-    // Find the definition ID of the current instance
-    const currentInstance = instanceStatuses.find(inst => inst.id === currentInstanceId);
-    if (!currentInstance) return;
-    
-    const definitionId = currentInstance.definitionId;
-    
-    // Find the new instance from serverInstances
-    const newInstance = serverInstances.find(inst => inst.id === newInstanceId);
-    if (!newInstance) return;
-    
-    // Replace the old instance with the new one
-    setInstanceStatuses(prev => {
-      const newStatuses = prev.filter(inst => inst.id !== currentInstanceId);
-      
-      // Add the new instance with connecting state
-      newStatuses.push({
-        id: newInstanceId,
-        name: newInstance.name,
-        definitionId: definitionId,
-        definitionName: getDefinitionName(definitionId),
-        status: 'connecting',
-        enabled: true
-      });
-      
-      return newStatuses;
-    });
-    
-    // Simulate connection after delay
-    setTimeout(() => {
-      setInstanceStatuses(prev => {
-        return prev.map(inst => {
-          if (inst.id === newInstanceId) {
-            // 80% chance of successful connection
-            const success = Math.random() > 0.2;
-            return {
-              ...inst,
-              status: success ? 'connected' : 'error'
-            };
-          }
-          return inst;
-        });
-      });
-    }, 1500);
   };
   
   const profileConnectionStatus = getProfileConnectionStatus();
@@ -271,15 +187,13 @@ export function HostCard({
               <SelectValue placeholder="Select a profile">
                 {selectedProfile && (
                   <div className="flex items-center gap-2">
-                    {/* Only show status indicator for connected hosts and when profile is selected */}
                     <StatusIndicator 
                       status={
                         isConnecting ? 'warning' :
                         profileConnectionStatus === 'connected' ? 'active' : 
                         profileConnectionStatus === 'warning' ? 'warning' : 
                         'error'
-                      }
-                      showIndicator={isConnected}
+                      } 
                     />
                     <span>{selectedProfile.name}</span>
                   </div>
@@ -290,7 +204,7 @@ export function HostCard({
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
                   <div className="flex items-center gap-2">
-                    {/* No status indicators in dropdown list */}
+                    <StatusIndicator status={profile.enabled ? 'active' : 'inactive'} />
                     <span>{profile.name}</span>
                   </div>
                 </SelectItem>
@@ -307,18 +221,14 @@ export function HostCard({
         
         {profileId && (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium">Server Instances</label>
-              <ScrollArea className="h-[140px] border rounded-md p-1">
-                <div className="space-y-1">
-                  {instanceStatuses.map(instance => {
-                    // Get all instances for this definition
-                    const definitionInstances = availableInstances[instance.definitionId] || [];
-                    
-                    return (
+            {instanceStatuses.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Server Instances</label>
+                <ScrollArea className="h-[140px] border rounded-md p-1">
+                  <div className="space-y-1">
+                    {instanceStatuses.map(instance => (
                       <div key={instance.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
                         <div className="flex items-center gap-2">
-                          {/* Only show status indicators for connected hosts */}
                           <StatusIndicator 
                             status={
                               !instance.enabled ? 'inactive' :
@@ -326,54 +236,11 @@ export function HostCard({
                               instance.status === 'connecting' ? 'warning' :
                               instance.status === 'error' ? 'error' : 'inactive'
                             }
-                            showIndicator={isConnected}
                           />
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-medium">{instance.definitionName}</span>
-                            
-                            {/* Only render dropdown if there are multiple instances for this definition */}
-                            {definitionInstances.length > 1 ? (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                    <ChevronDown className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-40">
-                                  {definitionInstances.map(defInstance => (
-                                    <DropdownMenuItem
-                                      key={defInstance.id}
-                                      className={cn(
-                                        "text-xs flex items-center gap-2",
-                                        defInstance.id === instance.id && "bg-accent"
-                                      )}
-                                      onClick={() => handleInstanceSwitch(instance.id, defInstance.id)}
-                                    >
-                                      <span className="truncate max-w-[120px]">
-                                        {defInstance.name.split('-').pop()}
-                                      </span>
-                                      {defInstance.id === instance.id && (
-                                        <CircleCheck className="h-3 w-3 ml-auto" />
-                                      )}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            ) : (
-                              <HoverCard>
-                                <HoverCardTrigger asChild>
-                                  <span className="text-muted-foreground text-xs ml-2">
-                                    {instance.name.split('-').pop()}
-                                  </span>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="w-64">
-                                  <div className="flex flex-col gap-1">
-                                    <p className="text-xs font-medium">Instance Details</p>
-                                    <p className="text-xs">{instance.name}</p>
-                                  </div>
-                                </HoverCardContent>
-                              </HoverCard>
-                            )}
+                          <div className="text-sm">
+                            <span className="font-medium">{instance.definitionName}</span>
+                            {' - '}
+                            <span className="text-muted-foreground">{instance.name}</span>
                           </div>
                           {instance.status === 'connecting' && (
                             <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
@@ -384,11 +251,11 @@ export function HostCard({
                           onCheckedChange={() => toggleInstanceEnabled(instance.id)}
                         />
                       </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
           </>
         )}
         
