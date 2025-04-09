@@ -249,10 +249,12 @@ export function HostCard({
                             <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
                           )}
                         </div>
-                        <Switch 
-                          checked={instance.enabled} 
-                          onCheckedChange={() => toggleInstanceEnabled(instance.id)}
-                        />
+                        {!isHostDisconnected && (
+                          <Switch 
+                            checked={instance.enabled} 
+                            onCheckedChange={() => toggleInstanceEnabled(instance.id)}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
