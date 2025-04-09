@@ -52,10 +52,17 @@ export function AddInstanceDialog({
   instanceId
 }: AddInstanceDialogProps) {
   // For STDIO type
-  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([]);
+  const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([
+    { name: "API_KEY", value: "" },
+    { name: "MODEL_NAME", value: "" },
+    { name: "MAX_TOKENS", value: "4096" },
+  ]);
   
   // For HTTP_SSE type
-  const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([]);
+  const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([
+    { name: "Authorization", value: "" },
+    { name: "Content-Type", value: "application/json" },
+  ]);
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
@@ -71,14 +78,14 @@ export function AddInstanceDialog({
 
   // Effect to reset form when dialog opens
   useEffect(() => {
-    if (open && serverDefinition) {
+    if (open) {
       // Initialize the form with proper defaults based on server definition
       form.reset({
         name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
         args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
-          serverDefinition?.commandArgs || `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
+          `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
           : ""),
-        url: initialValues?.url || (serverDefinition?.type === 'HTTP_SSE' ? serverDefinition?.url || "http://localhost:3000/api" : ""),
+        url: initialValues?.url || (serverDefinition?.type === 'HTTP_SSE' ? "http://localhost:3000/api" : ""),
         env: initialValues?.env || {},
         headers: initialValues?.headers || {},
         instanceId: instanceId,
@@ -87,36 +94,65 @@ export function AddInstanceDialog({
       // Initialize env fields based on initialValues if in edit mode
       if (editMode && initialValues?.env) {
         const envEntries = Object.entries(initialValues.env);
-        setEnvFields(envEntries.map(([name, value]) => ({ name, value: value.toString() })));
+        const defaultEnvFields = [
+          { name: "API_KEY", value: "" },
+          { name: "MODEL_NAME", value: "" },
+          { name: "MAX_TOKENS", value: "4096" },
+        ];
+        
+        // Start with default env fields
+        let newEnvFields = [...defaultEnvFields];
+        
+        // Update default fields if they exist in initialValues
+        newEnvFields = newEnvFields.map(field => {
+          const initialValue = initialValues.env?.[field.name];
+          return initialValue !== undefined ? { ...field, value: initialValue } : field;
+        });
+        
+        // Add any additional env fields from initialValues
+        const additionalFields = envEntries
+          .filter(([key]) => !defaultEnvFields.some(field => field.name === key))
+          .map(([name, value]) => ({ name, value }));
+        
+        setEnvFields([...newEnvFields, ...additionalFields]);
       } else if (serverDefinition?.type === 'STDIO') {
-        // Set default env fields for new STDIO instance based on server definition
-        if (serverDefinition.environment && Object.keys(serverDefinition.environment).length > 0) {
-          setEnvFields(Object.entries(serverDefinition.environment).map(([name, value]) => ({ name, value: value.toString() })));
-        } else {
-          // Default env fields if no server definition environment
-          setEnvFields([
-            { name: "API_KEY", value: "" },
-            { name: "MODEL_NAME", value: "" },
-            { name: "MAX_TOKENS", value: "4096" },
-          ]);
-        }
+        // Set default env fields for new STDIO instance
+        setEnvFields([
+          { name: "API_KEY", value: "" },
+          { name: "MODEL_NAME", value: "" },
+          { name: "MAX_TOKENS", value: "4096" },
+        ]);
       }
       
       // Initialize header fields based on initialValues if in edit mode
       if (editMode && initialValues?.headers) {
         const headerEntries = Object.entries(initialValues.headers);
-        setHeaderFields(headerEntries.map(([name, value]) => ({ name, value: value.toString() })));
+        const defaultHeaderFields = [
+          { name: "Authorization", value: "" },
+          { name: "Content-Type", value: "application/json" },
+        ];
+        
+        // Start with default header fields
+        let newHeaderFields = [...defaultHeaderFields];
+        
+        // Update default fields if they exist in initialValues
+        newHeaderFields = newHeaderFields.map(field => {
+          const initialValue = initialValues.headers?.[field.name];
+          return initialValue !== undefined ? { ...field, value: initialValue } : field;
+        });
+        
+        // Add any additional header fields from initialValues
+        const additionalFields = headerEntries
+          .filter(([key]) => !defaultHeaderFields.some(field => field.name === key))
+          .map(([name, value]) => ({ name, value }));
+        
+        setHeaderFields([...newHeaderFields, ...additionalFields]);
       } else if (serverDefinition?.type === 'HTTP_SSE') {
-        // Set default header fields for new HTTP_SSE instance based on server definition
-        if (serverDefinition.headers && Object.keys(serverDefinition.headers).length > 0) {
-          setHeaderFields(Object.entries(serverDefinition.headers).map(([name, value]) => ({ name, value: value.toString() })));
-        } else {
-          // Default header fields if no server definition headers
-          setHeaderFields([
-            { name: "Authorization", value: "" },
-            { name: "Content-Type", value: "application/json" },
-          ]);
-        }
+        // Set default header fields for new HTTP_SSE instance
+        setHeaderFields([
+          { name: "Authorization", value: "" },
+          { name: "Content-Type", value: "application/json" },
+        ]);
       }
     }
   }, [open, initialValues, serverDefinition, form, editMode, instanceId]);
@@ -162,14 +198,18 @@ export function AddInstanceDialog({
   };
   
   const removeEnvField = (index: number) => {
-    // Allow removing any field now
+    // Don't allow removing the default fields (first 3)
+    if (index < 3) return;
+    
     const newFields = [...envFields];
     newFields.splice(index, 1);
     setEnvFields(newFields);
   };
 
   const removeHeaderField = (index: number) => {
-    // Allow removing any field now
+    // Don't allow removing the default fields (first 2)
+    if (index < 2) return;
+    
     const newFields = [...headerFields];
     newFields.splice(index, 1);
     setHeaderFields(newFields);
@@ -295,38 +335,35 @@ export function AddInstanceDialog({
                   </div>
                   
                   <div className="space-y-4 max-h-[200px] overflow-y-auto border rounded-md p-4">
-                    {envFields.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-2">
-                        No environment variables defined. Click 'Add Variable' to add one.
-                      </p>
-                    ) : (
-                      envFields.map((field, index) => (
-                        <div key={index} className="grid grid-cols-12 gap-2 items-start">
-                          <div className="col-span-5">
-                            <Input
-                              value={field.name}
-                              onChange={(e) => {
-                                const newFields = [...envFields];
-                                newFields[index].name = e.target.value;
-                                setEnvFields(newFields);
-                              }}
-                              placeholder="Variable Name"
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="col-span-6">
-                            <Input
-                              value={field.value}
-                              onChange={(e) => {
-                                const newFields = [...envFields];
-                                newFields[index].value = e.target.value;
-                                setEnvFields(newFields);
-                              }}
-                              placeholder="Value"
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="col-span-1 flex justify-center items-center h-full">
+                    {envFields.map((field, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-2 items-start">
+                        <div className="col-span-5">
+                          <Input
+                            value={field.name}
+                            onChange={(e) => {
+                              const newFields = [...envFields];
+                              newFields[index].name = e.target.value;
+                              setEnvFields(newFields);
+                            }}
+                            placeholder="Variable Name"
+                            className="text-sm"
+                            disabled={index < 3} // Default fields are not editable
+                          />
+                        </div>
+                        <div className="col-span-6">
+                          <Input
+                            value={field.value}
+                            onChange={(e) => {
+                              const newFields = [...envFields];
+                              newFields[index].value = e.target.value;
+                              setEnvFields(newFields);
+                            }}
+                            placeholder="Value"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="col-span-1 flex justify-center items-center h-full">
+                          {index >= 3 && (
                             <Button 
                               type="button" 
                               variant="ghost" 
@@ -336,10 +373,10 @@ export function AddInstanceDialog({
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                          </div>
+                          )}
                         </div>
-                      ))
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>
@@ -408,38 +445,35 @@ export function AddInstanceDialog({
                   </div>
                   
                   <div className="space-y-4 max-h-[200px] overflow-y-auto border rounded-md p-4">
-                    {headerFields.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-2">
-                        No HTTP headers defined. Click 'Add Header' to add one.
-                      </p>
-                    ) : (
-                      headerFields.map((field, index) => (
-                        <div key={index} className="grid grid-cols-12 gap-2 items-start">
-                          <div className="col-span-5">
-                            <Input
-                              value={field.name}
-                              onChange={(e) => {
-                                const newFields = [...headerFields];
-                                newFields[index].name = e.target.value;
-                                setHeaderFields(newFields);
-                              }}
-                              placeholder="Header Name"
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="col-span-6">
-                            <Input
-                              value={field.value}
-                              onChange={(e) => {
-                                const newFields = [...headerFields];
-                                newFields[index].value = e.target.value;
-                                setHeaderFields(newFields);
-                              }}
-                              placeholder="Value"
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="col-span-1 flex justify-center items-center h-full">
+                    {headerFields.map((field, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-2 items-start">
+                        <div className="col-span-5">
+                          <Input
+                            value={field.name}
+                            onChange={(e) => {
+                              const newFields = [...headerFields];
+                              newFields[index].name = e.target.value;
+                              setHeaderFields(newFields);
+                            }}
+                            placeholder="Header Name"
+                            className="text-sm"
+                            disabled={index < 2} // Default fields are not editable
+                          />
+                        </div>
+                        <div className="col-span-6">
+                          <Input
+                            value={field.value}
+                            onChange={(e) => {
+                              const newFields = [...headerFields];
+                              newFields[index].value = e.target.value;
+                              setHeaderFields(newFields);
+                            }}
+                            placeholder="Value"
+                            className="text-sm"
+                          />
+                        </div>
+                        <div className="col-span-1 flex justify-center items-center h-full">
+                          {index >= 2 && (
                             <Button 
                               type="button" 
                               variant="ghost" 
@@ -449,10 +483,10 @@ export function AddInstanceDialog({
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                          </div>
+                          )}
                         </div>
-                      ))
-                    )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </>

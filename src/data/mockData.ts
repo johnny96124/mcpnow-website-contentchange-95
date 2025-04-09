@@ -15,10 +15,6 @@ export interface ServerDefinition {
   features?: string[];
   repository?: string;
   downloads?: number;
-  url?: string;
-  commandArgs?: string;
-  environment?: Record<string, string>;
-  headers?: Record<string, string>;
 }
 
 export interface ServerInstance {
@@ -72,12 +68,7 @@ export const serverDefinitions: ServerDefinition[] = [
       'Query optimizations'
     ],
     repository: 'https://github.com/mcp/postgres-tool',
-    downloads: 3500,
-    commandArgs: '--postgres-mcp',
-    environment: { 
-      'PG_HOST': 'localhost',
-      'PG_PORT': '5432'
-    }
+    downloads: 3500
   },
   {
     id: 'github-copilot-proxy',
@@ -96,12 +87,7 @@ export const serverDefinitions: ServerDefinition[] = [
       'API integration'
     ],
     repository: 'https://github.com/mcp/github-copilot-proxy',
-    downloads: 4200,
-    url: 'https://api.github.com/copilot/v1',
-    headers: {
-      'Authorization': 'Bearer ${GITHUB_TOKEN}',
-      'Content-Type': 'application/json'
-    }
+    downloads: 4200
   },
   {
     id: 'local-file-assistant',

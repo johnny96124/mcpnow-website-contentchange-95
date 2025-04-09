@@ -6,8 +6,7 @@ import {
   Trash2, 
   Terminal,
   Info,
-  Search,
-  Edit
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +54,6 @@ import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddI
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
-import { EditServerDialog, EditServerFormValues } from "@/components/servers/EditServerDialog";
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -65,7 +63,6 @@ const Servers = () => {
   const [activeTab, setActiveTab] = useState<"definitions" | "instances">("definitions");
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [editInstanceOpen, setEditInstanceOpen] = useState(false);
-  const [editServerOpen, setEditServerOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [selectedInstance, setSelectedInstance] = useState<ServerInstance | null>(null);
   const [sortConfig, setSortConfig] = useState<{
@@ -216,11 +213,6 @@ const Servers = () => {
     setSelectedInstance(instance);
     setEditInstanceOpen(true);
   };
-  
-  const handleEditServer = (definition: ServerDefinition) => {
-    setSelectedDefinition(definition);
-    setEditServerOpen(true);
-  };
 
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
@@ -246,21 +238,18 @@ const Servers = () => {
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // For new instances, use the server definition's pre-configured values
-      const connectionDetails = selectedDefinition.type === 'HTTP_SSE' 
-        ? (data.url || selectedDefinition.url || `http://localhost:${3000 + instances.length}`) 
-        : `localhost:${3000 + instances.length}`;
-      
       const newInstance: ServerInstance = {
         id: `instance-${Date.now()}`,
         name: data.name,
         definitionId: selectedDefinition.id,
         status: 'stopped',
         enabled: true,
-        connectionDetails: connectionDetails,
+        connectionDetails: selectedDefinition.type === 'HTTP_SSE' 
+          ? data.url || `http://localhost:${3000 + instances.length}` 
+          : `localhost:${3000 + instances.length}`,
         requestCount: 0,
-        environment: data.env || {},
-        arguments: data.args ? data.args.split(' ') : (selectedDefinition.commandArgs ? selectedDefinition.commandArgs.split(' ') : [])
+        environment: data.env,
+        arguments: data.args ? data.args.split(' ') : []
       };
       
       setInstances([...instances, newInstance]);
@@ -303,9 +292,7 @@ const Servers = () => {
   const handleCreateServer = (serverData: {
     name: string;
     type: 'HTTP_SSE' | 'STDIO';
-    description?: string;
-    url?: string;
-    commandArgs?: string;
+    description: string;
   }) => {
     const newDefinition: ServerDefinition = {
       id: `def-${Date.now()}`,
@@ -314,11 +301,7 @@ const Servers = () => {
       version: "1.0.0",
       description: serverData.description || "Custom server",
       downloads: 0,
-      isOfficial: false,
-      url: serverData.type === 'HTTP_SSE' ? serverData.url : undefined,
-      commandArgs: serverData.type === 'STDIO' ? serverData.commandArgs : undefined,
-      environment: {},
-      headers: {}
+      isOfficial: false
     };
     
     const updatedDefinitions = [...definitions, newDefinition];
@@ -331,33 +314,6 @@ const Servers = () => {
     });
     
     setAddServerDialogOpen(false);
-  };
-  
-  const handleUpdateServer = (data: EditServerFormValues) => {
-    if (!selectedDefinition) return;
-    
-    const updatedDefinition: ServerDefinition = {
-      ...selectedDefinition,
-      url: selectedDefinition.type === 'HTTP_SSE' ? data.url : undefined,
-      commandArgs: selectedDefinition.type === 'STDIO' ? data.commandArgs : undefined,
-      environment: selectedDefinition.type === 'STDIO' ? data.environment : {},
-      headers: selectedDefinition.type === 'HTTP_SSE' ? data.headers : {}
-    };
-    
-    setDefinitions(prev => 
-      prev.map(def => def.id === selectedDefinition.id ? updatedDefinition : def)
-    );
-    
-    setFilteredDefinitions(prev =>
-      prev.map(def => def.id === selectedDefinition.id ? updatedDefinition : def)
-    );
-    
-    setEditServerOpen(false);
-    
-    toast({
-      title: "Server Updated",
-      description: `${selectedDefinition.name} has been updated successfully.`,
-    });
   };
 
   const handleNavigateToDiscovery = () => {
@@ -571,45 +527,33 @@ const Servers = () => {
                 </CardContent>
                 
                 <CardFooter className="flex justify-between pt-4 pb-4 border-t mt-2 bg-secondary/10">
-                  <div className="flex space-x-2">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
-                          <Trash2 className="h-4 w-4 mr-1" />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete Server
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete the server definition "{definition.name}" 
+                          {definitionInstances.length > 0 && ` and all its ${definitionInstances.length} instances`}. 
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDeleteDefinition(definition.id)}
+                        >
                           Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete the server definition "{definition.name}" 
-                            {definitionInstances.length > 0 && ` and all its ${definitionInstances.length} instances`}. 
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            onClick={() => handleDeleteDefinition(definition.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEditServer(definition)}
-                      className="text-blue-600 hover:bg-blue-600/10"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                  </div>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
                   <Button 
                     variant="default" 
@@ -771,13 +715,6 @@ const Servers = () => {
         onOpenChange={setAddServerDialogOpen}
         onCreateServer={handleCreateServer}
         onNavigateToDiscovery={handleNavigateToDiscovery}
-      />
-      
-      <EditServerDialog
-        open={editServerOpen}
-        onOpenChange={setEditServerOpen}
-        serverDefinition={selectedDefinition}
-        onUpdateServer={handleUpdateServer}
       />
     </div>
   );
