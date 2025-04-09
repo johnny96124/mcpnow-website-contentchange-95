@@ -128,13 +128,28 @@ const Servers = () => {
     return (
       <div className="flex items-center gap-1">
         {associatedProfiles.slice(0, maxDisplayProfiles).map((profile, idx) => (
-          <Badge 
-            key={idx}
-            variant="default" 
-            className="text-xs"
-          >
-            {truncateText(profile.name, 20)}
-          </Badge>
+          <HoverCard key={idx}>
+            <HoverCardTrigger asChild>
+              <Badge 
+                variant="default" 
+                className="text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px] cursor-pointer"
+              >
+                {truncateText(profile.name, 12)}
+              </Badge>
+            </HoverCardTrigger>
+            <HoverCardContent className="p-3 w-auto min-w-[220px] max-w-[300px]">
+              <div className="text-sm font-medium mb-2">Profile Details</div>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${profile.enabled ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
+                  <span className="text-sm">{profile.name}</span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {profile.description || "No description available"}
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
         ))}
         
         {remainingCount > 0 && (
@@ -361,7 +376,7 @@ const Servers = () => {
         </div>
       </div>
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between max-w-[1536px] mx-auto">
         <div className="relative flex-1 mr-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
@@ -374,7 +389,7 @@ const Servers = () => {
         </div>
       </div>
       
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 max-w-[1536px] mx-auto">
         {filteredDefinitions.map(definition => {
           const definitionInstances = instancesByDefinition[definition.id] || [];
           const filteredDefInstances = definitionInstances.filter(
@@ -420,7 +435,7 @@ const Servers = () => {
                         {filteredDefInstances.map(instance => (
                           <TableRow key={instance.id}>
                             <TableCell className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                              {truncateText(instance.name)}
+                              {truncateText(instance.name, 18)}
                             </TableCell>
                             <TableCell className="px-6">
                               {renderProfileBadges(instance.id)}
