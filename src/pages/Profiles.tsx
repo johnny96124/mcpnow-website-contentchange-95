@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Profile, profiles, serverInstances, EndpointType } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
@@ -200,10 +199,7 @@ const Profiles = () => {
           return (
             <Card key={profile.id}>
               <CardHeader className="pb-2">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-xl">{profile.name}</CardTitle>
-                  <EndpointLabel type="HTTP_SSE" />
-                </div>
+                <CardTitle className="text-xl">{profile.name}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div>
