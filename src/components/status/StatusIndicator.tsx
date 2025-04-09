@@ -7,17 +7,13 @@ interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   className?: string;
-  hidden?: boolean;
 }
 
 export function StatusIndicator({ 
   status, 
   label,
-  className,
-  hidden = false
+  className 
 }: StatusIndicatorProps) {
-  if (hidden) return null;
-  
   const statusClass = {
     'active': 'status-active',
     'warning': 'status-warning',
