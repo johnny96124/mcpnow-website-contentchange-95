@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Terminal, Download, Copy, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { RuntimeInstance, ServerInstance, ServerDefinition } from "@/data/mockData";
+import { RuntimeInstance, ServerInstance, ServerDefinition } from "@/data/mockData";
 
 interface LogEntry {
   timestamp: Date;
@@ -42,13 +42,11 @@ export function RuntimeLogsDialog({
   const [autoScroll, setAutoScroll] = useState(true);
   const { toast } = useToast();
   
-  // Generate mock logs data
   useEffect(() => {
     if (open && runtime && instance) {
       const mockLogs: LogEntry[] = [];
       const now = new Date();
       
-      // Add connection logs
       mockLogs.push({
         timestamp: new Date(now.getTime() - 120000), // 2 minutes ago
         level: 'info',
@@ -61,12 +59,11 @@ export function RuntimeLogsDialog({
         message: `Resolving endpoint: ${instance.connectionDetails}`
       });
       
-      // Add some service-specific logs
       if (definition?.type === 'HTTP_SSE') {
         mockLogs.push({
           timestamp: new Date(now.getTime() - 118000),
           level: 'info',
-          message: `Establishing HTTP connection with headers: ${JSON.stringify({})}`
+          message: `Establishing HTTP connection with headers: ${JSON.stringify(instance.headers || {})}`
         });
         
         if (runtime.status === 'failed') {
@@ -87,7 +84,6 @@ export function RuntimeLogsDialog({
             message: 'SSE connection established successfully'
           });
           
-          // Add some success logs
           for (let i = 0; i < 5; i++) {
             mockLogs.push({
               timestamp: new Date(now.getTime() - (90000 - i * 15000)),
@@ -97,7 +93,6 @@ export function RuntimeLogsDialog({
           }
         }
       } else {
-        // STDIO logs
         mockLogs.push({
           timestamp: new Date(now.getTime() - 118000),
           level: 'info',
@@ -122,7 +117,6 @@ export function RuntimeLogsDialog({
             message: 'Process started successfully with PID 12345'
           });
           
-          // Add some random activity logs
           for (let i = 0; i < 7; i++) {
             mockLogs.push({
               timestamp: new Date(now.getTime() - (100000 - i * 12000)),

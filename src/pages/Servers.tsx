@@ -49,7 +49,8 @@ import {
   ServerDefinition,
   ServerInstance,
   profiles,
-  RuntimeStatus
+  RuntimeStatus,
+  RuntimeInstance
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -66,9 +67,9 @@ const mockHosts = [
 ];
 
 // Mock runtime instances for demonstration
-const generateMockRuntimeInstances = () => {
+const generateMockRuntimeInstances = (): RuntimeInstance[] => {
   const now = new Date();
-  const runtimes = [
+  const runtimes: RuntimeInstance[] = [
     {
       id: 'runtime-1',
       instanceId: 'postgres-dev',
@@ -544,7 +545,7 @@ const Servers = () => {
       return;
     }
     
-    // Set to disconnecting for animation
+    // Set to disconnected for animation
     setRuntimeInstances(prev => 
       prev.map(r => r.id === runtimeId ? { ...r, status: 'disconnected' as RuntimeStatus } : r)
     );
@@ -1015,7 +1016,7 @@ const Servers = () => {
         open={addInstanceOpen} 
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
-        instance={selectedInstance}
+        selectedInstance={selectedInstance}
         onCreateInstance={handleCreateInstance}
       />
       

@@ -1,6 +1,7 @@
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
+export type RuntimeStatus = 'connecting' | 'connected' | 'failed' | 'disconnected';
 
 export interface ServerDefinition {
   id: string;
@@ -31,6 +32,7 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string[];
   requestCount?: number;
+  headers?: Record<string, string>;
 }
 
 export interface Profile {
@@ -52,6 +54,18 @@ export interface Host {
   configPath?: string;
   icon?: string;
   needsUpdate?: boolean;
+}
+
+export interface RuntimeInstance {
+  id: string;
+  instanceId: string;
+  profileId: string;
+  hostId: string;
+  status: RuntimeStatus;
+  errorMessage?: string;
+  startedAt: Date;
+  requestCount: number;
+  lastActivityAt?: Date;
 }
 
 export const serverDefinitions: ServerDefinition[] = [

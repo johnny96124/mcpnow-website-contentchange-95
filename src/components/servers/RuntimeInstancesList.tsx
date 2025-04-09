@@ -15,7 +15,7 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { RuntimeInstance, ServerInstance, ServerDefinition, Profile } from "@/data/mockData";
+import { RuntimeInstance, ServerInstance, ServerDefinition, Profile } from "@/data/mockData";
 
 // Dialog component for runtime logs
 import { RuntimeLogsDialog } from "@/components/servers/RuntimeLogsDialog";
