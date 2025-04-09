@@ -7,14 +7,12 @@ interface StatusIndicatorProps {
   status: StatusType;
   label?: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
 export function StatusIndicator({ 
   status, 
   label,
-  className,
-  size = 'md'
+  className 
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -23,20 +21,9 @@ export function StatusIndicator({
     'inactive': 'status-inactive'
   }[status];
 
-  const sizeClass = {
-    'sm': 'w-1.5 h-1.5',
-    'md': 'w-2 h-2',
-    'lg': 'w-2.5 h-2.5'
-  }[size];
-
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("rounded-full flex-shrink-0", sizeClass, {
-        'bg-green-500': status === 'active',
-        'bg-yellow-500': status === 'warning',
-        'bg-red-500': status === 'error',
-        'bg-gray-400': status === 'inactive',
-      })}></span>
+      <span className={cn("status-dot", statusClass)}></span>
       {label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );

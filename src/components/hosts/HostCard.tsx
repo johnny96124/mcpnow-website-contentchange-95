@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InstanceStatus {
   id: string;
@@ -203,10 +204,7 @@ export function HostCard({
             <SelectContent>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
-                  <div className="flex items-center gap-2">
-                    <StatusIndicator status={profile.enabled ? 'active' : 'inactive'} />
-                    <span>{profile.name}</span>
-                  </div>
+                  <span>{profile.name}</span>
                 </SelectItem>
               ))}
               <SelectItem value="add-new-profile" className="text-primary font-medium">
@@ -254,6 +252,41 @@ export function HostCard({
                     ))}
                   </div>
                 </ScrollArea>
+              </div>
+            )}
+            
+            {/* Configuration status section - added below server instances */}
+            {host.configPath && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium">Configuration Status</label>
+                <div className="border rounded-md p-3">
+                  {host.configStatus === 'configured' ? (
+                    <div className="flex items-center gap-2">
+                      <CircleCheck className="h-5 w-5 text-green-500" />
+                      <span className="text-sm">Configuration is valid</span>
+                    </div>
+                  ) : host.configStatus === 'misconfigured' ? (
+                    <Alert variant="destructive" className="py-2 px-3">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="flex items-center justify-between w-full">
+                        <span className="text-xs">Configuration has errors</span>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-7 text-xs"
+                          onClick={() => onOpenConfigDialog(host.id)}
+                        >
+                          Reconfigure
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CircleMinus className="h-5 w-5 text-yellow-500" />
+                      <span className="text-sm">Configuration status unknown</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </>
