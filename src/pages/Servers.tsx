@@ -126,30 +126,15 @@ const Servers = () => {
     const remainingCount = associatedProfiles.length - maxDisplayProfiles;
     
     return (
-      <div className="flex items-center gap-1 max-w-[120px] overflow-hidden">
+      <div className="flex items-center gap-1">
         {associatedProfiles.slice(0, maxDisplayProfiles).map((profile, idx) => (
-          <HoverCard key={idx}>
-            <HoverCardTrigger asChild>
-              <Badge 
-                variant="default" 
-                className="text-xs whitespace-nowrap overflow-hidden text-ellipsis"
-              >
-                {truncateText(profile.name, 16)}
-              </Badge>
-            </HoverCardTrigger>
-            <HoverCardContent className="p-3 w-auto min-w-[220px] max-w-[300px]">
-              <div className="text-sm font-medium mb-2">Profile details</div>
-              <div className="flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${profile.enabled ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                  <span className="text-sm">{profile.name}</span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {profile.instances.length} server instance{profile.instances.length !== 1 ? 's' : ''}
-                </div>
-              </div>
-            </HoverCardContent>
-          </HoverCard>
+          <Badge 
+            key={idx}
+            variant="default" 
+            className="text-xs"
+          >
+            {truncateText(profile.name, 20)}
+          </Badge>
         ))}
         
         {remainingCount > 0 && (
@@ -376,7 +361,7 @@ const Servers = () => {
         </div>
       </div>
       
-      <div className="flex items-center justify-between max-w-[1200px]">
+      <div className="flex items-center justify-between">
         <div className="relative flex-1 mr-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
@@ -389,7 +374,7 @@ const Servers = () => {
         </div>
       </div>
       
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 max-w-[1200px]">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         {filteredDefinitions.map(definition => {
           const definitionInstances = instancesByDefinition[definition.id] || [];
           const filteredDefInstances = definitionInstances.filter(
@@ -427,20 +412,20 @@ const Servers = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead className="w-[30%]">Instance Name</TableHead>
-                          <TableHead className="w-[30%] pl-4">Profile</TableHead>
-                          <TableHead className="w-[40%] text-left pl-0">Actions</TableHead>
+                          <TableHead className="w-[30%] px-6">Profile</TableHead>
+                          <TableHead className="w-[40%] text-left pl-4">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredDefInstances.map(instance => (
                           <TableRow key={instance.id}>
-                            <TableCell className="font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
-                              {truncateText(instance.name, 20)}
+                            <TableCell className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                              {truncateText(instance.name)}
                             </TableCell>
-                            <TableCell className="pl-4">
+                            <TableCell className="px-6">
                               {renderProfileBadges(instance.id)}
                             </TableCell>
-                            <TableCell className="space-x-1 flex pl-0">
+                            <TableCell className="space-x-1 flex">
                               <Button 
                                 variant="outline" 
                                 size="sm" 
