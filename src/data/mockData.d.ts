@@ -50,7 +50,7 @@ export interface Profile {
 
 export const profiles: Profile[];
 
-// New types for Instance Runtime functionality
+// Runtime types for Instance Runtime functionality
 export type RuntimeStatus = 'connecting' | 'connected' | 'failed' | 'disconnected';
 
 export interface RuntimeInstance {
@@ -71,4 +71,17 @@ export interface RuntimeHost {
   icon?: string;
 }
 
+export interface Host {
+  id: string;
+  name: string;
+  icon?: string;
+  connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown' | 'connecting';
+  configStatus: 'configured' | 'misconfigured' | 'unknown';
+  configPath?: string;
+  profileId?: string;
+}
+
 export const runtimeInstances: RuntimeInstance[];
+export const hosts: Host[];
+export const connectionStatus: ConnectionStatus;
+export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown' | 'connecting';
