@@ -131,14 +131,15 @@ const Servers = () => {
           <Badge 
             key={idx}
             variant="default" 
-            className="text-xs"
+            className="text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]"
+            title={profile.name}
           >
-            {truncateText(profile.name, 20)}
+            {truncateText(profile.name, 16)}
           </Badge>
         ))}
         
         {remainingCount > 0 && (
-          <HoverCard>
+          <HoverCard openDelay={0} closeDelay={100}>
             <HoverCardTrigger asChild>
               <Badge 
                 variant="secondary" 
@@ -361,8 +362,8 @@ const Servers = () => {
         </div>
       </div>
       
-      <div className="flex items-center justify-between">
-        <div className="relative flex-1 mr-4">
+      <div className="flex items-center justify-between max-w-none">
+        <div className="relative w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="search"
@@ -420,7 +421,14 @@ const Servers = () => {
                         {filteredDefInstances.map(instance => (
                           <TableRow key={instance.id}>
                             <TableCell className="font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                              {truncateText(instance.name)}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span title={instance.name}>{truncateText(instance.name)}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{instance.name}</p>
+                                </TooltipContent>
+                              </Tooltip>
                             </TableCell>
                             <TableCell className="px-6">
                               {renderProfileBadges(instance.id)}
