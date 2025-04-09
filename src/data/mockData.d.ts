@@ -62,7 +62,7 @@ export interface RuntimeInstance {
   errorMessage?: string;
   startedAt: Date;
   requestCount: number;
-  lastActivityAt?: Date;
+  lastActivityAt?: Date; // Make this optional to fix type errors
 }
 
 export interface RuntimeHost {

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, serverInstances, serverDefinitions } from "@/data/mockData";
+import { profiles, serverInstances, serverDefinitions, EndpointType } from "@/data/mockData";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";

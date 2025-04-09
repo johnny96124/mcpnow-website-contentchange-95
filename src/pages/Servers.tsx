@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -87,7 +86,8 @@ const generateMockRuntimeInstances = () => {
       hostId: 'host-3',
       status: 'connecting' as RuntimeStatus,
       startedAt: new Date(now.getTime() - 1000 * 20), // Started 20 seconds ago
-      requestCount: 0
+      requestCount: 0,
+      lastActivityAt: undefined
     },
     {
       id: 'runtime-3',
@@ -128,7 +128,7 @@ const Servers = () => {
   
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const instancesByDefinition = instances.reduce((acc, instance) => {
     const { definitionId } = instance;
     if (!acc[definitionId]) {
@@ -596,7 +596,8 @@ const Servers = () => {
             ? { 
                 ...r, 
                 status: 'failed' as RuntimeStatus, 
-                errorMessage: "Reconnection failed. The server might be unavailable."
+                errorMessage: "Reconnection failed. The server might be unavailable.",
+                lastActivityAt: r.lastActivityAt
               } 
             : r
           )
@@ -610,7 +611,7 @@ const Servers = () => {
       }
     }, 1500);
   };
-  
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -1013,7 +1014,7 @@ const Servers = () => {
       <AddInstanceDialog 
         open={addInstanceOpen} 
         onOpenChange={setAddInstanceOpen}
-        definition={selectedDefinition}
+        serverDefinition={selectedDefinition}
         instance={selectedInstance}
         onCreateInstance={handleCreateInstance}
       />
@@ -1022,12 +1023,13 @@ const Servers = () => {
         open={addServerDialogOpen}
         onOpenChange={setAddServerDialogOpen}
         onCreateServer={handleCreateServer}
+        onNavigateToDiscovery={handleNavigateToDiscovery}
       />
       
       <EditServerDialog
         open={editServerOpen}
         onOpenChange={setEditServerOpen}
-        definition={selectedDefinition}
+        serverDefinition={selectedDefinition}
         onUpdateServer={handleUpdateServer}
       />
     </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -67,7 +66,7 @@ export function RuntimeLogsDialog({
         mockLogs.push({
           timestamp: new Date(now.getTime() - 118000),
           level: 'info',
-          message: `Establishing HTTP connection with headers: ${JSON.stringify(instance.headers || {})}`
+          message: `Establishing HTTP connection with headers: ${JSON.stringify({})}`
         });
         
         if (runtime.status === 'failed') {
