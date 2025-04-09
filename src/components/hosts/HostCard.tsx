@@ -48,6 +48,8 @@ export function HostCard({
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
   const navigate = useNavigate();
   
+  const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
+  
   // Calculate overall profile connection status based on instance statuses
   const getProfileConnectionStatus = () => {
     if (!instanceStatuses.length) return 'disconnected';
@@ -189,6 +191,7 @@ export function HostCard({
                   <div className="flex items-center gap-2">
                     <StatusIndicator 
                       status={
+                        isHostDisconnected ? 'none' : 
                         isConnecting ? 'warning' :
                         profileConnectionStatus === 'connected' ? 'active' : 
                         profileConnectionStatus === 'warning' ? 'warning' : 
@@ -204,7 +207,6 @@ export function HostCard({
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
                   <div className="flex items-center gap-2">
-                    <StatusIndicator status={profile.enabled ? 'active' : 'inactive'} />
                     <span>{profile.name}</span>
                   </div>
                 </SelectItem>
@@ -231,6 +233,7 @@ export function HostCard({
                         <div className="flex items-center gap-2">
                           <StatusIndicator 
                             status={
+                              isHostDisconnected ? 'none' :
                               !instance.enabled ? 'inactive' :
                               instance.status === 'connected' ? 'active' :
                               instance.status === 'connecting' ? 'warning' :
@@ -242,7 +245,7 @@ export function HostCard({
                             {' - '}
                             <span className="text-muted-foreground">{instance.name}</span>
                           </div>
-                          {instance.status === 'connecting' && (
+                          {!isHostDisconnected && instance.status === 'connecting' && (
                             <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
                           )}
                         </div>

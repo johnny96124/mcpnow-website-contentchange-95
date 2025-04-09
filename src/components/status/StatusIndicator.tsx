@@ -1,7 +1,7 @@
 
 import { cn } from "@/lib/utils";
 
-type StatusType = 'active' | 'warning' | 'error' | 'inactive';
+type StatusType = 'active' | 'warning' | 'error' | 'inactive' | 'none';
 
 interface StatusIndicatorProps {
   status: StatusType;
@@ -18,12 +18,13 @@ export function StatusIndicator({
     'active': 'status-active',
     'warning': 'status-warning',
     'error': 'status-error',
-    'inactive': 'status-inactive'
+    'inactive': 'status-inactive',
+    'none': 'status-none'
   }[status];
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className={cn("status-dot", statusClass)}></span>
+      {status !== 'none' && <span className={cn("status-dot", statusClass)}></span>}
       {label && <span className="text-sm font-medium">{label}</span>}
     </div>
   );
