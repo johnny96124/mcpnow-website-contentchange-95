@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, AlertTriangle } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InstanceStatus {
   id: string;
@@ -150,7 +149,7 @@ export function HostCard({
   const selectedProfile = profiles.find(p => p.id === profileId);
   
   return (
-    <Card className="overflow-hidden flex flex-col h-[480px]">
+    <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -188,6 +187,14 @@ export function HostCard({
               <SelectValue placeholder="Select a profile">
                 {selectedProfile && (
                   <div className="flex items-center gap-2">
+                    <StatusIndicator 
+                      status={
+                        isConnecting ? 'warning' :
+                        profileConnectionStatus === 'connected' ? 'active' : 
+                        profileConnectionStatus === 'warning' ? 'warning' : 
+                        'error'
+                      } 
+                    />
                     <span>{selectedProfile.name}</span>
                   </div>
                 )}
@@ -196,7 +203,10 @@ export function HostCard({
             <SelectContent>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
-                  <span>{profile.name}</span>
+                  <div className="flex items-center gap-2">
+                    <StatusIndicator status={profile.enabled ? 'active' : 'inactive'} />
+                    <span>{profile.name}</span>
+                  </div>
                 </SelectItem>
               ))}
               <SelectItem value="add-new-profile" className="text-primary font-medium">
@@ -214,7 +224,7 @@ export function HostCard({
             {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Server Instances</label>
-                <ScrollArea className="h-[180px] border rounded-md p-1">
+                <ScrollArea className="h-[140px] border rounded-md p-1">
                   <div className="space-y-1">
                     {instanceStatuses.map(instance => (
                       <div key={instance.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
@@ -246,46 +256,11 @@ export function HostCard({
                 </ScrollArea>
               </div>
             )}
-            
-            {/* Configuration status section - added below server instances */}
-            {host.configPath && (
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium">Configuration Status</label>
-                <div className="border rounded-md p-3">
-                  {host.configStatus === 'configured' ? (
-                    <div className="flex items-center gap-2">
-                      <CircleCheck className="h-5 w-5 text-green-500" />
-                      <span className="text-sm">Configuration is valid</span>
-                    </div>
-                  ) : host.configStatus === 'misconfigured' ? (
-                    <Alert variant="destructive" className="py-2 px-3">
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription className="flex items-center justify-between w-full">
-                        <span className="text-xs">Configuration has errors</span>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-7 text-xs"
-                          onClick={() => onOpenConfigDialog(host.id)}
-                        >
-                          Reconfigure
-                        </Button>
-                      </AlertDescription>
-                    </Alert>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <CircleMinus className="h-5 w-5 text-yellow-500" />
-                      <span className="text-sm">Configuration status unknown</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </>
         )}
         
         {!profileId && (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md h-[250px]">
+          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
             <p className="text-muted-foreground text-center">
               Select a profile to view connection details
             </p>

@@ -67,11 +67,7 @@ const Hosts = () => {
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
-      
-      // Check if the configuration needs updates
-      const needsUpdate = host.configStatus === 'misconfigured';
-      
-      openConfigDialog(hostId, host.configPath, profileEndpoint, needsUpdate, false);
+      openConfigDialog(hostId, host.configPath, profileEndpoint, false, false);
     } else {
       toast({
         title: "No config file",
@@ -167,49 +163,6 @@ const Hosts = () => {
     });
   };
 
-  const handleSaveConfigFile = (configContent: string, configPath: string) => {
-    try {
-      // Validate JSON format
-      const parsedConfig = JSON.parse(configContent);
-      
-      // Check if the config is valid based on some criteria
-      // For example, check if it contains the required mcpServers section
-      const isValidConfig = !!parsedConfig.mcpServers;
-      
-      if (currentHostId) {
-        // Update host config status based on validation
-        setHostsList(prev => prev.map(host => 
-          host.id === currentHostId 
-            ? { 
-                ...host, 
-                configPath,
-                configStatus: isValidConfig ? 'configured' : 'misconfigured',
-                connectionStatus: isValidConfig ? 'connected' : 'misconfigured'
-              } 
-            : host
-        ));
-      }
-      
-      toast({
-        title: isValidConfig ? "Configuration saved" : "Configuration saved with issues",
-        description: isValidConfig 
-          ? `Config file saved successfully to ${configPath}`
-          : "The configuration was saved but may have issues that need to be addressed.",
-        variant: isValidConfig ? "default" : "destructive",
-      });
-      
-      resetConfigDialog();
-      
-    } catch (err) {
-      // Handle JSON parsing error
-      toast({
-        title: "Configuration Error",
-        description: "Failed to save configuration: Invalid JSON format",
-        variant: "destructive",
-      });
-    }
-  };
-
   const generateDefaultConfig = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     
@@ -280,7 +233,7 @@ const Hosts = () => {
           ))}
           
           {isScanning && (
-            <div className="border rounded-lg overflow-hidden shadow-sm h-[480px]">
+            <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
               <div className="bg-muted/50 p-6 pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -297,7 +250,7 @@ const Hosts = () => {
                 </div>
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-40" />
-                  <Skeleton className="h-[180px] w-full" />
+                  <Skeleton className="h-20 w-full" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -369,7 +322,7 @@ const Hosts = () => {
         onOpenChange={setDialogOpen}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
-        onSave={handleSaveConfigFile}
+        onSave={resetConfigDialog}
         profileEndpoint={configDialog.profileEndpoint}
         needsUpdate={configDialog.needsUpdate}
         allowPathEdit={configDialog.allowPathEdit}
