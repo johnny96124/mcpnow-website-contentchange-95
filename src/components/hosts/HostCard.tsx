@@ -384,12 +384,11 @@ export function HostCard({
       <CardFooter className="mt-2">
         <div className="flex justify-end w-full">
           {profileId && (
-            !host.configPath ? (
+            host.configStatus === 'unknown' ? (
               <Button 
                 onClick={() => onCreateConfig(host.id, profileId)}
-                disabled={!profileId}
               >
-                <Settings2 className="h-4 w-4 mr-2" />
+                <FilePlus className="h-4 w-4 mr-2" />
                 Create Config
               </Button>
             ) : host.configStatus === 'misconfigured' ? (
