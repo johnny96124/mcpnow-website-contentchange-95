@@ -1,43 +1,40 @@
 
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: 'HTTP_SSE' | 'STDIO';
-  size?: 'xs' | 'sm' | 'default';
+  type: EndpointType | 'Custom' | 'WS';
   className?: string;
 }
 
-export function EndpointLabel({ type, size = 'default', className }: EndpointLabelProps) {
-  const textSizeClass = {
-    'xs': 'text-[10px]',
-    'sm': 'text-xs',
-    'default': 'text-xs'
-  }[size];
+export function EndpointLabel({ type, className }: EndpointLabelProps) {
+  let labelText = '';
+  let typeClasses = '';
   
-  const paddingClass = {
-    'xs': 'px-1 py-0',
-    'sm': 'px-1.5 py-0.5',
-    'default': 'px-2 py-0.5'
-  }[size];
-
+  switch(type) {
+    case 'HTTP_SSE':
+      labelText = 'HTTP SSE';
+      typeClasses = "bg-blue-50 text-blue-700 border border-blue-200";
+      break;
+    case 'STDIO':
+      labelText = 'STDIO';
+      typeClasses = "bg-purple-50 text-purple-700 border border-purple-200";
+      break;
+    case 'WS':
+      labelText = 'WebSocket';
+      typeClasses = "bg-green-50 text-green-700 border border-green-200";
+      break;
+    case 'Custom':
+      labelText = 'Custom';
+      typeClasses = "bg-gray-50 text-gray-700 border border-gray-200";
+      break;
+  }
+  
+  const baseClasses = "px-2 py-0.5 text-xs font-medium rounded-md";
+  
   return (
-    <Badge 
-      variant="outline"
-      className={cn(
-        "rounded font-medium border", 
-        textSizeClass,
-        paddingClass,
-        {
-          "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300": 
-            type === 'HTTP_SSE',
-          "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300": 
-            type === 'STDIO'
-        },
-        className
-      )}
-    >
-      {type}
-    </Badge>
+    <span className={cn(baseClasses, typeClasses, className)}>
+      {labelText}
+    </span>
   );
 }
