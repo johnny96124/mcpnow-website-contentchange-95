@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -15,6 +16,7 @@ import {
   Search,
   Tag,
   Users,
+  Watch,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -437,12 +439,10 @@ const Discovery = () => {
                       </div>
                       
                       <div className="flex items-center gap-1.5">
-                        {server.watches && (
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            {formatNumber(server.watches)}
-                          </div>
-                        )}
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Eye className="h-3.5 w-3.5 mr-1" />
+                          {formatNumber(server.views || 0)}
+                        </div>
                       </div>
                     </div>
                   </CardHeader>
