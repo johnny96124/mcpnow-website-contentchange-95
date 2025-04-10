@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -29,7 +30,7 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition, profiles } from "@/data/mockData";
+import { discoveryItems, ServerDefinition } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
@@ -50,7 +51,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
-import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
 
 const ITEMS_PER_PAGE = 12; // Increased to show more items initially
 
@@ -124,14 +124,10 @@ const Discovery = () => {
   const [sortOption, setSortOption] = useState("popular");
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
   
-  // States for the AddInstanceDialog
+  // New states for the AddInstanceDialog
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
-  
-  // New state for the created instance and profile dialog
-  const [createdInstance, setCreatedInstance] = useState<any>(null);
-  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -247,41 +243,19 @@ const Discovery = () => {
     }, 1500);
   };
 
-  // Modified handler for instance creation to show profile selection dialog
+  // Handler for instance creation
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
-    
-    // Create the instance - use connectionDetails instead of endpoint which doesn't exist in the form data type
-    const newInstance = {
-      id: `instance-${Math.random().toString(36).substr(2, 9)}`,
-      name: data.name,
-      definitionId: selectedDefinition.id,
-      status: "stopped" as const,
-      enabled: true,
-      connectionDetails: data.url || "http://localhost:8080",
-      requestCount: 0
-    };
-    
-    // Store the created instance
-    setCreatedInstance(newInstance);
-    
-    // Close instance dialog and open profile dialog
-    setAddInstanceOpen(false);
-    setProfileDialogOpen(true);
     
     toast({
       title: "Instance Created",
       description: `${data.name} has been created successfully.`,
     });
-  };
-
-  // Handler for adding instance to profile
-  const handleAddToProfile = (profileId: string) => {
-    // In a real app, you would update the profile with the instance
-    console.log(`Adding instance ${createdInstance?.id} to profile ${profileId}`);
     
-    // Close the profile dialog
-    setProfileDialogOpen(false);
+    setAddInstanceOpen(false);
+    
+    // Navigate to servers page after instance creation
+    navigate("/servers");
   };
 
   const handleNavigateToServers = () => {
@@ -778,15 +752,6 @@ const Discovery = () => {
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
-      />
-
-      {/* Add to Profile Dialog */}
-      <AddToProfileDialog
-        open={profileDialogOpen}
-        onOpenChange={setProfileDialogOpen}
-        instance={createdInstance}
-        profiles={profiles}
-        onAddToProfile={handleAddToProfile}
       />
     </div>
   );
