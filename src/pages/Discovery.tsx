@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -252,14 +251,15 @@ const Discovery = () => {
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
     
-    // Create the instance
+    // Create the instance - use connectionDetails instead of endpoint which doesn't exist in the form data type
     const newInstance = {
       id: `instance-${Math.random().toString(36).substr(2, 9)}`,
       name: data.name,
-      type: selectedDefinition.type,
-      status: "stopped",
-      endpoint: data.endpoint || "http://localhost:8080",
-      serverId: selectedDefinition.id
+      definitionId: selectedDefinition.id,
+      status: "stopped" as const,
+      enabled: true,
+      connectionDetails: data.url || "http://localhost:8080",
+      requestCount: 0
     };
     
     // Store the created instance

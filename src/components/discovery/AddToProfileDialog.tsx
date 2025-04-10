@@ -123,7 +123,8 @@ export function AddToProfileDialog({
                 />
                 <div>
                   <div className="font-medium">{instance.name}</div>
-                  <div className="text-sm text-muted-foreground">{instance.type}</div>
+                  {/* We access definitionId instead of type which doesn't exist on ServerInstance */}
+                  <div className="text-sm text-muted-foreground">{instance.definitionId}</div>
                 </div>
               </div>
             </div>
