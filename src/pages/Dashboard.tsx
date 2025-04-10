@@ -8,7 +8,14 @@ import {
   UsersRound,
   Download,
   X,
-  Database
+  Database,
+  HelpCircle,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Computer,
+  Settings2,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +35,6 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
-// Utility function to format download count
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
     return `${(count / 1000).toFixed(1)}k`;
@@ -44,6 +50,7 @@ const Dashboard = () => {
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [showCarouselControls, setShowCarouselControls] = useState(false);
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const { openAddInstanceDialog } = useServerContext();
   const navigate = useNavigate();
   
@@ -275,6 +282,123 @@ const Dashboard = () => {
     }, 1500);
   };
 
+  const toggleStep = (stepIndex: number) => {
+    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
+  };
+
+  const beginnerGuideSteps = [
+    {
+      title: "Connect your host",
+      description: "First, add your machine as a host in MCP Now to manage it remotely.",
+      icon: <Computer className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            To connect your machine as a host:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Navigate to the <Link to="/hosts" className="text-blue-500 hover:underline">Hosts</Link> page</li>
+            <li>Click on "Add Host" and enter your machine details</li>
+            <li>Follow the instructions to set up the connection</li>
+            <li>Verify the connection status shows as "Connected"</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/hosts">
+                Go to Hosts
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Create a profile",
+      description: "Profiles help you organize server instances and their configurations.",
+      icon: <Layers className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            To create and configure a profile:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Go to the <Link to="/profiles" className="text-blue-500 hover:underline">Profiles</Link> page</li>
+            <li>Click "Create Profile" and give it a meaningful name</li>
+            <li>Add server instances to the profile based on your needs</li>
+            <li>Enable the profile to make it active</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/profiles">
+                Go to Profiles
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Add server instances",
+      description: "Discover and install server modules that fit your project needs.",
+      icon: <Server className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            To add server instances:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Browse the <Link to="/discovery" className="text-blue-500 hover:underline">Discovery</Link> page to find available servers</li>
+            <li>Click on a server to view details and install it</li>
+            <li>Configure server settings through the <Link to="/servers" className="text-blue-500 hover:underline">Servers</Link> page</li>
+            <li>Add the server instance to your active profile</li>
+          </ol>
+          <div className="pt-2 flex gap-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/discovery">
+                Discover Servers
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/servers">
+                Manage Servers
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Configure settings",
+      description: "Customize MCP Now according to your preferences and requirements.",
+      icon: <Settings2 className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            To configure MCP Now settings:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Navigate to the <Link to="/settings" className="text-blue-500 hover:underline">Settings</Link> page</li>
+            <li>Adjust application preferences</li>
+            <li>Configure network and security settings if needed</li>
+            <li>Save your changes</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/settings">
+                Go to Settings
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -486,6 +610,65 @@ const Dashboard = () => {
             </CardFooter>
           </Card>
         </div>
+      </div>
+
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex items-center gap-2 mb-4">
+          <HelpCircle className="h-5 w-5 text-blue-500" />
+          <h2 className="text-2xl font-bold tracking-tight">Getting Started with MCP Now</h2>
+        </div>
+        
+        <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardContent className="pt-6">
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Welcome to MCP Now! Follow these simple steps to configure and start using the tool effectively.
+            </p>
+            
+            <div className="space-y-3">
+              {beginnerGuideSteps.map((step, index) => (
+                <div 
+                  key={index}
+                  className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900"
+                >
+                  <button 
+                    className="w-full flex items-center justify-between p-4 text-left"
+                    onClick={() => toggleStep(index)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2">
+                        {step.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Step {index + 1}: {step.title}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{step.description}</p>
+                      </div>
+                    </div>
+                    {expandedStep === index ? (
+                      <ChevronUp className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                  
+                  {expandedStep === index && (
+                    <div className="p-4 pt-0 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                      {step.content}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <Button asChild className="gap-2" variant="outline">
+                <Link to="/hosts">
+                  Start Configuration
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
