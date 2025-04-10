@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, AlertTriangle, FileCheck, FileWarning } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -71,25 +71,18 @@ export function HostCard({
   };
   
   const getConfigStatusInfo = () => {
-    switch(host.configStatus) {
-      case 'configured':
-        return { 
-          icon: <FileCheck className="h-4 w-4 text-green-500" />,
-          text: 'Correctly configured', 
-          color: 'bg-green-100 text-green-800 border-green-200'
-        };
-      case 'misconfigured':
-        return { 
-          icon: <FileWarning className="h-4 w-4 text-amber-500" />,
-          text: 'Misconfigured', 
-          color: 'bg-amber-100 text-amber-800 border-amber-200'
-        };
-      default:
-        return { 
-          icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
-          text: 'No config', 
-          color: 'bg-gray-100 text-gray-800 border-gray-200'
-        };
+    if (host.configStatus === 'configured') {
+      return { 
+        icon: <FileCheck className="h-4 w-4 text-green-500" />,
+        text: 'Correctly configured', 
+        color: 'bg-green-100 text-green-800 border-green-200'
+      };
+    } else {
+      return { 
+        icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
+        text: 'No config', 
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
     }
   };
   
@@ -214,6 +207,8 @@ export function HostCard({
   const instancesByDefinition = getInstancesByDefinition();
   const configStatusInfo = getConfigStatusInfo();
   
+  const needsConfig = host.configStatus === 'misconfigured' || host.configStatus === 'unknown';
+  
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
@@ -233,14 +228,14 @@ export function HostCard({
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'error' : 
+                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'inactive' : 
                 host.configStatus === 'unknown' ? 'warning' : 'inactive'
               } 
               label={
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Misconfigured' : 'Unknown'
+                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
               }
             />
           </div>
@@ -392,16 +387,7 @@ export function HostCard({
                 <Settings2 className="h-4 w-4 mr-2" />
                 Create Config
               </Button>
-            ) : host.configStatus === 'misconfigured' ? (
-              <Button 
-                variant="destructive"
-                onClick={() => onFixConfig(host.id)}
-                className="flex items-center gap-2"
-              >
-                <AlertTriangle className="h-4 w-4" />
-                Fix Config
-              </Button>
-            ) : (
+            ) : host.configStatus === 'configured' ? (
               <Button 
                 variant="outline"
                 onClick={() => onOpenConfigDialog(host.id)}
@@ -410,6 +396,14 @@ export function HostCard({
               >
                 <FilePlus className="h-4 w-4" />
                 View Config
+              </Button>
+            ) : (
+              <Button 
+                variant="default"
+                onClick={() => onFixConfig(host.id)}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Update Config
               </Button>
             )
           )}

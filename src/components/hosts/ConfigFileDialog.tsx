@@ -19,7 +19,8 @@ interface ConfigFileDialogProps {
   needsUpdate?: boolean;
   allowPathEdit?: boolean;
   isViewOnly?: boolean;
-  isFixMode?: boolean; // New prop to indicate if the dialog is in fix mode
+  isFixMode?: boolean;
+  isUpdateMode?: boolean; // New prop for update mode
 }
 
 export function ConfigFileDialog({
@@ -32,7 +33,8 @@ export function ConfigFileDialog({
   needsUpdate = false,
   allowPathEdit = false,
   isViewOnly = false,
-  isFixMode = false
+  isFixMode = false,
+  isUpdateMode = false // New prop
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState(configPath);
@@ -43,6 +45,7 @@ export function ConfigFileDialog({
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const configContainerRef = useRef<HTMLPreElement | null>(null);
 
   // Update config when initialConfig changes
   useEffect(() => {
@@ -102,8 +105,8 @@ export function ConfigFileDialog({
       onSave(config, path);
       
       toast({
-        title: "Configuration saved",
-        description: `Config file saved to ${path}`,
+        title: isUpdateMode ? "Configuration updated" : "Configuration saved",
+        description: `Config file ${isUpdateMode ? "updated" : "saved"} to ${path}`,
       });
       
       setIsModified(false);
@@ -169,24 +172,26 @@ export function ConfigFileDialog({
     }
   };
 
-  // Apply syntax highlighting for mcpnow section
-  useEffect(() => {
-    if (!textareaRef.current) return;
-    
+  // Format the config with mcpnow highlighting
+  const getFormattedConfig = () => {
     try {
-      // Implementation for highlighting would typically be more complex with a proper editor
-      const parsedConfig = JSON.parse(config);
-      if (parsedConfig.mcpServers?.mcpnow) {
-        // For a textarea, we can't apply direct highlighting
-      }
+      // Parse the JSON to ensure it's valid
+      const parsed = JSON.parse(config);
+      
+      // Convert back to a string with formatting
+      const formatted = JSON.stringify(parsed, null, 2);
+      
+      // Return the formatted string
+      return formatted;
     } catch (e) {
-      // Silently fail, validation error will be shown separately
+      // If there's an error parsing, just return the raw config
+      return config;
     }
-  }, [config]);
+  };
 
   // Handle dialog close with unsaved changes
   const handleCloseDialog = (open: boolean) => {
-    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode) {
+    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
@@ -227,23 +232,89 @@ export function ConfigFileDialog({
     }
   };
 
+  // Apply highlighting to mcpnow section
+  useEffect(() => {
+    if (!configContainerRef.current) return;
+    
+    try {
+      const container = configContainerRef.current;
+      const highlightMcpNowSection = (json: string) => {
+        // Use basic string manipulation to identify and wrap the mcpnow section
+        let inMcpNowSection = false;
+        let mcpNowStarted = false;
+        let openBraces = 0;
+
+        const lines = json.split('\n');
+        const highlightedLines: string[] = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          
+          // Check if we're entering the mcpnow section
+          if (line.includes('"mcpnow"')) {
+            inMcpNowSection = true;
+            mcpNowStarted = true;
+            highlightedLines.push(`<span class="mcpnow-highlight">${line}`);
+            continue;
+          }
+          
+          // Count braces to determine section boundaries
+          if (mcpNowStarted) {
+            const openCount = (line.match(/{/g) || []).length;
+            const closeCount = (line.match(/}/g) || []).length;
+            openBraces += openCount - closeCount;
+            
+            // If we've closed all braces, we're out of the section
+            if (openBraces <= 0) {
+              mcpNowStarted = false;
+              inMcpNowSection = false;
+              highlightedLines.push(`${line}</span>`);
+              continue;
+            }
+          }
+          
+          // Add highlighted line if in mcpnow section
+          if (inMcpNowSection) {
+            highlightedLines.push(line);
+          } else {
+            highlightedLines.push(line);
+          }
+        }
+        
+        return highlightedLines.join('\n');
+      };
+      
+      if (isViewOnly || isFixMode || isUpdateMode) {
+        // Create a formatted display for readonly modes
+        try {
+          const parsed = JSON.parse(config);
+          const formatted = JSON.stringify(parsed, null, 2);
+          container.innerHTML = highlightMcpNowSection(formatted);
+        } catch (e) {
+          container.textContent = config;
+        }
+      }
+    } catch (e) {
+      // Silently fail, formatting is not critical
+    }
+  }, [config, isViewOnly, isFixMode, isUpdateMode]);
+
   // If in fix mode, set the config to a fixed version automatically
   useEffect(() => {
-    if (isFixMode && open && hasEndpointMismatch) {
+    if ((isFixMode || isUpdateMode) && open && hasEndpointMismatch) {
       handleFixEndpoint();
-    } else if (isFixMode && open && needsUpdate) {
+    } else if ((isFixMode || isUpdateMode) && open && needsUpdate) {
       resetJson();
     }
-  }, [isFixMode, open, needsUpdate]);
-
-  // Only show the warning when both hasEndpointMismatch is true AND needsUpdate is true
-  const showWarning = hasEndpointMismatch && needsUpdate;
+  }, [isFixMode, isUpdateMode, open, needsUpdate]);
 
   // Prepare title and description based on mode
-  const dialogTitle = isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration");
-  const dialogDescription = isFixMode 
-    ? "Fix your configuration to match your selected profile"
-    : (isViewOnly ? "View configuration file details" : "Edit configuration file details");
+  const dialogTitle = isUpdateMode ? "Update Configuration" : 
+    (isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration"));
+    
+  const dialogDescription = isUpdateMode ? "Update your configuration to match your selected profile" :
+    (isFixMode ? "Fix your configuration to match your selected profile" :
+    (isViewOnly ? "View configuration file details" : "Edit configuration file details"));
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
@@ -265,55 +336,67 @@ export function ConfigFileDialog({
               onChange={(e) => handlePathChange(e.target.value)}
               rows={1}
               className="font-mono text-sm"
-              readOnly={isViewOnly || !allowPathEdit}
+              readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode}
             />
-            {allowPathEdit && !isViewOnly && !isFixMode && (
+            {allowPathEdit && !isViewOnly && !isFixMode && !isUpdateMode && (
               <p className="text-xs text-muted-foreground">
                 You can modify the path where this configuration will be saved.
               </p>
             )}
           </div>
 
-          {isFixMode && (
+          {(isFixMode || isUpdateMode) && (
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription className="text-blue-700">
                 We'll automatically update your configuration to match the selected profile. 
-                Click "Fix Configuration" when ready.
+                Click "{isUpdateMode ? 'Update' : 'Fix'} Configuration" when ready.
               </AlertDescription>
             </Alert>
           )}
 
-          {!isViewOnly && !isFixMode && (
-            <div className="flex justify-between mb-2">
-              <div className="text-sm text-muted-foreground">
-                Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+          <div className="mb-2">
+            <Label htmlFor="configDetails" className="text-sm font-medium">Config Details</Label>
+            {!isViewOnly && !isFixMode && !isUpdateMode && (
+              <div className="flex justify-between items-center mt-1 mb-2">
+                <div className="text-sm text-muted-foreground">
+                  Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={resetJson}>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Reset JSON
+                </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={resetJson}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset JSON
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
           
-          {showWarning && !isFixMode && (
+          {(needsUpdate || hasEndpointMismatch) && !isFixMode && !isUpdateMode && (
             <Alert variant="destructive" className="py-2 px-3">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                Warning: The endpoint in the mcpnow configuration does not match the selected profile's endpoint.
+                Warning: The configuration needs to be updated to match the selected profile.
                 {!isViewOnly ? " Click \"Reset JSON\" to fix this issue." : " This configuration needs to be updated."}
               </AlertDescription>
             </Alert>
           )}
           
           <ScrollArea className="h-[300px] border rounded-md">
-            <Textarea 
-              ref={textareaRef}
-              className="flex-1 font-mono text-sm min-h-[300px] border-0 resize-none"
-              value={config} 
-              onChange={(e) => handleChange(e.target.value)}
-              spellCheck={false}
-              readOnly={isViewOnly || isFixMode}
-            />
+            {/* Show textarea for editable mode, or pre for readonly mode */}
+            {isViewOnly || isFixMode || isUpdateMode ? (
+              <pre 
+                ref={configContainerRef}
+                className="font-mono text-sm p-4 whitespace-pre-wrap"
+              >
+                {getFormattedConfig()}
+              </pre>
+            ) : (
+              <Textarea 
+                ref={textareaRef}
+                className="flex-1 font-mono text-sm min-h-[300px] border-0 resize-none"
+                value={config} 
+                onChange={(e) => handleChange(e.target.value)}
+                spellCheck={false}
+              />
+            )}
           </ScrollArea>
           
           {error && (
@@ -324,7 +407,20 @@ export function ConfigFileDialog({
         </div>
         
         <DialogFooter className="flex justify-end space-x-2">
-          {isFixMode ? (
+          {isUpdateMode ? (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!!error || !isModified}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Update Configuration
+              </Button>
+            </>
+          ) : isFixMode ? (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel

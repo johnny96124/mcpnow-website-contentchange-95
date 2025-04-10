@@ -10,7 +10,8 @@ interface ConfigDialogState {
   needsUpdate?: boolean;
   allowPathEdit?: boolean;
   isViewOnly?: boolean;
-  isFixMode?: boolean; // Added property for fix mode
+  isFixMode?: boolean;
+  isUpdateMode?: boolean; // Added property for update mode
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -21,7 +22,8 @@ export function useConfigDialog(mockJsonConfig: any) {
     configContent: "",
     allowPathEdit: false,
     isViewOnly: false,
-    isFixMode: false
+    isFixMode: false,
+    isUpdateMode: false
   });
   
   const openConfigDialog = (
@@ -31,7 +33,8 @@ export function useConfigDialog(mockJsonConfig: any) {
     needsUpdate?: boolean,
     allowPathEdit?: boolean,
     isViewOnly?: boolean,
-    isFixMode?: boolean
+    isFixMode?: boolean,
+    isUpdateMode?: boolean
   ) => {
     setConfigDialog({
       isOpen: true,
@@ -42,7 +45,8 @@ export function useConfigDialog(mockJsonConfig: any) {
       needsUpdate,
       allowPathEdit,
       isViewOnly,
-      isFixMode
+      isFixMode,
+      isUpdateMode
     });
   };
   
@@ -62,7 +66,8 @@ export function useConfigDialog(mockJsonConfig: any) {
       configContent: "",
       allowPathEdit: false,
       isViewOnly: false,
-      isFixMode: false
+      isFixMode: false,
+      isUpdateMode: false
     });
   };
   

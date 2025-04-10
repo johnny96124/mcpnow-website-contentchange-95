@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -9,7 +10,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md",
       className
     )}
     {...props}
@@ -77,3 +78,22 @@ const CardFooter = React.forwardRef<
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
+// Add global style for mcpnow highlight
+if (typeof document !== 'undefined') {
+  // Check if the style already exists
+  if (!document.getElementById('mcpnow-highlight-style')) {
+    const style = document.createElement('style');
+    style.id = 'mcpnow-highlight-style';
+    style.textContent = `
+      .mcpnow-highlight {
+        background-color: rgba(59, 130, 246, 0.1);
+        border-left: 2px solid #3b82f6;
+        padding-left: 8px;
+        display: inline-block;
+        width: 100%;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}

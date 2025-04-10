@@ -81,14 +81,20 @@ const Hosts = () => {
     }
   };
 
-  // New function to handle fixing config
-  const handleFixConfigDialog = (hostId: string) => {
+  // Updated to handle update config
+  const handleUpdateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
-    if (host && host.configPath) {
+    if (host) {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
       
-      openConfigDialog(hostId, host.configPath, profileEndpoint, true, false, false, true);
+      // For existing config path
+      if (host.configPath) {
+        openConfigDialog(hostId, host.configPath, profileEndpoint, true, false, false, false, true);
+      } else {
+        // For hosts without config path, create a new one
+        handleCreateConfig(hostId, profileId);
+      }
     }
   };
   
@@ -199,13 +205,14 @@ const Hosts = () => {
     return JSON.stringify(defaultConfig, null, 2);
   };
 
-  // Updated handler for fixing configs
-  const handleFixConfig = (config: string, configPath: string) => {
+  // Updated handler for fixing/updating configs
+  const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => 
         host.id === configDialog.hostId
           ? { 
               ...host, 
+              configPath,
               configStatus: 'configured',
               connectionStatus: 'connected'  // Update connection status when config is fixed
             }
@@ -216,7 +223,7 @@ const Hosts = () => {
     resetConfigDialog();
     
     toast({
-      title: "Configuration fixed",
+      title: configDialog.isFixMode ? "Configuration fixed" : "Configuration updated",
       description: "The configuration has been updated to match the profile.",
     });
   };
@@ -266,7 +273,7 @@ const Hosts = () => {
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
               onCreateConfig={handleCreateConfig}
-              onFixConfig={handleFixConfigDialog} // New prop for fixing configs
+              onFixConfig={handleUpdateConfigDialog} // Use the new update handler
             />
           ))}
           
@@ -360,12 +367,13 @@ const Hosts = () => {
         onOpenChange={setDialogOpen}
         configPath={configDialog.configPath}
         initialConfig={configDialog.configContent}
-        onSave={handleFixConfig}
+        onSave={handleUpdateConfig}
         profileEndpoint={configDialog.profileEndpoint}
         needsUpdate={configDialog.needsUpdate}
         allowPathEdit={configDialog.allowPathEdit}
         isViewOnly={configDialog.isViewOnly}
         isFixMode={configDialog.isFixMode}
+        isUpdateMode={configDialog.isUpdateMode} // New prop
       />
       
       <AddHostDialog 
