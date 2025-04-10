@@ -24,7 +24,7 @@ export const EmptyState = ({ searchQuery, onReset }: EmptyStateProps) => {
           onClick={onReset}
           className="text-primary hover:text-primary/80 underline underline-offset-4 text-sm font-medium transition-colors"
         >
-          Clear all filters
+          Clear search
         </button>
       </div>
     </div>

@@ -204,7 +204,6 @@ const Discovery = () => {
       );
     }
     
-    // Default to views
     return (
       <div className="flex items-center text-xs text-muted-foreground">
         <Eye className="h-3.5 w-3.5 mr-1" />
@@ -216,6 +215,7 @@ const Discovery = () => {
   const filteredServers = getFilteredServers();
   const visibleServers = filteredServers.slice(0, visibleItems);
   const hasMore = visibleServers.length < filteredServers.length;
+  const isSearching = searchQuery.trim().length > 0;
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -404,67 +404,71 @@ const Discovery = () => {
           </div>
         </div>
         
-        <Tabs 
-          defaultValue="all" 
-          className="w-full" 
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <div className="flex justify-between items-center border-b pb-1">
-            <TabsList className="bg-transparent p-0 h-9">
-              <TabsTrigger 
-                value="all" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-              >
-                All
-              </TabsTrigger>
-              <TabsTrigger 
-                value="official"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-              >
-                <CheckCircle className="h-4 w-4 mr-1" />
-                Official
-              </TabsTrigger>
-              <TabsTrigger 
-                value="community"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-              >
-                <Users className="h-4 w-4 mr-1" />
-                Community
-              </TabsTrigger>
-            </TabsList>
-            
-            {selectedCategory && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 text-xs"
-                onClick={() => setSelectedCategory(null)}
-              >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Clear filters
-              </Button>
-            )}
-          </div>
-        </Tabs>
-        
-        <div className="flex flex-wrap gap-2">
-          {allCategories.map(category => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              className={`
-                rounded-full text-xs px-3 h-7
-                ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-transparent'}
-              `}
-              onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+        {!isSearching && (
+          <>
+            <Tabs 
+              defaultValue="all" 
+              className="w-full" 
+              value={activeTab}
+              onValueChange={setActiveTab}
             >
-              <Tag className="h-3 w-3 mr-1" />
-              {category}
-            </Button>
-          ))}
-        </div>
+              <div className="flex justify-between items-center border-b pb-1">
+                <TabsList className="bg-transparent p-0 h-9">
+                  <TabsTrigger 
+                    value="all" 
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="official"
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Official
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="community"
+                    className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
+                  >
+                    <Users className="h-4 w-4 mr-1" />
+                    Community
+                  </TabsTrigger>
+                </TabsList>
+                
+                {selectedCategory && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 text-xs"
+                    onClick={() => setSelectedCategory(null)}
+                  >
+                    <X className="h-3.5 w-3.5 mr-1" />
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            </Tabs>
+            
+            <div className="flex flex-wrap gap-2">
+              {allCategories.map(category => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  size="sm"
+                  className={`
+                    rounded-full text-xs px-3 h-7
+                    ${selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-transparent'}
+                  `}
+                  onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                >
+                  <Tag className="h-3 w-3 mr-1" />
+                  {category}
+                </Button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
       
       <ScrollArea className="h-[calc(100vh-380px)]">
@@ -474,14 +478,15 @@ const Discovery = () => {
               {visibleServers.map(server => (
                 <Card 
                   key={server.id} 
-                  className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-800"
+                  className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
+                  onClick={() => handleViewDetails(server)}
                 >
+                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">
                       <div className="flex flex-col">
                         <CardTitle 
-                          className="text-lg font-semibold hover:text-blue-600 transition-colors cursor-pointer"
-                          onClick={() => handleViewDetails(server)}
+                          className="text-lg font-semibold text-foreground group-hover:text-blue-600 transition-colors"
                         >
                           {server.name}
                         </CardTitle>
@@ -531,7 +536,10 @@ const Discovery = () => {
                             "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" : 
                             "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"}
                         `}
-                        onClick={handleNavigateToServers}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNavigateToServers();
+                        }}
                         onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: true }))}
                         onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: false }))}
                       >
@@ -548,15 +556,24 @@ const Discovery = () => {
                         )}
                       </Button>
                     ) : isInstalling[server.id] ? (
-                      <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200 h-8">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        disabled 
+                        className="bg-blue-50 text-blue-600 border-blue-200 h-8"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
                         Installing...
                       </Button>
                     ) : (
                       <Button 
                         size="sm" 
-                        onClick={() => handleInstall(server.id)}
-                        className="bg-blue-600 hover:bg-blue-700 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInstall(server.id);
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 h-8 relative z-10"
                       >
                         <Download className="h-3.5 w-3.5 mr-1" />
                         Install
@@ -750,7 +767,10 @@ const Discovery = () => {
                         "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
                       }
                     `}
-                    onClick={handleNavigateToServers}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToServers();
+                    }}
                     onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: true }))}
                     onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: false }))}
                   >
@@ -773,7 +793,10 @@ const Discovery = () => {
                   </Button>
                 ) : (
                   <Button 
-                    onClick={() => handleInstall(selectedServer.id)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInstall(selectedServer.id);
+                    }}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Download className="h-4 w-4 mr-1" />
