@@ -48,7 +48,7 @@ const Hosts = () => {
     return profile ? profile.endpoint : null;
   };
 
-  // View config
+  // Updated to handle view mode
   const handleOpenConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
@@ -59,19 +59,9 @@ const Hosts = () => {
     } else {
       toast({
         title: "No config file",
-        description: "This host doesn't have a configuration file yet. Please configure the host first.",
+        description: "This host doesn't have a configuration file yet. Please update the configuration first.",
         variant: "destructive"
       });
-    }
-  };
-
-  // Initial configuration for newly discovered hosts
-  const handleCreateConfigDialog = (hostId: string) => {
-    const host = hostsList.find(h => h.id === hostId);
-    if (host) {
-      // For hosts without config path, create a new default path
-      const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-      openConfigDialog(hostId, defaultConfigPath, undefined, true, false, false, false, false, true);
     }
   };
 
@@ -146,7 +136,7 @@ const Hosts = () => {
               ...host, 
               configPath,
               configStatus: 'configured',
-              connectionStatus: configDialog.isNewHost ? 'disconnected' : 'connected'
+              connectionStatus: 'connected'  // Update connection status when config is fixed
             }
           : host
       ));
@@ -154,15 +144,10 @@ const Hosts = () => {
     
     resetConfigDialog();
     
-    const title = configDialog.isNewHost ? 
-      "Configuration created" : 
-      (configDialog.isUpdateMode ? "Configuration updated" : "Configuration saved");
-      
-    const description = configDialog.isNewHost ?
-      "The configuration has been created. Now you can select a profile to connect with." :
-      "The configuration has been updated.";
-    
-    toast({ title, description });
+    toast({
+      title: "Configuration updated",
+      description: "The configuration has been updated to match the profile.",
+    });
   };
 
   return (
@@ -209,7 +194,7 @@ const Hosts = () => {
               profileId={hostProfiles[host.id] || ''}
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
-              onCreateConfig={handleCreateConfigDialog}
+              onCreateConfig={handleUpdateConfigDialog} // Reuse update handler for create
               onFixConfig={handleUpdateConfigDialog}
             />
           ))}
@@ -264,7 +249,6 @@ const Hosts = () => {
         isViewOnly={configDialog.isViewOnly}
         isFixMode={configDialog.isFixMode}
         isUpdateMode={configDialog.isUpdateMode}
-        isNewHost={configDialog.isNewHost}
       />
       
       <AddHostDialog 

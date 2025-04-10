@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, Info, AlertCircle } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -14,7 +13,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface InstanceStatus {
   id: string;
@@ -34,12 +32,11 @@ interface HostCardProps {
     configStatus: 'configured' | 'misconfigured' | 'unknown';
     configPath?: string;
     profileId?: string;
-    isNew?: boolean;
   };
   profileId: string;
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
-  onCreateConfig: (hostId: string) => void;
+  onCreateConfig: (hostId: string, profileId: string) => void;
   onFixConfig: (hostId: string) => void;
 }
 
@@ -56,8 +53,6 @@ export function HostCard({
   const navigate = useNavigate();
   
   const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
-  const isNewlyDiscovered = host.configStatus === 'unknown';
-  const needsConfig = host.configStatus === 'misconfigured' || host.configStatus === 'unknown';
   
   const getProfileConnectionStatus = () => {
     if (!instanceStatuses.length) return 'disconnected';
@@ -82,17 +77,11 @@ export function HostCard({
         text: 'Correctly configured', 
         color: 'bg-green-100 text-green-800 border-green-200'
       };
-    } else if (host.configStatus === 'misconfigured') {
-      return { 
-        icon: <AlertCircle className="h-4 w-4 text-amber-500" />,
-        text: 'Needs configuration', 
-        color: 'bg-amber-100 text-amber-800 border-amber-200'
-      };
     } else {
       return { 
-        icon: <CircleMinus className="h-4 w-4 text-blue-500" />,
-        text: 'New host', 
-        color: 'bg-blue-100 text-blue-800 border-blue-200'
+        icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
+        text: 'No config', 
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
       };
     }
   };
@@ -218,13 +207,11 @@ export function HostCard({
   const instancesByDefinition = getInstancesByDefinition();
   const configStatusInfo = getConfigStatusInfo();
   
+  const needsConfig = host.configStatus === 'misconfigured' || host.configStatus === 'unknown';
+  
   return (
-    <Card className={cn("overflow-hidden flex flex-col h-[400px]", 
-      isNewlyDiscovered ? "border-blue-200 shadow-sm" : ""
-    )}>
-      <CardHeader className={cn("pb-2", 
-        isNewlyDiscovered ? "bg-blue-50/50" : "bg-muted/50"
-      )}>
+    <Card className="overflow-hidden flex flex-col h-[400px]">
+      <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {host.icon && <span className="text-xl">{host.icon}</span>}
@@ -255,96 +242,52 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
-        {isNewlyDiscovered && (
-          <Alert className="bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4" />
-            <AlertDescription className="text-blue-700">
-              New host discovered! Configure this host to start using it.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {!needsConfig && (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Associated Profile</label>
-            </div>
-            <Select
-              value={profileId || ""}
-              onValueChange={handleProfileChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a profile">
-                  {selectedProfile && (
-                    <div className="flex items-center gap-2">
-                      {!isHostDisconnected && (
-                        <StatusIndicator 
-                          status={
-                            isConnecting ? 'warning' :
-                            profileConnectionStatus === 'connected' ? 'active' : 
-                            profileConnectionStatus === 'warning' ? 'warning' : 
-                            'error'
-                          } 
-                        />
-                      )}
-                      <span>{selectedProfile.name}</span>
-                    </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {profiles.map(profile => (
-                  <SelectItem key={profile.id} value={profile.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{profile.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-                <SelectItem value="add-new-profile" className="text-primary font-medium">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Associated Profile</label>
+          </div>
+          <Select
+            value={profileId}
+            onValueChange={handleProfileChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a profile">
+                {selectedProfile && (
                   <div className="flex items-center gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    <span>Add New Profile</span>
+                    {!isHostDisconnected && (
+                      <StatusIndicator 
+                        status={
+                          isConnecting ? 'warning' :
+                          profileConnectionStatus === 'connected' ? 'active' : 
+                          profileConnectionStatus === 'warning' ? 'warning' : 
+                          'error'
+                        } 
+                      />
+                    )}
+                    <span>{selectedProfile.name}</span>
+                  </div>
+                )}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {profiles.map(profile => (
+                <SelectItem key={profile.id} value={profile.id}>
+                  <div className="flex items-center gap-2">
+                    <span>{profile.name}</span>
                   </div>
                 </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        
-        {needsConfig && (
-          <div className="flex flex-col gap-4">
-            <div className="border-2 border-dashed border-blue-200 rounded-lg p-6 bg-blue-50/50">
-              <div className="flex flex-col items-center text-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Settings2 className="h-6 w-6 text-blue-600" />
+              ))}
+              <SelectItem value="add-new-profile" className="text-primary font-medium">
+                <div className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  <span>Add New Profile</span>
                 </div>
-                <h3 className="text-lg font-medium">Configuration Required</h3>
-                <p className="text-muted-foreground">
-                  This host needs to be configured before you can connect it to a profile.
-                </p>
-                <Button 
-                  variant="default"
-                  onClick={() => onCreateConfig(host.id)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white mt-2"
-                >
-                  <Settings2 className="h-4 w-4 mr-2" />
-                  Configure Host
-                </Button>
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-medium">Configuration Steps:</h4>
-              <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground pl-1">
-                <li>Configure host settings <span className="text-blue-500 font-medium">(current step)</span></li>
-                <li>Select a profile to connect with <span className="text-muted-foreground">(after configuration)</span></li>
-                <li>Start using the host with connected servers</li>
-              </ol>
-            </div>
-          </div>
-        )}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         
-        {profileId && !needsConfig && (
+        {profileId && (
           <>
             {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
@@ -422,88 +365,38 @@ export function HostCard({
           </>
         )}
         
-        {!profileId && !needsConfig && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Associated Profile</label>
-            </div>
-            
-            <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
-              <p className="text-muted-foreground text-center">
-                This host is configured but not connected to any profile yet. 
-                Please select a profile to connect.
-              </p>
-            </div>
-            
-            <Select
-              value={profileId}
-              onValueChange={handleProfileChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a profile to connect" />
-              </SelectTrigger>
-              <SelectContent>
-                {profiles.map(profile => (
-                  <SelectItem key={profile.id} value={profile.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{profile.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-                <SelectItem value="add-new-profile" className="text-primary font-medium">
-                  <div className="flex items-center gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    <span>Add New Profile</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+        {!profileId && (
+          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
+            <p className="text-muted-foreground text-center">
+              Select a profile to view connection details
+            </p>
           </div>
         )}
       </CardContent>
       
-      {!needsConfig && <Separator className="mt-auto" />}
+      <Separator className="mt-auto" />
       
       <CardFooter className="mt-2">
         <div className="flex justify-end w-full">
-          {needsConfig ? (
-            <Button 
-              variant="default"
-              onClick={() => onCreateConfig(host.id)}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              <Settings2 className="h-4 w-4 mr-2" />
-              Configure Host
-            </Button>
-          ) : (
-            profileId ? (
-              host.configStatus === 'configured' ? (
-                <Button 
-                  variant="outline"
-                  onClick={() => onOpenConfigDialog(host.id)}
-                  disabled={!host.configPath}
-                >
-                  <FilePlus className="h-4 w-4 mr-2" />
-                  View Config
-                </Button>
-              ) : (
-                <Button 
-                  variant="default"
-                  onClick={() => onFixConfig(host.id)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Update Config
-                </Button>
-              )
-            ) : (
+          {profileId && (
+            host.configStatus === 'configured' ? (
               <Button 
                 variant="outline"
                 onClick={() => onOpenConfigDialog(host.id)}
                 disabled={!host.configPath}
+                className="flex items-center gap-2"
               >
-                <FilePlus className="h-4 w-4 mr-2" />
+                <FilePlus className="h-4 w-4" />
                 View Config
+              </Button>
+            ) : (
+              <Button 
+                variant="default"
+                onClick={() => onFixConfig(host.id)}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Update Config
               </Button>
             )
           )}
