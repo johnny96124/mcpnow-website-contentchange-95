@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -558,18 +557,6 @@ const Discovery = () => {
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       <EndpointLabel type={selectedServer.type} />
                       {selectedServer.isOfficial && <OfficialBadge />}
-                      
-                      <div className="flex items-center text-blue-100 text-sm">
-                        <Eye className="h-4 w-4 mr-1" />
-                        {formatNumber(selectedServer.views || 0)} views
-                      </div>
-                      
-                      {selectedServer.forks && (
-                        <div className="flex items-center text-blue-100 text-sm">
-                          <Users className="h-4 w-4 mr-1" />
-                          {formatNumber(selectedServer.forks)} forks
-                        </div>
-                      )}
                     </div>
                   </div>
                   
@@ -627,7 +614,6 @@ const Discovery = () => {
                       <div>
                         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Author</h3>
                         <div className="flex items-center">
-                          <StatusIndicator status="verified" />
                           <span className="font-medium text-gray-800 dark:text-gray-200">
                             {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
                           </span>
@@ -679,16 +665,16 @@ const Discovery = () => {
                         
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
                           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatNumber(selectedServer.forks || 48)}
+                            {formatNumber(selectedServer.downloads || 386)}
                           </div>
-                          <div className="text-xs text-gray-500">Forks</div>
+                          <div className="text-xs text-gray-500">Installs</div>
                         </div>
                         
                         <div className="bg-white dark:bg-gray-900 rounded-lg p-3">
                           <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">
                             {formatNumber(selectedServer.watches || 215)}
                           </div>
-                          <div className="text-xs text-gray-500">Watches</div>
+                          <div className="text-xs text-gray-500">Stars</div>
                         </div>
                       </div>
                     </div>
