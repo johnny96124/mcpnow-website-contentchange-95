@@ -1,12 +1,15 @@
+
 import { useState, useEffect, useRef } from "react";
-import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
+import { Save, AlertTriangle, RotateCw, RefreshCw, FileCode, Info, FolderOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -20,6 +23,7 @@ interface ConfigFileDialogProps {
   isViewOnly?: boolean;
   isFixMode?: boolean;
   isUpdateMode?: boolean;
+  isNewHost?: boolean;
 }
 
 export function ConfigFileDialog({
@@ -33,7 +37,8 @@ export function ConfigFileDialog({
   allowPathEdit = false,
   isViewOnly = false,
   isFixMode = false,
-  isUpdateMode = false
+  isUpdateMode = false,
+  isNewHost = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState(configPath);
@@ -42,6 +47,7 @@ export function ConfigFileDialog({
   const [pathModified, setPathModified] = useState(false);
   const [hasEndpointMismatch, setHasEndpointMismatch] = useState(false);
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
+  const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const configContainerRef = useRef<HTMLPreElement | null>(null);
@@ -97,8 +103,8 @@ export function ConfigFileDialog({
       onSave(config, path);
       
       toast({
-        title: isUpdateMode ? "Configuration updated" : "Configuration saved",
-        description: `Config file ${isUpdateMode ? "updated" : "saved"} to ${path}`,
+        title: isNewHost ? "Configuration created" : isUpdateMode ? "Configuration updated" : "Configuration saved",
+        description: `Config file ${isNewHost ? "created" : isUpdateMode ? "updated" : "saved"} at ${path}`,
       });
       
       setIsModified(false);
@@ -174,7 +180,7 @@ export function ConfigFileDialog({
   };
 
   const handleCloseDialog = (open: boolean) => {
-    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode) {
+    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode && !isNewHost) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
@@ -236,7 +242,7 @@ export function ConfigFileDialog({
         }
       };
       
-      if (isViewOnly || isFixMode || isUpdateMode) {
+      if (isViewOnly || isFixMode || isUpdateMode || isNewHost) {
         try {
           const parsed = JSON.parse(config);
           const formatted = JSON.stringify(parsed, null, 2);
@@ -247,20 +253,22 @@ export function ConfigFileDialog({
       }
     } catch (e) {
     }
-  }, [config, isViewOnly, isFixMode, isUpdateMode]);
+  }, [config, isViewOnly, isFixMode, isUpdateMode, isNewHost]);
 
   useEffect(() => {
-    if ((isFixMode || isUpdateMode) && open && hasEndpointMismatch) {
+    if ((isFixMode || isUpdateMode || isNewHost) && open && hasEndpointMismatch) {
       handleFixEndpoint();
-    } else if ((isFixMode || isUpdateMode) && open && needsUpdate) {
+    } else if ((isFixMode || isUpdateMode || isNewHost) && open && needsUpdate) {
       resetJson();
     }
-  }, [isFixMode, isUpdateMode, open, needsUpdate]);
+  }, [isFixMode, isUpdateMode, isNewHost, open, needsUpdate]);
 
-  const dialogTitle = isUpdateMode ? "Update Configuration" : 
+  let dialogTitle = isNewHost ? "New Host Configuration" : 
+    isUpdateMode ? "Update Configuration" : 
     (isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration"));
     
-  const dialogDescription = isUpdateMode ? "Update your configuration to match your selected profile" :
+  let dialogDescription = isNewHost ? "Create a configuration file for this host" :
+    isUpdateMode ? "Update your configuration to match your selected profile" :
     (isFixMode ? "Fix your configuration to match your selected profile" :
     (isViewOnly ? "View configuration file details" : "Edit configuration file details"));
 
@@ -268,24 +276,43 @@ export function ConfigFileDialog({
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            {isNewHost && <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">New Host</Badge>}
+          </div>
           <DialogDescription>
             {dialogDescription}
           </DialogDescription>
         </DialogHeader>
         
+        {isNewHost && (
+          <Alert className="bg-blue-50 border-blue-200 mt-2">
+            <Info className="h-4 w-4 text-blue-700" />
+            <AlertTitle className="text-blue-700">New Host Found</AlertTitle>
+            <AlertDescription className="text-blue-700">
+              We need to create a configuration file for this host before you can use it. 
+              This file will contain the settings needed to connect to the host.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="flex-1 flex flex-col space-y-3 mt-2">
           <div className="space-y-2">
-            <Label htmlFor="configPath">Configuration File Path</Label>
+            <div className="flex items-center gap-2">
+              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="configPath" className="flex items-center gap-1">
+                Configuration File Path
+              </Label>
+            </div>
             <Textarea
               id="configPath"
               value={path}
               onChange={(e) => handlePathEdit(e.target.value)}
               rows={1}
               className="font-mono text-sm"
-              readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode}
+              readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode || isNewHost}
             />
-            {allowPathEdit && !isViewOnly && !isFixMode && !isUpdateMode && (
+            {allowPathEdit && !isViewOnly && !isFixMode && !isUpdateMode && !isNewHost && (
               <p className="text-xs text-muted-foreground">
                 You can modify the path where this configuration will be saved.
               </p>
@@ -293,8 +320,13 @@ export function ConfigFileDialog({
           </div>
 
           <div className="mb-2">
-            <Label htmlFor="configDetails" className="text-sm font-medium">Config Details</Label>
-            {!isViewOnly && !isFixMode && !isUpdateMode && (
+            <div className="flex items-center gap-2">
+              <FileCode className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="configDetails" className="flex items-center gap-1">
+                Configuration Details
+              </Label>
+            </div>
+            {!isViewOnly && !isFixMode && !isUpdateMode && !isNewHost && (
               <div className="flex justify-between items-center mt-1 mb-2">
                 <div className="text-sm text-muted-foreground">
                   Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
@@ -308,10 +340,13 @@ export function ConfigFileDialog({
           </div>
           
           <ScrollArea className="h-[300px] border rounded-md">
-            {isViewOnly || isFixMode || isUpdateMode ? (
+            {isViewOnly || isFixMode || isUpdateMode || isNewHost ? (
               <pre 
                 ref={configContainerRef}
-                className="font-mono text-sm p-4 whitespace-pre-wrap"
+                className={cn(
+                  "font-mono text-sm p-4 whitespace-pre-wrap",
+                  isNewHost && "mcpnow-highlight-container"
+                )}
               >
                 {getFormattedConfig()}
               </pre>
@@ -325,6 +360,15 @@ export function ConfigFileDialog({
               />
             )}
           </ScrollArea>
+
+          {isNewHost && (
+            <div className="text-sm text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <span className="p-1 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center h-5 w-5 text-xs font-bold">i</span>
+                The highlighted section shows the configuration we're creating for this host
+              </p>
+            </div>
+          )}
           
           {error && !isViewOnly && (
             <div className="text-destructive text-sm bg-destructive/10 p-2 rounded border border-destructive/20">
@@ -342,8 +386,30 @@ export function ConfigFileDialog({
           </Alert>
         )}
         
+        {isNewHost && (
+          <Alert className="bg-blue-50 border-blue-200 mt-2">
+            <AlertDescription className="text-blue-700 flex flex-col space-y-1">
+              <p>This configuration will enable your host to connect with MCP-compatible applications.</p>
+              <p>After creating this configuration, you'll need to select a profile to use with this host.</p>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <DialogFooter className="flex justify-end space-x-2">
-          {isUpdateMode ? (
+          {isNewHost ? (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!!error}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Create Configuration
+              </Button>
+            </>
+          ) : isUpdateMode ? (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
