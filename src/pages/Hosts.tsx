@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, Search, RefreshCw, FileText, Info } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -13,7 +13,6 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -33,8 +32,6 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [showNewHostAlert, setShowNewHostAlert] = useState(false);
-  const [newHostId, setNewHostId] = useState<string | null>(null);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -51,7 +48,7 @@ const Hosts = () => {
     return profile ? profile.endpoint : null;
   };
 
-  // View configuration
+  // Updated to handle view mode
   const handleOpenConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
@@ -62,39 +59,13 @@ const Hosts = () => {
     } else {
       toast({
         title: "No config file",
-        description: "This host doesn't have a configuration file yet. Please create a configuration first.",
+        description: "This host doesn't have a configuration file yet. Please update the configuration first.",
         variant: "destructive"
       });
     }
   };
 
-  // Create a new configuration
-  const handleCreateConfigDialog = (hostId: string, profileId?: string) => {
-    const host = hostsList.find(h => h.id === hostId);
-    if (host) {
-      // Determine which profile to use (either passed in or from hostProfiles)
-      const selectedProfileId = profileId || hostProfiles[host.id] || '';
-      const profileEndpoint = getProfileEndpoint(selectedProfileId);
-      
-      // Generate a default config path based on host name
-      const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-      
-      // Open in create mode
-      openConfigDialog(
-        hostId, 
-        defaultConfigPath, 
-        profileEndpoint, 
-        true,  // needs update 
-        true,  // allow path edit
-        false, // not view only
-        false, // not fix mode
-        false, // not update mode
-        true   // create mode - new parameter
-      );
-    }
-  };
-
-  // Fix/update an existing configuration
+  // Updated to handle update config - consolidates both create and fix operations
   const handleUpdateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -103,30 +74,11 @@ const Hosts = () => {
       
       // For existing config path
       if (host.configPath) {
-        openConfigDialog(
-          hostId, 
-          host.configPath, 
-          profileEndpoint, 
-          true,  // needs update
-          false, // don't allow path edit 
-          false, // not view only
-          false, // not fix mode
-          true   // update mode
-        );
+        openConfigDialog(hostId, host.configPath, profileEndpoint, true, false, false, false, true);
       } else {
         // For hosts without config path, create a new default path
         const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-        openConfigDialog(
-          hostId, 
-          defaultConfigPath, 
-          profileEndpoint, 
-          true,  // needs update
-          true,  // allow path edit
-          false, // not view only
-          false, // not fix mode
-          true,  // update mode
-          false  // not create mode
-        );
+        openConfigDialog(hostId, defaultConfigPath, profileEndpoint, true, false, false, false, true);
       }
     }
   };
@@ -135,9 +87,9 @@ const Hosts = () => {
     setIsScanning(true);
     
     setTimeout(() => {
-      const newId = `host-${Date.now()}`;
+      const newHostId = `host-${Date.now()}`;
       const newHost: Host = {
-        id: newId,
+        id: newHostId,
         name: "Local Host",
         icon: "💻",
         connectionStatus: "disconnected",
@@ -146,8 +98,6 @@ const Hosts = () => {
       
       setHostsList(prevHosts => [...prevHosts, newHost]);
       setIsScanning(false);
-      setNewHostId(newId);
-      setShowNewHostAlert(true);
       
       toast({
         title: "Host discovered",
@@ -170,8 +120,6 @@ const Hosts = () => {
     };
     
     setHostsList([...hostsList, host]);
-    setNewHostId(id);
-    setShowNewHostAlert(true);
     
     toast({
       title: "Host Added",
@@ -179,7 +127,7 @@ const Hosts = () => {
     });
   };
 
-  // Handler for updating/creating configs
+  // Updated handler for updating configs
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => 
@@ -192,27 +140,14 @@ const Hosts = () => {
             }
           : host
       ));
-      
-      // If this was for a newly discovered host, automatically show the host profile selector guidance
-      if (newHostId === configDialog.hostId) {
-        setTimeout(() => {
-          setShowNewHostAlert(false);
-          setNewHostId(null);
-          
-          toast({
-            title: "Configuration complete",
-            description: "Now you can select a profile for this host to connect to.",
-          });
-        }, 500);
-      }
     }
     
     resetConfigDialog();
-  };
-  
-  const dismissNewHostAlert = () => {
-    setShowNewHostAlert(false);
-    setNewHostId(null);
+    
+    toast({
+      title: "Configuration updated",
+      description: "The configuration has been updated to match the profile.",
+    });
   };
 
   return (
@@ -245,25 +180,6 @@ const Hosts = () => {
         </div>
       </div>
       
-      {showNewHostAlert && newHostId && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertTitle className="text-blue-700">New Host Discovered</AlertTitle>
-          <AlertDescription className="text-blue-600 flex items-center justify-between">
-            <span>Configure this host to connect it with your profiles</span>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-blue-700 border-blue-300 hover:bg-blue-100"
-              onClick={() => handleCreateConfigDialog(newHostId)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Configure Host
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <HostSearch 
         searchQuery={searchQuery} 
         onSearchChange={setSearchQuery} 
@@ -278,7 +194,7 @@ const Hosts = () => {
               profileId={hostProfiles[host.id] || ''}
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
-              onCreateConfig={handleCreateConfigDialog}
+              onCreateConfig={handleUpdateConfigDialog} // Reuse update handler for create
               onFixConfig={handleUpdateConfigDialog}
             />
           ))}
@@ -333,7 +249,6 @@ const Hosts = () => {
         isViewOnly={configDialog.isViewOnly}
         isFixMode={configDialog.isFixMode}
         isUpdateMode={configDialog.isUpdateMode}
-        isCreateMode={configDialog.isCreateMode}
       />
       
       <AddHostDialog 

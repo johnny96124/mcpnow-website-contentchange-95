@@ -1,14 +1,12 @@
-
 import { useState, useEffect, useRef } from "react";
-import { Save, AlertTriangle, RotateCw, RefreshCw, Settings, Check, Info } from "lucide-react";
+import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -22,7 +20,6 @@ interface ConfigFileDialogProps {
   isViewOnly?: boolean;
   isFixMode?: boolean;
   isUpdateMode?: boolean;
-  isCreateMode?: boolean;
 }
 
 export function ConfigFileDialog({
@@ -36,8 +33,7 @@ export function ConfigFileDialog({
   allowPathEdit = false,
   isViewOnly = false,
   isFixMode = false,
-  isUpdateMode = false,
-  isCreateMode = false
+  isUpdateMode = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState(configPath);
@@ -100,17 +96,9 @@ export function ConfigFileDialog({
       setError(null);
       onSave(config, path);
       
-      const successMessage = isCreateMode ? "Configuration created" : 
-                             isUpdateMode ? "Configuration updated" : 
-                             "Configuration saved";
-
-      const successDesc = isCreateMode ? `New config file created at ${path}` :
-                          isUpdateMode ? `Config file updated at ${path}` :
-                          `Config file saved to ${path}`;
-      
       toast({
-        title: successMessage,
-        description: successDesc,
+        title: isUpdateMode ? "Configuration updated" : "Configuration saved",
+        description: `Config file ${isUpdateMode ? "updated" : "saved"} to ${path}`,
       });
       
       setIsModified(false);
@@ -176,14 +164,17 @@ export function ConfigFileDialog({
   const getFormattedConfig = () => {
     try {
       const parsed = JSON.parse(config);
-      return JSON.stringify(parsed, null, 2);
+      
+      const formatted = JSON.stringify(parsed, null, 2);
+      
+      return formatted;
     } catch (e) {
       return config;
     }
   };
 
   const handleCloseDialog = (open: boolean) => {
-    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode && !isCreateMode) {
+    if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
         onOpenChange(false);
       }
@@ -233,11 +224,10 @@ export function ConfigFileDialog({
           
           let formatted = JSON.stringify(parsed, null, 2);
           
-          // Highlight the mcpnow section with a special class
           const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
           
           formatted = formatted.replace(mcpnowRegex, (match) => {
-            return `<span class="mcpnow-highlight bg-blue-50 border-l-2 border-blue-500 pl-2 block">${match}</span>`;
+            return `<span class="mcpnow-highlight">${match}</span>`;
           });
           
           return formatted;
@@ -246,7 +236,7 @@ export function ConfigFileDialog({
         }
       };
       
-      if (isViewOnly || isFixMode || isUpdateMode || isCreateMode) {
+      if (isViewOnly || isFixMode || isUpdateMode) {
         try {
           const parsed = JSON.parse(config);
           const formatted = JSON.stringify(parsed, null, 2);
@@ -257,34 +247,26 @@ export function ConfigFileDialog({
       }
     } catch (e) {
     }
-  }, [config, isViewOnly, isFixMode, isUpdateMode, isCreateMode]);
+  }, [config, isViewOnly, isFixMode, isUpdateMode]);
 
   useEffect(() => {
-    if ((isFixMode || isUpdateMode || isCreateMode) && open) {
-      if (hasEndpointMismatch) {
-        handleFixEndpoint();
-      } else if (needsUpdate || isCreateMode) {
-        resetJson();
-      }
+    if ((isFixMode || isUpdateMode) && open && hasEndpointMismatch) {
+      handleFixEndpoint();
+    } else if ((isFixMode || isUpdateMode) && open && needsUpdate) {
+      resetJson();
     }
-  }, [isFixMode, isUpdateMode, isCreateMode, open, needsUpdate, hasEndpointMismatch]);
+  }, [isFixMode, isUpdateMode, open, needsUpdate]);
 
-  const dialogTitle = isCreateMode ? "Create Host Configuration" :
-                      isUpdateMode ? "Update Configuration" :
-                      isFixMode ? "Fix Configuration" :
-                      isViewOnly ? "View Configuration" : "Edit Configuration";
+  const dialogTitle = isUpdateMode ? "Update Configuration" : 
+    (isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration"));
     
-  const dialogDescription = isCreateMode ? "Create a new configuration file for your host" :
-                           isUpdateMode ? "Update your configuration to match your selected profile" :
-                           isFixMode ? "Fix your configuration to match your selected profile" :
-                           isViewOnly ? "View configuration file details" :
-                           "Edit configuration file details";
-
-  const showConfigurationCreatedAlert = isCreateMode || isUpdateMode || isFixMode;
+  const dialogDescription = isUpdateMode ? "Update your configuration to match your selected profile" :
+    (isFixMode ? "Fix your configuration to match your selected profile" :
+    (isViewOnly ? "View configuration file details" : "Edit configuration file details"));
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
-      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
@@ -292,44 +274,18 @@ export function ConfigFileDialog({
           </DialogDescription>
         </DialogHeader>
         
-        {isCreateMode && (
-          <Alert variant="default" className="bg-blue-50 border-blue-200 mb-4">
-            <Info className="h-4 w-4 text-blue-500" />
-            <AlertTitle className="text-blue-700">Creating Host Configuration</AlertTitle>
-            <AlertDescription className="text-blue-600">
-              We'll create a configuration file for your host that will allow it to connect to your profiles.
-            </AlertDescription>
-          </Alert>
-        )}
-        
         <div className="flex-1 flex flex-col space-y-3 mt-2">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="configPath" className="text-sm font-medium">Configuration File Path</Label>
-              {isCreateMode && (
-                <div className="text-xs text-blue-600 flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  We recommend keeping the default path
-                </div>
-              )}
-            </div>
-            
-            {isCreateMode || isUpdateMode ? (
-              <div className="bg-gray-50 border rounded-md px-3 py-2">
-                <div className="font-mono text-sm break-all">{path}</div>
-              </div>
-            ) : (
-              <Textarea
-                id="configPath"
-                value={path}
-                onChange={(e) => handlePathEdit(e.target.value)}
-                rows={1}
-                className="font-mono text-sm"
-                readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode}
-              />
-            )}
-            
-            {allowPathEdit && !isViewOnly && !isFixMode && !isUpdateMode && !isCreateMode && (
+            <Label htmlFor="configPath">Configuration File Path</Label>
+            <Textarea
+              id="configPath"
+              value={path}
+              onChange={(e) => handlePathEdit(e.target.value)}
+              rows={1}
+              className="font-mono text-sm"
+              readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode}
+            />
+            {allowPathEdit && !isViewOnly && !isFixMode && !isUpdateMode && (
               <p className="text-xs text-muted-foreground">
                 You can modify the path where this configuration will be saved.
               </p>
@@ -337,27 +293,22 @@ export function ConfigFileDialog({
           </div>
 
           <div className="mb-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="configDetails" className="text-sm font-medium">Configuration Details</Label>
-              
-              {!isViewOnly && !isFixMode && !isUpdateMode && !isCreateMode && (
+            <Label htmlFor="configDetails" className="text-sm font-medium">Config Details</Label>
+            {!isViewOnly && !isFixMode && !isUpdateMode && (
+              <div className="flex justify-between items-center mt-1 mb-2">
+                <div className="text-sm text-muted-foreground">
+                  Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
+                </div>
                 <Button variant="outline" size="sm" onClick={resetJson}>
                   <RotateCw className="h-4 w-4 mr-2" />
-                  Reset to Default
+                  Reset JSON
                 </Button>
-              )}
-            </div>
-            
-            {isCreateMode && (
-              <p className="text-sm text-muted-foreground mt-1">
-                This is the default MCP configuration. The <span className="font-medium text-blue-600">mcpnow</span> section 
-                is highlighted and contains the important settings.
-              </p>
+              </div>
             )}
           </div>
           
           <ScrollArea className="h-[300px] border rounded-md">
-            {isViewOnly || isFixMode || isUpdateMode || isCreateMode ? (
+            {isViewOnly || isFixMode || isUpdateMode ? (
               <pre 
                 ref={configContainerRef}
                 className="font-mono text-sm p-4 whitespace-pre-wrap"
@@ -382,37 +333,17 @@ export function ConfigFileDialog({
           )}
         </div>
         
-        {showConfigurationCreatedAlert && (
-          <Alert className={isCreateMode ? "bg-green-50 border-green-200 mt-2" : "bg-blue-50 border-blue-200 mt-2"}>
-            {isCreateMode ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Info className="h-4 w-4 text-blue-500" />
-            )}
-            <AlertDescription className={isCreateMode ? "text-green-700" : "text-blue-700"}>
-              {isCreateMode 
-                ? "This configuration will be created automatically. Click 'Create Configuration' to proceed."
-                : "We'll automatically update your configuration to match the selected profile. Click 'Update Configuration' when ready."}
+        {(isFixMode || isUpdateMode) && (
+          <Alert className="bg-blue-50 border-blue-200 mt-2">
+            <AlertDescription className="text-blue-700">
+              We'll automatically update your configuration to match the selected profile. 
+              Click "{isUpdateMode ? 'Update' : 'Fix'} Configuration" when ready.
             </AlertDescription>
           </Alert>
         )}
         
         <DialogFooter className="flex justify-end space-x-2">
-          {isCreateMode ? (
-            <>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={!!error}
-                className="bg-green-500 hover:bg-green-600 text-white"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Create Configuration
-              </Button>
-            </>
-          ) : isUpdateMode ? (
+          {isUpdateMode ? (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
@@ -422,7 +353,6 @@ export function ConfigFileDialog({
                 disabled={!!error || !isModified}
                 className="bg-blue-500 hover:bg-blue-600 text-white"
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
                 Update Configuration
               </Button>
             </>
@@ -431,12 +361,7 @@ export function ConfigFileDialog({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleSave} 
-                disabled={!!error || !isModified}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                <Settings className="mr-2 h-4 w-4" />
+              <Button onClick={handleSave} disabled={!!error || !isModified}>
                 Fix Configuration
               </Button>
             </>
