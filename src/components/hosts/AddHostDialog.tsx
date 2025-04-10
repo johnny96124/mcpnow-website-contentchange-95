@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,7 +21,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConnectionStatus } from "@/data/mockData";
 
 const hostSchema = z.object({
@@ -40,7 +38,7 @@ interface AddHostDialogProps {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured" | "unknown";
+    configStatus: "configured" | "misconfigured";
     connectionStatus: ConnectionStatus;
   }) => void;
 }
@@ -60,8 +58,8 @@ export function AddHostDialog({ open, onOpenChange, onAddHost }: AddHostDialogPr
       name: values.name,
       configPath: values.configPath || undefined,
       icon: values.icon || undefined,
-      configStatus: "unknown",
-      connectionStatus: "unknown",
+      configStatus: "misconfigured",
+      connectionStatus: "disconnected",
     });
     
     form.reset();

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -224,10 +225,11 @@ export function ConfigFileDialog({
           
           let formatted = JSON.stringify(parsed, null, 2);
           
-          const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
+          // Updated regex to be more specific to mcpnow section
+          const mcpnowRegex = /("mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*})/gs;
           
           formatted = formatted.replace(mcpnowRegex, (match) => {
-            return `<span class="mcpnow-highlight">${match}</span>`;
+            return `<span class="text-blue-600 font-semibold bg-blue-50 border-l-2 border-blue-400 pl-1">${match}</span>`;
           });
           
           return formatted;
@@ -241,11 +243,18 @@ export function ConfigFileDialog({
           const parsed = JSON.parse(config);
           const formatted = JSON.stringify(parsed, null, 2);
           container.innerHTML = highlightMcpNowSection(formatted);
+          
+          // Add styling to pre element for better code display
+          container.style.fontFamily = "monospace";
+          container.style.whiteSpace = "pre-wrap";
+          container.style.fontSize = "0.875rem";
+          container.style.lineHeight = "1.5";
         } catch (e) {
           container.textContent = config;
         }
       }
     } catch (e) {
+      // Silent error handling
     }
   }, [config, isViewOnly, isFixMode, isUpdateMode]);
 
@@ -266,7 +275,7 @@ export function ConfigFileDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[650px]">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
@@ -307,18 +316,18 @@ export function ConfigFileDialog({
             )}
           </div>
           
-          <ScrollArea className="h-[300px] border rounded-md">
+          <ScrollArea className="h-[350px] border rounded-md">
             {isViewOnly || isFixMode || isUpdateMode ? (
               <pre 
                 ref={configContainerRef}
-                className="font-mono text-sm p-4 whitespace-pre-wrap"
+                className="font-mono text-sm p-4 whitespace-pre-wrap overflow-x-auto"
               >
                 {getFormattedConfig()}
               </pre>
             ) : (
               <Textarea 
                 ref={textareaRef}
-                className="flex-1 font-mono text-sm min-h-[300px] border-0 resize-none"
+                className="flex-1 font-mono text-sm min-h-[350px] border-0 resize-none"
                 value={config} 
                 onChange={(e) => handleChange(e.target.value)}
                 spellCheck={false}
