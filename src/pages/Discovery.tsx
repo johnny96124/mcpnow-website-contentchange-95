@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -30,7 +29,7 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition } from "@/data/mockData";
+import { discoveryItems, ServerDefinition, profiles } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
@@ -51,10 +50,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
+import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
+import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 
-const ITEMS_PER_PAGE = 12; // Increased to show more items initially
+const ITEMS_PER_PAGE = 12;
 
-// Extended to have more variety in the data for presentation
 interface EnhancedServerDefinition extends ServerDefinition {
   views?: number;
   forks?: number;
@@ -71,7 +71,6 @@ const extendedItems: EnhancedServerDefinition[] = [
     updated: "2025-03-15",
     author: item.author || "API Team"
   })),
-  // Add trending items with higher view counts and recent updates
   ...discoveryItems.map((item, index) => ({
     ...item,
     id: `trending-${item.id}-${index}`,
@@ -84,7 +83,6 @@ const extendedItems: EnhancedServerDefinition[] = [
     watches: Math.floor(Math.random() * 1000) + 200,
     author: item.author || "API Team"
   })),
-  // Add community items with varied statistics
   ...discoveryItems.map((item, index) => ({
     ...item,
     id: `community-${item.id}-${index}`,
@@ -123,15 +121,17 @@ const Discovery = () => {
   const [allCategories, setAllCategories] = useState<string[]>(mockCategories);
   const [sortOption, setSortOption] = useState("popular");
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
-  
-  // New states for the AddInstanceDialog
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
-  
+  const [addToProfileOpen, setAddToProfileOpen] = useState(false);
+  const [hostConfigGuideOpen, setHostConfigGuideOpen] = useState(false);
+  const [selectedInstanceName, setSelectedInstanceName] = useState("");
+  const [selectedProfileName, setSelectedProfileName] = useState("");
+
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -139,7 +139,6 @@ const Discovery = () => {
     setVisibleItems(ITEMS_PER_PAGE);
   }, [searchQuery, selectedCategory, activeTab]);
 
-  // Filter and sort servers based on user selections
   const getFilteredServers = () => {
     let filtered = extendedItems.filter(server => 
       (searchQuery === "" || 
@@ -152,15 +151,12 @@ const Discovery = () => {
       )
     );
 
-    // Filter by tab selection
     if (activeTab === "official") {
       filtered = filtered.filter(server => server.isOfficial);
     } else if (activeTab === "community") {
       filtered = filtered.filter(server => !server.isOfficial);
     }
-    // No filtering for "all" tab
 
-    // Sort based on selected option
     if (sortOption === "popular") {
       filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
     } else if (sortOption === "recent") {
@@ -218,7 +214,6 @@ const Discovery = () => {
     setIsDialogOpen(true);
   };
 
-  // Modified handleInstall to open the AddInstanceDialog after installation
   const handleInstall = (serverId: string) => {
     const server = extendedItems.find(item => item.id === serverId);
     if (!server) return;
@@ -230,7 +225,6 @@ const Discovery = () => {
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
       setJustInstalledServerId(serverId);
       
-      // Save the installed server definition to open dialog later
       setSelectedDefinition(server);
       
       toast({
@@ -238,12 +232,10 @@ const Discovery = () => {
         description: `${server.name} has been successfully installed.`,
       });
 
-      // Open the AddInstanceDialog with the newly installed server
       setAddInstanceOpen(true);
     }, 1500);
   };
 
-  // Handler for instance creation
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
     
@@ -253,9 +245,30 @@ const Discovery = () => {
     });
     
     setAddInstanceOpen(false);
+    setSelectedInstanceName(data.name);
     
-    // Navigate to servers page after instance creation
-    navigate("/servers");
+    setTimeout(() => {
+      setAddToProfileOpen(true);
+    }, 300);
+  };
+
+  const handleAddToProfile = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    
+    if (profile) {
+      setSelectedProfileName(profile.name);
+      
+      toast({
+        title: "Added to Profile",
+        description: `Instance has been added to ${profile.name}`,
+      });
+      
+      setAddToProfileOpen(false);
+      
+      setTimeout(() => {
+        setHostConfigGuideOpen(true);
+      }, 300);
+    }
   };
 
   const handleNavigateToServers = () => {
@@ -286,7 +299,6 @@ const Discovery = () => {
 
   return (
     <div className="animate-fade-in">
-      {/* Hero Section */}
       <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
         <div className="max-w-3xl relative z-10">
           <h1 className="text-3xl font-bold mb-2">All Server Definitions</h1>
@@ -307,7 +319,6 @@ const Discovery = () => {
           </div>
         </div>
         
-        {/* Abstract decoration */}
         <div className="absolute right-8 top-1/2 transform -translate-y-1/2 opacity-10">
           <div className="w-64 h-64 rounded-full border-4 border-white absolute -right-16 -top-16"></div>
           <div className="w-32 h-32 rounded-full border-4 border-white absolute right-24 top-8"></div>
@@ -315,7 +326,6 @@ const Discovery = () => {
         </div>
       </div>
       
-      {/* Filters Section */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex-1 min-w-[280px]">
@@ -388,7 +398,6 @@ const Discovery = () => {
           </div>
         </Tabs>
         
-        {/* Category chips */}
         <div className="flex flex-wrap gap-2">
           {allCategories.map(category => (
             <Button
@@ -540,7 +549,6 @@ const Discovery = () => {
         )}
       </ScrollArea>
       
-      {/* Detail Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
@@ -745,13 +753,25 @@ const Discovery = () => {
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Add Instance Dialog */}
+      
       <AddInstanceDialog
         open={addInstanceOpen}
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
+      />
+      
+      <AddToProfileDialog
+        open={addToProfileOpen}
+        onOpenChange={setAddToProfileOpen}
+        instanceName={selectedInstanceName}
+        onAddToProfile={handleAddToProfile}
+      />
+      
+      <HostConfigGuideDialog
+        open={hostConfigGuideOpen}
+        onOpenChange={setHostConfigGuideOpen}
+        profileName={selectedProfileName}
       />
     </div>
   );
