@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface EditServerDialogProps {
   open: boolean;
@@ -68,7 +68,6 @@ export function EditServerDialog({
     },
   });
   
-  // Reset form when server definition changes
   useEffect(() => {
     if (!serverDefinition) return;
     
@@ -97,16 +96,14 @@ export function EditServerDialog({
     newEnvVars[index][field] = value;
     setEnvVars(newEnvVars);
     
-    // Check for duplicate keys
     if (field === 'key') {
       const keyCount = newEnvVars.filter(item => item.key === value && item.key !== "").length;
       setEnvKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
     }
     
-    // Update the form value
     const envObject: Record<string, string> = {};
     newEnvVars.forEach(item => {
-      if (item.key.trim()) { // Only add if key is not empty
+      if (item.key.trim()) {
         envObject[item.key] = item.value;
       }
     });
@@ -118,16 +115,14 @@ export function EditServerDialog({
     newHeaders[index][field] = value;
     setHttpHeaders(newHeaders);
     
-    // Check for duplicate keys
     if (field === 'key') {
       const keyCount = newHeaders.filter(item => item.key === value && item.key !== "").length;
       setHeaderKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
     }
     
-    // Update the form value
     const headerObject: Record<string, string> = {};
     newHeaders.forEach(item => {
-      if (item.key.trim()) { // Only add if key is not empty
+      if (item.key.trim()) {
         headerObject[item.key] = item.value;
       }
     });
@@ -139,7 +134,6 @@ export function EditServerDialog({
     newEnvVars.splice(index, 1);
     setEnvVars(newEnvVars);
     
-    // Update the form value
     const envObject: Record<string, string> = {};
     newEnvVars.forEach(item => {
       if (item.key.trim()) {
@@ -155,7 +149,6 @@ export function EditServerDialog({
     newHeaders.splice(index, 1);
     setHttpHeaders(newHeaders);
     
-    // Update the form value
     const headerObject: Record<string, string> = {};
     newHeaders.forEach(item => {
       if (item.key.trim()) {
@@ -191,9 +184,7 @@ export function EditServerDialog({
   };
   
   const onSubmit = (formData: EditServerFormValues) => {
-    // Validate required fields based on server type
     if (!validateRequiredFields()) {
-      // Don't proceed if validation fails
       return;
     }
 
@@ -206,7 +197,14 @@ export function EditServerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md overflow-y-auto max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Edit Server: {serverDefinition.name}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Edit Server: {serverDefinition.name}
+            {isCustomServer && (
+              <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md ml-2">
+                Custom
+              </Badge>
+            )}
+          </DialogTitle>
           <DialogDescription>
             Modify the server configuration parameters
           </DialogDescription>
