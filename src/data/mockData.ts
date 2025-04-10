@@ -1,6 +1,6 @@
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
-export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured';
 
 export interface ServerDefinition {
   id: string;
@@ -47,7 +47,7 @@ export interface Host {
   id: string;
   name: string;
   profileId?: string;
-  configStatus: 'configured' | 'misconfigured' | 'unknown';
+  configStatus: 'configured' | 'misconfigured';
   connectionStatus: ConnectionStatus;
   configPath?: string;
   icon?: string;
@@ -319,8 +319,8 @@ export const hosts: Host[] = [
     id: 'windsurf',
     name: 'Windsurf',
     profileId: 'database-ops',
-    configStatus: 'unknown',
-    connectionStatus: 'unknown',
+    configStatus: 'misconfigured',
+    connectionStatus: 'disconnected',
     configPath: '/Users/user/.windsurf/config',
     icon: '🏄'
   },

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -28,8 +29,8 @@ interface HostCardProps {
     id: string;
     name: string;
     icon?: string;
-    connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown' | 'connecting';
-    configStatus: 'configured' | 'misconfigured' | 'unknown';
+    connectionStatus: 'connected' | 'disconnected' | 'misconfigured';
+    configStatus: 'configured' | 'misconfigured';
     configPath?: string;
     profileId?: string;
   };
@@ -52,7 +53,7 @@ export function HostCard({
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
   const navigate = useNavigate();
   
-  const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
+  const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'misconfigured';
   
   const getProfileConnectionStatus = () => {
     if (!instanceStatuses.length) return 'disconnected';
@@ -93,7 +94,10 @@ export function HostCard({
       if (profile) {
         setIsConnecting(true);
         
-        const initialStatuses: InstanceStatus[] = profile.instances
+        // Get actual instances from the profile in mockData
+        const profileInstanceIds = profile.instances;
+        
+        const initialStatuses: InstanceStatus[] = profileInstanceIds
           .map(instanceId => {
             const instance = serverInstances.find(s => s.id === instanceId);
             return instance ? {
@@ -207,7 +211,7 @@ export function HostCard({
   const instancesByDefinition = getInstancesByDefinition();
   const configStatusInfo = getConfigStatusInfo();
   
-  const needsConfig = host.configStatus === 'misconfigured' || host.configStatus === 'unknown';
+  const needsConfig = host.configStatus === 'misconfigured';
   
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -227,15 +231,12 @@ export function HostCard({
               status={
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
-                host.connectionStatus === 'disconnected' ? 'inactive' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'inactive' : 
-                host.configStatus === 'unknown' ? 'warning' : 'inactive'
+                host.connectionStatus === 'disconnected' ? 'inactive' : 'inactive'
               } 
               label={
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
-                host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
+                host.connectionStatus === 'disconnected' ? 'Disconnected' : 'Disconnected'
               }
             />
           </div>
@@ -274,6 +275,9 @@ export function HostCard({
                 <SelectItem key={profile.id} value={profile.id}>
                   <div className="flex items-center gap-2">
                     <span>{profile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({profile.instances.length} server{profile.instances.length !== 1 ? 's' : ''})
+                    </span>
                   </div>
                 </SelectItem>
               ))}

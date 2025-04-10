@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -44,7 +45,7 @@ export function ConfigFileDialog({
   const [originalConfig, setOriginalConfig] = useState(initialConfig);
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const configContainerRef = useRef<HTMLPreElement | null>(null);
+  const configContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setConfig(initialConfig);
@@ -164,10 +165,7 @@ export function ConfigFileDialog({
   const getFormattedConfig = () => {
     try {
       const parsed = JSON.parse(config);
-      
-      const formatted = JSON.stringify(parsed, null, 2);
-      
-      return formatted;
+      return JSON.stringify(parsed, null, 2);
     } catch (e) {
       return config;
     }
@@ -218,34 +216,44 @@ export function ConfigFileDialog({
     
     try {
       const container = configContainerRef.current;
-      const highlightMcpNowSection = (json: string) => {
-        try {
-          const parsed = JSON.parse(json);
-          
-          let formatted = JSON.stringify(parsed, null, 2);
-          
-          const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
-          
-          formatted = formatted.replace(mcpnowRegex, (match) => {
-            return `<span class="mcpnow-highlight">${match}</span>`;
-          });
-          
-          return formatted;
-        } catch (e) {
-          return json;
-        }
-      };
       
       if (isViewOnly || isFixMode || isUpdateMode) {
         try {
-          const parsed = JSON.parse(config);
-          const formatted = JSON.stringify(parsed, null, 2);
-          container.innerHTML = highlightMcpNowSection(formatted);
+          // Create a formatted JSON string with syntax highlighting
+          const formattedJson = getFormattedConfig();
+          
+          // Highlight the mcpnow section specifically
+          const highlightedJson = formattedJson.replace(
+            /("mcpnow"\s*:\s*\{[^}]*\})/g,
+            '<span class="text-blue-600 dark:text-blue-400 font-semibold">$1</span>'
+          );
+          
+          // Add general syntax highlighting
+          const coloredJson = highlightedJson
+            .replace(/(".*?")\s*:/g, '<span class="text-purple-600 dark:text-purple-400">$1</span>:')
+            .replace(/:\s*"(.*?)"/g, ': <span class="text-green-600 dark:text-green-400">"$1"</span>')
+            .replace(/:\s*([0-9]+)/g, ': <span class="text-amber-600 dark:text-amber-400">$1</span>')
+            .replace(/:\s*(true|false)/g, ': <span class="text-amber-600 dark:text-amber-400">$1</span>');
+
+          container.innerHTML = `<pre class="p-4 whitespace-pre-wrap font-mono text-sm">${coloredJson}</pre>`;
+          
+          // Add a small CSS for the mcpnow highlight effect
+          const style = document.createElement('style');
+          style.textContent = `
+            .mcpnow-highlight {
+              background-color: rgba(59, 130, 246, 0.1);
+              border-radius: 4px;
+              padding: 2px 0;
+            }
+          `;
+          document.head.appendChild(style);
+          
         } catch (e) {
-          container.textContent = config;
+          container.innerHTML = `<pre class="p-4 whitespace-pre-wrap font-mono text-sm">${config}</pre>`;
         }
       }
     } catch (e) {
+      console.error("Error highlighting JSON:", e);
     }
   }, [config, isViewOnly, isFixMode, isUpdateMode]);
 
@@ -266,7 +274,7 @@ export function ConfigFileDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[650px]">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
@@ -307,18 +315,16 @@ export function ConfigFileDialog({
             )}
           </div>
           
-          <ScrollArea className="h-[300px] border rounded-md">
+          <ScrollArea className="h-[350px] border rounded-md bg-muted/10">
             {isViewOnly || isFixMode || isUpdateMode ? (
-              <pre 
+              <div 
                 ref={configContainerRef}
-                className="font-mono text-sm p-4 whitespace-pre-wrap"
-              >
-                {getFormattedConfig()}
-              </pre>
+                className="font-mono text-sm whitespace-pre-wrap"
+              ></div>
             ) : (
               <Textarea 
                 ref={textareaRef}
-                className="flex-1 font-mono text-sm min-h-[300px] border-0 resize-none"
+                className="flex-1 font-mono text-sm min-h-[350px] border-0 resize-none"
                 value={config} 
                 onChange={(e) => handleChange(e.target.value)}
                 spellCheck={false}
