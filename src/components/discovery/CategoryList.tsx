@@ -1,7 +1,8 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { CategoryBadge } from "./CategoryBadge";
 import { Badge } from "@/components/ui/badge";
+import { Tag } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -23,7 +24,7 @@ export const CategoryList = ({
   const hasExtra = extraCategories.length > 0;
 
   return (
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap gap-2">
       {visibleCategories.map((category) => (
         <CategoryBadge key={category} category={category} />
       ))}
@@ -33,13 +34,16 @@ export const CategoryList = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
-                <Badge variant="outline" className="mr-1.5 mb-1.5 cursor-default">
+                <Badge 
+                  variant="outline" 
+                  className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full cursor-default flex items-center"
+                >
                   +{extraCategories.length}
                 </Badge>
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <div className="flex flex-wrap max-w-[200px]">
+              <div className="flex flex-wrap max-w-[250px] gap-2 p-2">
                 {extraCategories.map((category) => (
                   <CategoryBadge key={category} category={category} />
                 ))}

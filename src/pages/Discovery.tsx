@@ -621,30 +621,30 @@ const Discovery = () => {
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
             <div className="h-full">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 pb-3 text-white">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
                 <div className="flex justify-between items-start">
-                  <div className="space-y-0.5">
+                  <div className="space-y-1">
                     <DialogTitle className="text-xl font-bold leading-tight text-white">
                       {selectedServer.name}
                     </DialogTitle>
                     
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <EndpointLabel type={selectedServer.type} />
                       {selectedServer.isOfficial && <OfficialBadge />}
                     </div>
                   </div>
                   
-                  <DialogClose className="rounded-full p-1 hover:bg-white/20 transition-colors">
+                  <DialogClose className="rounded-full p-1.5 hover:bg-white/20 transition-colors">
                     <X className="h-5 w-5" />
                   </DialogClose>
                 </div>
               </div>
               
-              <div className="p-4 space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
+              <div className="p-6 space-y-6">
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-semibold mb-1.5 text-gray-800 dark:text-gray-200">
+                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
                         Description
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -653,10 +653,22 @@ const Discovery = () => {
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-semibold mb-1.5 text-gray-800 dark:text-gray-200">
+                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                        Author
+                      </h3>
+                      <div className="flex items-center">
+                        <UserRound className="h-4 w-4 mr-2 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
                         Features
                       </h3>
-                      <ul className="list-disc list-inside space-y-0.5 text-sm text-gray-600 dark:text-gray-300">
+                      <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
                         {selectedServer.features?.map((feature, index) => (
                           <li key={index}>{feature}</li>
                         ))}
@@ -664,16 +676,17 @@ const Discovery = () => {
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-semibold mb-1.5 text-gray-800 dark:text-gray-200">
+                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
                         Categories
                       </h3>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-2">
                         {selectedServer.categories?.map(category => (
                           <Badge 
                             key={category} 
                             variant="outline" 
-                            className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs py-0 px-2"
+                            className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
                           >
+                            <Tag className="h-3 w-3 mr-1.5" />
                             {category}
                           </Badge>
                         ))}
@@ -681,29 +694,19 @@ const Discovery = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3 space-y-3">
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
                       <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Author</h3>
-                        <div className="flex items-center">
-                          <UserRound className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
-                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                            {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Version</h3>
+                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                           {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
                         </p>
                       </div>
                       
                       <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Last Updated</h3>
+                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
                         <div className="flex items-center">
-                          <Calendar className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                           <span className="text-sm text-gray-800 dark:text-gray-200">
                             {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
                           </span>
@@ -711,45 +714,45 @@ const Discovery = () => {
                       </div>
                       
                       <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Repository</h3>
+                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
                         <a 
                           href="#" 
                           className="text-sm text-blue-600 flex items-center hover:underline"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Globe className="h-3.5 w-3.5 mr-1.5" />
+                          <Globe className="h-4 w-4 mr-2" />
                           <span className="truncate">
                             {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
                           </span>
-                          <ExternalLink className="h-3 w-3 ml-1" />
+                          <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
                         </a>
                       </div>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-3">
-                      <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Usage Statistics</h3>
+                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
+                      <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
                       
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-2">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
                           <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
                             {formatNumber(selectedServer.views || 1320)}
                           </div>
-                          <div className="text-xs text-gray-500">Views</div>
+                          <div className="text-xs text-gray-500 mt-1">Views</div>
                         </div>
                         
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-2">
+                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
                           <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
                             {formatNumber(selectedServer.downloads || 386)}
                           </div>
-                          <div className="text-xs text-gray-500">Installs</div>
+                          <div className="text-xs text-gray-500 mt-1">Installs</div>
                         </div>
                         
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-2">
+                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
                           <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
                             {formatNumber(selectedServer.watches || 215)}
                           </div>
-                          <div className="text-xs text-gray-500">Stars</div>
+                          <div className="text-xs text-gray-500 mt-1">Stars</div>
                         </div>
                       </div>
                     </div>
@@ -757,7 +760,7 @@ const Discovery = () => {
                 </div>
               </div>
               
-              <div className="flex justify-end p-3 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
+              <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
@@ -785,12 +788,12 @@ const Discovery = () => {
                   >
                     {installedButtonHover[selectedServer.id] ? (
                       <>
-                        <Check className="h-3.5 w-3.5 mr-1.5" />
+                        <Check className="h-3.5 w-3.5 mr-2" />
                         Check
                       </>
                     ) : (
                       <>
-                        <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                        <CheckCircle className="h-3.5 w-3.5 mr-2" />
                         Installed
                       </>
                     )}
@@ -801,7 +804,7 @@ const Discovery = () => {
                     size="sm"
                     className="bg-blue-50 text-blue-600 border-blue-200"
                   >
-                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                     Installing...
                   </Button>
                 ) : (
@@ -813,7 +816,7 @@ const Discovery = () => {
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700"
                   >
-                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                    <Download className="h-3.5 w-3.5 mr-2" />
                     Install Server
                   </Button>
                 )}
