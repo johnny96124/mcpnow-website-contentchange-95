@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -47,26 +46,22 @@ export function ConfigFileDialog({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const configContainerRef = useRef<HTMLPreElement | null>(null);
 
-  // Update config when initialConfig changes
   useEffect(() => {
     setConfig(initialConfig);
     setOriginalConfig(initialConfig);
     setIsModified(false);
   }, [initialConfig, open]);
 
-  // Update path when configPath changes
   useEffect(() => {
     setPath(configPath);
     setPathModified(false);
   }, [configPath, open]);
 
-  // Check if the config has an endpoint that doesn't match the profile's endpoint
   useEffect(() => {
     if (profileEndpoint && config) {
       try {
         const parsedConfig = JSON.parse(config);
         
-        // Check for endpoint mismatch in mcpnow configuration
         let configHasEndpoint = false;
         let configEndpoint = "";
         
@@ -85,17 +80,14 @@ export function ConfigFileDialog({
           configEndpoint.trim() !== ""
         );
       } catch (e) {
-        // Silently fail, validation error will be shown separately
       }
     }
   }, [config, profileEndpoint]);
 
   const handleSave = () => {
     try {
-      // Validate JSON format
       JSON.parse(config);
 
-      // Check for endpoint mismatch before saving
       if (hasEndpointMismatch) {
         setError("Cannot save: The endpoint in the mcpnow configuration doesn't match the selected profile's endpoint.");
         return;
@@ -126,14 +118,12 @@ export function ConfigFileDialog({
     setIsModified(true);
   };
 
-  const handlePathChange = (value: string) => {
+  const handlePathEdit = (value: string) => {
     setPath(value);
     setPathModified(true);
   };
 
-  // Generate the default system configuration based on profile endpoint
   const generateDefaultConfig = () => {
-    // Create a default configuration structure
     const defaultConfig = {
       mcpServers: {
         mcpnow: {
@@ -152,7 +142,6 @@ export function ConfigFileDialog({
 
   const resetJson = () => {
     try {
-      // Set the textarea to show the default system configuration
       const defaultSystemConfig = generateDefaultConfig();
       setConfig(defaultSystemConfig);
       setIsModified(true);
@@ -172,24 +161,18 @@ export function ConfigFileDialog({
     }
   };
 
-  // Format the config with mcpnow highlighting
   const getFormattedConfig = () => {
     try {
-      // Parse the JSON to ensure it's valid
       const parsed = JSON.parse(config);
       
-      // Convert back to a string with formatting
       const formatted = JSON.stringify(parsed, null, 2);
       
-      // Return the formatted string
       return formatted;
     } catch (e) {
-      // If there's an error parsing, just return the raw config
       return config;
     }
   };
 
-  // Handle dialog close with unsaved changes
   const handleCloseDialog = (open: boolean) => {
     if (!open && (isModified || pathModified) && !isViewOnly && !isFixMode && !isUpdateMode) {
       if (window.confirm("You have unsaved changes. Are you sure you want to close?")) {
@@ -200,14 +183,12 @@ export function ConfigFileDialog({
     }
   };
 
-  // Fix endpoint mismatch automatically
   const handleFixEndpoint = () => {
     try {
       const parsedConfig = JSON.parse(config);
       
       if (parsedConfig.mcpServers?.mcpnow?.args && profileEndpoint) {
         const args = [...parsedConfig.mcpServers.mcpnow.args];
-        // Update the endpoint (last argument)
         args[args.length - 1] = profileEndpoint;
         
         parsedConfig.mcpServers.mcpnow.args = args;
@@ -232,7 +213,6 @@ export function ConfigFileDialog({
     }
   };
 
-  // Apply highlighting to mcpnow section
   useEffect(() => {
     if (!configContainerRef.current) return;
     
@@ -240,14 +220,10 @@ export function ConfigFileDialog({
       const container = configContainerRef.current;
       const highlightMcpNowSection = (json: string) => {
         try {
-          // Parse the JSON to get a structured representation
           const parsed = JSON.parse(json);
           
-          // Convert back to a string with formatting
           let formatted = JSON.stringify(parsed, null, 2);
           
-          // Replace the mcpnow section with highlighted version
-          // This regex will match the "mcpnow" key and its entire object value including nested content
           const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
           
           formatted = formatted.replace(mcpnowRegex, (match) => {
@@ -256,13 +232,11 @@ export function ConfigFileDialog({
           
           return formatted;
         } catch (e) {
-          // If parsing fails, return the original JSON
           return json;
         }
       };
       
       if (isViewOnly || isFixMode || isUpdateMode) {
-        // Create a formatted display for readonly modes
         try {
           const parsed = JSON.parse(config);
           const formatted = JSON.stringify(parsed, null, 2);
@@ -272,11 +246,9 @@ export function ConfigFileDialog({
         }
       }
     } catch (e) {
-      // Silently fail, formatting is not critical
     }
   }, [config, isViewOnly, isFixMode, isUpdateMode]);
 
-  // If in fix mode, set the config to a fixed version automatically
   useEffect(() => {
     if ((isFixMode || isUpdateMode) && open && hasEndpointMismatch) {
       handleFixEndpoint();
@@ -285,7 +257,6 @@ export function ConfigFileDialog({
     }
   }, [isFixMode, isUpdateMode, open, needsUpdate]);
 
-  // Prepare title and description based on mode
   const dialogTitle = isUpdateMode ? "Update Configuration" : 
     (isFixMode ? "Fix Configuration" : (isViewOnly ? "View Configuration" : "Edit Configuration"));
     
@@ -304,7 +275,6 @@ export function ConfigFileDialog({
         </DialogHeader>
         
         <div className="flex-1 flex flex-col space-y-3 mt-2">
-          {/* Configuration File Path Section */}
           <div className="space-y-2">
             <Label htmlFor="configPath">Configuration File Path</Label>
             <Textarea
@@ -338,7 +308,6 @@ export function ConfigFileDialog({
           </div>
           
           <ScrollArea className="h-[300px] border rounded-md">
-            {/* Show textarea for editable mode, or pre for readonly mode */}
             {isViewOnly || isFixMode || isUpdateMode ? (
               <pre 
                 ref={configContainerRef}
