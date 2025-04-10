@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, Search, RefreshCw } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -11,8 +11,21 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { ConnectionStatus, Host } from "@/data/mockData";
+import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const mockJsonConfig = {
+  "mcpServers": {
+    "mcpnow": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/mcpnow",
+        "http://localhost:8008/mcp"
+      ]
+    }
+  }
+};
 
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,7 +34,7 @@ const Hosts = () => {
   const [isScanning, setIsScanning] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog();
+  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -31,7 +44,7 @@ const Hosts = () => {
   const clearSearch = () => setSearchQuery("");
 
   const getProfileEndpoint = (profileId: string) => {
-    const profile = hostProfiles.allProfiles.find(p => p.id === profileId);
+    const profile = profiles.find(p => p.id === profileId);
     return profile ? profile.endpoint : null;
   };
 
@@ -80,7 +93,7 @@ const Hosts = () => {
         name: "Local Host",
         icon: "💻",
         connectionStatus: "disconnected",
-        configStatus: "misconfigured",
+        configStatus: "unknown",
       };
       
       setHostsList(prevHosts => [...prevHosts, newHost]);
@@ -97,7 +110,7 @@ const Hosts = () => {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured";
+    configStatus: "configured" | "misconfigured" | "unknown";
     connectionStatus: ConnectionStatus;
   }) => {
     const id = `host-${Date.now()}`;

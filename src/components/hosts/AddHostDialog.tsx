@@ -40,7 +40,7 @@ interface AddHostDialogProps {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured";
+    configStatus: "configured" | "misconfigured" | "unknown";
     connectionStatus: ConnectionStatus;
   }) => void;
 }
@@ -60,8 +60,8 @@ export function AddHostDialog({ open, onOpenChange, onAddHost }: AddHostDialogPr
       name: values.name,
       configPath: values.configPath || undefined,
       icon: values.icon || undefined,
-      configStatus: "misconfigured",
-      connectionStatus: "disconnected",
+      configStatus: "unknown",
+      connectionStatus: "unknown",
     });
     
     form.reset();

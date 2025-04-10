@@ -14,38 +14,7 @@ interface ConfigDialogState {
   isUpdateMode?: boolean;
 }
 
-const multipleServicesConfig = `{
-  "mcpServers": {
-    "mcpnow": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/mcpnow",
-        "http://localhost:8008/mcp"
-      ]
-    },
-    "mcppy": {
-      "command": "python",
-      "args": [
-        "-m",
-        "mcp.cli",
-        "--port",
-        "8009"
-      ]
-    },
-    "mcpjava": {
-      "command": "java",
-      "args": [
-        "-jar",
-        "mcp-server.jar",
-        "--config",
-        "config.json"
-      ]
-    }
-  }
-}`;
-
-export function useConfigDialog() {
+export function useConfigDialog(mockJsonConfig: any) {
   const [configDialog, setConfigDialog] = useState<ConfigDialogState>({
     isOpen: false,
     hostId: null,
@@ -71,7 +40,7 @@ export function useConfigDialog() {
       isOpen: true,
       hostId,
       configPath,
-      configContent: multipleServicesConfig,
+      configContent: JSON.stringify(mockJsonConfig, null, 2),
       profileEndpoint,
       needsUpdate,
       allowPathEdit,
