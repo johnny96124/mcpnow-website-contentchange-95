@@ -12,7 +12,7 @@ interface ConfigDialogState {
   isViewOnly?: boolean;
   isFixMode?: boolean;
   isUpdateMode?: boolean;
-  isNewHost?: boolean; // 添加新标志来识别新主机
+  isCreateMode?: boolean;
 }
 
 export function useConfigDialog(mockJsonConfig: any) {
@@ -25,7 +25,7 @@ export function useConfigDialog(mockJsonConfig: any) {
     isViewOnly: false,
     isFixMode: false,
     isUpdateMode: false,
-    isNewHost: false
+    isCreateMode: false
   });
   
   const openConfigDialog = (
@@ -37,7 +37,7 @@ export function useConfigDialog(mockJsonConfig: any) {
     isViewOnly?: boolean,
     isFixMode?: boolean,
     isUpdateMode?: boolean,
-    isNewHost?: boolean
+    isCreateMode?: boolean
   ) => {
     setConfigDialog({
       isOpen: true,
@@ -50,7 +50,7 @@ export function useConfigDialog(mockJsonConfig: any) {
       isViewOnly,
       isFixMode,
       isUpdateMode,
-      isNewHost
+      isCreateMode
     });
   };
   
@@ -72,7 +72,7 @@ export function useConfigDialog(mockJsonConfig: any) {
       isViewOnly: false,
       isFixMode: false,
       isUpdateMode: false,
-      isNewHost: false
+      isCreateMode: false
     });
   };
   
