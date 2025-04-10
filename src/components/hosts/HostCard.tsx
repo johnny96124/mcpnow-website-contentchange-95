@@ -379,15 +379,7 @@ export function HostCard({
       <CardFooter className="mt-2">
         <div className="flex justify-end w-full">
           {profileId && (
-            !host.configPath ? (
-              <Button 
-                onClick={() => onCreateConfig(host.id, profileId)}
-                disabled={!profileId}
-              >
-                <Settings2 className="h-4 w-4 mr-2" />
-                Create Config
-              </Button>
-            ) : host.configStatus === 'configured' ? (
+            host.configStatus === 'configured' ? (
               <Button 
                 variant="outline"
                 onClick={() => onOpenConfigDialog(host.id)}
@@ -403,6 +395,7 @@ export function HostCard({
                 onClick={() => onFixConfig(host.id)}
                 className="bg-blue-500 hover:bg-blue-600 text-white"
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Update Config
               </Button>
             )

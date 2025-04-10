@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from "react";
-import { Save, AlertTriangle, RotateCcw } from "lucide-react";
+import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,7 @@ interface ConfigFileDialogProps {
   allowPathEdit?: boolean;
   isViewOnly?: boolean;
   isFixMode?: boolean;
-  isUpdateMode?: boolean; // New prop for update mode
+  isUpdateMode?: boolean;
 }
 
 export function ConfigFileDialog({
@@ -34,7 +34,7 @@ export function ConfigFileDialog({
   allowPathEdit = false,
   isViewOnly = false,
   isFixMode = false,
-  isUpdateMode = false // New prop
+  isUpdateMode = false
 }: ConfigFileDialogProps) {
   const [config, setConfig] = useState(initialConfig);
   const [path, setPath] = useState(configPath);
@@ -239,49 +239,26 @@ export function ConfigFileDialog({
     try {
       const container = configContainerRef.current;
       const highlightMcpNowSection = (json: string) => {
-        // Use basic string manipulation to identify and wrap the mcpnow section
-        let inMcpNowSection = false;
-        let mcpNowStarted = false;
-        let openBraces = 0;
-
-        const lines = json.split('\n');
-        const highlightedLines: string[] = [];
-        
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
+        try {
+          // Parse the JSON to get a structured representation
+          const parsed = JSON.parse(json);
           
-          // Check if we're entering the mcpnow section
-          if (line.includes('"mcpnow"')) {
-            inMcpNowSection = true;
-            mcpNowStarted = true;
-            highlightedLines.push(`<span class="mcpnow-highlight">${line}`);
-            continue;
-          }
+          // Convert back to a string with formatting
+          let formatted = JSON.stringify(parsed, null, 2);
           
-          // Count braces to determine section boundaries
-          if (mcpNowStarted) {
-            const openCount = (line.match(/{/g) || []).length;
-            const closeCount = (line.match(/}/g) || []).length;
-            openBraces += openCount - closeCount;
-            
-            // If we've closed all braces, we're out of the section
-            if (openBraces <= 0) {
-              mcpNowStarted = false;
-              inMcpNowSection = false;
-              highlightedLines.push(`${line}</span>`);
-              continue;
-            }
-          }
+          // Replace the mcpnow section with highlighted version
+          // This regex will match the "mcpnow" key and its entire object value including nested content
+          const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
           
-          // Add highlighted line if in mcpnow section
-          if (inMcpNowSection) {
-            highlightedLines.push(line);
-          } else {
-            highlightedLines.push(line);
-          }
+          formatted = formatted.replace(mcpnowRegex, (match) => {
+            return `<span class="mcpnow-highlight">${match}</span>`;
+          });
+          
+          return formatted;
+        } catch (e) {
+          // If parsing fails, return the original JSON
+          return json;
         }
-        
-        return highlightedLines.join('\n');
       };
       
       if (isViewOnly || isFixMode || isUpdateMode) {
@@ -333,7 +310,7 @@ export function ConfigFileDialog({
             <Textarea
               id="configPath"
               value={path}
-              onChange={(e) => handlePathChange(e.target.value)}
+              onChange={(e) => handlePathEdit(e.target.value)}
               rows={1}
               className="font-mono text-sm"
               readOnly={isViewOnly || !allowPathEdit || isFixMode || isUpdateMode}
@@ -345,15 +322,6 @@ export function ConfigFileDialog({
             )}
           </div>
 
-          {(isFixMode || isUpdateMode) && (
-            <Alert className="bg-blue-50 border-blue-200">
-              <AlertDescription className="text-blue-700">
-                We'll automatically update your configuration to match the selected profile. 
-                Click "{isUpdateMode ? 'Update' : 'Fix'} Configuration" when ready.
-              </AlertDescription>
-            </Alert>
-          )}
-
           <div className="mb-2">
             <Label htmlFor="configDetails" className="text-sm font-medium">Config Details</Label>
             {!isViewOnly && !isFixMode && !isUpdateMode && (
@@ -362,22 +330,12 @@ export function ConfigFileDialog({
                   Edit the configuration below. <span className="font-medium text-primary">The mcpnow section is important and must match your profile.</span>
                 </div>
                 <Button variant="outline" size="sm" onClick={resetJson}>
-                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <RotateCw className="h-4 w-4 mr-2" />
                   Reset JSON
                 </Button>
               </div>
             )}
           </div>
-          
-          {(needsUpdate || hasEndpointMismatch) && !isFixMode && !isUpdateMode && (
-            <Alert variant="destructive" className="py-2 px-3">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-xs">
-                Warning: The configuration needs to be updated to match the selected profile.
-                {!isViewOnly ? " Click \"Reset JSON\" to fix this issue." : " This configuration needs to be updated."}
-              </AlertDescription>
-            </Alert>
-          )}
           
           <ScrollArea className="h-[300px] border rounded-md">
             {/* Show textarea for editable mode, or pre for readonly mode */}
@@ -399,12 +357,21 @@ export function ConfigFileDialog({
             )}
           </ScrollArea>
           
-          {error && (
+          {error && !isViewOnly && (
             <div className="text-destructive text-sm bg-destructive/10 p-2 rounded border border-destructive/20">
               {error}
             </div>
           )}
         </div>
+        
+        {(isFixMode || isUpdateMode) && (
+          <Alert className="bg-blue-50 border-blue-200 mt-2">
+            <AlertDescription className="text-blue-700">
+              We'll automatically update your configuration to match the selected profile. 
+              Click "{isUpdateMode ? 'Update' : 'Fix'} Configuration" when ready.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <DialogFooter className="flex justify-end space-x-2">
           {isUpdateMode ? (
@@ -430,17 +397,9 @@ export function ConfigFileDialog({
               </Button>
             </>
           ) : isViewOnly ? (
-            <>
-              {hasEndpointMismatch && (
-                <Button onClick={handleFixEndpoint} variant="destructive">
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  Fix Endpoint Mismatch
-                </Button>
-              )}
-              <Button onClick={() => onOpenChange(false)}>
-                Close
-              </Button>
-            </>
+            <Button onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
           ) : (
             <Button onClick={handleSave} disabled={!!error}>
               <Save className="mr-2 h-4 w-4" />

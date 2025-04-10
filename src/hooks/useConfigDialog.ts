@@ -11,7 +11,7 @@ interface ConfigDialogState {
   allowPathEdit?: boolean;
   isViewOnly?: boolean;
   isFixMode?: boolean;
-  isUpdateMode?: boolean; // Added property for update mode
+  isUpdateMode?: boolean;
 }
 
 export function useConfigDialog(mockJsonConfig: any) {

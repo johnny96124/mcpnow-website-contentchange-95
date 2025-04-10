@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, Search, RefreshCw } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -13,16 +13,6 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter, 
-  DialogDescription 
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -42,10 +32,6 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [createConfigOpen, setCreateConfigOpen] = useState(false);
-  const [currentHostId, setCurrentHostId] = useState<string | null>(null);
-  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null);
-  const [configPath, setConfigPath] = useState("");
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -69,19 +55,17 @@ const Hosts = () => {
       const profileId = hostProfiles[host.id] || '';
       const profileEndpoint = getProfileEndpoint(profileId);
       
-      const needsUpdate = host.configStatus === 'misconfigured';
-      
-      openConfigDialog(hostId, host.configPath, profileEndpoint, needsUpdate, false, true);
+      openConfigDialog(hostId, host.configPath, profileEndpoint, false, false, true);
     } else {
       toast({
         title: "No config file",
-        description: "This host doesn't have a configuration file yet. Please create one first.",
+        description: "This host doesn't have a configuration file yet. Please update the configuration first.",
         variant: "destructive"
       });
     }
   };
 
-  // Updated to handle update config
+  // Updated to handle update config - consolidates both create and fix operations
   const handleUpdateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -92,51 +76,10 @@ const Hosts = () => {
       if (host.configPath) {
         openConfigDialog(hostId, host.configPath, profileEndpoint, true, false, false, false, true);
       } else {
-        // For hosts without config path, create a new one
-        handleCreateConfig(hostId, profileId);
+        // For hosts without config path, create a new default path
+        const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+        openConfigDialog(hostId, defaultConfigPath, profileEndpoint, true, false, false, false, true);
       }
-    }
-  };
-  
-  const handleCreateConfig = (hostId: string, profileId: string) => {
-    const host = hostsList.find(h => h.id === hostId);
-    
-    if (host) {
-      setCurrentHostId(hostId);
-      setCurrentProfileId(profileId);
-      
-      const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-      setConfigPath(defaultConfigPath);
-      setCreateConfigOpen(true);
-    }
-  };
-  
-  const handleConfirmCreateConfig = () => {
-    if (currentHostId && currentProfileId) {
-      // Update the host with the new config
-      setHostsList(prev => prev.map(host => 
-        host.id === currentHostId 
-          ? { 
-              ...host, 
-              configPath, 
-              configStatus: 'configured',
-              connectionStatus: 'connected'
-            } 
-          : host
-      ));
-      
-      toast({
-        title: "Configuration created",
-        description: `Config file created at ${configPath}`,
-      });
-      
-      setCreateConfigOpen(false);
-      
-      setTimeout(() => {
-        setCurrentHostId(null);
-        setCurrentProfileId(null);
-        setConfigPath("");
-      }, 100);
     }
   };
 
@@ -184,28 +127,7 @@ const Hosts = () => {
     });
   };
 
-  const generateDefaultConfig = (profileId: string) => {
-    const profile = profiles.find(p => p.id === profileId);
-    
-    if (!profile) return "{}";
-    
-    const defaultConfig = {
-      mcpServers: {
-        mcpnow: {
-          command: "npx",
-          args: [
-            "-y",
-            "@modelcontextprotocol/mcpnow",
-            profile.endpoint
-          ]
-        }
-      }
-    };
-    
-    return JSON.stringify(defaultConfig, null, 2);
-  };
-
-  // Updated handler for fixing/updating configs
+  // Updated handler for updating configs
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => 
@@ -223,7 +145,7 @@ const Hosts = () => {
     resetConfigDialog();
     
     toast({
-      title: configDialog.isFixMode ? "Configuration fixed" : "Configuration updated",
+      title: "Configuration updated",
       description: "The configuration has been updated to match the profile.",
     });
   };
@@ -272,8 +194,8 @@ const Hosts = () => {
               profileId={hostProfiles[host.id] || ''}
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
-              onCreateConfig={handleCreateConfig}
-              onFixConfig={handleUpdateConfigDialog} // Use the new update handler
+              onCreateConfig={handleUpdateConfigDialog} // Reuse update handler for create
+              onFixConfig={handleUpdateConfigDialog}
             />
           ))}
           
@@ -315,53 +237,6 @@ const Hosts = () => {
         <NoSearchResults query={searchQuery} onClear={clearSearch} />
       )}
       
-      <Dialog open={createConfigOpen} onOpenChange={setCreateConfigOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Configuration File</DialogTitle>
-            <DialogDescription>
-              Specify the location where the host configuration file will be created.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="configPath">Configuration File Path</Label>
-              <Textarea 
-                id="configPath"
-                value={configPath}
-                onChange={(e) => setConfigPath(e.target.value)}
-                rows={2}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground">
-                This is the location where the configuration file will be saved.
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Configuration Preview</Label>
-              <pre className="bg-muted p-2 rounded-md text-xs overflow-auto max-h-36">
-                {currentProfileId ? generateDefaultConfig(currentProfileId) : "{}"}
-              </pre>
-              <p className="text-xs text-muted-foreground">
-                The configuration will be created with default values based on the selected profile.
-                You can edit it after creation.
-              </p>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateConfigOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmCreateConfig}>
-              Create Configuration
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
       <ConfigFileDialog
         open={configDialog.isOpen}
         onOpenChange={setDialogOpen}
@@ -373,7 +248,7 @@ const Hosts = () => {
         allowPathEdit={configDialog.allowPathEdit}
         isViewOnly={configDialog.isViewOnly}
         isFixMode={configDialog.isFixMode}
-        isUpdateMode={configDialog.isUpdateMode} // New prop
+        isUpdateMode={configDialog.isUpdateMode}
       />
       
       <AddHostDialog 
