@@ -50,7 +50,7 @@ export function useHostProfiles() {
     return hosts.map(host => ({
       id: host.id,
       name: host.name,
-      status: host.status || "disconnected"
+      status: host.connectionStatus || "disconnected"
     }));
   }, []);
   
