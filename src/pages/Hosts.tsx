@@ -11,24 +11,30 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { Host, profiles } from "@/data/mockData";
+import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Define the acceptable connection status types
-type AllowedConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'connecting';
+const mockJsonConfig = {
+  "mcpServers": {
+    "mcpnow": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/mcpnow",
+        "http://localhost:8008/mcp"
+      ]
+    }
+  }
+};
 
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [hostsList, setHostsList] = useState<Host[]>(hosts.map(host => ({
-    ...host,
-    // Convert any 'unknown' status to 'disconnected' as required
-    connectionStatus: host.connectionStatus === 'unknown' ? 'disconnected' as const : host.connectionStatus
-  })));
+  const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog();
+  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -42,7 +48,7 @@ const Hosts = () => {
     return profile ? profile.endpoint : null;
   };
 
-  // View configuration dialog
+  // Updated to handle view mode
   const handleOpenConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
@@ -59,7 +65,7 @@ const Hosts = () => {
     }
   };
 
-  // Update config - now handles all config operations
+  // Updated to handle update config - consolidates both create and fix operations
   const handleUpdateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -82,12 +88,12 @@ const Hosts = () => {
     
     setTimeout(() => {
       const newHostId = `host-${Date.now()}`;
-      const newHost = {
+      const newHost: Host = {
         id: newHostId,
         name: "Local Host",
         icon: "💻",
-        connectionStatus: "disconnected" as AllowedConnectionStatus,
-        configStatus: "misconfigured" as const,
+        connectionStatus: "disconnected",
+        configStatus: "unknown",
       };
       
       setHostsList(prevHosts => [...prevHosts, newHost]);
@@ -104,11 +110,11 @@ const Hosts = () => {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured";
-    connectionStatus: AllowedConnectionStatus;
+    configStatus: "configured" | "misconfigured" | "unknown";
+    connectionStatus: ConnectionStatus;
   }) => {
     const id = `host-${Date.now()}`;
-    const host = {
+    const host: Host = {
       id,
       ...newHost
     };
@@ -129,8 +135,8 @@ const Hosts = () => {
           ? { 
               ...host, 
               configPath,
-              configStatus: 'configured' as const,
-              connectionStatus: 'connected' as AllowedConnectionStatus  // Update connection status when config is fixed
+              configStatus: 'configured',
+              connectionStatus: 'connected'  // Update connection status when config is fixed
             }
           : host
       ));
@@ -188,7 +194,7 @@ const Hosts = () => {
               profileId={hostProfiles[host.id] || ''}
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
-              onCreateConfig={handleUpdateConfigDialog} // Use update handler for all config operations
+              onCreateConfig={handleUpdateConfigDialog} // Reuse update handler for create
               onFixConfig={handleUpdateConfigDialog}
             />
           ))}
@@ -255,4 +261,3 @@ const Hosts = () => {
 };
 
 export default Hosts;
-
