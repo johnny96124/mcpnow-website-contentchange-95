@@ -50,6 +50,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 
 const ITEMS_PER_PAGE = 12; // Increased to show more items initially
 
@@ -122,6 +123,11 @@ const Discovery = () => {
   const [allCategories, setAllCategories] = useState<string[]>(mockCategories);
   const [sortOption, setSortOption] = useState("popular");
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
+  
+  // New states for the AddInstanceDialog
+  const [addInstanceOpen, setAddInstanceOpen] = useState(false);
+  const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
+  const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -212,6 +218,7 @@ const Discovery = () => {
     setIsDialogOpen(true);
   };
 
+  // Modified handleInstall to open the AddInstanceDialog after installation
   const handleInstall = (serverId: string) => {
     const server = extendedItems.find(item => item.id === serverId);
     if (!server) return;
@@ -221,12 +228,34 @@ const Discovery = () => {
     setTimeout(() => {
       setIsInstalling(prev => ({ ...prev, [serverId]: false }));
       setInstalledServers(prev => ({ ...prev, [serverId]: true }));
+      setJustInstalledServerId(serverId);
+      
+      // Save the installed server definition to open dialog later
+      setSelectedDefinition(server);
       
       toast({
         title: "Server installed",
         description: `${server.name} has been successfully installed.`,
       });
+
+      // Open the AddInstanceDialog with the newly installed server
+      setAddInstanceOpen(true);
     }, 1500);
+  };
+
+  // Handler for instance creation
+  const handleCreateInstance = (data: InstanceFormValues) => {
+    if (!selectedDefinition) return;
+    
+    toast({
+      title: "Instance Created",
+      description: `${data.name} has been created successfully.`,
+    });
+    
+    setAddInstanceOpen(false);
+    
+    // Navigate to servers page after instance creation
+    navigate("/servers");
   };
 
   const handleNavigateToServers = () => {
@@ -260,7 +289,7 @@ const Discovery = () => {
       {/* Hero Section */}
       <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
         <div className="max-w-3xl relative z-10">
-          <h1 className="text-3xl font-bold mb-2">Trending Server Definitions</h1>
+          <h1 className="text-3xl font-bold mb-2">All Server Definitions</h1>
           <p className="text-blue-100 mb-6">
             Discover server definitions created by the community. Find what's popular,
             trending, and recently updated to enhance your development workflow.
@@ -716,6 +745,14 @@ const Discovery = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Instance Dialog */}
+      <AddInstanceDialog
+        open={addInstanceOpen}
+        onOpenChange={setAddInstanceOpen}
+        serverDefinition={selectedDefinition}
+        onCreateInstance={handleCreateInstance}
+      />
     </div>
   );
 };
