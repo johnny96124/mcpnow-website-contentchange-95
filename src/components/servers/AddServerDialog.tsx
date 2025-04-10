@@ -48,8 +48,10 @@ export function AddServerDialog({
   const [commandArgsError, setCommandArgsError] = useState<string | null>(null);
   const [showEnvironmentVars, setShowEnvironmentVars] = useState(false);
   const [showUrlParams, setShowUrlParams] = useState(false);
-  const [environmentVars, setEnvironmentVars] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
-  const [urlParams, setUrlParams] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
+  const [environmentVars, setEnvironmentVars] = useState<{ key: string; value: string }[]>([]);
+  const [urlParams, setUrlParams] = useState<{ key: string; value: string }[]>([]);
+  const [envKeyError, setEnvKeyError] = useState<string | null>(null);
+  const [headerKeyError, setHeaderKeyError] = useState<string | null>(null);
   const { toast } = useToast();
   
   const form = useForm<ServerFormValues>({
@@ -73,10 +75,12 @@ export function AddServerDialog({
       form.setValue("commandArgs", "");
       setCommandArgsError(null);
       setShowEnvironmentVars(false);
+      setEnvironmentVars([]);
     } else {
       form.setValue("url", "");
       setUrlError(null);
       setShowUrlParams(false);
+      setUrlParams([]);
     }
   }, [serverType, form]);
   
@@ -109,6 +113,12 @@ export function AddServerDialog({
     newVars[index][field] = value;
     setEnvironmentVars(newVars);
     
+    // Check for duplicate keys
+    if (field === 'key') {
+      const keyCount = newVars.filter(item => item.key === value && item.key !== "").length;
+      setEnvKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
+    }
+    
     // Update the form value
     const envObject: Record<string, string> = {};
     newVars.forEach(item => {
@@ -123,6 +133,12 @@ export function AddServerDialog({
     const newParams = [...urlParams];
     newParams[index][field] = value;
     setUrlParams(newParams);
+    
+    // Check for duplicate keys
+    if (field === 'key') {
+      const keyCount = newParams.filter(item => item.key === value && item.key !== "").length;
+      setHeaderKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
+    }
     
     // Update the form value
     const headerObject: Record<string, string> = {};
@@ -154,6 +170,7 @@ export function AddServerDialog({
       }
     });
     form.setValue("environment", envObject);
+    setEnvKeyError(null);
   };
   
   const removeUrlParam = (index: number) => {
@@ -168,6 +185,7 @@ export function AddServerDialog({
       }
     });
     form.setValue("headers", headerObject);
+    setHeaderKeyError(null);
   };
   
   const onSubmit = (data: ServerFormValues) => {
@@ -305,7 +323,7 @@ export function AddServerDialog({
                 )}
                 
                 {serverType === "STDIO" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mt-6">
                     <Button 
                       type="button" 
                       variant="outline" 
@@ -317,49 +335,62 @@ export function AddServerDialog({
                     </Button>
                     
                     {showEnvironmentVars && (
-                      <div className="space-y-3 p-3 border rounded-md bg-secondary/10">
-                        <div className="text-sm font-medium">Environment Variables</div>
-                        {environmentVars.map((env, index) => (
-                          <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2">
-                            <Input
-                              placeholder="Key"
-                              value={env.key}
-                              onChange={(e) => handleEnvironmentVarChange(index, 'key', e.target.value)}
-                              className="text-xs"
-                            />
-                            <Input
-                              placeholder="Value"
-                              value={env.value}
-                              onChange={(e) => handleEnvironmentVarChange(index, 'value', e.target.value)}
-                              className="text-xs"
-                            />
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-destructive h-9 w-9 p-0" 
-                              onClick={() => removeEnvironmentVar(index)}
-                            >
-                              <span className="sr-only">Remove</span>
-                              ✕
-                            </Button>
+                      <div className="space-y-4 p-4 border rounded-md bg-secondary/10">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-medium">Environment Variables</div>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={addEnvironmentVar}
+                          >
+                            <Plus className="h-4 w-4 mr-1" /> Add
+                          </Button>
+                        </div>
+                        
+                        {envKeyError && (
+                          <p className="text-sm font-medium text-destructive">{envKeyError}</p>
+                        )}
+                        
+                        {environmentVars.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No environment variables defined</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {environmentVars.map((env, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input
+                                  placeholder="Key"
+                                  value={env.key}
+                                  onChange={(e) => handleEnvironmentVarChange(index, 'key', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Input
+                                  placeholder="Value"
+                                  value={env.value}
+                                  onChange={(e) => handleEnvironmentVarChange(index, 'value', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive h-9 w-9 p-0"
+                                  onClick={() => removeEnvironmentVar(index)}
+                                >
+                                  <span className="sr-only">Remove</span>
+                                  ✕
+                                </Button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2" 
-                          onClick={addEnvironmentVar}
-                        >
-                          Add Variable
-                        </Button>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
                 
                 {serverType === "HTTP_SSE" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 mt-6">
                     <Button 
                       type="button" 
                       variant="outline" 
@@ -371,42 +402,55 @@ export function AddServerDialog({
                     </Button>
                     
                     {showUrlParams && (
-                      <div className="space-y-3 p-3 border rounded-md bg-secondary/10">
-                        <div className="text-sm font-medium">Header Parameters</div>
-                        {urlParams.map((param, index) => (
-                          <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2">
-                            <Input
-                              placeholder="Key"
-                              value={param.key}
-                              onChange={(e) => handleUrlParamChange(index, 'key', e.target.value)}
-                              className="text-xs"
-                            />
-                            <Input
-                              placeholder="Value"
-                              value={param.value}
-                              onChange={(e) => handleUrlParamChange(index, 'value', e.target.value)}
-                              className="text-xs"
-                            />
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-destructive h-9 w-9 p-0" 
-                              onClick={() => removeUrlParam(index)}
-                            >
-                              <span className="sr-only">Remove</span>
-                              ✕
-                            </Button>
+                      <div className="space-y-4 p-4 border rounded-md bg-secondary/10">
+                        <div className="flex items-center justify-between">
+                          <div className="text-sm font-medium">Header Parameters</div>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={addUrlParam}
+                          >
+                            <Plus className="h-4 w-4 mr-1" /> Add
+                          </Button>
+                        </div>
+                        
+                        {headerKeyError && (
+                          <p className="text-sm font-medium text-destructive">{headerKeyError}</p>
+                        )}
+                        
+                        {urlParams.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No header parameters defined</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {urlParams.map((param, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <Input
+                                  placeholder="Key"
+                                  value={param.key}
+                                  onChange={(e) => handleUrlParamChange(index, 'key', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Input
+                                  placeholder="Value"
+                                  value={param.value}
+                                  onChange={(e) => handleUrlParamChange(index, 'value', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive h-9 w-9 p-0"
+                                  onClick={() => removeUrlParam(index)}
+                                >
+                                  <span className="sr-only">Remove</span>
+                                  ✕
+                                </Button>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2" 
-                          onClick={addUrlParam}
-                        >
-                          Add Parameter
-                        </Button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -433,7 +477,10 @@ export function AddServerDialog({
                 />
                 
                 <DialogFooter>
-                  <Button type="submit">
+                  <Button 
+                    type="submit"
+                    disabled={!!envKeyError || !!headerKeyError}
+                  >
                     <Plus className="mr-2 h-4 w-4" />
                     Create Server
                   </Button>
