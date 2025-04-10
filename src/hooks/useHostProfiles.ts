@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { hosts, profiles, type Profile } from "@/data/mockData";
 
 export function useHostProfiles() {
@@ -11,6 +11,7 @@ export function useHostProfiles() {
   );
   
   const [profileCache, setProfileCache] = useState<Record<string, Profile | null>>({});
+  const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   
   useEffect(() => {
     const initialCache = profiles.reduce((acc, profile) => {
@@ -19,22 +20,46 @@ export function useHostProfiles() {
     }, {} as Record<string, Profile>);
     
     setProfileCache(initialCache);
+    setAllProfiles(profiles);
   }, []);
   
-  const getProfileById = (profileId: string): Profile | null => {
+  const getProfileById = useCallback((profileId: string): Profile | null => {
     return profileCache[profileId] || null;
-  };
+  }, [profileCache]);
   
-  const handleProfileChange = (hostId: string, profileId: string) => {
+  const handleProfileChange = useCallback((hostId: string, profileId: string) => {
     setHostProfiles(prev => ({
       ...prev,
       [hostId]: profileId
     }));
-  };
+  }, []);
+
+  const addInstanceToProfile = useCallback((profileId: string, instanceId: string) => {
+    // Find the profile and add the instance to it
+    const profile = getProfileById(profileId);
+    if (profile) {
+      // In a real app, this would make an API call to update the profile
+      // For this demo, we'll just update the local cache
+      console.log(`Added instance ${instanceId} to profile ${profileId}`);
+      return profile;
+    }
+    return null;
+  }, [getProfileById]);
+  
+  const getAvailableHosts = useCallback(() => {
+    return hosts.map(host => ({
+      id: host.id,
+      name: host.name,
+      status: host.status || "disconnected"
+    }));
+  }, []);
   
   return {
     hostProfiles,
+    allProfiles,
     handleProfileChange,
-    getProfileById
+    getProfileById,
+    addInstanceToProfile,
+    getAvailableHosts
   };
 }
