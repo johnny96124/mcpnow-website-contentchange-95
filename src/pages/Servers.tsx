@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -226,7 +225,6 @@ const Servers = () => {
         description: `${data.name} has been updated successfully.`,
       });
     } else {
-      // For new instances, use the server definition's pre-configured values
       const connectionDetails = selectedDefinition.type === 'HTTP_SSE' 
         ? (data.url || selectedDefinition.url || `http://localhost:${3000 + instances.length}`) 
         : `localhost:${3000 + instances.length}`;
@@ -318,6 +316,8 @@ const Servers = () => {
     
     const updatedDefinition: ServerDefinition = {
       ...selectedDefinition,
+      name: data.name || selectedDefinition.name,
+      description: data.description || selectedDefinition.description,
       url: selectedDefinition.type === 'HTTP_SSE' ? data.url : undefined,
       commandArgs: selectedDefinition.type === 'STDIO' ? data.commandArgs : undefined,
       environment: selectedDefinition.type === 'STDIO' ? data.environment : {},
@@ -336,7 +336,7 @@ const Servers = () => {
     
     toast({
       title: "Server Updated",
-      description: `${selectedDefinition.name} has been updated successfully.`,
+      description: `${updatedDefinition.name} has been updated successfully.`,
     });
   };
 
