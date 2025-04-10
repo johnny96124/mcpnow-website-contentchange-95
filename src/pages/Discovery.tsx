@@ -2,23 +2,19 @@
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
+  Check,
   CheckCircle,
-  ChevronDown, 
   ChevronLeft,
   Clock,
   Download, 
   Eye,
   ExternalLink,
-  Filter,
   FolderOpen,
   Globe,
-  Info,
   Link2, 
   Loader2,
   Search,
-  Star,
   Tag,
-  TrendingUp,
   Users,
   X
 } from "lucide-react";
@@ -58,8 +54,22 @@ import {
 const ITEMS_PER_PAGE = 12; // Increased to show more items initially
 
 // Extended to have more variety in the data for presentation
-const extendedItems = [
-  ...discoveryItems,
+interface EnhancedServerDefinition extends ServerDefinition {
+  views?: number;
+  forks?: number;
+  watches?: number;
+  updated?: string;
+  trending?: boolean;
+  author?: string;
+}
+
+const extendedItems: EnhancedServerDefinition[] = [
+  ...discoveryItems.map(item => ({
+    ...item,
+    views: Math.floor(Math.random() * 50000) + 1000,
+    updated: "2025-03-15",
+    author: item.author || "API Team"
+  })),
   // Add trending items with higher view counts and recent updates
   ...discoveryItems.map((item, index) => ({
     ...item,
@@ -99,20 +109,10 @@ const mockCategories = [
   "Automation"
 ];
 
-// Enhanced server definition for our design
-interface EnhancedServerDefinition extends ServerDefinition {
-  views?: number;
-  forks?: number;
-  watches?: number;
-  updated?: string;
-  trending?: boolean;
-  author?: string;
-}
-
 const Discovery = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("trending");
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [selectedServer, setSelectedServer] = useState<EnhancedServerDefinition | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
@@ -121,6 +121,7 @@ const Discovery = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [allCategories, setAllCategories] = useState<string[]>(mockCategories);
   const [sortOption, setSortOption] = useState("popular");
+  const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -146,13 +147,12 @@ const Discovery = () => {
     );
 
     // Filter by tab selection
-    if (activeTab === "trending") {
-      filtered = filtered.filter(server => server.trending);
-    } else if (activeTab === "official") {
+    if (activeTab === "official") {
       filtered = filtered.filter(server => server.isOfficial);
     } else if (activeTab === "community") {
       filtered = filtered.filter(server => !server.isOfficial);
     }
+    // No filtering for "all" tab
 
     // Sort based on selected option
     if (sortOption === "popular") {
@@ -275,14 +275,6 @@ const Discovery = () => {
               <FolderOpen className="mr-2 h-4 w-4" />
               My Servers
             </Button>
-            
-            <Button 
-              variant="outline"
-              className="bg-transparent border-white/30 text-white hover:bg-white/10"
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              View Trending
-            </Button>
           </div>
         </div>
         
@@ -310,11 +302,6 @@ const Discovery = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-10 gap-1">
-              <Filter className="h-4 w-4" />
-              Filters
-            </Button>
-            
             <Select value={sortOption} onValueChange={setSortOption}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Sort by" />
@@ -329,7 +316,7 @@ const Discovery = () => {
         </div>
         
         <Tabs 
-          defaultValue="trending" 
+          defaultValue="all" 
           className="w-full" 
           value={activeTab}
           onValueChange={setActiveTab}
@@ -337,11 +324,10 @@ const Discovery = () => {
           <div className="flex justify-between items-center border-b pb-1">
             <TabsList className="bg-transparent p-0 h-9">
               <TabsTrigger 
-                value="trending" 
+                value="all" 
                 className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
               >
-                <TrendingUp className="h-4 w-4 mr-1" />
-                Trending
+                All
               </TabsTrigger>
               <TabsTrigger 
                 value="official"
@@ -356,12 +342,6 @@ const Discovery = () => {
               >
                 <Users className="h-4 w-4 mr-1" />
                 Community
-              </TabsTrigger>
-              <TabsTrigger 
-                value="all"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-              >
-                All
               </TabsTrigger>
             </TabsList>
             
@@ -420,12 +400,6 @@ const Discovery = () => {
                         <div className="flex items-center gap-1.5 mt-1">
                           <EndpointLabel type={server.type} />
                           {server.isOfficial && <OfficialBadge />}
-                          {server.trending && (
-                            <Badge className="bg-orange-100 text-orange-700 border-orange-200 text-[10px] py-0 h-5">
-                              <TrendingUp className="h-3 w-3 mr-0.5" />
-                              Trending
-                            </Badge>
-                          )}
                         </div>
                       </div>
                       
@@ -444,26 +418,6 @@ const Discovery = () => {
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                       {server.description}
                     </p>
-                    
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {server.categories?.slice(0, 3).map(category => (
-                        <Badge 
-                          key={category} 
-                          variant="outline" 
-                          className="bg-blue-50 border-blue-100 text-blue-700 text-[10px] py-0 px-1.5"
-                        >
-                          {category}
-                        </Badge>
-                      ))}
-                      {server.categories && server.categories.length > 3 && (
-                        <Badge 
-                          variant="outline" 
-                          className="bg-gray-50 border-gray-100 text-gray-600 text-[10px] py-0 px-1.5"
-                        >
-                          +{server.categories.length - 3}
-                        </Badge>
-                      )}
-                    </div>
                   </CardContent>
                   
                   <CardFooter className="px-5 py-4 border-t flex justify-between bg-gray-50 dark:bg-gray-900">
@@ -488,11 +442,27 @@ const Discovery = () => {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100 h-8"
+                        className={`
+                          h-8
+                          ${installedButtonHover[server.id] ? 
+                            "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" : 
+                            "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"}
+                        `}
                         onClick={handleNavigateToServers}
+                        onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: true }))}
+                        onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: false }))}
                       >
-                        <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                        Installed
+                        {installedButtonHover[server.id] ? (
+                          <>
+                            <Check className="h-3.5 w-3.5 mr-1" />
+                            Check
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                            Installed
+                          </>
+                        )}
                       </Button>
                     ) : isInstalling[server.id] ? (
                       <Button variant="outline" size="sm" disabled className="bg-blue-50 text-blue-600 border-blue-200 h-8">
@@ -705,11 +675,27 @@ const Discovery = () => {
                 {installedServers[selectedServer.id] ? (
                   <Button 
                     variant="outline" 
-                    className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                    className={`
+                      ${installedButtonHover[selectedServer.id] ?
+                        "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" :
+                        "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                      }
+                    `}
                     onClick={handleNavigateToServers}
+                    onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: true }))}
+                    onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: false }))}
                   >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Installed
+                    {installedButtonHover[selectedServer.id] ? (
+                      <>
+                        <Check className="h-4 w-4 mr-1" />
+                        Check
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Installed
+                      </>
+                    )}
                   </Button>
                 ) : isInstalling[selectedServer.id] ? (
                   <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
