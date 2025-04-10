@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ServerDefinition, Profile } from "@/data/mockData";
+import { Layers } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AddToProfileDialogProps {
   open: boolean;
@@ -62,6 +64,21 @@ export function AddToProfileDialog({
         </DialogHeader>
 
         <div className="py-4">
+          {/* What is a Profile explanation box */}
+          <Alert className="bg-blue-50 dark:bg-blue-950/30 rounded-md p-4 border border-blue-100 dark:border-blue-900 mb-4">
+            <div className="flex gap-2 items-center">
+              <Layers className="h-4 w-4 text-blue-500" />
+              <h3 className="font-medium text-blue-800 dark:text-blue-300">
+                What is a Profile?
+              </h3>
+            </div>
+            <AlertDescription className="mt-2 text-sm text-blue-700 dark:text-blue-400">
+              Profiles are groups of server instances that work together. By organizing instances into profiles, 
+              you can manage and deploy related services as a single unit. A profile can contain multiple 
+              instances of different server types.
+            </AlertDescription>
+          </Alert>
+
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
