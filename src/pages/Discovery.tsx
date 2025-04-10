@@ -13,6 +13,7 @@ import {
   Link2, 
   Loader2,
   Search,
+  Star,
   Tag,
   Users,
   Watch,
@@ -83,7 +84,8 @@ const extendedItems: EnhancedServerDefinition[] = [
     trending: true,
     forks: Math.floor(Math.random() * 100) + 30,
     watches: Math.floor(Math.random() * 1000) + 200,
-    author: item.author || "API Team"
+    author: item.author || "API Team",
+    downloads: Math.floor(Math.random() * 5000) + 500
   })),
   ...discoveryItems.map((item, index) => ({
     ...item,
@@ -93,7 +95,9 @@ const extendedItems: EnhancedServerDefinition[] = [
     views: Math.floor(Math.random() * 50000) + 1000,
     updated: "2025-02-15",
     author: "Community Contributor",
-    categories: [...(item.categories || []), "Community"]
+    categories: [...(item.categories || []), "Community"],
+    downloads: Math.floor(Math.random() * 2000) + 100,
+    watches: Math.floor(Math.random() * 500) + 50
   }))
 ];
 
@@ -167,11 +171,46 @@ const Discovery = () => {
         const dateB = b.updated ? new Date(b.updated).getTime() : 0;
         return dateB - dateA;
       });
-    } else if (sortOption === "forks") {
-      filtered.sort((a, b) => (b.forks || 0) - (a.forks || 0));
+    } else if (sortOption === "installed") {
+      filtered.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+    } else if (sortOption === "stars") {
+      filtered.sort((a, b) => (b.watches || 0) - (a.watches || 0));
     }
 
     return filtered;
+  };
+
+  const getCardStatIcon = (server: EnhancedServerDefinition) => {
+    if (sortOption === "popular") {
+      return (
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Eye className="h-3.5 w-3.5 mr-1" />
+          {formatNumber(server.views || 0)}
+        </div>
+      );
+    } else if (sortOption === "installed") {
+      return (
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Download className="h-3.5 w-3.5 mr-1" />
+          {formatNumber(server.downloads || 0)}
+        </div>
+      );
+    } else if (sortOption === "stars") {
+      return (
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Star className="h-3.5 w-3.5 mr-1" />
+          {formatNumber(server.watches || 0)}
+        </div>
+      );
+    }
+    
+    // Default to views
+    return (
+      <div className="flex items-center text-xs text-muted-foreground">
+        <Eye className="h-3.5 w-3.5 mr-1" />
+        {formatNumber(server.views || 0)}
+      </div>
+    );
   };
 
   const filteredServers = getFilteredServers();
@@ -342,9 +381,24 @@ const Discovery = () => {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="recent">Recently Updated</SelectItem>
-                <SelectItem value="forks">Most Forked</SelectItem>
+                <SelectItem value="popular">
+                  <div className="flex items-center">
+                    <Eye className="h-4 w-4 mr-2 text-blue-600" />
+                    Most Popular
+                  </div>
+                </SelectItem>
+                <SelectItem value="installed">
+                  <div className="flex items-center">
+                    <Download className="h-4 w-4 mr-2 text-green-600" />
+                    Most Installed
+                  </div>
+                </SelectItem>
+                <SelectItem value="stars">
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 mr-2 text-amber-500" />
+                    Most Stars
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -438,10 +492,7 @@ const Discovery = () => {
                       </div>
                       
                       <div className="flex items-center gap-1.5">
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Eye className="h-3.5 w-3.5 mr-1" />
-                          {formatNumber(server.views || 0)}
-                        </div>
+                        {getCardStatIcon(server)}
                       </div>
                     </div>
                   </CardHeader>
