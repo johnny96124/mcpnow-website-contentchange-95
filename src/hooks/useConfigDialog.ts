@@ -14,12 +14,55 @@ interface ConfigDialogState {
   isUpdateMode?: boolean;
 }
 
-export function useConfigDialog(mockJsonConfig: any) {
+export function useConfigDialog() {
+  // Sample config with multiple MCP services
+  const mockJsonConfig = {
+    "mcpServers": {
+      "filesystem": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "/Users/username/Desktop",
+          "/path/to/other/allowed/dir"
+        ]
+      },
+      "database": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-database",
+          "--host",
+          "localhost",
+          "--port",
+          "5432",
+          "--username",
+          "admin",
+          "--password",
+          "password123"
+        ]
+      },
+      "mcpnow": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-network",
+          "--listen",
+          "0.0.0.0:8080",
+          "--protocol",
+          "http",
+          "--timeout",
+          "30000"
+        ]
+      }
+    }
+  };
+  
   const [configDialog, setConfigDialog] = useState<ConfigDialogState>({
     isOpen: false,
     hostId: null,
     configPath: "",
-    configContent: "",
+    configContent: JSON.stringify(mockJsonConfig, null, 2),
     allowPathEdit: false,
     isViewOnly: false,
     isFixMode: false,
@@ -63,7 +106,7 @@ export function useConfigDialog(mockJsonConfig: any) {
       isOpen: false,
       hostId: null,
       configPath: "",
-      configContent: "",
+      configContent: JSON.stringify(mockJsonConfig, null, 2),
       allowPathEdit: false,
       isViewOnly: false,
       isFixMode: false,

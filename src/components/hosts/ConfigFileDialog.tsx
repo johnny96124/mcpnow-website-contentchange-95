@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Save, AlertTriangle, RotateCw, RefreshCw, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -224,6 +225,7 @@ export function ConfigFileDialog({
           
           let formatted = JSON.stringify(parsed, null, 2);
           
+          // Updated regex to highlight all mcpnow-related content including command and args
           const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
           
           formatted = formatted.replace(mcpnowRegex, (match) => {
