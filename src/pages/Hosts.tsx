@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useMemo, memo } from "react";
+import { useState } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
@@ -37,9 +37,6 @@ const mockJsonConfig = {
   }
 };
 
-// Create a memoized host card component to prevent unnecessary re-renders
-const MemoizedHostCard = memo(HostCard);
-
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
@@ -54,22 +51,19 @@ const Hosts = () => {
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
-  const filteredHosts = useMemo(() => 
-    hostsList.filter(host => 
-      host.name.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-    [hostsList, searchQuery]
+  const filteredHosts = hostsList.filter(host => 
+    host.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const clearSearch = useCallback(() => setSearchQuery(""), []);
+  const clearSearch = () => setSearchQuery("");
 
-  const getProfileEndpoint = useCallback((profileId: string) => {
+  const getProfileEndpoint = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     return profile ? profile.endpoint : null;
-  }, []);
+  };
 
   // Updated to handle view mode
-  const handleOpenConfigDialog = useCallback((hostId: string) => {
+  const handleOpenConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
@@ -85,10 +79,10 @@ const Hosts = () => {
         variant: "destructive"
       });
     }
-  }, [hostsList, hostProfiles, getProfileEndpoint, openConfigDialog, toast]);
+  };
 
   // New function to handle fixing config
-  const handleFixConfigDialog = useCallback((hostId: string) => {
+  const handleFixConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
       const profileId = hostProfiles[host.id] || '';
@@ -96,9 +90,9 @@ const Hosts = () => {
       
       openConfigDialog(hostId, host.configPath, profileEndpoint, true, false, false, true);
     }
-  }, [hostsList, hostProfiles, getProfileEndpoint, openConfigDialog]);
+  };
   
-  const handleCreateConfig = useCallback((hostId: string, profileId: string) => {
+  const handleCreateConfig = (hostId: string, profileId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     
     if (host) {
@@ -109,9 +103,9 @@ const Hosts = () => {
       setConfigPath(defaultConfigPath);
       setCreateConfigOpen(true);
     }
-  }, [hostsList]);
+  };
   
-  const handleConfirmCreateConfig = useCallback(() => {
+  const handleConfirmCreateConfig = () => {
     if (currentHostId && currentProfileId) {
       // Update the host with the new config
       setHostsList(prev => prev.map(host => 
@@ -138,9 +132,9 @@ const Hosts = () => {
         setConfigPath("");
       }, 100);
     }
-  }, [currentHostId, currentProfileId, configPath, toast]);
+  };
 
-  const handleScanForHosts = useCallback(() => {
+  const handleScanForHosts = () => {
     setIsScanning(true);
     
     setTimeout(() => {
@@ -161,9 +155,9 @@ const Hosts = () => {
         description: "A new local host has been found and added to your hosts list.",
       });
     }, 2500);
-  }, [toast]);
+  };
 
-  const handleAddHost = useCallback((newHost: {
+  const handleAddHost = (newHost: {
     name: string;
     configPath?: string;
     icon?: string;
@@ -176,15 +170,15 @@ const Hosts = () => {
       ...newHost
     };
     
-    setHostsList(prev => [...prev, host]);
+    setHostsList([...hostsList, host]);
     
     toast({
       title: "Host Added",
       description: `${newHost.name} has been added successfully`,
     });
-  }, [toast]);
+  };
 
-  const generateDefaultConfig = useCallback((profileId: string) => {
+  const generateDefaultConfig = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     
     if (!profile) return "{}";
@@ -203,10 +197,10 @@ const Hosts = () => {
     };
     
     return JSON.stringify(defaultConfig, null, 2);
-  }, []);
+  };
 
   // Updated handler for fixing configs
-  const handleFixConfig = useCallback((config: string, configPath: string) => {
+  const handleFixConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => 
         host.id === configDialog.hostId
@@ -225,42 +219,7 @@ const Hosts = () => {
       title: "Configuration fixed",
       description: "The configuration has been updated to match the profile.",
     });
-  }, [configDialog.hostId, resetConfigDialog, toast]);
-
-  // Prepare the skeleton component for scanning state outside render
-  const ScanningHostSkeleton = useMemo(() => (
-    <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
-      <div className="bg-muted/50 p-6 pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-6 rounded-full" />
-            <Skeleton className="h-6 w-32" />
-          </div>
-          <Skeleton className="h-6 w-24" />
-        </div>
-      </div>
-      <div className="p-6 space-y-4">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-20 w-full" />
-        </div>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-9 w-1/2" />
-            <Skeleton className="h-9 w-1/2" />
-          </div>
-        </div>
-      </div>
-    </div>
-  ), []);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -300,18 +259,50 @@ const Hosts = () => {
       {filteredHosts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
           {filteredHosts.map(host => (
-            <MemoizedHostCard
+            <HostCard
               key={host.id}
               host={host}
               profileId={hostProfiles[host.id] || ''}
               onProfileChange={handleProfileChange}
               onOpenConfigDialog={handleOpenConfigDialog}
               onCreateConfig={handleCreateConfig}
-              onFixConfig={handleFixConfigDialog}
+              onFixConfig={handleFixConfigDialog} // New prop for fixing configs
             />
           ))}
           
-          {isScanning && ScanningHostSkeleton}
+          {isScanning && (
+            <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
+              <div className="bg-muted/50 p-6 pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-1/2" />
+                    <Skeleton className="h-9 w-1/2" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <NoSearchResults query={searchQuery} onClear={clearSearch} />
