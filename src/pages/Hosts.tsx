@@ -11,12 +11,19 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { ConnectionStatus, Host, profiles } from "@/data/mockData";
+import { Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Define the acceptable connection status types
+type AllowedConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'connecting';
 
 const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [hostsList, setHostsList] = useState<Host[]>(hosts);
+  const [hostsList, setHostsList] = useState<Host[]>(hosts.map(host => ({
+    ...host,
+    // Convert any 'unknown' status to 'disconnected' as required
+    connectionStatus: host.connectionStatus === 'unknown' ? 'disconnected' as const : host.connectionStatus
+  })));
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   
@@ -75,12 +82,12 @@ const Hosts = () => {
     
     setTimeout(() => {
       const newHostId = `host-${Date.now()}`;
-      const newHost: Host = {
+      const newHost = {
         id: newHostId,
         name: "Local Host",
         icon: "💻",
-        connectionStatus: "disconnected",
-        configStatus: "misconfigured",
+        connectionStatus: "disconnected" as AllowedConnectionStatus,
+        configStatus: "misconfigured" as const,
       };
       
       setHostsList(prevHosts => [...prevHosts, newHost]);
@@ -98,10 +105,10 @@ const Hosts = () => {
     configPath?: string;
     icon?: string;
     configStatus: "configured" | "misconfigured";
-    connectionStatus: ConnectionStatus;
+    connectionStatus: AllowedConnectionStatus;
   }) => {
     const id = `host-${Date.now()}`;
-    const host: Host = {
+    const host = {
       id,
       ...newHost
     };
@@ -122,8 +129,8 @@ const Hosts = () => {
           ? { 
               ...host, 
               configPath,
-              configStatus: 'configured',
-              connectionStatus: 'connected'  // Update connection status when config is fixed
+              configStatus: 'configured' as const,
+              connectionStatus: 'connected' as AllowedConnectionStatus  // Update connection status when config is fixed
             }
           : host
       ));
@@ -248,3 +255,4 @@ const Hosts = () => {
 };
 
 export default Hosts;
+
