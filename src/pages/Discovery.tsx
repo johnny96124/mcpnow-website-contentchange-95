@@ -479,10 +479,10 @@ const Discovery = () => {
               {visibleServers.map(server => (
                 <Card 
                   key={server.id} 
-                  className="flex flex-col overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-800 cursor-pointer group relative hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100 dark:hover:shadow-blue-900/30"
+                  className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
                   onClick={() => handleViewDetails(server)}
                 >
-                  <div className="absolute inset-0 bg-blue-50/50 dark:bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">
                       <div className="flex flex-col">
