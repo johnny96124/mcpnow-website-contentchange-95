@@ -39,7 +39,7 @@ import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -52,7 +52,6 @@ import {
 } from "@/components/ui/select";
 
 const ITEMS_PER_PAGE = 12; // Increased to show more items initially
-const HIGHLIGHT_DURATION = 5000; // 5 seconds for highlighting
 
 // Extended to have more variety in the data for presentation
 interface EnhancedServerDefinition extends ServerDefinition {
@@ -123,57 +122,12 @@ const Discovery = () => {
   const [allCategories, setAllCategories] = useState<string[]>(mockCategories);
   const [sortOption, setSortOption] = useState("popular");
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
-  const [highlightedServerId, setHighlightedServerId] = useState<string | null>(null);
   
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
   
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const serverRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  // Handle highlighting based on URL params
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const newServerId = queryParams.get('highlight');
-    
-    if (newServerId) {
-      // Mark the server as installed
-      setInstalledServers(prev => ({ ...prev, [newServerId]: true }));
-      
-      // Set the highlighted server
-      setHighlightedServerId(newServerId);
-      
-      // Ensure the server will be visible
-      const server = extendedItems.find(item => item.id === newServerId);
-      if (server) {
-        // Reset filters to make sure the server is visible
-        setSearchQuery("");
-        setSelectedCategory(null);
-        setActiveTab("all");
-        
-        // Scroll to the server card once it's rendered
-        setTimeout(() => {
-          if (serverRefs.current[newServerId]) {
-            serverRefs.current[newServerId]?.scrollIntoView({ 
-              behavior: 'smooth',
-              block: 'center'
-            });
-          }
-        }, 300);
-      }
-      
-      // Clear URL parameter after handling
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-      
-      // Remove highlight after duration
-      setTimeout(() => {
-        setHighlightedServerId(null);
-      }, HIGHLIGHT_DURATION);
-    }
-  }, [location.search]);
 
   useEffect(() => {
     setVisibleItems(ITEMS_PER_PAGE);
@@ -432,12 +386,7 @@ const Discovery = () => {
               {visibleServers.map(server => (
                 <Card 
                   key={server.id} 
-                  ref={el => serverRefs.current[server.id] = el}
-                  className={`
-                    flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 
-                    border border-gray-200 dark:border-gray-800
-                    ${highlightedServerId === server.id ? 'highlighted-server' : ''}
-                  `}
+                  className="flex flex-col overflow-hidden hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-800"
                 >
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">
