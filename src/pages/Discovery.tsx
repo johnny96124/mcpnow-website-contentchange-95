@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -30,7 +29,7 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition } from "@/data/mockData";
+import { discoveryItems, ServerDefinition, profiles } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
@@ -128,6 +127,12 @@ const Discovery = () => {
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
+  
+  // New states for profile management after instance creation
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [createdInstanceId, setCreatedInstanceId] = useState<string | null>(null);
+  const [createdInstanceName, setCreatedInstanceName] = useState("");
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -247,15 +252,52 @@ const Discovery = () => {
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
     
+    // Generate a random instance ID for demo purposes
+    const instanceId = `inst-${Date.now()}`;
+    
     toast({
       title: "Instance Created",
       description: `${data.name} has been created successfully.`,
     });
     
     setAddInstanceOpen(false);
+    setCreatedInstanceId(instanceId);
+    setCreatedInstanceName(data.name);
+    setIsProfileDialogOpen(true);
+  };
+
+  const handleProfileSelection = () => {
+    // Close profile dialog
+    setIsProfileDialogOpen(false);
     
-    // Navigate to servers page after instance creation
-    navigate("/servers");
+    if (!selectedProfileId || !createdInstanceId) {
+      toast({
+        title: "No profile selected",
+        description: "Instance created but not added to any profile.",
+      });
+      return;
+    }
+    
+    // In a real app, this would add the instance to the selected profile
+    toast({
+      title: "Instance added to profile",
+      description: `${createdInstanceName} has been added to the selected profile.`,
+    });
+  };
+
+  const handleApplyToHost = () => {
+    if (!selectedProfileId) {
+      toast({
+        title: "No profile selected",
+        description: "Please select a profile before applying to a host.",
+      });
+      return;
+    }
+    
+    handleProfileSelection();
+    
+    // Navigate to hosts page
+    navigate("/hosts");
   };
 
   const handleNavigateToServers = () => {
@@ -753,6 +795,63 @@ const Discovery = () => {
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
       />
+      
+      {/* Profile Selection Dialog */}
+      <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Instance to Profile</DialogTitle>
+            <DialogDescription>
+              Add your new instance to a profile to use it with hosts.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Instance Created</h3>
+              <div className="flex items-center p-2 bg-green-50 border border-green-200 rounded-md">
+                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                <span className="text-green-700">{createdInstanceName}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Select Profile</h3>
+              <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profiles.map(profile => (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Profiles allow you to group instances for use with different hosts.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
+            <Button variant="outline" onClick={() => setIsProfileDialogOpen(false)}>
+              Skip
+            </Button>
+            <Button onClick={handleProfileSelection}>
+              Add to Profile
+            </Button>
+            <Button 
+              variant="default" 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleApplyToHost}
+            >
+              Apply Profile to Host
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
