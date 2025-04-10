@@ -15,6 +15,7 @@ import {
   Search,
   Star,
   Tag,
+  UserRound,
   Users,
   Watch,
   X
@@ -513,8 +514,8 @@ const Discovery = () => {
                       <div className="flex flex-col text-xs text-muted-foreground">
                         {server.author && (
                           <div className="flex items-center mb-1">
-                            <StatusIndicator status="verified" size="sm" />
-                            <span className="ml-1 font-medium break-words line-clamp-1 max-w-[130px]">
+                            <UserRound className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
+                            <span className="ml-1 font-medium break-words max-w-[130px]">
                               {server.author}
                             </span>
                           </div>
@@ -683,6 +684,7 @@ const Discovery = () => {
                       <div>
                         <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-0.5">Author</h3>
                         <div className="flex items-center">
+                          <UserRound className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
                           <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
                             {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
                           </span>
