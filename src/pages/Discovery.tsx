@@ -511,22 +511,24 @@ const Discovery = () => {
                   
                   <CardFooter className="px-5 py-4 border-t flex flex-col gap-2 bg-gray-50 dark:bg-gray-900">
                     <div className="flex items-start justify-between w-full">
-                      <div className="flex flex-col text-xs text-muted-foreground">
-                        {server.author && (
-                          <div className="flex items-center mb-1">
-                            <UserRound className="h-3.5 w-3.5 mr-1.5 text-blue-600" />
-                            <span className="ml-1 font-medium break-words max-w-[130px]">
-                              {server.author}
-                            </span>
-                          </div>
-                        )}
-                        
-                        {server.updated && (
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
-                            <span>Updated {getTimeAgo(server.updated)}</span>
-                          </div>
-                        )}
+                      <div className="flex flex-col text-xs text-muted-foreground w-3/5">
+                        <div className="grid grid-cols-1 gap-1">
+                          {server.author && (
+                            <div className="flex items-center">
+                              <UserRound className="h-3.5 w-3.5 mr-1.5 text-blue-600 flex-shrink-0" />
+                              <span className="font-medium">
+                                {server.author}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {server.updated && (
+                            <div className="flex items-center">
+                              <Clock className="h-3 w-3 mr-1.5 text-gray-400 flex-shrink-0" />
+                              <span>Updated {getTimeAgo(server.updated)}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
                       {installedServers[server.id] ? (
