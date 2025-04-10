@@ -9,7 +9,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowRight, Download, Plus } from "lucide-react";
+import { ArrowRight, Download, Plus, Variable, Link as LinkIcon } from "lucide-react";
 import { Card, CardContent, CardDescription } from "@/components/ui/card";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,6 +31,8 @@ const serverFormSchema = z.object({
   description: z.string().max(100, { 
     message: "Description must not exceed 100 characters" 
   }).optional(),
+  environment: z.record(z.string(), z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
 });
 
 type ServerFormValues = z.infer<typeof serverFormSchema>;
@@ -44,6 +46,10 @@ export function AddServerDialog({
   const [activeTab, setActiveTab] = useState<"local" | "discovery">("local");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [commandArgsError, setCommandArgsError] = useState<string | null>(null);
+  const [showEnvironmentVars, setShowEnvironmentVars] = useState(false);
+  const [showUrlParams, setShowUrlParams] = useState(false);
+  const [environmentVars, setEnvironmentVars] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
+  const [urlParams, setUrlParams] = useState<{ key: string; value: string }[]>([{ key: "", value: "" }]);
   const { toast } = useToast();
   
   const form = useForm<ServerFormValues>({
@@ -54,6 +60,8 @@ export function AddServerDialog({
       url: "",
       commandArgs: "",
       description: "",
+      environment: {},
+      headers: {},
     },
   });
   
@@ -64,9 +72,11 @@ export function AddServerDialog({
     if (serverType === "HTTP_SSE") {
       form.setValue("commandArgs", "");
       setCommandArgsError(null);
+      setShowEnvironmentVars(false);
     } else {
       form.setValue("url", "");
       setUrlError(null);
+      setShowUrlParams(false);
     }
   }, [serverType, form]);
   
@@ -92,6 +102,72 @@ export function AddServerDialog({
     }
     
     return isValid;
+  };
+  
+  const handleEnvironmentVarChange = (index: number, field: 'key' | 'value', value: string) => {
+    const newVars = [...environmentVars];
+    newVars[index][field] = value;
+    setEnvironmentVars(newVars);
+    
+    // Update the form value
+    const envObject: Record<string, string> = {};
+    newVars.forEach(item => {
+      if (item.key.trim()) { // Only add if key is not empty
+        envObject[item.key] = item.value;
+      }
+    });
+    form.setValue("environment", envObject);
+  };
+  
+  const handleUrlParamChange = (index: number, field: 'key' | 'value', value: string) => {
+    const newParams = [...urlParams];
+    newParams[index][field] = value;
+    setUrlParams(newParams);
+    
+    // Update the form value
+    const headerObject: Record<string, string> = {};
+    newParams.forEach(item => {
+      if (item.key.trim()) { // Only add if key is not empty
+        headerObject[item.key] = item.value;
+      }
+    });
+    form.setValue("headers", headerObject);
+  };
+  
+  const addEnvironmentVar = () => {
+    setEnvironmentVars([...environmentVars, { key: "", value: "" }]);
+  };
+  
+  const addUrlParam = () => {
+    setUrlParams([...urlParams, { key: "", value: "" }]);
+  };
+  
+  const removeEnvironmentVar = (index: number) => {
+    const newVars = environmentVars.filter((_, i) => i !== index);
+    setEnvironmentVars(newVars);
+    
+    // Update the form value
+    const envObject: Record<string, string> = {};
+    newVars.forEach(item => {
+      if (item.key.trim()) {
+        envObject[item.key] = item.value;
+      }
+    });
+    form.setValue("environment", envObject);
+  };
+  
+  const removeUrlParam = (index: number) => {
+    const newParams = urlParams.filter((_, i) => i !== index);
+    setUrlParams(newParams);
+    
+    // Update the form value
+    const headerObject: Record<string, string> = {};
+    newParams.forEach(item => {
+      if (item.key.trim()) {
+        headerObject[item.key] = item.value;
+      }
+    });
+    form.setValue("headers", headerObject);
   };
   
   const onSubmit = (data: ServerFormValues) => {
@@ -226,6 +302,114 @@ export function AddServerDialog({
                       </FormItem>
                     )}
                   />
+                )}
+                
+                {serverType === "STDIO" && (
+                  <div className="space-y-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setShowEnvironmentVars(!showEnvironmentVars)}
+                    >
+                      <Variable className="mr-2 h-4 w-4" />
+                      Configure Environment Variables
+                    </Button>
+                    
+                    {showEnvironmentVars && (
+                      <div className="space-y-3 p-3 border rounded-md bg-secondary/10">
+                        <div className="text-sm font-medium">Environment Variables</div>
+                        {environmentVars.map((env, index) => (
+                          <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2">
+                            <Input
+                              placeholder="Key"
+                              value={env.key}
+                              onChange={(e) => handleEnvironmentVarChange(index, 'key', e.target.value)}
+                              className="text-xs"
+                            />
+                            <Input
+                              placeholder="Value"
+                              value={env.value}
+                              onChange={(e) => handleEnvironmentVarChange(index, 'value', e.target.value)}
+                              className="text-xs"
+                            />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-destructive h-9 w-9 p-0" 
+                              onClick={() => removeEnvironmentVar(index)}
+                            >
+                              <span className="sr-only">Remove</span>
+                              ✕
+                            </Button>
+                          </div>
+                        ))}
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2" 
+                          onClick={addEnvironmentVar}
+                        >
+                          Add Variable
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {serverType === "HTTP_SSE" && (
+                  <div className="space-y-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setShowUrlParams(!showUrlParams)}
+                    >
+                      <LinkIcon className="mr-2 h-4 w-4" />
+                      Configure URL Parameters
+                    </Button>
+                    
+                    {showUrlParams && (
+                      <div className="space-y-3 p-3 border rounded-md bg-secondary/10">
+                        <div className="text-sm font-medium">Header Parameters</div>
+                        {urlParams.map((param, index) => (
+                          <div key={index} className="grid grid-cols-[1fr,1fr,auto] gap-2">
+                            <Input
+                              placeholder="Key"
+                              value={param.key}
+                              onChange={(e) => handleUrlParamChange(index, 'key', e.target.value)}
+                              className="text-xs"
+                            />
+                            <Input
+                              placeholder="Value"
+                              value={param.value}
+                              onChange={(e) => handleUrlParamChange(index, 'value', e.target.value)}
+                              className="text-xs"
+                            />
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-destructive h-9 w-9 p-0" 
+                              onClick={() => removeUrlParam(index)}
+                            >
+                              <span className="sr-only">Remove</span>
+                              ✕
+                            </Button>
+                          </div>
+                        ))}
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2" 
+                          onClick={addUrlParam}
+                        >
+                          Add Parameter
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 )}
                 
                 <FormField
