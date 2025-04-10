@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ const Hosts = () => {
   const [isScanning, setIsScanning] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
-  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog();
+  const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
   const { toast } = useToast();
   
   const filteredHosts = hostsList.filter(host => 
@@ -92,7 +93,7 @@ const Hosts = () => {
         name: "Local Host",
         icon: "💻",
         connectionStatus: "disconnected",
-        configStatus: "misconfigured",
+        configStatus: "unknown",
       };
       
       setHostsList(prevHosts => [...prevHosts, newHost]);
@@ -109,7 +110,7 @@ const Hosts = () => {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured";
+    configStatus: "configured" | "misconfigured" | "unknown";
     connectionStatus: ConnectionStatus;
   }) => {
     const id = `host-${Date.now()}`;

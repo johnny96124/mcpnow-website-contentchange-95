@@ -14,49 +14,12 @@ interface ConfigDialogState {
   isUpdateMode?: boolean;
 }
 
-export function useConfigDialog() {
-  const mockJsonConfig = {
-    "mcpServers": {
-      "mcpnow": {
-        "command": "npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/mcpnow",
-          "http://localhost:8008/mcp"
-        ]
-      },
-      "mcpOpenAI": {
-        "command": "npx",
-        "args": [
-          "@openai/api",
-          "--api-key",
-          "${OPENAI_API_KEY}",
-          "--model",
-          "gpt-4"
-        ]
-      },
-      "mcpLocalLLM": {
-        "command": "python",
-        "args": [
-          "-m",
-          "llm_server",
-          "--model",
-          "mixtral-8x7b",
-          "--port",
-          "8010"
-        ],
-        "env": {
-          "CUDA_VISIBLE_DEVICES": "0"
-        }
-      }
-    }
-  };
-
+export function useConfigDialog(mockJsonConfig: any) {
   const [configDialog, setConfigDialog] = useState<ConfigDialogState>({
     isOpen: false,
     hostId: null,
     configPath: "",
-    configContent: JSON.stringify(mockJsonConfig, null, 2),
+    configContent: "",
     allowPathEdit: false,
     isViewOnly: false,
     isFixMode: false,
@@ -100,7 +63,7 @@ export function useConfigDialog() {
       isOpen: false,
       hostId: null,
       configPath: "",
-      configContent: JSON.stringify(mockJsonConfig, null, 2),
+      configContent: "",
       allowPathEdit: false,
       isViewOnly: false,
       isFixMode: false,
