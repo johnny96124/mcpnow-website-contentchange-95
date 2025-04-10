@@ -83,7 +83,7 @@ export function HostConfigGuideDialog({
                       <Server className="h-4 w-4 text-muted-foreground" />
                       <span>{host.name}</span>
                     </div>
-                    <StatusIndicator status="disconnected" />
+                    <StatusIndicator status="inactive" />
                   </div>
                 ))}
                 {availableHosts.length > 3 && (
