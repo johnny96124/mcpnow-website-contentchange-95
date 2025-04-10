@@ -508,77 +508,80 @@ const Discovery = () => {
                     </p>
                   </CardContent>
                   
-                  <CardFooter className="px-5 py-4 border-t flex justify-between bg-gray-50 dark:bg-gray-900">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      {server.author && (
-                        <>
-                          <StatusIndicator status="verified" size="sm" />
-                          <span className="ml-1 font-medium">{server.author}</span>
-                          <Separator orientation="vertical" className="h-3 mx-2" />
-                        </>
-                      )}
+                  <CardFooter className="px-5 py-4 border-t flex flex-col gap-2 bg-gray-50 dark:bg-gray-900">
+                    <div className="flex items-start justify-between w-full">
+                      <div className="flex flex-col text-xs text-muted-foreground">
+                        {server.author && (
+                          <div className="flex items-center mb-1">
+                            <StatusIndicator status="verified" size="sm" />
+                            <span className="ml-1 font-medium break-words line-clamp-1 max-w-[130px]">
+                              {server.author}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {server.updated && (
+                          <div className="flex items-center">
+                            <Clock className="h-3 w-3 mr-1 text-gray-400 flex-shrink-0" />
+                            <span>Updated {getTimeAgo(server.updated)}</span>
+                          </div>
+                        )}
+                      </div>
                       
-                      {server.updated && (
-                        <div className="flex items-center">
-                          <Clock className="h-3 w-3 mr-1 text-gray-400" />
-                          <span>Updated {getTimeAgo(server.updated)}</span>
-                        </div>
+                      {installedServers[server.id] ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`
+                            h-8
+                            ${installedButtonHover[server.id] ? 
+                              "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" : 
+                              "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"}
+                          `}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNavigateToServers();
+                          }}
+                          onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: true }))}
+                          onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: false }))}
+                        >
+                          {installedButtonHover[server.id] ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 mr-1" />
+                              Check
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" />
+                              Installed
+                            </>
+                          )}
+                        </Button>
+                      ) : isInstalling[server.id] ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          disabled 
+                          className="bg-blue-50 text-blue-600 border-blue-200 h-8"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                          Installing...
+                        </Button>
+                      ) : (
+                        <Button 
+                          size="sm" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleInstall(server.id);
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 h-8 relative z-10"
+                        >
+                          <Download className="h-3.5 w-3.5 mr-1" />
+                          Install
+                        </Button>
                       )}
                     </div>
-                    
-                    {installedServers[server.id] ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className={`
-                          h-8
-                          ${installedButtonHover[server.id] ? 
-                            "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" : 
-                            "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"}
-                        `}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleNavigateToServers();
-                        }}
-                        onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: true }))}
-                        onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [server.id]: false }))}
-                      >
-                        {installedButtonHover[server.id] ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 mr-1" />
-                            Check
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                            Installed
-                          </>
-                        )}
-                      </Button>
-                    ) : isInstalling[server.id] ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        disabled 
-                        className="bg-blue-50 text-blue-600 border-blue-200 h-8"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                        Installing...
-                      </Button>
-                    ) : (
-                      <Button 
-                        size="sm" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleInstall(server.id);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 h-8 relative z-10"
-                      >
-                        <Download className="h-3.5 w-3.5 mr-1" />
-                        Install
-                      </Button>
-                    )}
                   </CardFooter>
                 </Card>
               ))}
