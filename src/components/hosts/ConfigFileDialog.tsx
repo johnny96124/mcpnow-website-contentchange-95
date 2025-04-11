@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -270,7 +271,7 @@ export function ConfigFileDialog({
     }
   }, [isFixMode, isUpdateMode, isCreateMode, open, needsUpdate, hasEndpointMismatch]);
 
-  const dialogTitle = isCreateMode ? "Create Host Configuration" :
+  const dialogTitle = isCreateMode ? "Create Configuration" :
                       isUpdateMode ? "Update Configuration" :
                       isFixMode ? "Fix Configuration" :
                       isViewOnly ? "View Configuration" : "Edit Configuration";
@@ -281,7 +282,7 @@ export function ConfigFileDialog({
                            isViewOnly ? "View configuration file details" :
                            "Edit configuration file details";
 
-  const showConfigurationCreatedAlert = isCreateMode || isUpdateMode || isFixMode;
+  // Removed showConfigurationCreatedAlert as it's no longer needed
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
@@ -312,14 +313,18 @@ export function ConfigFileDialog({
         
         <div className="flex-1 flex flex-col space-y-3 mt-2">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
               <Label htmlFor="configPath" className="text-sm font-medium">Configuration File Path</Label>
-              {isCreateMode && (
-                <div className="text-xs text-blue-600 flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  We recommend keeping the default path
-                </div>
-              )}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[250px]">
+                    MCP now use the default path for each host
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             
             {isCreateMode || isUpdateMode ? (
@@ -390,20 +395,7 @@ export function ConfigFileDialog({
           )}
         </div>
         
-        {showConfigurationCreatedAlert && (
-          <Alert className={isCreateMode ? "bg-green-50 border-green-200 mt-2" : "bg-blue-50 border-blue-200 mt-2"}>
-            {isCreateMode ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Info className="h-4 w-4 text-blue-500" />
-            )}
-            <AlertDescription className={isCreateMode ? "text-green-700" : "text-blue-700"}>
-              {isCreateMode 
-                ? "This configuration will be created automatically. Click 'Create Configuration' to proceed."
-                : "We'll automatically update your configuration to match the selected profile. Click 'Update Configuration' when ready."}
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Removed the green alert box that was here */}
         
         <DialogFooter className="flex justify-end space-x-2">
           {isCreateMode ? (
@@ -414,7 +406,7 @@ export function ConfigFileDialog({
               <Button 
                 onClick={handleSave} 
                 disabled={!!error}
-                className="bg-green-500 hover:bg-green-600 text-white"
+                className="bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <Check className="mr-2 h-4 w-4" />
                 Create Configuration
