@@ -35,6 +35,7 @@ const Hosts = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [showNewHostAlert, setShowNewHostAlert] = useState(false);
   const [newHostId, setNewHostId] = useState<string | null>(null);
+  const [scanError, setScanError] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -133,26 +134,41 @@ const Hosts = () => {
 
   const handleScanForHosts = () => {
     setIsScanning(true);
+    setScanError(false);
     
+    // Simulate scanning for hosts with a 50% chance of finding nothing
     setTimeout(() => {
-      const newId = `host-${Date.now()}`;
-      const newHost: Host = {
-        id: newId,
-        name: "Local Host",
-        icon: "💻",
-        connectionStatus: "disconnected",
-        configStatus: "unknown",
-      };
+      const foundHost = Math.random() > 0.5;
       
-      setHostsList(prevHosts => [...prevHosts, newHost]);
+      if (foundHost) {
+        const newId = `host-${Date.now()}`;
+        const newHost: Host = {
+          id: newId,
+          name: "Local Host",
+          icon: "💻",
+          connectionStatus: "disconnected", // Set to disconnected initially
+          configStatus: "unknown",
+        };
+        
+        setHostsList(prevHosts => [...prevHosts, newHost]);
+        setNewHostId(newId);
+        setShowNewHostAlert(true);
+        
+        toast({
+          title: "Host discovered",
+          description: "A new local host has been found and added to your hosts list.",
+        });
+      } else {
+        // No hosts found case
+        setScanError(true);
+        toast({
+          title: "No hosts found",
+          description: "No new hosts were discovered on your network.",
+          variant: "destructive",
+        });
+      }
+      
       setIsScanning(false);
-      setNewHostId(newId);
-      setShowNewHostAlert(true);
-      
-      toast({
-        title: "Host discovered",
-        description: "A new local host has been found and added to your hosts list.",
-      });
     }, 2500);
   };
 
@@ -166,7 +182,8 @@ const Hosts = () => {
     const id = `host-${Date.now()}`;
     const host: Host = {
       id,
-      ...newHost
+      ...newHost,
+      connectionStatus: "disconnected" // Ensure new hosts start with disconnected status
     };
     
     setHostsList([...hostsList, host]);
@@ -268,6 +285,17 @@ const Hosts = () => {
         searchQuery={searchQuery} 
         onSearchChange={setSearchQuery} 
       />
+      
+      {/* Scan Error Alert - No hosts found */}
+      {scanError && (
+        <Alert className="bg-amber-50 border-amber-200 mb-4">
+          <Info className="h-4 w-4 text-amber-500" />
+          <AlertTitle className="text-amber-700">No New Hosts Found</AlertTitle>
+          <AlertDescription className="text-amber-600">
+            No new hosts were discovered during scanning. You can try again or add a host manually.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {filteredHosts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
