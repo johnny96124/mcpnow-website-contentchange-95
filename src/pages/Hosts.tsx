@@ -33,8 +33,7 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [showNewHostAlert, setShowNewHostAlert] = useState(false);
-  const [newHostId, setNewHostId] = useState<string | null>(null);
+  // Removing the showNewHostAlert and newHostId states as we're removing that UI element
   const [scanError, setScanError] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
@@ -151,13 +150,19 @@ const Hosts = () => {
         };
         
         setHostsList(prevHosts => [...prevHosts, newHost]);
-        setNewHostId(newId);
-        setShowNewHostAlert(true);
         
         toast({
           title: "Host discovered",
           description: "A new local host has been found and added to your hosts list.",
         });
+        
+        // Automatically show a toast with guidance instead of the alert box
+        setTimeout(() => {
+          toast({
+            title: "Configure new host",
+            description: "Configure this host to connect it with your profiles.",
+          });
+        }, 500);
       } else {
         // No hosts found case
         setScanError(true);
@@ -187,13 +192,19 @@ const Hosts = () => {
     };
     
     setHostsList([...hostsList, host]);
-    setNewHostId(id);
-    setShowNewHostAlert(true);
     
     toast({
       title: "Host Added",
       description: `${newHost.name} has been added successfully`,
     });
+    
+    // Show a toast with guidance instead of the alert box
+    setTimeout(() => {
+      toast({
+        title: "Configure new host",
+        description: "Configure this host to connect it with your profiles.",
+      });
+    }, 500);
   };
 
   // Handler for updating/creating configs
@@ -210,26 +221,14 @@ const Hosts = () => {
           : host
       ));
       
-      // If this was for a newly discovered host, automatically show the host profile selector guidance
-      if (newHostId === configDialog.hostId) {
-        setTimeout(() => {
-          setShowNewHostAlert(false);
-          setNewHostId(null);
-          
-          toast({
-            title: "Configuration complete",
-            description: "Now you can select a profile for this host to connect to.",
-          });
-        }, 500);
-      }
+      // Show a toast notification instead of the alert box
+      toast({
+        title: "Configuration complete",
+        description: "Now you can select a profile for this host to connect to.",
+      });
     }
     
     resetConfigDialog();
-  };
-  
-  const dismissNewHostAlert = () => {
-    setShowNewHostAlert(false);
-    setNewHostId(null);
   };
 
   return (
@@ -262,24 +261,7 @@ const Hosts = () => {
         </div>
       </div>
       
-      {showNewHostAlert && newHostId && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertTitle className="text-blue-700">New Host Discovered</AlertTitle>
-          <AlertDescription className="text-blue-600 flex items-center justify-between">
-            <span>Configure this host to connect it with your profiles</span>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-blue-700 border-blue-300 hover:bg-blue-100"
-              onClick={() => handleCreateConfigDialog(newHostId)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Configure Host
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Removed the New Host Discovered Alert Box */}
       
       <HostSearch 
         searchQuery={searchQuery} 
