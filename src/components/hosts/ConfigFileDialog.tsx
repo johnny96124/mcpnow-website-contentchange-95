@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -286,7 +287,14 @@ export function ConfigFileDialog({
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>{dialogTitle}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{dialogTitle}</DialogTitle>
+            {isViewOnly && !needsUpdate && !hasEndpointMismatch && (
+              <Badge className="bg-green-500 text-white">
+                <Check className="h-3 w-3 mr-1" /> Correctly configured
+              </Badge>
+            )}
+          </div>
           <DialogDescription>
             {dialogDescription}
           </DialogDescription>
