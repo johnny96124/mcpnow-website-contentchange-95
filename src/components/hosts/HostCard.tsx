@@ -252,6 +252,8 @@ export function HostCard({
           <div className="flex items-center gap-2">
             <StatusIndicator 
               status={
+                // Always show as disconnected when no profile is selected
+                !profileId ? 'inactive' :
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
@@ -259,6 +261,8 @@ export function HostCard({
                 host.configStatus === 'unknown' ? 'warning' : 'inactive'
               } 
               label={
+                // Always show as disconnected when no profile is selected
+                !profileId ? 'Disconnected' :
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
@@ -395,7 +399,7 @@ export function HostCard({
         {!profileId && (
           <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
             <p className="text-muted-foreground text-center">
-              Select a profile to view connection details
+              Select a profile to connect mcp server to host
             </p>
           </div>
         )}
