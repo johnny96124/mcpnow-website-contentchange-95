@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { PlusCircle, Search, RefreshCw, FileText, Info, AlertCircle } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -35,7 +35,6 @@ const Hosts = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [showNewHostAlert, setShowNewHostAlert] = useState(false);
   const [newHostId, setNewHostId] = useState<string | null>(null);
-  const [noHostsFound, setNoHostsFound] = useState(false);
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -134,40 +133,26 @@ const Hosts = () => {
 
   const handleScanForHosts = () => {
     setIsScanning(true);
-    setNoHostsFound(false); // Reset no hosts found state
     
     setTimeout(() => {
-      // Simulate a scan - 20% chance to find a host, 80% chance to find nothing
-      const hostFound = Math.random() > 0.8;
+      const newId = `host-${Date.now()}`;
+      const newHost: Host = {
+        id: newId,
+        name: "Local Host",
+        icon: "💻",
+        connectionStatus: "disconnected",
+        configStatus: "unknown",
+      };
       
-      if (hostFound) {
-        const newId = `host-${Date.now()}`;
-        const newHost: Host = {
-          id: newId,
-          name: "Local Host",
-          icon: "💻",
-          connectionStatus: "disconnected",
-          configStatus: "unknown",
-        };
-        
-        setHostsList(prevHosts => [...prevHosts, newHost]);
-        setNewHostId(newId);
-        setShowNewHostAlert(true);
-        
-        toast({
-          title: "Host discovered",
-          description: "A new local host has been found and added to your hosts list.",
-        });
-      } else {
-        setNoHostsFound(true);
-        toast({
-          title: "No hosts found",
-          description: "We couldn't find any hosts on your network.",
-          variant: "destructive"
-        });
-      }
-      
+      setHostsList(prevHosts => [...prevHosts, newHost]);
       setIsScanning(false);
+      setNewHostId(newId);
+      setShowNewHostAlert(true);
+      
+      toast({
+        title: "Host discovered",
+        description: "A new local host has been found and added to your hosts list.",
+      });
     }, 2500);
   };
 
@@ -203,7 +188,7 @@ const Hosts = () => {
               ...host, 
               configPath,
               configStatus: 'configured',
-              connectionStatus: 'disconnected'  // Set as disconnected until profile is selected
+              connectionStatus: 'connected'  // Update connection status when config is fixed
             }
           : host
       ));
@@ -331,24 +316,6 @@ const Hosts = () => {
               </div>
             </div>
           )}
-        </div>
-      ) : noHostsFound && !isScanning ? (
-        <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed rounded-lg">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-1">No Hosts Found</h3>
-          <p className="text-muted-foreground mb-4">
-            We couldn't find any hosts on your network. You can try scanning again or add a host manually.
-          </p>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleScanForHosts}>
-              <Search className="h-4 w-4 mr-2" />
-              Scan Again
-            </Button>
-            <Button onClick={() => setAddHostDialogOpen(true)}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Host Manually
-            </Button>
-          </div>
         </div>
       ) : (
         <NoSearchResults query={searchQuery} onClear={clearSearch} />

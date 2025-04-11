@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -69,6 +70,22 @@ export function HostCard({
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown';
+  };
+  
+  const getConfigStatusInfo = () => {
+    if (host.configStatus === 'configured') {
+      return { 
+        icon: <FileCheck className="h-4 w-4 text-green-500" />,
+        text: 'Correctly configured', 
+        color: 'bg-green-100 text-green-800 border-green-200'
+      };
+    } else {
+      return { 
+        icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
+        text: 'No config', 
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
+    }
   };
   
   useEffect(() => {
@@ -190,7 +207,10 @@ export function HostCard({
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
+  const configStatusInfo = getConfigStatusInfo();
   
+  // Configure Host First Flow - Render components based on configuration status
+  // If configuration is needed, simplify the UI to focus on that step first
   if (needsConfiguration) {
     return (
       <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -199,12 +219,16 @@ export function HostCard({
             <div className="flex items-center gap-2">
               {host.icon && <span className="text-xl">{host.icon}</span>}
               <h3 className="font-medium text-lg">{host.name}</h3>
+              
+              <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+                {configStatusInfo.icon}
+                {configStatusInfo.text}
+              </Badge>
             </div>
             <div className="flex items-center gap-2">
               <StatusIndicator 
-                status="none" 
-                label="No Config"
-                useDotIcon={true}
+                status="warning" 
+                label="Needs Configuration"
               />
             </div>
           </div>
@@ -233,10 +257,28 @@ export function HostCard({
             </Button>
           </div>
         </CardContent>
+        
+        <CardFooter className="border-t px-6 py-4 bg-gray-50">
+          <div className="w-full text-sm text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <CircleCheck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div>
+                <span className="font-medium">Step 1:</span> Configure Host
+              </div>
+            </div>
+            <div className="flex items-start gap-2 opacity-50">
+              <CircleCheck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div>
+                <span className="font-medium">Step 2:</span> Select Profile
+              </div>
+            </div>
+          </div>
+        </CardFooter>
       </Card>
     );
   }
   
+  // Standard card UI for already configured hosts
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
@@ -244,6 +286,11 @@ export function HostCard({
           <div className="flex items-center gap-2">
             {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
+            
+            <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+              {configStatusInfo.icon}
+              {configStatusInfo.text}
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
             <StatusIndicator 
@@ -257,7 +304,6 @@ export function HostCard({
               label={
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
-                !profileId ? 'Disconnected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
                 host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
               }
@@ -401,25 +447,16 @@ export function HostCard({
       <Separator className="mt-auto" />
       
       <CardFooter className="mt-2">
-        <div className="flex justify-between w-full">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline"
-              onClick={() => onOpenConfigDialog(host.id)}
-              disabled={!host.configPath}
-              className="flex items-center gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              View Config
-            </Button>
-            
-            {host.configStatus === 'configured' && (
-              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
-                <FileCheck className="h-4 w-4 text-green-500" />
-                Correctly configured
-              </Badge>
-            )}
-          </div>
+        <div className="flex justify-end w-full">
+          <Button 
+            variant="outline"
+            onClick={() => onOpenConfigDialog(host.id)}
+            disabled={!host.configPath}
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            View Config
+          </Button>
         </div>
       </CardFooter>
     </Card>
