@@ -137,8 +137,8 @@ const Hosts = () => {
     setNoHostsFound(false); // Reset no hosts found state
     
     setTimeout(() => {
-      // Simulate a scan - 80% chance to find a host, 20% chance to find nothing
-      const hostFound = Math.random() > 0.2;
+      // Simulate a scan - 20% chance to find a host, 80% chance to find nothing
+      const hostFound = Math.random() > 0.8;
       
       if (hostFound) {
         const newId = `host-${Date.now()}`;
@@ -203,7 +203,7 @@ const Hosts = () => {
               ...host, 
               configPath,
               configStatus: 'configured',
-              connectionStatus: 'connected'  // Update connection status when config is fixed
+              connectionStatus: 'disconnected'  // Set as disconnected until profile is selected
             }
           : host
       ));

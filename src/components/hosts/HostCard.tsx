@@ -204,6 +204,7 @@ export function HostCard({
               <StatusIndicator 
                 status="none" 
                 label="No Config"
+                useDotIcon={true}
               />
             </div>
           </div>
@@ -256,6 +257,7 @@ export function HostCard({
               label={
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
+                !profileId ? 'Disconnected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
                 host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
               }
@@ -400,13 +402,7 @@ export function HostCard({
       
       <CardFooter className="mt-2">
         <div className="flex justify-between w-full">
-          {host.configStatus === 'configured' && (
-            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
-              <FileCheck className="h-4 w-4 text-green-500" />
-              Correctly configured
-            </Badge>
-          )}
-          <div className={host.configStatus === 'configured' ? "" : "ml-auto"}>
+          <div className="flex items-center gap-2">
             <Button 
               variant="outline"
               onClick={() => onOpenConfigDialog(host.id)}
@@ -416,6 +412,13 @@ export function HostCard({
               <FileText className="h-4 w-4" />
               View Config
             </Button>
+            
+            {host.configStatus === 'configured' && (
+              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+                <FileCheck className="h-4 w-4 text-green-500" />
+                Correctly configured
+              </Badge>
+            )}
           </div>
         </div>
       </CardFooter>
