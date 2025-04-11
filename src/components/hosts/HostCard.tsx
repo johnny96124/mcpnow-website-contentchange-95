@@ -72,6 +72,22 @@ export function HostCard({
     return definition ? definition.name : 'Unknown';
   };
   
+  const getConfigStatusInfo = () => {
+    if (host.configStatus === 'configured') {
+      return { 
+        icon: <FileCheck className="h-4 w-4 text-green-500" />,
+        text: 'Correctly configured', 
+        color: 'bg-green-100 text-green-800 border-green-200'
+      };
+    } else {
+      return { 
+        icon: <CircleMinus className="h-4 w-4 text-gray-500" />,
+        text: 'No config', 
+        color: 'bg-gray-100 text-gray-800 border-gray-200'
+      };
+    }
+  };
+  
   useEffect(() => {
     if (profileId) {
       const profile = profiles.find(p => p.id === profileId);
@@ -191,6 +207,7 @@ export function HostCard({
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
+  const configStatusInfo = getConfigStatusInfo();
   
   // Configure Host First Flow - Render components based on configuration status
   // If configuration is needed, simplify the UI to focus on that step first
@@ -202,12 +219,16 @@ export function HostCard({
             <div className="flex items-center gap-2">
               {host.icon && <span className="text-xl">{host.icon}</span>}
               <h3 className="font-medium text-lg">{host.name}</h3>
+              
+              <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+                {configStatusInfo.icon}
+                {configStatusInfo.text}
+              </Badge>
             </div>
             <div className="flex items-center gap-2">
               <StatusIndicator 
-                status="inactive" 
-                label="No Config"
-                useIcon={true}
+                status="warning" 
+                label="Needs Configuration"
               />
             </div>
           </div>
@@ -236,6 +257,23 @@ export function HostCard({
             </Button>
           </div>
         </CardContent>
+        
+        <CardFooter className="border-t px-6 py-4 bg-gray-50">
+          <div className="w-full text-sm text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <CircleCheck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div>
+                <span className="font-medium">Step 1:</span> Configure Host
+              </div>
+            </div>
+            <div className="flex items-start gap-2 opacity-50">
+              <CircleCheck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div>
+                <span className="font-medium">Step 2:</span> Select Profile
+              </div>
+            </div>
+          </div>
+        </CardFooter>
       </Card>
     );
   }
@@ -248,12 +286,15 @@ export function HostCard({
           <div className="flex items-center gap-2">
             {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
+            
+            <Badge variant="outline" className={cn("ml-2 text-xs flex items-center gap-1", configStatusInfo.color)}>
+              {configStatusInfo.icon}
+              {configStatusInfo.text}
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
             <StatusIndicator 
               status={
-                // Always show as disconnected when no profile is selected
-                !profileId ? 'inactive' :
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
                 host.connectionStatus === 'disconnected' ? 'inactive' : 
@@ -261,8 +302,6 @@ export function HostCard({
                 host.configStatus === 'unknown' ? 'warning' : 'inactive'
               } 
               label={
-                // Always show as disconnected when no profile is selected
-                !profileId ? 'Disconnected' :
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
                 host.connectionStatus === 'disconnected' ? 'Disconnected' : 
@@ -399,7 +438,7 @@ export function HostCard({
         {!profileId && (
           <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
             <p className="text-muted-foreground text-center">
-              Select a profile to connect mcp server to host
+              Select a profile to view connection details
             </p>
           </div>
         )}
