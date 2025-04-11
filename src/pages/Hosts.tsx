@@ -13,7 +13,6 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -33,8 +32,7 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  // Removing the showNewHostAlert and newHostId states as we're removing that UI element
-  const [scanError, setScanError] = useState(false);
+  // Remove the scanError state since we won't be showing the alert anymore
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -133,7 +131,6 @@ const Hosts = () => {
 
   const handleScanForHosts = () => {
     setIsScanning(true);
-    setScanError(false);
     
     // Simulate scanning for hosts with a 50% chance of finding nothing
     setTimeout(() => {
@@ -164,8 +161,7 @@ const Hosts = () => {
           });
         }, 500);
       } else {
-        // No hosts found case
-        setScanError(true);
+        // No hosts found case - just show toast notification without setting scanError
         toast({
           title: "No hosts found",
           description: "No new hosts were discovered on your network.",
@@ -261,23 +257,12 @@ const Hosts = () => {
         </div>
       </div>
       
-      {/* Removed the New Host Discovered Alert Box */}
-      
       <HostSearch 
         searchQuery={searchQuery} 
         onSearchChange={setSearchQuery} 
       />
       
-      {/* Scan Error Alert - No hosts found */}
-      {scanError && (
-        <Alert className="bg-amber-50 border-amber-200 mb-4">
-          <Info className="h-4 w-4 text-amber-500" />
-          <AlertTitle className="text-amber-700">No New Hosts Found</AlertTitle>
-          <AlertDescription className="text-amber-600">
-            No new hosts were discovered during scanning. You can try again or add a host manually.
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Removed the "No New Hosts Found" alert that was here */}
       
       {filteredHosts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
