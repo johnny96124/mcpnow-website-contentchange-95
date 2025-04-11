@@ -1,19 +1,14 @@
 
-import { useState } from "react";
-import { Globe, Laptop, Moon, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Laptop, Moon, RefreshCw, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme/theme-provider";
 import { useToast } from "@/components/ui/use-toast";
+
+const DEFAULT_PORT = 8008;
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -21,10 +16,17 @@ const Settings = () => {
   
   const [settings, setSettings] = useState({
     startOnLogin: true,
-    port: 8008,
+    port: DEFAULT_PORT,
     autoUpdate: true,
     minimizeToTray: true
   });
+  
+  const [initialPort, setInitialPort] = useState(settings.port);
+  const [portChanged, setPortChanged] = useState(false);
+  
+  useEffect(() => {
+    setPortChanged(settings.port !== initialPort);
+  }, [settings.port, initialPort]);
   
   const updateSetting = <K extends keyof typeof settings>(key: K, value: typeof settings[K]) => {
     setSettings({
@@ -34,9 +36,21 @@ const Settings = () => {
   };
 
   const handleSavePort = () => {
+    setInitialPort(settings.port);
+    setPortChanged(false);
     toast({
       title: "Port settings saved",
       description: `Default port has been set to ${settings.port}`
+    });
+  };
+  
+  const handleResetPort = () => {
+    updateSetting('port', DEFAULT_PORT);
+    setInitialPort(DEFAULT_PORT);
+    setPortChanged(false);
+    toast({
+      title: "Port reset",
+      description: "Default port has been reset to 8008"
     });
   };
 
@@ -49,8 +63,8 @@ const Settings = () => {
         </p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="md:col-span-2 lg:col-span-1">
+      <div className="grid gap-6">
+        <Card>
           <CardHeader>
             <CardTitle>Application</CardTitle>
             <CardDescription>
@@ -96,10 +110,10 @@ const Settings = () => {
                 onCheckedChange={(checked) => updateSetting('autoUpdate', checked)}
               />
             </div>
-
-            <div className="pt-2 border-t">
+            
+            <div className="space-y-2">
               <label className="text-sm font-medium">Theme</label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-3 gap-2">
                 <Button
                   variant={theme === 'light' ? 'default' : 'outline'}
                   className="w-full justify-start"
@@ -129,46 +143,7 @@ const Settings = () => {
           </CardContent>
         </Card>
         
-        <Card className="md:col-span-2 lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Customize the look and feel of MCP Now
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Language</label>
-              <Select defaultValue="en">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-2" />
-                      English
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="fr">
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-2" />
-                      Français
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="de">
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-2" />
-                      Deutsch
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="md:col-span-2 lg:col-span-1">
+        <Card>
           <CardHeader>
             <CardTitle>Network</CardTitle>
             <CardDescription>
@@ -185,7 +160,19 @@ const Settings = () => {
                   onChange={(e) => updateSetting('port', parseInt(e.target.value))}
                   className="flex-1"
                 />
-                <Button onClick={handleSavePort}>Save</Button>
+                <Button 
+                  onClick={handleSavePort} 
+                  disabled={!portChanged}
+                >
+                  Save
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleResetPort}
+                  title="Reset to default port (8008)"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">
                 This port will be used as the base for HTTP SSE endpoints
