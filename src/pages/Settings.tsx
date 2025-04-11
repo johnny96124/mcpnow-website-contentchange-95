@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { AlarmClock, Globe, Laptop, Moon, Sun } from "lucide-react";
+import { Globe, Laptop, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,15 +13,16 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme/theme-provider";
+import { useToast } from "@/components/ui/use-toast";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   
   const [settings, setSettings] = useState({
     startOnLogin: true,
     port: 8008,
     autoUpdate: true,
-    telemetry: false,
     minimizeToTray: true
   });
   
@@ -29,6 +30,13 @@ const Settings = () => {
     setSettings({
       ...settings,
       [key]: value
+    });
+  };
+
+  const handleSavePort = () => {
+    toast({
+      title: "Port settings saved",
+      description: `Default port has been set to ${settings.port}`
     });
   };
 
@@ -42,7 +50,7 @@ const Settings = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="md:col-span-2 lg:col-span-1">
           <CardHeader>
             <CardTitle>Application</CardTitle>
             <CardDescription>
@@ -88,33 +96,10 @@ const Settings = () => {
                 onCheckedChange={(checked) => updateSetting('autoUpdate', checked)}
               />
             </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium">Send telemetry</label>
-                <p className="text-xs text-muted-foreground">
-                  Help improve MCP Now by sending anonymous usage data
-                </p>
-              </div>
-              <Switch
-                checked={settings.telemetry}
-                onCheckedChange={(checked) => updateSetting('telemetry', checked)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Customize the look and feel of MCP Now
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+
+            <div className="pt-2 border-t">
               <label className="text-sm font-medium">Theme</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 mt-2">
                 <Button
                   variant={theme === 'light' ? 'default' : 'outline'}
                   className="w-full justify-start"
@@ -141,7 +126,17 @@ const Settings = () => {
                 </Button>
               </div>
             </div>
-            
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-2 lg:col-span-1">
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+            <CardDescription>
+              Customize the look and feel of MCP Now
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Language</label>
               <Select defaultValue="en">
@@ -173,90 +168,29 @@ const Settings = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="md:col-span-2 lg:col-span-1">
           <CardHeader>
             <CardTitle>Network</CardTitle>
             <CardDescription>
-              Configure network and proxy settings
+              Configure network settings
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Default Port</label>
-              <Input 
-                type="number" 
-                value={settings.port} 
-                onChange={(e) => updateSetting('port', parseInt(e.target.value))}
-              />
+              <div className="flex items-center gap-2">
+                <Input 
+                  type="number" 
+                  value={settings.port} 
+                  onChange={(e) => updateSetting('port', parseInt(e.target.value))}
+                  className="flex-1"
+                />
+                <Button onClick={handleSavePort}>Save</Button>
+              </div>
               <p className="text-xs text-muted-foreground">
                 This port will be used as the base for HTTP SSE endpoints
               </p>
             </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Port Range</label>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="number" 
-                  defaultValue={8000} 
-                  className="w-24"
-                />
-                <span>to</span>
-                <Input 
-                  type="number" 
-                  defaultValue={9000}
-                  className="w-24" 
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Port range to use for multiple profiles
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Advanced</CardTitle>
-            <CardDescription>
-              Advanced settings for developers
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Log Level</label>
-              <Select defaultValue="info">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="error">Error</SelectItem>
-                  <SelectItem value="warn">Warning</SelectItem>
-                  <SelectItem value="info">Info</SelectItem>
-                  <SelectItem value="debug">Debug</SelectItem>
-                  <SelectItem value="trace">Trace</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Request Timeout (ms)</label>
-              <Input type="number" defaultValue={30000} />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium">Enable Developer Mode</label>
-                <p className="text-xs text-muted-foreground">
-                  Show additional debugging options and log output
-                </p>
-              </div>
-              <Switch defaultChecked={false} />
-            </div>
-            
-            <Button variant="outline" className="w-full">
-              Export Configuration
-            </Button>
           </CardContent>
         </Card>
       </div>
