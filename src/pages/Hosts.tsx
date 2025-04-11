@@ -13,7 +13,6 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -33,8 +32,7 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [showNewHostAlert, setShowNewHostAlert] = useState(false);
-  const [newHostId, setNewHostId] = useState<string | null>(null);
+  // Remove the scanError state since we won't be showing the alert anymore
   
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -134,25 +132,44 @@ const Hosts = () => {
   const handleScanForHosts = () => {
     setIsScanning(true);
     
+    // Simulate scanning for hosts with a 50% chance of finding nothing
     setTimeout(() => {
-      const newId = `host-${Date.now()}`;
-      const newHost: Host = {
-        id: newId,
-        name: "Local Host",
-        icon: "💻",
-        connectionStatus: "disconnected",
-        configStatus: "unknown",
-      };
+      const foundHost = Math.random() > 0.5;
       
-      setHostsList(prevHosts => [...prevHosts, newHost]);
+      if (foundHost) {
+        const newId = `host-${Date.now()}`;
+        const newHost: Host = {
+          id: newId,
+          name: "Local Host",
+          icon: "💻",
+          connectionStatus: "disconnected", // Set to disconnected initially
+          configStatus: "unknown",
+        };
+        
+        setHostsList(prevHosts => [...prevHosts, newHost]);
+        
+        toast({
+          title: "Host discovered",
+          description: "A new local host has been found and added to your hosts list.",
+        });
+        
+        // Automatically show a toast with guidance instead of the alert box
+        setTimeout(() => {
+          toast({
+            title: "Configure new host",
+            description: "Configure this host to connect it with your profiles.",
+          });
+        }, 500);
+      } else {
+        // No hosts found case - just show toast notification without setting scanError
+        toast({
+          title: "No hosts found",
+          description: "No new hosts were discovered on your network.",
+          variant: "destructive",
+        });
+      }
+      
       setIsScanning(false);
-      setNewHostId(newId);
-      setShowNewHostAlert(true);
-      
-      toast({
-        title: "Host discovered",
-        description: "A new local host has been found and added to your hosts list.",
-      });
     }, 2500);
   };
 
@@ -166,17 +183,24 @@ const Hosts = () => {
     const id = `host-${Date.now()}`;
     const host: Host = {
       id,
-      ...newHost
+      ...newHost,
+      connectionStatus: "disconnected" // Ensure new hosts start with disconnected status
     };
     
     setHostsList([...hostsList, host]);
-    setNewHostId(id);
-    setShowNewHostAlert(true);
     
     toast({
       title: "Host Added",
       description: `${newHost.name} has been added successfully`,
     });
+    
+    // Show a toast with guidance instead of the alert box
+    setTimeout(() => {
+      toast({
+        title: "Configure new host",
+        description: "Configure this host to connect it with your profiles.",
+      });
+    }, 500);
   };
 
   // Handler for updating/creating configs
@@ -193,26 +217,14 @@ const Hosts = () => {
           : host
       ));
       
-      // If this was for a newly discovered host, automatically show the host profile selector guidance
-      if (newHostId === configDialog.hostId) {
-        setTimeout(() => {
-          setShowNewHostAlert(false);
-          setNewHostId(null);
-          
-          toast({
-            title: "Configuration complete",
-            description: "Now you can select a profile for this host to connect to.",
-          });
-        }, 500);
-      }
+      // Show a toast notification instead of the alert box
+      toast({
+        title: "Configuration complete",
+        description: "Now you can select a profile for this host to connect to.",
+      });
     }
     
     resetConfigDialog();
-  };
-  
-  const dismissNewHostAlert = () => {
-    setShowNewHostAlert(false);
-    setNewHostId(null);
   };
 
   return (
@@ -245,29 +257,12 @@ const Hosts = () => {
         </div>
       </div>
       
-      {showNewHostAlert && newHostId && (
-        <Alert className="bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4 text-blue-500" />
-          <AlertTitle className="text-blue-700">New Host Discovered</AlertTitle>
-          <AlertDescription className="text-blue-600 flex items-center justify-between">
-            <span>Configure this host to connect it with your profiles</span>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-blue-700 border-blue-300 hover:bg-blue-100"
-              onClick={() => handleCreateConfigDialog(newHostId)}
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Configure Host
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <HostSearch 
         searchQuery={searchQuery} 
         onSearchChange={setSearchQuery} 
       />
+      
+      {/* Removed the "No New Hosts Found" alert that was here */}
       
       {filteredHosts.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2">
