@@ -16,6 +16,7 @@ import Servers from "./pages/Servers";
 import Discovery from "./pages/Discovery";
 import Settings from "./pages/Settings";
 import TrayPopup from "./pages/TrayPopup";
+import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import NotFound from "./pages/NotFound";
 
 // Create a new QueryClient instance
@@ -32,6 +33,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/tray" element={<TrayPopup />} />
+                <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/" element={<DefaultLayout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="empty-dashboard" element={<EmptyDashboard />} />
