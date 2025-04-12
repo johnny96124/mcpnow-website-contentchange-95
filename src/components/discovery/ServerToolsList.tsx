@@ -8,14 +8,25 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, Code, Play, Wrench } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ChevronDown, ChevronUp, Code, Play, Wrench, SendHorizonal } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServerToolsListProps {
   tools?: Tool[];
+  debugMode?: boolean;
+  serverName?: string;
+  instanceId?: string;
 }
 
-export function ServerToolsList({ tools }: ServerToolsListProps) {
+export function ServerToolsList({ tools, debugMode = false, serverName, instanceId }: ServerToolsListProps) {
+  const { toast } = useToast();
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [toolInputs, setToolInputs] = useState<Record<string, Record<string, any>>>({});
+  const [isExecuting, setIsExecuting] = useState<Record<string, boolean>>({});
+  
   if (!tools || tools.length === 0) {
     return (
       <div className="py-8 text-center">
@@ -32,9 +43,58 @@ export function ServerToolsList({ tools }: ServerToolsListProps) {
     );
   }
 
+  const handleInputChange = (toolId: string, paramName: string, value: any) => {
+    setToolInputs(prev => ({
+      ...prev,
+      [toolId]: {
+        ...(prev[toolId] || {}),
+        [paramName]: value
+      }
+    }));
+  };
+
+  const executeTool = (tool: Tool) => {
+    setIsExecuting(prev => ({ ...prev, [tool.id]: true }));
+    
+    // Mock execution with a delay
+    setTimeout(() => {
+      setIsExecuting(prev => ({ ...prev, [tool.id]: false }));
+      
+      toast({
+        title: `Tool Executed: ${tool.name}`,
+        description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
+      });
+    }, 1500);
+  };
+
+  const validateToolInputs = (tool: Tool): boolean => {
+    if (!tool.parameters) return true;
+    
+    const toolParams = toolInputs[tool.id] || {};
+    
+    for (const param of tool.parameters) {
+      if (param.required && (toolParams[param.name] === undefined || toolParams[param.name] === "")) {
+        toast({
+          title: "Validation Error",
+          description: `Parameter "${param.name}" is required.`,
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   return (
     <ScrollArea className="h-[380px] pr-4">
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion 
+        type="single" 
+        collapsible 
+        className="w-full"
+        value={activeToolId || undefined}
+        onValueChange={setActiveToolId}
+      >
         {tools.map((tool) => (
           <AccordionItem key={tool.id} value={tool.id} className="border border-gray-200 dark:border-gray-800 rounded-lg mb-3 overflow-hidden">
             <div className="bg-gray-50 dark:bg-gray-800/50">
@@ -60,9 +120,41 @@ export function ServerToolsList({ tools }: ServerToolsListProps) {
                     </h4>
                     <div className="space-y-3">
                       {tool.parameters.map((param) => (
-                        <ParameterItem key={param.name} parameter={param} />
+                        <ParameterItem 
+                          key={param.name} 
+                          parameter={param} 
+                          debugMode={debugMode}
+                          value={toolInputs[tool.id]?.[param.name] || ""}
+                          onChange={(value) => handleInputChange(tool.id, param.name, value)}
+                        />
                       ))}
                     </div>
+                  </div>
+                )}
+                
+                {debugMode && (
+                  <div className="mt-6 flex justify-end">
+                    <Button 
+                      onClick={() => {
+                        if (validateToolInputs(tool)) {
+                          executeTool(tool);
+                        }
+                      }}
+                      disabled={isExecuting[tool.id]}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {isExecuting[tool.id] ? (
+                        <>
+                          <span className="mr-1 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                          Executing...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-3.5 w-3.5 mr-1.5" />
+                          Execute Tool
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
@@ -76,9 +168,12 @@ export function ServerToolsList({ tools }: ServerToolsListProps) {
 
 interface ParameterItemProps {
   parameter: ToolParameter;
+  debugMode?: boolean;
+  value?: any;
+  onChange?: (value: any) => void;
 }
 
-function ParameterItem({ parameter }: ParameterItemProps) {
+function ParameterItem({ parameter, debugMode = false, value, onChange }: ParameterItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
   return (
@@ -124,6 +219,38 @@ function ParameterItem({ parameter }: ParameterItemProps) {
                 }
               </code>
             </div>
+          )}
+        </div>
+      )}
+      
+      {debugMode && (
+        <div className="mt-2">
+          {parameter.type === 'string' && (
+            <Textarea
+              placeholder={`Enter ${parameter.name} value...`}
+              className="h-20 text-sm"
+              value={value || ''}
+              onChange={(e) => onChange && onChange(e.target.value)}
+            />
+          )}
+          {parameter.type === 'number' && (
+            <input
+              type="number"
+              placeholder={`Enter ${parameter.name} value...`}
+              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+              value={value || ''}
+              onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
+            />
+          )}
+          {parameter.type === 'boolean' && (
+            <select
+              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+              value={value?.toString() || "false"}
+              onChange={(e) => onChange && onChange(e.target.value === "true")}
+            >
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
           )}
         </div>
       )}

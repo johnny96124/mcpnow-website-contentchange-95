@@ -6,7 +6,8 @@ import {
   Terminal,
   Info,
   Search,
-  Edit
+  Edit,
+  Wrench
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +55,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { EditServerDialog, EditServerFormValues } from "@/components/servers/EditServerDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
@@ -72,6 +82,13 @@ const Servers = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, 'success' | 'failed' | 'connecting'>>({});
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
+  const [selectedServerTools, setSelectedServerTools] = useState<{
+    tools?: Tool[];
+    serverName?: string;
+    instanceId?: string;
+    definitionId?: string;
+  }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -364,6 +381,21 @@ const Servers = () => {
     }, 2000);
   };
   
+  const handleOpenToolsDialog = (instanceId: string, definitionId: string) => {
+    const instance = instances.find(i => i.id === instanceId);
+    const definition = definitions.find(d => d.id === definitionId);
+    
+    if (instance && definition) {
+      setSelectedServerTools({
+        tools: definition.tools || [],
+        serverName: instance.name,
+        instanceId: instance.id,
+        definitionId: definition.id
+      });
+      setToolsDialogOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -460,6 +492,26 @@ const Servers = () => {
                                 )}
                                 Connect
                               </Button>
+                              
+                              {definition.tools && definition.tools.length > 0 && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="icon"
+                                        className="text-purple-500 hover:text-purple-600 hover:border-purple-500 transition-colors h-9 w-9"
+                                        onClick={() => handleOpenToolsDialog(instance.id, definition.id)}
+                                      >
+                                        <Wrench className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Debug Tools</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                               
                               <TooltipProvider>
                                 <Tooltip>
@@ -648,6 +700,29 @@ const Servers = () => {
         serverDefinition={selectedDefinition}
         onUpdateServer={handleUpdateServer}
       />
+      
+      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wrench className="h-5 w-5 text-purple-500" />
+              <span>Server Tools - {selectedServerTools.serverName}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Debug and execute tools for this server instance
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <ServerToolsList 
+              tools={selectedServerTools.tools} 
+              debugMode={true} 
+              serverName={selectedServerTools.serverName}
+              instanceId={selectedServerTools.instanceId}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
