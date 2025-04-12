@@ -10,9 +10,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronDown, ChevronUp, Code, Play, Wrench, SendHorizonal } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { 
+  Code, 
+  Play, 
+  Wrench, 
+  SendHorizonal, 
+  CheckCircle2, 
+  XCircle, 
+  Terminal
+} from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface ServerToolsListProps {
   tools?: Tool[];
@@ -26,6 +36,7 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [toolInputs, setToolInputs] = useState<Record<string, Record<string, any>>>({});
   const [isExecuting, setIsExecuting] = useState<Record<string, boolean>>({});
+  const [toolResults, setToolResults] = useState<Record<string, { success: boolean; data?: any; error?: string }>>({});
   
   if (!tools || tools.length === 0) {
     return (
@@ -55,15 +66,56 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
 
   const executeTool = (tool: Tool) => {
     setIsExecuting(prev => ({ ...prev, [tool.id]: true }));
+    // Clear previous results
+    setToolResults(prev => ({ ...prev, [tool.id]: undefined }));
     
     // Mock execution with a delay
     setTimeout(() => {
       setIsExecuting(prev => ({ ...prev, [tool.id]: false }));
       
-      toast({
-        title: `Tool Executed: ${tool.name}`,
-        description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
-      });
+      // Simulate a 20% chance of failure
+      const isSuccess = Math.random() > 0.2;
+      
+      if (isSuccess) {
+        const mockResponse = {
+          success: true,
+          data: {
+            message: `Successfully executed ${tool.name}`,
+            timestamp: new Date().toISOString(),
+            result: {
+              status: "completed",
+              details: `Operation completed on ${serverName || 'Unknown server'}`
+            }
+          }
+        };
+        
+        setToolResults(prev => ({
+          ...prev,
+          [tool.id]: mockResponse
+        }));
+        
+        toast({
+          title: `Tool Executed: ${tool.name}`,
+          description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
+        });
+      } else {
+        // Mock error response
+        const mockError = {
+          success: false,
+          error: `Failed to execute ${tool.name}: Connection timeout or invalid parameters`
+        };
+        
+        setToolResults(prev => ({
+          ...prev,
+          [tool.id]: mockError
+        }));
+        
+        toast({
+          title: `Tool Execution Failed: ${tool.name}`,
+          description: `Failed to execute tool on server instance ${serverName || 'Unknown'}.`,
+          variant: "destructive"
+        });
+      }
     }, 1500);
   };
 
@@ -115,10 +167,10 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
                 
                 {tool.parameters && tool.parameters.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                    <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-3">
                       Parameters
                     </h4>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {tool.parameters.map((param) => (
                         <ParameterItem 
                           key={param.name} 
@@ -129,6 +181,37 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
                         />
                       ))}
                     </div>
+                  </div>
+                )}
+                
+                {/* Tool execution results */}
+                {toolResults[tool.id] && (
+                  <div className="mt-4">
+                    <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                      Execution Result
+                    </h4>
+                    
+                    {toolResults[tool.id].success ? (
+                      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3">
+                        <div className="flex items-center mb-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                          <h5 className="font-medium text-green-800 dark:text-green-300">Success</h5>
+                        </div>
+                        <pre className="text-xs bg-white dark:bg-gray-800 p-3 rounded border border-green-100 dark:border-green-800 overflow-auto max-h-[200px]">
+                          {JSON.stringify(toolResults[tool.id].data, null, 2)}
+                        </pre>
+                      </div>
+                    ) : (
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                        <div className="flex items-center mb-2">
+                          <XCircle className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
+                          <h5 className="font-medium text-red-800 dark:text-red-300">Error</h5>
+                        </div>
+                        <p className="text-red-700 dark:text-red-300 text-sm mb-2">
+                          {toolResults[tool.id].error}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -150,7 +233,7 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
                         </>
                       ) : (
                         <>
-                          <Play className="h-3.5 w-3.5 mr-1.5" />
+                          <Terminal className="h-3.5 w-3.5 mr-1.5" />
                           Execute Tool
                         </>
                       )}
@@ -174,52 +257,35 @@ interface ParameterItemProps {
 }
 
 function ParameterItem({ parameter, debugMode = false, value, onChange }: ParameterItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-2">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center">
-          <span className="font-mono text-xs text-blue-600 dark:text-blue-400 mr-2">
-            {parameter.name}
-          </span>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-            {parameter.type}
+    <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
+      <div className="flex items-center mb-2">
+        <span className="font-mono text-xs text-blue-600 dark:text-blue-400 mr-2">
+          {parameter.name}
+        </span>
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          {parameter.type}
+        </Badge>
+        {parameter.required && (
+          <Badge className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">
+            required
           </Badge>
-          {parameter.required && (
-            <Badge className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">
-              required
-            </Badge>
-          )}
-        </div>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-        >
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </button>
+        )}
       </div>
       
-      {isExpanded && (
-        <div className="mt-2 pl-2 border-l-2 border-gray-200 dark:border-gray-700">
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            {parameter.description}
-          </p>
-          {parameter.default !== undefined && (
-            <div className="mt-1 text-xs">
-              <span className="text-gray-500 dark:text-gray-500">Default: </span>
-              <code className="font-mono text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-1 rounded">
-                {typeof parameter.default === 'object' 
-                  ? JSON.stringify(parameter.default) 
-                  : String(parameter.default)
-                }
-              </code>
-            </div>
-          )}
+      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+        {parameter.description}
+      </p>
+
+      {parameter.default !== undefined && (
+        <div className="mb-2 text-xs">
+          <span className="text-gray-500 dark:text-gray-500">Default: </span>
+          <code className="font-mono text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-1 rounded">
+            {typeof parameter.default === 'object' 
+              ? JSON.stringify(parameter.default) 
+              : String(parameter.default)
+            }
+          </code>
         </div>
       )}
       
@@ -234,10 +300,10 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
             />
           )}
           {parameter.type === 'number' && (
-            <input
+            <Input
               type="number"
               placeholder={`Enter ${parameter.name} value...`}
-              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+              className="text-sm"
               value={value || ''}
               onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
             />
@@ -257,3 +323,4 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
     </div>
   );
 }
+
