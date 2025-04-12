@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -48,7 +49,8 @@ import {
   serverInstances,
   ServerDefinition,
   ServerInstance,
-  profiles
+  profiles,
+  Tool
 } from "@/data/mockData";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { useToast } from "@/hooks/use-toast";
