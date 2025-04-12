@@ -1,5 +1,4 @@
 
-
 export interface ServerDefinition {
   id: string;
   name: string;
@@ -18,32 +17,12 @@ export interface ServerDefinition {
   commandArgs?: string;
   environment?: Record<string, string>;
   headers?: Record<string, string>;
-  tools?: Tool[]; // Add tools array
-  views?: number;
-  updated?: string;
-  trending?: boolean;
-  forks?: number;
-  watches?: number;
-}
-
-export interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  parameters?: ToolParameter[];
-}
-
-export interface ToolParameter {
-  name: string;
-  type: 'string' | 'number' | 'boolean' | 'object';
-  description: string;
-  required?: boolean;
 }
 
 export interface ServerInstance {
   id: string;
-  definitionId: string;
   name: string;
+  definitionId: string;
   status: 'running' | 'stopped' | 'connecting' | 'error';
   connectionDetails: string;
   requestCount?: number;
@@ -70,13 +49,3 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
-
-// Add EnhancedServerDefinition interface
-export interface EnhancedServerDefinition extends ServerDefinition {
-  views: number;
-  updated: string;
-  trending?: boolean;
-  forks?: number;
-  watches?: number;
-}
-
