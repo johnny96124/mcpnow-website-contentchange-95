@@ -17,6 +17,22 @@ export interface ServerDefinition {
   commandArgs?: string;
   environment?: Record<string, string>;
   headers?: Record<string, string>;
+  tools?: Tool[];
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  parameters?: ToolParameter[];
+}
+
+export interface ToolParameter {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  description: string;
+  required?: boolean;
+  default?: any;
 }
 
 export interface ServerInstance {

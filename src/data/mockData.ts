@@ -19,6 +19,22 @@ export interface ServerDefinition {
   commandArgs?: string;
   environment?: Record<string, string>;
   headers?: Record<string, string>;
+  tools?: Tool[];
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  parameters?: ToolParameter[];
+}
+
+export interface ToolParameter {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  description: string;
+  required?: boolean;
+  default?: any;
 }
 
 export interface ServerInstance {
@@ -77,7 +93,60 @@ export const serverDefinitions: ServerDefinition[] = [
     environment: { 
       'PG_HOST': 'localhost',
       'PG_PORT': '5432'
-    }
+    },
+    tools: [
+      {
+        id: 'query_execute',
+        name: 'execute_query',
+        description: 'Execute a SQL query against a PostgreSQL database and return the results.',
+        parameters: [
+          {
+            name: 'query',
+            type: 'string',
+            description: 'The SQL query to execute.',
+            required: true
+          },
+          {
+            name: 'params',
+            type: 'array',
+            description: 'Optional parameters for the query.',
+            required: false
+          }
+        ]
+      },
+      {
+        id: 'schema_info',
+        name: 'get_schema_info',
+        description: 'Get information about database schemas, tables, columns, and relationships.',
+        parameters: [
+          {
+            name: 'schema_name',
+            type: 'string',
+            description: 'The schema name to inspect. If not provided, returns all schemas.',
+            required: false
+          },
+          {
+            name: 'table_name',
+            type: 'string',
+            description: 'Filter results to a specific table.',
+            required: false
+          }
+        ]
+      },
+      {
+        id: 'explain_analyze',
+        name: 'explain_analyze',
+        description: 'Generate and analyze an execution plan for a query.',
+        parameters: [
+          {
+            name: 'query',
+            type: 'string',
+            description: 'The SQL query to analyze.',
+            required: true
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'github-copilot-proxy',
@@ -101,7 +170,56 @@ export const serverDefinitions: ServerDefinition[] = [
     headers: {
       'Authorization': 'Bearer ${GITHUB_TOKEN}',
       'Content-Type': 'application/json'
-    }
+    },
+    tools: [
+      {
+        id: 'code_completion',
+        name: 'get_completions',
+        description: 'Get code completion suggestions based on the current code context.',
+        parameters: [
+          {
+            name: 'prefix',
+            type: 'string',
+            description: 'The code context to generate completions for.',
+            required: true
+          },
+          {
+            name: 'language',
+            type: 'string',
+            description: 'The programming language of the code.',
+            required: false,
+            default: 'javascript'
+          },
+          {
+            name: 'max_tokens',
+            type: 'number',
+            description: 'Maximum number of tokens to generate.',
+            required: false,
+            default: 256
+          }
+        ]
+      },
+      {
+        id: 'comment_to_code',
+        name: 'comment_to_code',
+        description: 'Generate code from a natural language comment or description.',
+        parameters: [
+          {
+            name: 'comment',
+            type: 'string',
+            description: 'The natural language description of what code to generate.',
+            required: true
+          },
+          {
+            name: 'language',
+            type: 'string',
+            description: 'The programming language to generate code in.',
+            required: false,
+            default: 'javascript'
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'local-file-assistant',
@@ -120,7 +238,94 @@ export const serverDefinitions: ServerDefinition[] = [
       'Batch operations'
     ],
     repository: 'https://github.com/mcp/local-file-assistant',
-    downloads: 2800
+    downloads: 2800,
+    tools: [
+      {
+        id: 'file_read',
+        name: 'read_file',
+        description: 'Read the contents of a file from the local filesystem.',
+        parameters: [
+          {
+            name: 'path',
+            type: 'string',
+            description: 'Path to the file to read.',
+            required: true
+          },
+          {
+            name: 'encoding',
+            type: 'string',
+            description: 'File encoding to use when reading the file.',
+            required: false,
+            default: 'utf-8'
+          }
+        ]
+      },
+      {
+        id: 'file_write',
+        name: 'write_file',
+        description: 'Write content to a file on the local filesystem.',
+        parameters: [
+          {
+            name: 'path',
+            type: 'string',
+            description: 'Path to the file to write.',
+            required: true
+          },
+          {
+            name: 'content',
+            type: 'string',
+            description: 'Content to write to the file.',
+            required: true
+          },
+          {
+            name: 'encoding',
+            type: 'string',
+            description: 'File encoding to use when writing the file.',
+            required: false,
+            default: 'utf-8'
+          }
+        ]
+      },
+      {
+        id: 'file_search',
+        name: 'search_files',
+        description: 'Search for files matching a pattern in a directory.',
+        parameters: [
+          {
+            name: 'directory',
+            type: 'string',
+            description: 'Directory to search in.',
+            required: true
+          },
+          {
+            name: 'pattern',
+            type: 'string',
+            description: 'File pattern to match (glob format).',
+            required: true
+          },
+          {
+            name: 'recursive',
+            type: 'boolean',
+            description: 'Whether to search recursively in subdirectories.',
+            required: false,
+            default: true
+          }
+        ]
+      },
+      {
+        id: 'file_delete',
+        name: 'delete_file',
+        description: 'Delete a file from the local filesystem.',
+        parameters: [
+          {
+            name: 'path',
+            type: 'string',
+            description: 'Path to the file to delete.',
+            required: true
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'code-assistant',
@@ -139,7 +344,60 @@ export const serverDefinitions: ServerDefinition[] = [
       'Bug detection'
     ],
     repository: 'https://github.com/mcp-community/code-assistant',
-    downloads: 3700
+    downloads: 3700,
+    tools: [
+      {
+        id: 'complete_code',
+        name: 'complete_code',
+        description: 'Complete code based on the existing context.',
+        parameters: [
+          {
+            name: 'code_context',
+            type: 'string',
+            description: 'Existing code context to complete from.',
+            required: true
+          },
+          {
+            name: 'language',
+            type: 'string',
+            description: 'Programming language of the code.',
+            required: true
+          },
+          {
+            name: 'max_length',
+            type: 'number',
+            description: 'Maximum length of completion.',
+            required: false,
+            default: 100
+          }
+        ]
+      },
+      {
+        id: 'generate_docs',
+        name: 'generate_documentation',
+        description: 'Generate documentation for a given code snippet.',
+        parameters: [
+          {
+            name: 'code',
+            type: 'string',
+            description: 'Code to document.',
+            required: true
+          },
+          {
+            name: 'language',
+            type: 'string',
+            description: 'Programming language of the code.',
+            required: true
+          },
+          {
+            name: 'doc_style',
+            type: 'string',
+            description: 'Documentation style (e.g., JSDoc, DocString).',
+            required: false
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'docker-compose-tools',
@@ -158,8 +416,58 @@ export const serverDefinitions: ServerDefinition[] = [
       'Performance monitoring'
     ],
     repository: 'https://github.com/mcp-community/docker-compose-tools',
-    downloads: 2950
-  },
+    downloads: 2950,
+    tools: [
+      {
+        id: 'docker_compose_up',
+        name: 'compose_up',
+        description: 'Start services defined in a docker-compose.yml file.',
+        parameters: [
+          {
+            name: 'compose_file',
+            type: 'string',
+            description: 'Path to docker-compose.yml file.',
+            required: false,
+            default: './docker-compose.yml'
+          },
+          {
+            name: 'services',
+            type: 'array',
+            description: 'List of services to start. If empty, starts all services.',
+            required: false
+          },
+          {
+            name: 'detach',
+            type: 'boolean',
+            description: 'Run in detached mode.',
+            required: false,
+            default: true
+          }
+        ]
+      },
+      {
+        id: 'docker_compose_down',
+        name: 'compose_down',
+        description: 'Stop and remove services defined in a docker-compose.yml file.',
+        parameters: [
+          {
+            name: 'compose_file',
+            type: 'string',
+            description: 'Path to docker-compose.yml file.',
+            required: false,
+            default: './docker-compose.yml'
+          },
+          {
+            name: 'remove_volumes',
+            type: 'boolean',
+            description: 'Remove volumes as well.',
+            required: false,
+            default: false
+          }
+        ]
+      }
+    ]
+  }
 ];
 
 export const serverInstances: ServerInstance[] = [

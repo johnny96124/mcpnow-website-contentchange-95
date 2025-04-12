@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -10,6 +11,7 @@ import {
   ExternalLink,
   FolderOpen,
   Globe,
+  Info,
   Link2, 
   Loader2,
   Search,
@@ -18,6 +20,7 @@ import {
   UserRound,
   Users,
   Watch,
+  Wrench,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,7 +45,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { 
@@ -56,6 +59,7 @@ import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddI
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
 import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -134,6 +138,7 @@ const Discovery = () => {
   const [addToProfileOpen, setAddToProfileOpen] = useState(false);
   const [hostGuideOpen, setHostGuideOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const [activeDetailTab, setActiveDetailTab] = useState("overview");
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -254,6 +259,7 @@ const Discovery = () => {
   const handleViewDetails = (server: EnhancedServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
+    setActiveDetailTab("overview"); // Reset to overview tab when opening dialog
   };
 
   const handleInstall = (serverId: string) => {
@@ -640,125 +646,172 @@ const Discovery = () => {
                 </div>
               </div>
               
-              <div className="p-6 space-y-6">
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                        Description
+              <Tabs 
+                value={activeDetailTab} 
+                onValueChange={setActiveDetailTab}
+                className="w-full"
+              >
+                <div className="border-b border-gray-200 dark:border-gray-800">
+                  <TabsList className="bg-transparent px-6 pt-2 h-auto">
+                    <TabsTrigger 
+                      value="overview" 
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
+                    >
+                      <Info className="h-4 w-4 mr-2" />
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="tools"
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
+                    >
+                      <Wrench className="h-4 w-4 mr-2" />
+                      Tools
+                      {selectedServer.tools && selectedServer.tools.length > 0 && (
+                        <Badge className="ml-1.5 text-[10px] bg-blue-600/20 text-blue-700 dark:bg-blue-600/30 dark:text-blue-300 border-none">
+                          {selectedServer.tools.length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="overview" className="mt-0 pt-0">
+                  <div className="p-6 space-y-6">
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                            Description
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {selectedServer.description}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                            Author
+                          </h3>
+                          <div className="flex items-center">
+                            <UserRound className="h-4 w-4 mr-2 text-blue-600" />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                            Features
+                          </h3>
+                          <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
+                            {selectedServer.features?.map((feature, index) => (
+                              <li key={index}>{feature}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                            Categories
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedServer.categories?.map(category => (
+                              <Badge 
+                                key={category} 
+                                variant="outline" 
+                                className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
+                              >
+                                <Tag className="h-3 w-3 mr-1.5" />
+                                {category}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-6">
+                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
+                          <div>
+                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                              {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                              <span className="text-sm text-gray-800 dark:text-gray-200">
+                                {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
+                            <a 
+                              href="#" 
+                              className="text-sm text-blue-600 flex items-center hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Globe className="h-4 w-4 mr-2" />
+                              <span className="truncate">
+                                {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
+                              </span>
+                              <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                            </a>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
+                          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
+                          
+                          <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                {formatNumber(selectedServer.views || 1320)}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">Views</div>
+                            </div>
+                            
+                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                {formatNumber(selectedServer.downloads || 386)}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">Installs</div>
+                            </div>
+                            
+                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                {formatNumber(selectedServer.watches || 215)}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">Stars</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="tools" className="mt-0 pt-0">
+                  <div className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        Available Tools
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {selectedServer.description}
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        These tools are available for this server definition. Tools can be used after creating an instance.
                       </p>
                     </div>
                     
-                    <div>
-                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                        Author
-                      </h3>
-                      <div className="flex items-center">
-                        <UserRound className="h-4 w-4 mr-2 text-blue-600" />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                        Features
-                      </h3>
-                      <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
-                        {selectedServer.features?.map((feature, index) => (
-                          <li key={index}>{feature}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                        Categories
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedServer.categories?.map(category => (
-                          <Badge 
-                            key={category} 
-                            variant="outline" 
-                            className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
-                          >
-                            <Tag className="h-3 w-3 mr-1.5" />
-                            {category}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                    <ServerToolsList tools={selectedServer.tools} />
                   </div>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
-                      <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                          <span className="text-sm text-gray-800 dark:text-gray-200">
-                            {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
-                        <a 
-                          href="#" 
-                          className="text-sm text-blue-600 flex items-center hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Globe className="h-4 w-4 mr-2" />
-                          <span className="truncate">
-                            {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
-                          </span>
-                          <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-                        </a>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
-                      <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
-                      
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                          <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatNumber(selectedServer.views || 1320)}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">Views</div>
-                        </div>
-                        
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                          <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatNumber(selectedServer.downloads || 386)}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">Installs</div>
-                        </div>
-                        
-                        <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                          <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                            {formatNumber(selectedServer.watches || 215)}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">Stars</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </TabsContent>
+              </Tabs>
               
               <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
                 <Button
