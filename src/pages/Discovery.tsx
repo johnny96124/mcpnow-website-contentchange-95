@@ -33,7 +33,7 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition, Profile, Tool, EnhancedServerDefinition } from "@/data/mockData";
+import { discoveryItems, serverDefinitions, ServerDefinition, Profile, Tool, EnhancedServerDefinition } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
