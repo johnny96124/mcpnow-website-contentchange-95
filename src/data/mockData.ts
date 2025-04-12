@@ -652,7 +652,85 @@ export const discoveryItems: ServerDefinition[] = [
       'Integrated debugging'
     ],
     repository: 'https://github.com/AWS Community/aws toolkit',
-    downloads: 4500
+    downloads: 4500,
+    tools: [
+      {
+        id: 'lambda_deploy',
+        name: 'deploy_lambda',
+        description: 'Deploy a Lambda function to AWS with specified configuration and permissions.',
+        parameters: [
+          {
+            name: 'function_name',
+            type: 'string',
+            description: 'Name of the Lambda function to deploy.',
+            required: true
+          },
+          {
+            name: 'runtime',
+            type: 'string',
+            description: 'Runtime environment for the Lambda function (e.g., nodejs18.x, python3.9).',
+            required: true
+          },
+          {
+            name: 'source_path',
+            type: 'string',
+            description: 'Path to the function source code.',
+            required: true
+          },
+          {
+            name: 'memory_size',
+            type: 'number',
+            description: 'Memory allocation for the function in MB.',
+            required: false,
+            default: 128
+          }
+        ]
+      },
+      {
+        id: 's3_operations',
+        name: 'manage_s3',
+        description: 'Perform operations on S3 buckets and objects.',
+        parameters: [
+          {
+            name: 'bucket_name',
+            type: 'string',
+            description: 'Name of the S3 bucket.',
+            required: true
+          },
+          {
+            name: 'operation',
+            type: 'string',
+            description: 'Operation to perform (create, delete, list, upload, download).',
+            required: true
+          },
+          {
+            name: 'object_key',
+            type: 'string',
+            description: 'Object key for operations on specific objects.',
+            required: false
+          }
+        ]
+      },
+      {
+        id: 'ec2_control',
+        name: 'manage_ec2',
+        description: 'Control EC2 instances and manage their lifecycle.',
+        parameters: [
+          {
+            name: 'instance_id',
+            type: 'string',
+            description: 'ID of the EC2 instance.',
+            required: true
+          },
+          {
+            name: 'action',
+            type: 'string',
+            description: 'Action to perform (start, stop, reboot, terminate).',
+            required: true
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'docker-assistant',
@@ -671,7 +749,86 @@ export const discoveryItems: ServerDefinition[] = [
       'Volume management'
     ],
     repository: 'https://github.com/docker/assistant',
-    downloads: 4000
+    downloads: 4000,
+    tools: [
+      {
+        id: 'container_manage',
+        name: 'manage_container',
+        description: 'Start, stop, restart, or remove Docker containers.',
+        parameters: [
+          {
+            name: 'container_id',
+            type: 'string',
+            description: 'ID or name of the container to manage.',
+            required: true
+          },
+          {
+            name: 'action',
+            type: 'string',
+            description: 'Action to perform (start, stop, restart, remove).',
+            required: true
+          },
+          {
+            name: 'force',
+            type: 'boolean',
+            description: 'Force the action if necessary.',
+            required: false,
+            default: false
+          }
+        ]
+      },
+      {
+        id: 'image_build',
+        name: 'build_image',
+        description: 'Build a Docker image from a Dockerfile.',
+        parameters: [
+          {
+            name: 'dockerfile_path',
+            type: 'string',
+            description: 'Path to the Dockerfile.',
+            required: true
+          },
+          {
+            name: 'tag',
+            type: 'string',
+            description: 'Tag for the built image.',
+            required: true
+          },
+          {
+            name: 'build_args',
+            type: 'object',
+            description: 'Build arguments to pass to the build process.',
+            required: false
+          }
+        ]
+      },
+      {
+        id: 'network_create',
+        name: 'create_network',
+        description: 'Create a Docker network with specified configuration.',
+        parameters: [
+          {
+            name: 'network_name',
+            type: 'string',
+            description: 'Name for the network.',
+            required: true
+          },
+          {
+            name: 'driver',
+            type: 'string',
+            description: 'Network driver to use.',
+            required: false,
+            default: 'bridge'
+          },
+          {
+            name: 'subnet',
+            type: 'string',
+            description: 'Subnet in CIDR format.',
+            required: false
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'kubernetes-helper',
@@ -690,7 +847,88 @@ export const discoveryItems: ServerDefinition[] = [
       'Deployment automation'
     ],
     repository: 'https://github.com/k8s/helper',
-    downloads: 3800
+    downloads: 3800,
+    tools: [
+      {
+        id: 'deploy_resource',
+        name: 'apply_resource',
+        description: 'Apply a Kubernetes resource definition to the cluster.',
+        parameters: [
+          {
+            name: 'manifest_path',
+            type: 'string',
+            description: 'Path to the YAML or JSON manifest file.',
+            required: true
+          },
+          {
+            name: 'namespace',
+            type: 'string',
+            description: 'Kubernetes namespace to apply the resource to.',
+            required: false,
+            default: 'default'
+          }
+        ]
+      },
+      {
+        id: 'pod_logs',
+        name: 'get_pod_logs',
+        description: 'Retrieve logs from a Kubernetes pod.',
+        parameters: [
+          {
+            name: 'pod_name',
+            type: 'string',
+            description: 'Name of the pod.',
+            required: true
+          },
+          {
+            name: 'namespace',
+            type: 'string',
+            description: 'Kubernetes namespace where the pod is located.',
+            required: false,
+            default: 'default'
+          },
+          {
+            name: 'container',
+            type: 'string',
+            description: 'Container name (if pod has multiple containers).',
+            required: false
+          },
+          {
+            name: 'tail_lines',
+            type: 'number',
+            description: 'Number of lines to show from the end of the logs.',
+            required: false,
+            default: 100
+          }
+        ]
+      },
+      {
+        id: 'scale_deployment',
+        name: 'scale_deployment',
+        description: 'Scale a Kubernetes deployment to a specified number of replicas.',
+        parameters: [
+          {
+            name: 'deployment_name',
+            type: 'string',
+            description: 'Name of the deployment to scale.',
+            required: true
+          },
+          {
+            name: 'replicas',
+            type: 'number',
+            description: 'Desired number of replicas.',
+            required: true
+          },
+          {
+            name: 'namespace',
+            type: 'string',
+            description: 'Kubernetes namespace where the deployment is located.',
+            required: false,
+            default: 'default'
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'frontend-dev-tools',
