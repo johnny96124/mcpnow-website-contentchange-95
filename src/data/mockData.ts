@@ -19,6 +19,29 @@ export interface ServerDefinition {
   commandArgs?: string;
   environment?: Record<string, string>;
   headers?: Record<string, string>;
+  tools?: Tool[];
+}
+
+export interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  parameters?: ToolParameter[];
+}
+
+export interface ToolParameter {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'object';
+  description: string;
+  required?: boolean;
+}
+
+export interface EnhancedServerDefinition extends ServerDefinition {
+  views: number;
+  updated: string;
+  trending?: boolean;
+  forks?: number;
+  watches?: number;
 }
 
 export interface ServerInstance {
@@ -31,6 +54,8 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string[];
   requestCount?: number;
+  url?: string;
+  headers?: Record<string, string>;
 }
 
 export interface Profile {
