@@ -1,6 +1,6 @@
 
 import { useState, useRef } from 'react';
-import { ChevronUp, ChevronDown, Wrench, Tool as ToolIcon } from 'lucide-react';
+import { ChevronUp, ChevronDown, Wrench, WrenchIcon } from 'lucide-react';
 import { Tool } from '@/data/mockData';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,7 +41,7 @@ export const ServerTools = ({ tools }: ServerToolsProps) => {
             >
               <AccordionTrigger className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 data-[state=open]:bg-blue-50 data-[state=open]:dark:bg-blue-900/20">
                 <div className="flex items-center text-left">
-                  <ToolIcon className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                  <WrenchIcon className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
                   <span className="font-medium text-gray-800 dark:text-gray-200">{tool.name}</span>
                 </div>
               </AccordionTrigger>

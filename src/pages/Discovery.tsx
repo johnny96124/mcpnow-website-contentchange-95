@@ -33,7 +33,7 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition, Profile, Tool } from "@/data/mockData";
+import { discoveryItems, ServerDefinition, Profile, Tool, EnhancedServerDefinition } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
@@ -58,6 +58,9 @@ import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
 import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerTools } from "@/components/discovery/ServerTools";
+
+// Define the ITEMS_PER_PAGE constant
+const ITEMS_PER_PAGE = 9;
 
 const mockTools: Record<string, Tool[]> = {
   "redis": [
