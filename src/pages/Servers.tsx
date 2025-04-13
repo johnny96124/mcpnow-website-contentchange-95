@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -63,6 +64,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
