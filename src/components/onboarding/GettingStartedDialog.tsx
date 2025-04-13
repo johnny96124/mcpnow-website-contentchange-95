@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Book, Settings2, Layers, Computer, X } from "lucide-react";
+import { ChevronRight, Book, Settings2, Layers, Computer, X, Download as DownloadIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +39,7 @@ export function GettingStartedDialog({ open, onOpenChange }: GettingStartedDialo
               <div className="flex-1 p-5 border rounded-lg hover:border-blue-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 dark:hover:border-blue-900 transition-all duration-200">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full p-2.5">
-                    <Download className="h-5 w-5" />
+                    <DownloadIcon className="h-5 w-5" />
                   </div>
                   <h3 className="text-lg font-semibold">Step 1: Install Servers</h3>
                 </div>
