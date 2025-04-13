@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Book, Discord, ExternalLink, Github, HelpCircle, MessageSquare, Twitter } from "lucide-react";
+import { Book, ExternalLink, Github, HelpCircle, MessageSquare, Twitter } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -70,7 +70,7 @@ export function HelpDialog({ trigger }: HelpDialogProps) {
                   <Button variant="outline" className="w-full justify-start text-left" asChild>
                     <a href="https://twitter.com/mcpnow" target="_blank" rel="noopener noreferrer">
                       <Twitter className="mr-2 h-4 w-4 text-[#1DA1F2]" />
-                      Twitter - @mcpnow
+                      Twitter - mcpnow
                     </a>
                   </Button>
                   <Button variant="outline" className="w-full justify-start text-left" asChild>
@@ -81,7 +81,7 @@ export function HelpDialog({ trigger }: HelpDialogProps) {
                   </Button>
                   <Button variant="outline" className="w-full justify-start text-left" asChild>
                     <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer">
-                      <Discord className="mr-2 h-4 w-4 text-[#5865F2]" />
+                      <MessageSquare className="mr-2 h-4 w-4 text-[#5865F2]" />
                       Discord - mcpnow
                     </a>
                   </Button>
