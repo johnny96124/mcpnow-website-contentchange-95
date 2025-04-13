@@ -1,4 +1,3 @@
-
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -16,15 +15,11 @@ export interface ServerDefinition {
   features?: string[];
   repository?: string;
   downloads?: number;
-  stars?: number;
   url?: string;
   commandArgs?: string;
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
-  views?: number;
-  watches?: number;
-  updated?: string;
 }
 
 export interface Tool {
