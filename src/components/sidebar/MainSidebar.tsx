@@ -11,7 +11,7 @@ import {
   UsersRound,
   Twitter,
   Github,
-  Discord
+  MessageSquare // Replaced Discord with MessageSquare as an alternative
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -178,7 +178,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
             <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer">
-              <Discord className="h-4 w-4 text-[#5865F2]" />
+              <MessageSquare className="h-4 w-4 text-[#5865F2]" />
             </a>
           </Button>
         </div>
