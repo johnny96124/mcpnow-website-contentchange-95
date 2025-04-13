@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -706,18 +705,18 @@ const Servers = () => {
       />
       
       <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl h-[700px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wrench className="h-5 w-5 text-purple-500" />
               <span>Server Tools - {selectedServerTools.serverName}</span>
             </DialogTitle>
             <DialogDescription>
-              Debug and execute tools for this server instance
+              Debug, execute tools, and view event history for this server instance
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4">
+          <div className="flex-1 overflow-hidden py-4">
             <ServerToolsList 
               tools={selectedServerTools.tools} 
               debugMode={true} 
