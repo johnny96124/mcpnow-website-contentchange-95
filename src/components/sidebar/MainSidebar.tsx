@@ -11,10 +11,7 @@ import {
   UsersRound,
   Twitter,
   Github,
-  MessageSquare,
-  HelpCircle,
-  Info,
-  Home
+  MessageSquare // Replaced Discord with MessageSquare as an alternative
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,15 +24,6 @@ import {
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useState } from "react";
 import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -45,24 +33,8 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   
-  const mainNavItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/hosts", icon: UsersRound, label: "Hosts" },
-    { path: "/profiles", icon: Database, label: "Profiles" },
-    { path: "/servers", icon: GridIcon, label: "Servers" },
-    { path: "/discovery", icon: ScanLine, label: "Discovery" },
-    { path: "/settings", icon: Settings, label: "Settings" }
-  ];
-  
-  const helpNavItems = [
-    { icon: Info, label: "About", onClick: () => console.log("About clicked") },
-    { icon: HelpCircle, label: "Help", onClick: () => console.log("Help clicked") },
-    { icon: MessageCircle, label: "Feedback", onClick: () => setShowFeedbackDialog(true) }
-  ];
-  
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
-      {/* App Logo and Title */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-2">
           <img 
@@ -73,65 +45,117 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           {!collapsed && <h1 className="text-lg font-semibold">MCP Now</h1>}
         </div>
       </div>
-      
-      {/* Main Navigation */}
-      <ScrollArea className="flex-1 p-2">
-        <nav className="space-y-6">
-          {/* Primary Navigation Section */}
-          <div className="space-y-2">
-            {!collapsed && (
-              <div className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Main
-              </div>
-            )}
-            
-            {mainNavItems.map((item) => (
-              <NavLink 
-                key={item.path}
-                to={item.path} 
-                end={item.path === "/"} 
-                className={({ isActive }) => 
-                  cn(
-                    "sidebar-item font-medium flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent transition-colors", 
-                    isActive ? "bg-accent text-accent-foreground" : "text-foreground",
-                    collapsed && "justify-center px-0"
-                  )
-                }
-              >
-                <item.icon className="h-4 w-4" />
-                {!collapsed && <span>{item.label}</span>}
-              </NavLink>
-            ))}
-          </div>
-          
-          {/* Help & Support Section */}
-          <div className="space-y-2">
-            {!collapsed && (
-              <div className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Support
-              </div>
-            )}
-            
-            {helpNavItems.map((item, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                size="sm"
+      <ScrollArea className="flex-1 px-2 py-4">
+        <nav className="space-y-2">
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
                 className={cn(
-                  "sidebar-item font-medium w-full justify-start",
+                  "w-full justify-start text-left font-medium",
                   collapsed && "justify-center px-0"
                 )}
-                onClick={item.onClick}
               >
-                <item.icon className="h-4 w-4 mr-2" />
-                {!collapsed && <span>{item.label}</span>}
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                {!collapsed && "Dashboard"}
+                {!collapsed && (
+                  <ChevronDown 
+                    className={cn(
+                      "h-4 w-4 ml-auto transition-transform",
+                      isOpen && "transform rotate-180"
+                    )} 
+                  />
+                )}
               </Button>
-            ))}
-          </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              {!collapsed && (
+                <div className="space-y-1 pl-6 mt-1">
+                  <NavLink 
+                    to="/" 
+                    end
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <GridIcon className="h-4 w-4" />
+                    Overview
+                  </NavLink>
+                  <NavLink 
+                    to="/hosts" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <UsersRound className="h-4 w-4" />
+                    Hosts
+                  </NavLink>
+                  <NavLink 
+                    to="/profiles" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <Database className="h-4 w-4" />
+                    Profiles
+                  </NavLink>
+                  <NavLink 
+                    to="/servers" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <GridIcon className="h-4 w-4" />
+                    Servers
+                  </NavLink>
+                </div>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
+
+          <NavLink 
+            to="/discovery" 
+            className={({ isActive }) => 
+              cn(
+                "sidebar-item font-medium", 
+                isActive && "sidebar-item-active",
+                collapsed && "justify-center px-0"
+              )
+            }
+          >
+            <ScanLine className="h-4 w-4 mr-2" />
+            {!collapsed && "Discovery"}
+          </NavLink>
+
+          <NavLink 
+            to="/settings" 
+            className={({ isActive }) => 
+              cn(
+                "sidebar-item font-medium", 
+                isActive && "sidebar-item-active",
+                collapsed && "justify-center px-0"
+              )
+            }
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            {!collapsed && "Settings"}
+          </NavLink>
+          
+          {/* Feedback Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "sidebar-item font-medium w-full justify-start",
+              collapsed && "justify-center px-0"
+            )}
+            onClick={() => setShowFeedbackDialog(true)}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {!collapsed && "Feedback"}
+          </Button>
         </nav>
       </ScrollArea>
-      
-      {/* Footer */}
       <div className="border-t p-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -140,28 +164,25 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </div>
           <ThemeToggle />
         </div>
-        
         {/* Social Media Icons */}
         <div className="flex justify-center gap-3 mt-3">
           <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://twitter.com/mcpnow" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+            <a href="https://twitter.com/mcpnow" target="_blank" rel="noopener noreferrer">
               <Twitter className="h-4 w-4 text-[#1DA1F2]" />
             </a>
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://github.com/mcpnow" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <a href="https://github.com/mcpnow" target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4" />
             </a>
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer">
               <MessageSquare className="h-4 w-4 text-[#5865F2]" />
             </a>
           </Button>
         </div>
       </div>
-      
-      {/* Feedback Dialog */}
       <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
     </div>
   );
