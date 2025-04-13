@@ -9,10 +9,13 @@ import {
   Download,
   X,
   Database,
+  HelpCircle,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Computer,
   Settings2,
-  Layers,
-  ChevronRight,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,8 +33,6 @@ import { useState, useEffect } from "react";
 import { useServerContext } from "@/context/ServerContext";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
-import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
-import { hasSeenOnboarding, markOnboardingSeen } from "@/utils/localStorage";
 import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
 const formatDownloadCount = (count: number): string => {
@@ -41,32 +42,21 @@ const formatDownloadCount = (count: number): string => {
   return count.toString();
 };
 
+const AUTOPLAY_INTERVAL = 5000; // 5 seconds between slides
+
 const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [showCarouselControls, setShowCarouselControls] = useState(false);
-  const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const { openAddInstanceDialog } = useServerContext();
   const navigate = useNavigate();
   
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
-
-  useEffect(() => {
-    if (!hasSeenOnboarding()) {
-      setShowOnboardingDialog(true);
-    }
-  }, []);
-
-  const handleOnboardingDialogClose = (open: boolean) => {
-    setShowOnboardingDialog(open);
-    if (!open) {
-      markOnboardingSeen();
-    }
-  };
 
   const handleNavigateToServers = () => {
     navigate('/servers');
@@ -292,6 +282,117 @@ const Dashboard = () => {
     }, 1500);
   };
 
+  const toggleStep = (stepIndex: number) => {
+    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
+  };
+
+  const beginnerGuideSteps = [
+    {
+      title: "Install Servers from Discovery",
+      description: "Browse and install server definitions for your workflow.",
+      icon: <Download className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Start by installing server definitions from our Discovery page:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Navigate to the <Link to="/discovery" className="text-blue-500 hover:underline">Discovery</Link> page</li>
+            <li>Browse available server types based on your needs</li>
+            <li>Click "Install" to add server definitions to your environment</li>
+            <li>Explore official and community-created server options</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/discovery">
+                Go to Discovery
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Create Instances & Configure Parameters",
+      description: "Create and customize server instances with specific settings.",
+      icon: <Settings2 className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Once you've installed server definitions, create instances with custom configurations:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Go to <Link to="/servers" className="text-blue-500 hover:underline">Servers</Link> page</li>
+            <li>Click "Add Instance" on an installed server</li>
+            <li>Set name, parameters, and environment variables</li>
+            <li>Configure connection details specific to your needs</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/servers">
+                Manage Servers
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Create Profiles & Add Instances",
+      description: "Organize server instances into profiles for easier management.",
+      icon: <Layers className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Create profiles to group your server instances logically:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Visit the <Link to="/profiles" className="text-blue-500 hover:underline">Profiles</Link> page</li>
+            <li>Create a new profile with a relevant name</li>
+            <li>Add your configured server instances to the profile</li>
+            <li>Enable the profile to activate all included instances</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/profiles">
+                Create Profiles
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Associate Hosts with Profiles",
+      description: "Connect your profiles to hosts to deploy server instances.",
+      icon: <Computer className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Finally, associate your profiles with hosts to run your server instances:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Go to the <Link to="/hosts" className="text-blue-500 hover:underline">Hosts</Link> page</li>
+            <li>Add a new host or select an existing one</li>
+            <li>Assign your created profile to the host</li>
+            <li>Monitor status and control your server instances</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/hosts">
+                Manage Hosts
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -344,7 +445,7 @@ const Dashboard = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm flex items-center gap-1.5 text-muted-foreground">
                           <Download className="h-4 w-4" />
-                          {formatDownloadCount(server.downloads)}
+                          {(server.downloads / 1000).toFixed(1)}k
                         </span>
                         
                         <Button 
@@ -505,6 +606,65 @@ const Dashboard = () => {
         </div>
       </div>
 
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex items-center gap-2 mb-4">
+          <HelpCircle className="h-5 w-5 text-blue-500" />
+          <h2 className="text-2xl font-bold tracking-tight">Getting Started with MCP Now</h2>
+        </div>
+        
+        <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardContent className="pt-6">
+            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+              Follow these simple steps to configure and start using MCP Now effectively.
+            </p>
+            
+            <div className="space-y-3">
+              {beginnerGuideSteps.map((step, index) => (
+                <div 
+                  key={index}
+                  className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900"
+                >
+                  <button 
+                    className="w-full flex items-center justify-between p-4 text-left"
+                    onClick={() => toggleStep(index)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2">
+                        {step.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Step {index + 1}: {step.title}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{step.description}</p>
+                      </div>
+                    </div>
+                    {expandedStep === index ? (
+                      <ChevronUp className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    )}
+                  </button>
+                  
+                  {expandedStep === index && (
+                    <div className="p-4 pt-0 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                      {step.content}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <Button asChild className="gap-2">
+                <Link to="/discovery">
+                  Start Setup Process
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
@@ -617,11 +777,6 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
-
-      <GettingStartedDialog 
-        open={showOnboardingDialog} 
-        onOpenChange={handleOnboardingDialogClose} 
-      />
     </div>
   );
 };

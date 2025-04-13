@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
@@ -7,7 +8,6 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,10 +22,9 @@ import { HelpDialog } from "@/components/help/HelpDialog";
 
 interface MainSidebarProps {
   collapsed?: boolean;
-  onShowGettingStarted?: () => void;
 }
 
-export function MainSidebar({ collapsed = false, onShowGettingStarted }: MainSidebarProps) {
+export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   
   return (
@@ -143,20 +142,7 @@ export function MainSidebar({ collapsed = false, onShowGettingStarted }: MainSid
             <div className="h-2 w-2 rounded-full bg-status-active"></div>
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
-          <div className="flex gap-2">
-            {!collapsed && onShowGettingStarted && (
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={onShowGettingStarted}
-                className="h-8 w-8 rounded-full"
-                title="Getting Started Guide"
-              >
-                <Book className="h-4 w-4 text-blue-500" />
-              </Button>
-            )}
-            <HelpDialog />
-          </div>
+          <HelpDialog />
         </div>
       </div>
     </div>
