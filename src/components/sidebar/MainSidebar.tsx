@@ -5,7 +5,6 @@ import {
   Database, 
   GridIcon, 
   LayoutDashboard, 
-  MessageCircle,
   ScanLine, 
   Settings, 
   UsersRound,
@@ -19,7 +18,6 @@ import {
   CollapsibleTrigger 
 } from "@/components/ui/collapsible";
 import { useState } from "react";
-import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
 import { HelpDialog } from "@/components/help/HelpDialog";
 
 interface MainSidebarProps {
@@ -28,7 +26,6 @@ interface MainSidebarProps {
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
@@ -137,20 +134,6 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <Settings className="h-4 w-4 mr-2" />
             {!collapsed && "Settings"}
           </NavLink>
-          
-          {/* Feedback Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "sidebar-item font-medium w-full justify-start",
-              collapsed && "justify-center px-0"
-            )}
-            onClick={() => setShowFeedbackDialog(true)}
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            {!collapsed && "Feedback"}
-          </Button>
         </nav>
       </ScrollArea>
       <div className="border-t p-4">
@@ -162,7 +145,6 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           <HelpDialog />
         </div>
       </div>
-      <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
     </div>
   );
 }
