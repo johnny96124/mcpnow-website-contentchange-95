@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { Laptop, Moon, RefreshCw, Sun } from "lucide-react";
+import { Laptop, Moon, RefreshCw, Sun, Download, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/theme/theme-provider";
 import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
 
+const APP_VERSION = "1.2.0"; // Current app version
 const DEFAULT_PORT = 8008;
 
 const Settings = () => {
@@ -23,6 +25,8 @@ const Settings = () => {
   
   const [initialPort, setInitialPort] = useState(settings.port);
   const [portChanged, setPortChanged] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<"checking" | "available" | "latest" | "downloading" | "ready" | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   
   useEffect(() => {
     setPortChanged(settings.port !== initialPort);
@@ -54,6 +58,117 @@ const Settings = () => {
     });
   };
 
+  const checkForUpdates = () => {
+    setUpdateStatus("checking");
+    
+    // Simulate checking for updates
+    setTimeout(() => {
+      // Randomly determine if there's an update (for demo purposes)
+      const hasUpdate = Math.random() > 0.5;
+      
+      if (hasUpdate) {
+        setUpdateStatus("available");
+        toast({
+          title: "Update available",
+          description: "A new version of MCP Now is available."
+        });
+      } else {
+        setUpdateStatus("latest");
+        toast({
+          title: "No updates available",
+          description: "You're already using the latest version."
+        });
+        
+        // Reset status after a few seconds
+        setTimeout(() => {
+          setUpdateStatus(null);
+        }, 3000);
+      }
+    }, 1500);
+  };
+
+  const downloadUpdate = () => {
+    setUpdateStatus("downloading");
+    setDownloadProgress(0);
+    
+    // Simulate download progress
+    const interval = setInterval(() => {
+      setDownloadProgress(prev => {
+        const newProgress = prev + Math.random() * 15;
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          setUpdateStatus("ready");
+          setDownloadProgress(100);
+          toast({
+            title: "Update downloaded",
+            description: "The update is ready to install."
+          });
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 500);
+  };
+
+  const installUpdate = () => {
+    toast({
+      title: "Installing update",
+      description: "The app will restart to apply the update."
+    });
+    
+    // Simulate app restart (would actually be handled by the Electron app)
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
+  };
+
+  const renderUpdateButton = () => {
+    switch (updateStatus) {
+      case "checking":
+        return (
+          <Button disabled className="w-full">
+            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            Checking...
+          </Button>
+        );
+      case "available":
+        return (
+          <Button onClick={downloadUpdate} className="w-full">
+            <Download className="h-4 w-4 mr-2" />
+            Download Update
+          </Button>
+        );
+      case "downloading":
+        return (
+          <div className="space-y-2 w-full">
+            <Progress value={downloadProgress} className="w-full h-2" />
+            <p className="text-xs text-center text-muted-foreground">{Math.round(downloadProgress)}% downloaded</p>
+          </div>
+        );
+      case "ready":
+        return (
+          <Button onClick={installUpdate} className="w-full">
+            <Check className="h-4 w-4 mr-2" />
+            Install & Restart
+          </Button>
+        );
+      case "latest":
+        return (
+          <Button variant="outline" className="w-full" disabled>
+            <Check className="h-4 w-4 mr-2 text-green-500" />
+            Up to Date
+          </Button>
+        );
+      default:
+        return (
+          <Button onClick={checkForUpdates} variant="outline" className="w-full">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Check for Updates
+          </Button>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -64,6 +179,47 @@ const Settings = () => {
       </div>
       
       <div className="grid gap-6">
+        {/* App Info Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>About MCP Now</CardTitle>
+            <CardDescription>
+              Application information and updates
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Version</label>
+                <p className="text-xs text-muted-foreground">
+                  Current installed version
+                </p>
+              </div>
+              <span className="text-sm font-mono bg-muted px-2 py-1 rounded">
+                v{APP_VERSION}
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Updates</label>
+              {renderUpdateButton()}
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Auto update</label>
+                <p className="text-xs text-muted-foreground">
+                  Automatically check for and install updates
+                </p>
+              </div>
+              <Switch
+                checked={settings.autoUpdate}
+                onCheckedChange={(checked) => updateSetting('autoUpdate', checked)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        
         <Card>
           <CardHeader>
             <CardTitle>Application</CardTitle>
@@ -95,19 +251,6 @@ const Settings = () => {
               <Switch
                 checked={settings.minimizeToTray}
                 onCheckedChange={(checked) => updateSetting('minimizeToTray', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium">Auto update</label>
-                <p className="text-xs text-muted-foreground">
-                  Automatically check for and install updates
-                </p>
-              </div>
-              <Switch
-                checked={settings.autoUpdate}
-                onCheckedChange={(checked) => updateSetting('autoUpdate', checked)}
               />
             </div>
             
