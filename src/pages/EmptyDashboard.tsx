@@ -1,18 +1,36 @@
 import { Link } from "react-router-dom";
 import { 
+  Calendar,
+  CheckCircle,
+  ChevronLeft,
+  Clock,
   Database,
+  Download,
+  Eye,
   ExternalLink,
+  FolderOpen,
+  Globe,
   Info,
+  Link2, 
   Loader2,
   Server, 
+  Star,
+  Tag,
   UsersRound,
-  CheckCircle,
-  Download,
+  UserRound,
+  Wrench,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
@@ -26,6 +44,8 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { EmptyState } from "@/components/discovery/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
 const EmptyDashboard = () => {
@@ -33,6 +53,8 @@ const EmptyDashboard = () => {
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
+  const [activeDetailTab, setActiveDetailTab] = useState("overview");
+  const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
   
   // Empty arrays for hosts, profiles, and server instances
   const hosts = [];
@@ -251,6 +273,7 @@ const EmptyDashboard = () => {
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
+    setActiveDetailTab("overview");
   };
 
   const handleInstall = (serverId: string) => {
@@ -269,6 +292,30 @@ const EmptyDashboard = () => {
     return `${(count / 1000).toFixed(1)}K`;
   };
   
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`;
+    }
+    return num.toString();
+  };
+
+  const getTimeAgo = (dateStr: string) => {
+    if (!dateStr) return "Recently";
+    
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 30) return `${diffDays} days ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+  };
+  
   const handleNavigateToServers = () => {
   };
 
@@ -284,7 +331,6 @@ const EmptyDashboard = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Empty Connected Hosts Card */}
         <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -317,7 +363,6 @@ const EmptyDashboard = () => {
           </CardFooter>
         </Card>
         
-        {/* Empty Active Profiles Card */}
         <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -350,7 +395,6 @@ const EmptyDashboard = () => {
           </CardFooter>
         </Card>
         
-        {/* Empty Server Instances Card */}
         <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
@@ -447,109 +491,254 @@ const EmptyDashboard = () => {
       </div>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
-            <div className="h-full">
-              <div className="flex justify-between items-center p-5 pb-2">
-                <div className="space-y-1">
-                  <DialogTitle className="text-2xl font-bold leading-tight">
-                    {selectedServer.name}
-                  </DialogTitle>
-                  <div className="flex items-center gap-2">
-                    <EndpointLabel type={selectedServer.type} />
-                    {selectedServer.isOfficial && <OfficialBadge />}
+            <div className="h-full flex flex-col">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <DialogTitle className="text-xl font-bold leading-tight text-white">
+                      {selectedServer.name}
+                    </DialogTitle>
+                    
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <EndpointLabel type={selectedServer.type} />
+                      {selectedServer.isOfficial && <OfficialBadge />}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
-                    <Download className="h-3 w-3" />
-                    {formatDownloadCount(selectedServer.downloads)}
-                  </Badge>
-                  <DialogClose className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+                  
+                  <DialogClose className="rounded-full p-1.5 hover:bg-white/20 transition-colors">
                     <X className="h-5 w-5" />
                   </DialogClose>
                 </div>
               </div>
               
-              <div className="px-5 space-y-4 pb-6">
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Description</h3>
-                  <p>{selectedServer.description}</p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Author</h3>
-                    <p className="font-medium">
-                      {selectedServer.author}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Version</h3>
-                    <p className="font-medium">
-                      {selectedServer.version}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Category</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedServer.categories?.map(category => (
-                      <Badge key={category} variant="outline" className="py-1 px-2 bg-gray-50 text-gray-700 border-gray-200">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Features</h3>
-                  <ul className="list-disc list-inside space-y-1 ml-1">
-                    {selectedServer.features?.map((feature, index) => (
-                      <li key={index} className="text-sm">{feature}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="bg-gray-50 dark:bg-gray-800/30 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Repository</h3>
-                  <a 
-                    href="#" 
-                    className="text-blue-500 flex items-center hover:underline text-sm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedServer.repository}
-                    <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                  </a>
-                </div>
-              </div>
-              
-              <div className="flex justify-end p-4 border-t gap-2 bg-gray-50 dark:bg-gray-800/50">
-                {installedServers[selectedServer.id] ? (
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100">
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Installed
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={handleNavigateToServers}
-                      className="px-2"
+              <Tabs 
+                value={activeDetailTab} 
+                onValueChange={setActiveDetailTab}
+                className="w-full flex-1 flex flex-col"
+              >
+                <div className="border-b border-gray-200 dark:border-gray-800">
+                  <TabsList className="bg-transparent px-6 pt-2 h-auto">
+                    <TabsTrigger 
+                      value="overview" 
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
                     >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
+                      <Info className="h-4 w-4 mr-2" />
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="tools"
+                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
+                    >
+                      <Wrench className="h-4 w-4 mr-2" />
+                      Tools
+                      {selectedServer.tools && selectedServer.tools.length > 0 && (
+                        <Badge className="ml-1.5 text-[10px] bg-blue-600/20 text-blue-700 dark:bg-blue-600/30 dark:text-blue-300 border-none">
+                          {selectedServer.tools.length}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                  <TabsContent value="overview" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6 space-y-6">
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                          <div>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Description
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              {selectedServer.description}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Author
+                            </h3>
+                            <div className="flex items-center">
+                              <UserRound className="h-4 w-4 mr-2 text-blue-600" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Features
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
+                              {selectedServer.features?.map((feature, index) => (
+                                <li key={index}>{feature}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Categories
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedServer.categories?.map(category => (
+                                <Badge 
+                                  key={category} 
+                                  variant="outline" 
+                                  className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
+                                >
+                                  <Tag className="h-3 w-3 mr-1.5" />
+                                  {category}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-6">
+                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
+                              <div className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                                <span className="text-sm text-gray-800 dark:text-gray-200">
+                                  {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
+                              <a 
+                                href="#" 
+                                className="text-sm text-blue-600 flex items-center hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Globe className="h-4 w-4 mr-2" />
+                                <span className="truncate">
+                                  {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                </span>
+                                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                              </a>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
+                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
+                            
+                            <div className="grid grid-cols-3 gap-4 text-center">
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.views || 1320)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Views</div>
+                              </div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.downloads || 386)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Installs</div>
+                              </div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.watches || 215)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Stars</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                          Available Tools
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          These tools are available for this server definition. Tools can be used after creating an instance.
+                        </p>
+                      </div>
+                      
+                      <ServerToolsList tools={selectedServer.tools} />
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+              
+              <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  size="sm"
+                >
+                  Close
+                </Button>
+                
+                {installedServers[selectedServer.id] ? (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className={`
+                      ${installedButtonHover[selectedServer.id] ?
+                        "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" :
+                        "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                      }
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToServers();
+                    }}
+                    onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: true }))}
+                    onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: false }))}
+                  >
+                    {installedButtonHover[selectedServer.id] ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 mr-2" />
+                        Check
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-3.5 w-3.5 mr-2" />
+                        Installed
+                      </>
+                    )}
+                  </Button>
                 ) : isInstalling[selectedServer.id] ? (
-                  <Button disabled className="bg-blue-50 text-blue-600 border-blue-200">
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  <Button 
+                    disabled
+                    size="sm"
+                    className="bg-blue-50 text-blue-600 border-blue-200"
+                  >
+                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                     Installing...
                   </Button>
                 ) : (
-                  <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600">
-                    <Download className="h-4 w-4 mr-1" />
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInstall(selectedServer.id);
+                    }}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Download className="h-3.5 w-3.5 mr-2" />
                     Install Server
                   </Button>
                 )}
