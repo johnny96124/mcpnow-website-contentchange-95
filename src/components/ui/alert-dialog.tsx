@@ -4,7 +4,6 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { X } from "lucide-react"
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -40,11 +39,7 @@ const AlertDialogContent = React.forwardRef<
         className
       )}
       {...props}
-    >
-      {props.children}
-      {/* We can't use AlertDialogPrimitive.Close here as it doesn't exist in the package */}
-      {/* Instead, we'll rely on the AlertDialogCancel for closing functionality */}
-    </AlertDialogPrimitive.Content>
+    />
   </AlertDialogPortal>
 ))
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
