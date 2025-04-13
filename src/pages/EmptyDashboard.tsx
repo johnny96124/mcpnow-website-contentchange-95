@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { 
   Calendar,
@@ -85,7 +86,10 @@ const EmptyDashboard = () => {
         "Multi-model support",
         "Custom prompt templates"
       ],
-      repository: "https://github.com/ai-systems/fastgpt-server"
+      repository: "https://github.com/ai-systems/fastgpt-server",
+      updated: "2025-03-10",
+      views: 4500,
+      watches: 320
     },
     { 
       id: "trend2", 
@@ -105,7 +109,10 @@ const EmptyDashboard = () => {
         "Semantic code search",
         "Integration with popular IDEs"
       ],
-      repository: "https://github.com/devtools/code-assistant"
+      repository: "https://github.com/devtools/code-assistant",
+      updated: "2025-03-15",
+      views: 3800,
+      watches: 275
     },
     { 
       id: "trend3", 
@@ -125,7 +132,10 @@ const EmptyDashboard = () => {
         "Performance analytics",
         "Template library"
       ],
-      repository: "https://github.com/promptlabs/prompt-wizard"
+      repository: "https://github.com/promptlabs/prompt-wizard",
+      updated: "2025-03-05",
+      views: 2900,
+      watches: 195
     },
     { 
       id: "trend4", 
@@ -145,7 +155,10 @@ const EmptyDashboard = () => {
         "Custom embeddings support",
         "Query optimization"
       ],
-      repository: "https://github.com/searchtech/semantic-search"
+      repository: "https://github.com/searchtech/semantic-search",
+      updated: "2025-02-28",
+      views: 2400,
+      watches: 180
     },
     { 
       id: "trend5", 
@@ -165,7 +178,10 @@ const EmptyDashboard = () => {
         "Document chunking",
         "Metadata extraction"
       ],
-      repository: "https://github.com/doctools/document-loader"
+      repository: "https://github.com/doctools/document-loader",
+      updated: "2025-03-01",
+      views: 2100,
+      watches: 150
     },
     { 
       id: "trend6", 
@@ -185,7 +201,10 @@ const EmptyDashboard = () => {
         "Hybrid queries",
         "Multi-tenancy support"
       ],
-      repository: "https://github.com/vectortech/vector-store"
+      repository: "https://github.com/vectortech/vector-store",
+      updated: "2025-02-20",
+      views: 1950,
+      watches: 130
     },
     { 
       id: "trend7", 
@@ -205,7 +224,10 @@ const EmptyDashboard = () => {
         "Image transformations",
         "Batch processing"
       ],
-      repository: "https://github.com/pixelworks/image-processor"
+      repository: "https://github.com/pixelworks/image-processor",
+      updated: "2025-02-15",
+      views: 1800,
+      watches: 125
     },
     { 
       id: "trend8", 
@@ -225,7 +247,10 @@ const EmptyDashboard = () => {
         "Noise reduction",
         "Audio summarization"
       ],
-      repository: "https://github.com/audiolabs/audio-transcriber"
+      repository: "https://github.com/audiolabs/audio-transcriber",
+      updated: "2025-02-10",
+      views: 1650,
+      watches: 110
     },
     { 
       id: "trend9", 
@@ -245,7 +270,10 @@ const EmptyDashboard = () => {
         "Automated insights",
         "Report generation"
       ],
-      repository: "https://github.com/dataworks/data-analyzer"
+      repository: "https://github.com/dataworks/data-analyzer",
+      updated: "2025-01-25",
+      views: 1500,
+      watches: 95
     },
     { 
       id: "trend10", 
@@ -265,7 +293,10 @@ const EmptyDashboard = () => {
         "Knowledge base integration",
         "Multi-turn conversations"
       ],
-      repository: "https://github.com/chattech/chatbot"
+      repository: "https://github.com/chattech/chatbot",
+      updated: "2025-01-20",
+      views: 1350,
+      watches: 85
     }
   ];
   
