@@ -5,9 +5,13 @@ import {
   Database, 
   GridIcon, 
   LayoutDashboard, 
+  MessageCircle,
   ScanLine, 
   Settings, 
-  UsersRound 
+  UsersRound,
+  Twitter,
+  Github,
+  Discord
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +23,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useState } from "react";
+import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -26,6 +31,7 @@ interface MainSidebarProps {
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
   
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
@@ -134,6 +140,20 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <Settings className="h-4 w-4 mr-2" />
             {!collapsed && "Settings"}
           </NavLink>
+          
+          {/* Feedback Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "sidebar-item font-medium w-full justify-start",
+              collapsed && "justify-center px-0"
+            )}
+            onClick={() => setShowFeedbackDialog(true)}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {!collapsed && "Feedback"}
+          </Button>
         </nav>
       </ScrollArea>
       <div className="border-t p-4">
@@ -144,7 +164,26 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </div>
           <ThemeToggle />
         </div>
+        {/* Social Media Icons */}
+        <div className="flex justify-center gap-3 mt-3">
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
+            <a href="https://twitter.com/mcpnow" target="_blank" rel="noopener noreferrer">
+              <Twitter className="h-4 w-4 text-[#1DA1F2]" />
+            </a>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
+            <a href="https://github.com/mcpnow" target="_blank" rel="noopener noreferrer">
+              <Github className="h-4 w-4" />
+            </a>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
+            <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer">
+              <Discord className="h-4 w-4 text-[#5865F2]" />
+            </a>
+          </Button>
+        </div>
       </div>
+      <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
     </div>
   );
 }
