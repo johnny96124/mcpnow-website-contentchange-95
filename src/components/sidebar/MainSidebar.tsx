@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
@@ -8,7 +7,7 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  HelpCircle,
+  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -153,7 +152,7 @@ export function MainSidebar({ collapsed = false, onShowGettingStarted }: MainSid
                 className="h-8 w-8 rounded-full"
                 title="Getting Started Guide"
               >
-                <HelpCircle className="h-4 w-4 text-blue-500" />
+                <Book className="h-4 w-4 text-blue-500" />
               </Button>
             )}
             <HelpDialog />

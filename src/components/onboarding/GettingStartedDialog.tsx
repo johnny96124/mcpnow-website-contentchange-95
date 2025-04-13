@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Download, Settings2, Layers, Computer, X } from "lucide-react";
+import { ChevronRight, Book, Settings2, Layers, Computer, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -110,15 +110,6 @@ export function GettingStartedDialog({ open, onOpenChange }: GettingStartedDialo
                 </Button>
               </div>
             </div>
-          </div>
-          
-          <div className="flex justify-center pt-2">
-            <Button asChild size="lg" className="px-8 gap-2">
-              <Link to="/discovery">
-                Start Setup Process
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </div>
       </DialogContent>
