@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
@@ -8,7 +7,7 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  BookOpen
+  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,15 +19,14 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
-import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 
 interface MainSidebarProps {
   collapsed?: boolean;
+  onShowGettingStarted?: () => void;
 }
 
-export function MainSidebar({ collapsed = false }: MainSidebarProps) {
+export function MainSidebar({ collapsed = false, onShowGettingStarted }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [showGettingStarted, setShowGettingStarted] = useState(false);
   
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
@@ -146,23 +144,21 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full h-8 w-8" 
-              onClick={() => setShowGettingStarted(true)}
-            >
-              <BookOpen className="h-5 w-5" />
-            </Button>
+            {!collapsed && onShowGettingStarted && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={onShowGettingStarted}
+                className="h-8 w-8 rounded-full"
+                title="Getting Started Guide"
+              >
+                <Book className="h-4 w-4 text-blue-500" />
+              </Button>
+            )}
             <HelpDialog />
           </div>
         </div>
       </div>
-      
-      <GettingStartedDialog 
-        open={showGettingStarted} 
-        onOpenChange={setShowGettingStarted} 
-      />
     </div>
   );
 }
