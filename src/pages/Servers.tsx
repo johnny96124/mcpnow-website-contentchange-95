@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   CirclePlus, 
@@ -8,7 +7,8 @@ import {
   Info,
   Search,
   Edit,
-  Wrench
+  Wrench,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -723,6 +723,12 @@ const Servers = () => {
               instanceId={selectedServerTools.instanceId}
             />
           </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setToolsDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

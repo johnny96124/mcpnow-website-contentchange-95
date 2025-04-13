@@ -458,7 +458,14 @@ export function EditServerDialog({
                 )}
               />
               
-              <DialogFooter className="pt-4">
+              <DialogFooter className="pt-4 flex justify-between">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
                 <Button 
                   type="submit"
                   disabled={!!envKeyError || !!headerKeyError}
