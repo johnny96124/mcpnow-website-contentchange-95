@@ -1,5 +1,4 @@
 
-
 export interface ServerDefinition {
   id: string;
   name: string;
@@ -19,6 +18,9 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
+  views?: number;
+  watches?: number;
+  updated?: string;
 }
 
 export interface Tool {
@@ -66,4 +68,3 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
-
