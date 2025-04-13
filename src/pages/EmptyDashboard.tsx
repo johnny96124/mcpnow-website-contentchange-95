@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -84,13 +85,13 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "prompt",
-              type: "string" as "string",
+              type: "string",
               description: "The prompt to generate completions for",
               required: true
             },
             {
               name: "max_tokens",
-              type: "number" as "number",
+              type: "number",
               description: "The maximum number of tokens to generate",
               required: false,
               default: 100
@@ -104,7 +105,7 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "text",
-              type: "string" as "string",
+              type: "string",
               description: "The text to summarize",
               required: true
             }
@@ -117,13 +118,13 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "text",
-              type: "string" as "string",
+              type: "string",
               description: "The text to translate",
               required: true
             },
             {
               name: "target_language",
-              type: "string" as "string",
+              type: "string",
               description: "The target language",
               required: true
             }
