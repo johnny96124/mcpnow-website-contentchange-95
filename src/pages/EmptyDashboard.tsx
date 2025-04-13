@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -59,7 +58,7 @@ const EmptyDashboard = () => {
       id: "trend1", 
       name: "FastGPT Server", 
       icon: "🚀", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 918, 
       downloads: 2342, 
       views: 879600,
@@ -136,7 +135,7 @@ const EmptyDashboard = () => {
       id: "trend2", 
       name: "CodeAssistant", 
       icon: "💻", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 856, 
       downloads: 1856, 
       views: 652400,
@@ -159,7 +158,7 @@ const EmptyDashboard = () => {
       id: "trend3", 
       name: "PromptWizard", 
       icon: "✨", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 745, 
       downloads: 1543,
       views: 543200,
@@ -182,7 +181,7 @@ const EmptyDashboard = () => {
       id: "trend4", 
       name: "SemanticSearch", 
       icon: "🔍", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 678, 
       downloads: 1278,
       views: 478500,
@@ -205,7 +204,7 @@ const EmptyDashboard = () => {
       id: "trend5", 
       name: "DocumentLoader", 
       icon: "📄", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 534, 
       downloads: 1150,
       views: 387600,
@@ -228,7 +227,7 @@ const EmptyDashboard = () => {
       id: "trend6", 
       name: "VectorStore", 
       icon: "🔮", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 467, 
       downloads: 1050,
       views: 342800,
@@ -251,7 +250,7 @@ const EmptyDashboard = () => {
       id: "trend7", 
       name: "ImageProcessor", 
       icon: "🖼️", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 412, 
       downloads: 980,
       views: 289400,
@@ -274,7 +273,7 @@ const EmptyDashboard = () => {
       id: "trend8", 
       name: "AudioTranscriber", 
       icon: "🎵", 
-      type: "STDIO" as EndpointType, 
+      type: "STDIO", 
       stars: 387, 
       downloads: 920,
       views: 267300,
@@ -297,7 +296,7 @@ const EmptyDashboard = () => {
       id: "trend9", 
       name: "DataAnalyzer", 
       icon: "📊", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 352, 
       downloads: 870,
       views: 245600,
@@ -320,7 +319,7 @@ const EmptyDashboard = () => {
       id: "trend10", 
       name: "ChatBot", 
       icon: "💬", 
-      type: "HTTP_SSE" as EndpointType, 
+      type: "HTTP_SSE", 
       stars: 328, 
       downloads: 820,
       views: 234500,
@@ -379,9 +378,9 @@ const EmptyDashboard = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Empty Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">空的仪表板</h1>
           <p className="text-muted-foreground">
-            Empty state view for MCP profiles, servers, and host connections.
+            MCP配置文件、服务器和主机连接的空状态视图。
           </p>
         </div>
       </div>
@@ -392,10 +391,10 @@ const EmptyDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
-                Connected Hosts
+                已连接的主机
               </CardTitle>
               <CardDescription>
-                {connectedHosts} of {hosts.length} hosts connected
+                {connectedHosts} / {hosts.length} 主机已连接
               </CardDescription>
             </div>
             <UsersRound className="h-5 w-5 text-muted-foreground" />
@@ -405,16 +404,16 @@ const EmptyDashboard = () => {
               <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <UsersRound className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-1">No Hosts Connected</h3>
+              <h3 className="text-lg font-medium mb-1">没有连接主机</h3>
               <p className="text-sm text-muted-foreground">
-                Add hosts to manage your infrastructure
+                添加主机以管理您的基础设施
               </p>
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
             <Button asChild className="w-full">
               <Link to="/hosts">
-                Add Host
+                添加主机
               </Link>
             </Button>
           </CardFooter>
@@ -425,10 +424,10 @@ const EmptyDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
-                Active Profiles
+                活跃的配置文件
               </CardTitle>
               <CardDescription>
-                {activeProfiles} of {profiles.length} profiles enabled
+                {activeProfiles} / {profiles.length} 配置文件已启用
               </CardDescription>
             </div>
             <Database className="h-5 w-5 text-muted-foreground" />
@@ -438,16 +437,16 @@ const EmptyDashboard = () => {
               <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Database className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-1">No Profiles Created</h3>
+              <h3 className="text-lg font-medium mb-1">没有创建配置文件</h3>
               <p className="text-sm text-muted-foreground">
-                Create profiles to manage your API connections
+                创建配置文件以管理您的API连接
               </p>
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
             <Button asChild className="w-full">
               <Link to="/profiles">
-                Create Profile
+                创建配置文件
               </Link>
             </Button>
           </CardFooter>
@@ -458,10 +457,10 @@ const EmptyDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
               <CardTitle className="text-lg font-medium">
-                Server Instances
+                服务器实例
               </CardTitle>
               <CardDescription>
-                {runningInstances} of {serverInstances.length} instances running
+                {runningInstances} / {serverInstances.length} 实例运行中
               </CardDescription>
             </div>
             <Server className="h-5 w-5 text-muted-foreground" />
@@ -471,16 +470,16 @@ const EmptyDashboard = () => {
               <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                 <Server className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-1">No Server Instances</h3>
+              <h3 className="text-lg font-medium mb-1">没有服务器实例</h3>
               <p className="text-sm text-muted-foreground">
-                Add server instances to expand functionality
+                添加服务器实例以扩展功能
               </p>
             </div>
           </CardContent>
           <CardFooter className="pt-2 mt-auto border-t">
             <Button asChild className="w-full">
               <Link to="/servers">
-                Add Server Instance
+                添加服务器实例
               </Link>
             </Button>
           </CardFooter>
@@ -489,63 +488,61 @@ const EmptyDashboard = () => {
       
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
+          <h2 className="text-2xl font-bold tracking-tight">热门 MCP 服务器</h2>
           <Button variant="outline" size="sm" asChild>
             <Link to="/discovery">
-              View All
+              查看全部
               <ExternalLink className="ml-1 h-4 w-4" />
             </Link>
           </Button>
         </div>
         
-        <div className="w-full">
-          <Carousel className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3">
-                  <Card className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
-                    <CardHeader className="pb-2 space-y-0">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <CardTitle className="text-xl">{server.name}</CardTitle>
-                          <div className="flex items-center gap-1">
-                            <EndpointLabel type={server.type} />
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 pt-4">
-                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                        {server.description}
-                      </p>
-                    </CardContent>
-                    
-                    <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
-                      <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
-                        <Download className="h-3 w-3" />
-                        {formatDownloadCount(server.downloads)}
-                      </Badge>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleViewDetails(server)}
-                      >
-                        <Info className="h-4 w-4 mr-1" />
-                        Details
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex items-center justify-center mt-4">
-              <CarouselPrevious className="relative -left-0 mx-2" />
-              <CarouselNext className="relative -right-0 mx-2" />
-            </div>
-          </Carousel>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {trendingServers.slice(0, 6).map(server => (
+            <Card key={server.id} className="flex flex-col h-[280px] overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-2 space-y-0">
+                <div className="flex justify-between items-start">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl">{server.name}</CardTitle>
+                    <div className="flex items-center gap-1">
+                      <EndpointLabel type={server.type} />
+                      {server.isOfficial && <OfficialBadge />}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="flex-1 pt-4">
+                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                  {server.description}
+                </p>
+              </CardContent>
+              
+              <CardFooter className="flex justify-between items-center p-3 mt-auto border-t">
+                <Badge variant="outline" className="flex items-center gap-1 py-1 px-2 bg-amber-50 text-amber-600 border-amber-200">
+                  <Download className="h-3 w-3" />
+                  {formatDownloadCount(server.downloads)}
+                </Badge>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => handleViewDetails(server)}
+                >
+                  <Info className="h-4 w-4 mr-1" />
+                  详情
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        <div className="flex justify-center">
+          <Button variant="outline" asChild className="mt-4">
+            <Link to="/discovery">
+              查看更多服务器
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
       
@@ -568,7 +565,7 @@ const EmptyDashboard = () => {
                   {selectedServer.isOfficial && (
                     <Badge variant="secondary" className="flex items-center gap-1 bg-green-500 text-white border-none">
                       <CheckCircle className="h-3 w-3" />
-                      Official
+                      官方
                     </Badge>
                   )}
                 </div>
@@ -581,11 +578,11 @@ const EmptyDashboard = () => {
                     <TabsList className="bg-transparent">
                       <TabsTrigger value="overview" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none">
                         <Info className="h-4 w-4 mr-2" />
-                        Overview
+                        概览
                       </TabsTrigger>
                       <TabsTrigger value="tools" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none">
                         <Server className="h-4 w-4 mr-2" />
-                        Tools
+                        工具
                         {selectedServer.tools && selectedServer.tools.length > 0 && (
                           <Badge className="ml-2 bg-gray-200 text-gray-800">
                             {selectedServer.tools.length}
@@ -601,13 +598,13 @@ const EmptyDashboard = () => {
                     <div className="md:col-span-2 space-y-6">
                       {/* Description */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Description</h3>
+                        <h3 className="text-lg font-medium mb-2">描述</h3>
                         <p className="text-muted-foreground">{selectedServer.description}</p>
                       </div>
 
                       {/* Author */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Author</h3>
+                        <h3 className="text-lg font-medium mb-2">作者</h3>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span>{selectedServer.author}</span>
@@ -617,7 +614,7 @@ const EmptyDashboard = () => {
                       {/* Features */}
                       {selectedServer.features && selectedServer.features.length > 0 && (
                         <div>
-                          <h3 className="text-lg font-medium mb-2">Features</h3>
+                          <h3 className="text-lg font-medium mb-2">功能</h3>
                           <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                             {selectedServer.features.map((feature, i) => (
                               <li key={i}>{feature}</li>
@@ -629,7 +626,7 @@ const EmptyDashboard = () => {
                       {/* Categories */}
                       {selectedServer.categories && selectedServer.categories.length > 0 && (
                         <div>
-                          <h3 className="text-lg font-medium mb-2">Categories</h3>
+                          <h3 className="text-lg font-medium mb-2">分类</h3>
                           <div className="flex flex-wrap gap-2">
                             {selectedServer.categories.map((category, i) => (
                               <Badge key={i} variant="outline" className="flex items-center gap-1 py-1">
@@ -643,7 +640,7 @@ const EmptyDashboard = () => {
 
                       {/* Repository */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Repository</h3>
+                        <h3 className="text-lg font-medium mb-2">代码仓库</h3>
                         <a 
                           href={selectedServer.repository} 
                           target="_blank" 
@@ -661,7 +658,7 @@ const EmptyDashboard = () => {
                       {/* Metadata */}
                       <Card>
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Version</CardTitle>
+                          <CardTitle className="text-base">版本</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <p>{selectedServer.version}</p>
@@ -670,7 +667,7 @@ const EmptyDashboard = () => {
 
                       <Card>
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Last Updated</CardTitle>
+                          <CardTitle className="text-base">最后更新</CardTitle>
                         </CardHeader>
                         <CardContent className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -680,21 +677,21 @@ const EmptyDashboard = () => {
 
                       <Card>
                         <CardHeader className="pb-2">
-                          <CardTitle className="text-base">Usage Statistics</CardTitle>
+                          <CardTitle className="text-base">使用统计</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="grid grid-cols-3 gap-2 text-center">
                             <div>
                               <p className="text-2xl font-bold">{formatNumber(selectedServer.views)}</p>
-                              <p className="text-xs text-muted-foreground">Views</p>
+                              <p className="text-xs text-muted-foreground">浏览量</p>
                             </div>
                             <div>
                               <p className="text-2xl font-bold">{formatNumber(selectedServer.downloads)}</p>
-                              <p className="text-xs text-muted-foreground">Installs</p>
+                              <p className="text-xs text-muted-foreground">下载量</p>
                             </div>
                             <div>
                               <p className="text-2xl font-bold">{formatNumber(selectedServer.stars)}</p>
-                              <p className="text-xs text-muted-foreground">Stars</p>
+                              <p className="text-xs text-muted-foreground">星标</p>
                             </div>
                           </div>
                         </CardContent>
@@ -714,7 +711,7 @@ const EmptyDashboard = () => {
                           </CardHeader>
                           {tool.parameters && tool.parameters.length > 0 && (
                             <CardContent>
-                              <h4 className="text-sm font-medium mb-2">Parameters</h4>
+                              <h4 className="text-sm font-medium mb-2">参数</h4>
                               <div className="space-y-3">
                                 {tool.parameters.map((param, i) => (
                                   <div key={i} className="bg-muted p-3 rounded-md">
@@ -724,11 +721,11 @@ const EmptyDashboard = () => {
                                     </div>
                                     <p className="text-sm text-muted-foreground mt-1">{param.description}</p>
                                     {param.required && (
-                                      <Badge className="mt-2 bg-red-100 text-red-800 border-red-200">Required</Badge>
+                                      <Badge className="mt-2 bg-red-100 text-red-800 border-red-200">必填</Badge>
                                     )}
                                     {param.default !== undefined && (
                                       <div className="text-sm mt-2">
-                                        <span className="text-muted-foreground">Default:</span> {JSON.stringify(param.default)}
+                                        <span className="text-muted-foreground">默认值:</span> {JSON.stringify(param.default)}
                                       </div>
                                     )}
                                   </div>
@@ -744,8 +741,8 @@ const EmptyDashboard = () => {
                       <div className="bg-muted rounded-full p-3 w-12 h-12 mx-auto mb-3 flex items-center justify-center">
                         <Server className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      <h3 className="text-lg font-medium">No Tools Available</h3>
-                      <p className="text-muted-foreground mt-1">This server doesn't provide any tools.</p>
+                      <h3 className="text-lg font-medium">没有可用的工具</h3>
+                      <p className="text-muted-foreground mt-1">该服务器未提供任何工具。</p>
                     </div>
                   )}
                 </TabsContent>
@@ -754,22 +751,22 @@ const EmptyDashboard = () => {
               {/* Footer */}
               <div className="border-t p-4 flex justify-end gap-2 bg-muted/30">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Close
+                  关闭
                 </Button>
                 {installedServers[selectedServer.id] ? (
                   <Button variant="outline" className="bg-green-50 text-green-600 border-green-200 hover:bg-green-100">
                     <CheckCircle className="h-4 w-4 mr-1" />
-                    Installed
+                    已安装
                   </Button>
                 ) : isInstalling[selectedServer.id] ? (
                   <Button disabled className="bg-blue-500 text-white">
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    Installing...
+                    安装中...
                   </Button>
                 ) : (
                   <Button onClick={() => handleInstall(selectedServer.id)} className="bg-blue-500 hover:bg-blue-600 text-white">
                     <Download className="h-4 w-4 mr-1" />
-                    Install
+                    安装
                   </Button>
                 )}
               </div>
