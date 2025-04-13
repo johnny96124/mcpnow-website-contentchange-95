@@ -8,7 +8,6 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
-import { OnboardingButton } from "@/components/onboarding/OnboardingButton";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -76,15 +74,6 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
                   >
                     <GridIcon className="h-4 w-4" />
                     Overview
-                  </NavLink>
-                  <NavLink 
-                    to="/new-user" 
-                    className={({ isActive }) => 
-                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                    }
-                  >
-                    <BookOpen className="h-4 w-4" />
-                    Getting Started
                   </NavLink>
                   <NavLink 
                     to="/hosts" 
@@ -153,10 +142,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <div className="h-2 w-2 rounded-full bg-status-active"></div>
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
-          <div className="flex items-center gap-1">
-            <OnboardingButton />
-            <HelpDialog />
-          </div>
+          <HelpDialog />
         </div>
       </div>
     </div>

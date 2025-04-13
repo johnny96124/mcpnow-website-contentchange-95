@@ -10,7 +10,6 @@ import { ServerProvider } from "@/context/ServerContext";
 import DefaultLayout from "./layouts/DefaultLayout";
 import Dashboard from "./pages/Dashboard";
 import EmptyDashboard from "./pages/EmptyDashboard";
-import NewUserHome from "./pages/NewUserHome";
 import Hosts from "./pages/Hosts";
 import Profiles from "./pages/Profiles";
 import Servers from "./pages/Servers";
@@ -37,7 +36,6 @@ const App = () => {
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/" element={<DefaultLayout />}>
                   <Route index element={<Dashboard />} />
-                  <Route path="new-user" element={<NewUserHome />} />
                   <Route path="empty-dashboard" element={<EmptyDashboard />} />
                   <Route path="hosts" element={<Hosts />} />
                   <Route path="profiles" element={<Profiles />} />
