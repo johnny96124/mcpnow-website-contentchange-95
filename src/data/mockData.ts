@@ -20,9 +20,6 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
-  updated?: string;
-  views?: number;
-  watches?: number;
 }
 
 export interface Tool {
@@ -97,9 +94,6 @@ export const serverDefinitions: ServerDefinition[] = [
       'PG_HOST': 'localhost',
       'PG_PORT': '5432'
     },
-    updated: '2025-03-01',
-    views: 7500,
-    watches: 450,
     tools: [
       {
         id: 'query_execute',
@@ -177,9 +171,6 @@ export const serverDefinitions: ServerDefinition[] = [
       'Authorization': 'Bearer ${GITHUB_TOKEN}',
       'Content-Type': 'application/json'
     },
-    updated: '2025-03-01',
-    views: 6500,
-    watches: 350,
     tools: [
       {
         id: 'code_completion',
@@ -248,9 +239,6 @@ export const serverDefinitions: ServerDefinition[] = [
     ],
     repository: 'https://github.com/mcp/local-file-assistant',
     downloads: 2800,
-    updated: '2025-03-01',
-    views: 5500,
-    watches: 250,
     tools: [
       {
         id: 'file_read',
@@ -357,9 +345,6 @@ export const serverDefinitions: ServerDefinition[] = [
     ],
     repository: 'https://github.com/mcp-community/code-assistant',
     downloads: 3700,
-    updated: '2025-03-01',
-    views: 4500,
-    watches: 150,
     tools: [
       {
         id: 'complete_code',
@@ -432,9 +417,6 @@ export const serverDefinitions: ServerDefinition[] = [
     ],
     repository: 'https://github.com/mcp-community/docker-compose-tools',
     downloads: 2950,
-    updated: '2025-03-01',
-    views: 3500,
-    watches: 100,
     tools: [
       {
         id: 'docker_compose_up',
@@ -671,9 +653,6 @@ export const discoveryItems: ServerDefinition[] = [
     ],
     repository: 'https://github.com/AWS Community/aws toolkit',
     downloads: 4500,
-    updated: '2025-03-01',
-    views: 7500,
-    watches: 450,
     tools: [
       {
         id: 'lambda_deploy',
@@ -771,9 +750,6 @@ export const discoveryItems: ServerDefinition[] = [
     ],
     repository: 'https://github.com/docker/assistant',
     downloads: 4000,
-    updated: '2025-03-01',
-    views: 6500,
-    watches: 350,
     tools: [
       {
         id: 'container_manage',
@@ -872,9 +848,6 @@ export const discoveryItems: ServerDefinition[] = [
     ],
     repository: 'https://github.com/k8s/helper',
     downloads: 3800,
-    updated: '2025-03-01',
-    views: 5500,
-    watches: 250,
     tools: [
       {
         id: 'deploy_resource',
