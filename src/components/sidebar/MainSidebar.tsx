@@ -8,7 +8,8 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  BookOpen
+  BookOpen,
+  HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -145,7 +146,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <div className="h-2 w-2 rounded-full bg-status-active"></div>
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <Button 
               variant="ghost" 
               size="icon" 
