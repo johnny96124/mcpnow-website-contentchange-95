@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   Database,
@@ -35,7 +34,7 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { EmptyState } from "@/components/discovery/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ServerDefinition, EndpointType } from "@/data/mockData";
+import type { ServerDefinition, EndpointType, Tool, ToolParameter } from "@/data/mockData";
 
 const EmptyDashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -54,7 +53,7 @@ const EmptyDashboard = () => {
   const runningInstances = 0;
   const connectedHosts = 0;
   
-  const trendingServers = [
+  const trendingServers: ServerDefinition[] = [
     { 
       id: "trend1", 
       name: "FastGPT Server", 
@@ -85,13 +84,13 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "prompt",
-              type: "string",
+              type: "string" as "string",
               description: "The prompt to generate completions for",
               required: true
             },
             {
               name: "max_tokens",
-              type: "number",
+              type: "number" as "number",
               description: "The maximum number of tokens to generate",
               required: false,
               default: 100
@@ -105,7 +104,7 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "text",
-              type: "string",
+              type: "string" as "string",
               description: "The text to summarize",
               required: true
             }
@@ -118,13 +117,13 @@ const EmptyDashboard = () => {
           parameters: [
             {
               name: "text",
-              type: "string",
+              type: "string" as "string",
               description: "The text to translate",
               required: true
             },
             {
               name: "target_language",
-              type: "string",
+              type: "string" as "string",
               description: "The target language",
               required: true
             }
