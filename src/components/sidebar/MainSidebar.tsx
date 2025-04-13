@@ -8,6 +8,7 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
+import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -26,6 +28,7 @@ interface MainSidebarProps {
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const [showGettingStarted, setShowGettingStarted] = useState(false);
   
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
@@ -142,9 +145,24 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <div className="h-2 w-2 rounded-full bg-status-active"></div>
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
-          <HelpDialog />
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full h-8 w-8" 
+              onClick={() => setShowGettingStarted(true)}
+            >
+              <BookOpen className="h-5 w-5" />
+            </Button>
+            <HelpDialog />
+          </div>
         </div>
       </div>
+      
+      <GettingStartedDialog 
+        open={showGettingStarted} 
+        onOpenChange={setShowGettingStarted} 
+      />
     </div>
   );
 }
