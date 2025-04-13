@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -809,7 +808,7 @@ const Discovery = () => {
                         </p>
                       </div>
                       
-                      <ServerToolsList tools={selectedServer.tools} />
+                      <ServerToolsList tools={selectedServer.tools} isDiscoveryView={true} />
                     </div>
                   </TabsContent>
                 </div>

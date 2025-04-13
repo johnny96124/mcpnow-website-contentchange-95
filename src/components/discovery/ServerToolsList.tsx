@@ -31,9 +31,17 @@ interface ServerToolsListProps {
   debugMode?: boolean;
   serverName?: string;
   instanceId?: string;
+  /** Set to true when used in Discovery page to hide tabs */
+  isDiscoveryView?: boolean;
 }
 
-export function ServerToolsList({ tools, debugMode = false, serverName, instanceId }: ServerToolsListProps) {
+export function ServerToolsList({ 
+  tools, 
+  debugMode = false, 
+  serverName, 
+  instanceId,
+  isDiscoveryView = false
+}: ServerToolsListProps) {
   const { toast } = useToast();
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [toolInputs, setToolInputs] = useState<Record<string, Record<string, any>>>({});
@@ -251,6 +259,120 @@ export function ServerToolsList({ tools, debugMode = false, serverName, instance
     
     return true;
   };
+
+  if (isDiscoveryView) {
+    return (
+      <div className="flex flex-col h-full">
+        <ScrollArea className="h-[500px] overflow-auto flex-1">
+          <Accordion 
+            type="single" 
+            collapsible 
+            className="w-full"
+            value={activeToolId || undefined}
+            onValueChange={setActiveToolId}
+          >
+            {tools.map((tool) => (
+              <AccordionItem key={tool.id} value={tool.id} className="border border-gray-200 dark:border-gray-800 rounded-lg mb-3 overflow-hidden">
+                <div className="bg-gray-50 dark:bg-gray-800/50">
+                  <AccordionTrigger className="px-4 py-3 hover:no-underline font-medium">
+                    <div className="flex items-center text-left">
+                      <Code className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                      <span className="text-blue-600 dark:text-blue-400 font-mono text-sm">
+                        {tool.name}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                </div>
+                <AccordionContent className="pb-0">
+                  <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                      {tool.description}
+                    </p>
+                    
+                    {tool.parameters && tool.parameters.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-3">
+                          Parameters
+                        </h4>
+                        <div className="space-y-4">
+                          {tool.parameters.map((param) => (
+                            <ParameterItem 
+                              key={param.name} 
+                              parameter={param} 
+                              debugMode={debugMode}
+                              value={toolInputs[tool.id]?.[param.name] || ""}
+                              onChange={(value) => handleInputChange(tool.id, param.name, value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Tool execution results */}
+                    {toolResults[tool.id] && (
+                      <div className="mt-4">
+                        <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
+                          Execution Result
+                        </h4>
+                        
+                        {toolResults[tool.id].success ? (
+                          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md p-3">
+                            <div className="flex items-center mb-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 mr-2" />
+                              <h5 className="font-medium text-green-800 dark:text-green-300">Success</h5>
+                            </div>
+                            <pre className="text-xs bg-white dark:bg-gray-800 p-3 rounded border border-green-100 dark:border-green-800 overflow-auto max-h-[200px]">
+                              {JSON.stringify(toolResults[tool.id].data, null, 2)}
+                            </pre>
+                          </div>
+                        ) : (
+                          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                            <div className="flex items-center mb-2">
+                              <XCircle className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
+                              <h5 className="font-medium text-red-800 dark:text-red-300">Error</h5>
+                            </div>
+                            <p className="text-red-700 dark:text-red-300 text-sm mb-2">
+                              {toolResults[tool.id].error}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {debugMode && (
+                      <div className="mt-6 flex justify-end">
+                        <Button 
+                          onClick={() => {
+                            if (validateToolInputs(tool)) {
+                              executeTool(tool);
+                            }
+                          }}
+                          disabled={isExecuting[tool.id]}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {isExecuting[tool.id] ? (
+                            <>
+                              <span className="mr-1 h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" />
+                              Executing...
+                            </>
+                          ) : (
+                            <>
+                              <Terminal className="h-3.5 w-3.5 mr-1.5" />
+                              Execute Tool
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </ScrollArea>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
