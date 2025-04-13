@@ -9,9 +9,6 @@ import {
   ScanLine, 
   Settings, 
   UsersRound,
-  Twitter,
-  Github,
-  MessageSquare // Replaced Discord with MessageSquare as an alternative
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,9 +18,9 @@ import {
   CollapsibleContent, 
   CollapsibleTrigger 
 } from "@/components/ui/collapsible";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useState } from "react";
 import { FeedbackDialog } from "@/components/feedback/FeedbackDialog";
+import { HelpDialog } from "@/components/help/HelpDialog";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -162,25 +159,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <div className="h-2 w-2 rounded-full bg-status-active"></div>
             {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
           </div>
-          <ThemeToggle />
-        </div>
-        {/* Social Media Icons */}
-        <div className="flex justify-center gap-3 mt-3">
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://twitter.com/mcpnow" target="_blank" rel="noopener noreferrer">
-              <Twitter className="h-4 w-4 text-[#1DA1F2]" />
-            </a>
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://github.com/mcpnow" target="_blank" rel="noopener noreferrer">
-              <Github className="h-4 w-4" />
-            </a>
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" asChild>
-            <a href="https://discord.gg/mcpnow" target="_blank" rel="noopener noreferrer">
-              <MessageSquare className="h-4 w-4 text-[#5865F2]" />
-            </a>
-          </Button>
+          <HelpDialog />
         </div>
       </div>
       <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
