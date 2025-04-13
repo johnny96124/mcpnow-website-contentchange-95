@@ -626,7 +626,7 @@ const Discovery = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
-            <div className="h-full">
+            <div className="h-full flex flex-col">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
@@ -649,7 +649,7 @@ const Discovery = () => {
               <Tabs 
                 value={activeDetailTab} 
                 onValueChange={setActiveDetailTab}
-                className="w-full"
+                className="w-full flex-1 flex flex-col"
               >
                 <div className="border-b border-gray-200 dark:border-gray-800">
                   <TabsList className="bg-transparent px-6 pt-2 h-auto">
@@ -675,142 +675,144 @@ const Discovery = () => {
                   </TabsList>
                 </div>
 
-                <TabsContent value="overview" className="mt-0 pt-0">
-                  <div className="p-6 space-y-6">
-                    <div className="grid md:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                            Description
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {selectedServer.description}
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                            Author
-                          </h3>
-                          <div className="flex items-center">
-                            <UserRound className="h-4 w-4 mr-2 text-blue-600" />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                            Features
-                          </h3>
-                          <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
-                            {selectedServer.features?.map((feature, index) => (
-                              <li key={index}>{feature}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        
-                        <div>
-                          <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                            Categories
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {selectedServer.categories?.map(category => (
-                              <Badge 
-                                key={category} 
-                                variant="outline" 
-                                className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
-                              >
-                                <Tag className="h-3 w-3 mr-1.5" />
-                                {category}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-6">
-                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
+                <div className="flex-1 overflow-hidden">
+                  <TabsContent value="overview" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6 space-y-6">
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-6">
                           <div>
-                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
-                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                              {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Description
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                              {selectedServer.description}
                             </p>
                           </div>
                           
                           <div>
-                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Author
+                            </h3>
                             <div className="flex items-center">
-                              <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                              <span className="text-sm text-gray-800 dark:text-gray-200">
-                                {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
+                              <UserRound className="h-4 w-4 mr-2 text-blue-600" />
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
                               </span>
                             </div>
                           </div>
                           
                           <div>
-                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
-                            <a 
-                              href="#" 
-                              className="text-sm text-blue-600 flex items-center hover:underline"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Globe className="h-4 w-4 mr-2" />
-                              <span className="truncate">
-                                {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
-                              </span>
-                              <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-                            </a>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Features
+                            </h3>
+                            <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
+                              {selectedServer.features?.map((feature, index) => (
+                                <li key={index}>{feature}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                              Categories
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedServer.categories?.map(category => (
+                                <Badge 
+                                  key={category} 
+                                  variant="outline" 
+                                  className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
+                                >
+                                  <Tag className="h-3 w-3 mr-1.5" />
+                                  {category}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
-                          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
+                        <div className="space-y-6">
+                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
+                              <div className="flex items-center">
+                                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                                <span className="text-sm text-gray-800 dark:text-gray-200">
+                                  {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
+                              <a 
+                                href="#" 
+                                className="text-sm text-blue-600 flex items-center hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Globe className="h-4 w-4 mr-2" />
+                                <span className="truncate">
+                                  {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                </span>
+                                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                              </a>
+                            </div>
+                          </div>
                           
-                          <div className="grid grid-cols-3 gap-4 text-center">
-                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                {formatNumber(selectedServer.views || 1320)}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">Views</div>
-                            </div>
+                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
+                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
                             
-                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                {formatNumber(selectedServer.downloads || 386)}
+                            <div className="grid grid-cols-3 gap-4 text-center">
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.views || 1320)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Views</div>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">Installs</div>
-                            </div>
-                            
-                            <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                              <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                {formatNumber(selectedServer.watches || 215)}
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.downloads || 386)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Installs</div>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">Stars</div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.watches || 215)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Stars</div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="tools" className="mt-0 pt-0">
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Available Tools
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        These tools are available for this server definition. Tools can be used after creating an instance.
-                      </p>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                          Available Tools
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          These tools are available for this server definition. Tools can be used after creating an instance.
+                        </p>
+                      </div>
+                      
+                      <ServerToolsList tools={selectedServer.tools} />
                     </div>
-                    
-                    <ServerToolsList tools={selectedServer.tools} />
-                  </div>
-                </TabsContent>
+                  </TabsContent>
+                </div>
               </Tabs>
               
               <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
