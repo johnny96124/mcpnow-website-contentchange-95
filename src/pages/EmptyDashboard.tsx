@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { 
   Calendar,
+  Check,
   CheckCircle,
   ChevronLeft,
   Clock,
@@ -56,13 +57,11 @@ const EmptyDashboard = () => {
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
   
-  // Empty arrays for hosts, profiles, and server instances
   const hosts = [];
   const profiles = [];
   const serverInstances = [];
   const serverDefinitions = [];
   
-  // Stats with zero values
   const activeProfiles = 0;
   const runningInstances = 0;
   const connectedHosts = 0;
