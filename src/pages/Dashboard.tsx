@@ -288,79 +288,47 @@ const Dashboard = () => {
 
   const beginnerGuideSteps = [
     {
-      title: "Connect your host",
-      description: "First, add your machine as a host in MCP Now to manage it remotely.",
-      icon: <Computer className="h-6 w-6" />,
+      title: "Install Servers from Discovery",
+      description: "Browse and install server definitions for your workflow.",
+      icon: <Download className="h-6 w-6" />,
       content: (
         <div className="space-y-3">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            To connect your machine as a host:
+            Start by installing server definitions from our Discovery page:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Navigate to the <Link to="/hosts" className="text-blue-500 hover:underline">Hosts</Link> page</li>
-            <li>Click on "Add Host" and enter your machine details</li>
-            <li>Follow the instructions to set up the connection</li>
-            <li>Verify the connection status shows as "Connected"</li>
+            <li>Navigate to the <Link to="/discovery" className="text-blue-500 hover:underline">Discovery</Link> page</li>
+            <li>Browse available server types based on your needs</li>
+            <li>Click "Install" to add server definitions to your environment</li>
+            <li>Explore official and community-created server options</li>
           </ol>
           <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/hosts">
-                Go to Hosts
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Create a profile",
-      description: "Profiles help you organize server instances and their configurations.",
-      icon: <Layers className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            To create and configure a profile:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Go to the <Link to="/profiles" className="text-blue-500 hover:underline">Profiles</Link> page</li>
-            <li>Click "Create Profile" and give it a meaningful name</li>
-            <li>Add server instances to the profile based on your needs</li>
-            <li>Enable the profile to make it active</li>
-          </ol>
-          <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/profiles">
-                Go to Profiles
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Add server instances",
-      description: "Discover and install server modules that fit your project needs.",
-      icon: <Server className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            To add server instances:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Browse the <Link to="/discovery" className="text-blue-500 hover:underline">Discovery</Link> page to find available servers</li>
-            <li>Click on a server to view details and install it</li>
-            <li>Configure server settings through the <Link to="/servers" className="text-blue-500 hover:underline">Servers</Link> page</li>
-            <li>Add the server instance to your active profile</li>
-          </ol>
-          <div className="pt-2 flex gap-2">
             <Button asChild size="sm" variant="outline" className="gap-1">
               <Link to="/discovery">
-                Discover Servers
+                Go to Discovery
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Create Instances & Configure Parameters",
+      description: "Create and customize server instances with specific settings.",
+      icon: <Settings2 className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Once you've installed server definitions, create instances with custom configurations:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Go to <Link to="/servers" className="text-blue-500 hover:underline">Servers</Link> page</li>
+            <li>Click "Add Instance" on an installed server</li>
+            <li>Set name, parameters, and environment variables</li>
+            <li>Configure connection details specific to your needs</li>
+          </ol>
+          <div className="pt-2">
             <Button asChild size="sm" variant="outline" className="gap-1">
               <Link to="/servers">
                 Manage Servers
@@ -372,24 +340,50 @@ const Dashboard = () => {
       )
     },
     {
-      title: "Configure settings",
-      description: "Customize MCP Now according to your preferences and requirements.",
-      icon: <Settings2 className="h-6 w-6" />,
+      title: "Create Profiles & Add Instances",
+      description: "Organize server instances into profiles for easier management.",
+      icon: <Layers className="h-6 w-6" />,
       content: (
         <div className="space-y-3">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            To configure MCP Now settings:
+            Create profiles to group your server instances logically:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Navigate to the <Link to="/settings" className="text-blue-500 hover:underline">Settings</Link> page</li>
-            <li>Adjust application preferences</li>
-            <li>Configure network and security settings if needed</li>
-            <li>Save your changes</li>
+            <li>Visit the <Link to="/profiles" className="text-blue-500 hover:underline">Profiles</Link> page</li>
+            <li>Create a new profile with a relevant name</li>
+            <li>Add your configured server instances to the profile</li>
+            <li>Enable the profile to activate all included instances</li>
           </ol>
           <div className="pt-2">
             <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/settings">
-                Go to Settings
+              <Link to="/profiles">
+                Create Profiles
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Associate Hosts with Profiles",
+      description: "Connect your profiles to hosts to deploy server instances.",
+      icon: <Computer className="h-6 w-6" />,
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Finally, associate your profiles with hosts to run your server instances:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-sm">
+            <li>Go to the <Link to="/hosts" className="text-blue-500 hover:underline">Hosts</Link> page</li>
+            <li>Add a new host or select an existing one</li>
+            <li>Assign your created profile to the host</li>
+            <li>Monitor status and control your server instances</li>
+          </ol>
+          <div className="pt-2">
+            <Button asChild size="sm" variant="outline" className="gap-1">
+              <Link to="/hosts">
+                Manage Hosts
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -621,7 +615,7 @@ const Dashboard = () => {
         <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
           <CardContent className="pt-6">
             <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-              Welcome to MCP Now! Follow these simple steps to configure and start using the tool effectively.
+              Follow these simple steps to configure and start using MCP Now effectively.
             </p>
             
             <div className="space-y-3">
@@ -660,9 +654,9 @@ const Dashboard = () => {
             </div>
             
             <div className="mt-6 flex justify-center">
-              <Button asChild className="gap-2" variant="outline">
-                <Link to="/hosts">
-                  Start Configuration
+              <Button asChild className="gap-2">
+                <Link to="/discovery">
+                  Start Setup Process
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </Button>
