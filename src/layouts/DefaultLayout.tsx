@@ -1,31 +1,33 @@
 
 import { Outlet } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
-import { useState } from "react";
-import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
+import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
+import { useServerContext } from "@/context/ServerContext";
+import { InstanceFormValues } from "@/components/servers/AddInstanceDialog";
+import { toast } from "sonner";
 
 const DefaultLayout = () => {
-  const [showGettingStarted, setShowGettingStarted] = useState(false);
-
-  const handleShowGettingStarted = () => {
-    setShowGettingStarted(true);
+  const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
+  
+  const handleCreateInstance = (data: InstanceFormValues) => {
+    toast.success(`Instance created: ${data.name}`);
+    closeAddInstanceDialog();
   };
-
+  
   return (
-    <div className="flex h-screen">
-      <aside className="w-64 flex-shrink-0">
-        <MainSidebar onShowGettingStarted={handleShowGettingStarted} />
-      </aside>
-      <main className="flex-1 overflow-auto">
-        <div className="container py-6">
+    <div className="flex h-screen bg-background">
+      <MainSidebar />
+      <div className="flex-1 overflow-auto">
+        <div className="container py-6 h-full">
           <Outlet />
         </div>
-      </main>
+      </div>
       
-      {/* 引导弹窗 - 由侧边栏按钮触发 */}
-      <GettingStartedDialog 
-        open={showGettingStarted} 
-        onOpenChange={setShowGettingStarted} 
+      <AddInstanceDialog 
+        open={showAddInstanceDialog} 
+        onOpenChange={closeAddInstanceDialog} 
+        serverDefinition={selectedServer} 
+        onCreateInstance={handleCreateInstance}
       />
     </div>
   );
