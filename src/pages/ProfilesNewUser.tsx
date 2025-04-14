@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import {
   Layers,
   Settings,
   Share2,
-  ArrowRight,
   Zap,
   HelpCircle,
   Server,
@@ -66,7 +64,6 @@ const ProfilesNewUser = () => {
 
   return (
     <div className="container py-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
-      {/* Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-4 py-1 rounded-full inline-flex items-center gap-1.5 mb-2">
           <Zap className="h-3.5 w-3.5" />
@@ -78,13 +75,12 @@ const ProfilesNewUser = () => {
         </p>
       </div>
       
-      {/* Main content */}
       <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
         <CardContent className="pt-6">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">What are profiles?</h2>
+                <h2 className="text-2xl font-semibold">What are profiles?</h2>
                 <p className="text-muted-foreground">
                   Profiles allow you to group server instances together, making it easier to manage 
                   and deploy related services. A profile can include multiple server instances 
@@ -172,7 +168,7 @@ const ProfilesNewUser = () => {
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Profile features</h2>
+              <h2 className="text-2xl font-semibold">Profile features</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {profileFeatures.map((feature) => (
                   <Card key={feature.name} className="border hover:shadow-md transition-shadow">

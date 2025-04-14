@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,16 +6,12 @@ import {
   Server,
   FileCode,
   Database,
-  ArrowRight,
   Zap,
   HelpCircle,
-  ServerCrash,
-  Globe,
   Terminal,
   CirclePlus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { serverDefinitions } from "@/data/mockData";
 import { markServersOnboardingAsSeen } from "@/utils/localStorage";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 
@@ -95,7 +90,7 @@ const ServersNewUser = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">What are servers?</h2>
+                <h2 className="text-2xl font-semibold">What are servers?</h2>
                 <p className="text-muted-foreground">
                   Servers define how your application connects to models and external services.
                   They can be HTTP endpoints, standard I/O processes, or custom implementations.
@@ -151,14 +146,6 @@ const ServersNewUser = () => {
                 </Button>
                 
                 <Button 
-                  onClick={handleNavigateToDiscovery}
-                  variant="outline" 
-                  size="lg"
-                >
-                  Browse Catalog
-                </Button>
-                
-                <Button 
                   onClick={handleSkip} 
                   variant="ghost" 
                   size="lg"
@@ -169,7 +156,7 @@ const ServersNewUser = () => {
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Supported server types</h2>
+              <h2 className="text-2xl font-semibold">Supported server types</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {serverTypes.map((type) => (
                   <Card key={type.name} className="border hover:shadow-md transition-shadow">
