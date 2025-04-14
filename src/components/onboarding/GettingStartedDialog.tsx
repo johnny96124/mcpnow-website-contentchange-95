@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -8,8 +7,7 @@ import {
   Settings2, 
   Computer, 
   Layers,
-  BookOpen,
-  X
+  BookOpen
 } from "lucide-react";
 import { 
   Dialog, 
@@ -202,10 +200,6 @@ export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialo
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Welcome to MCP Now</DialogTitle>
-          <DialogClose className="absolute top-4 right-4 rounded-full p-1">
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
