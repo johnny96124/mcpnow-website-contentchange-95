@@ -118,42 +118,6 @@ const NewUserTrayPopup = () => {
                 </div>
               </div>
             </Card>
-
-            <Card className="p-4 mb-4">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Download className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="font-medium mb-1">Start Your Journey</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Begin by exploring and installing server definitions from our Discovery page.
-                    You'll be guided through the entire setup process.
-                  </p>
-                  
-                  <div className="grid grid-cols-2 gap-4 mt-2">
-                    <div className="bg-muted/40 p-3 rounded-md text-left">
-                      <h5 className="font-medium text-sm flex items-center gap-2">
-                        <Settings className="h-4 w-4 text-blue-600" />
-                        Configure
-                      </h5>
-                      <p className="text-xs text-muted-foreground">
-                        Customize server parameters
-                      </p>
-                    </div>
-                    <div className="bg-muted/40 p-3 rounded-md text-left">
-                      <h5 className="font-medium text-sm flex items-center gap-2">
-                        <User className="h-4 w-4 text-blue-600" />
-                        Profiles
-                      </h5>
-                      <p className="text-xs text-muted-foreground">
-                        Organize your instances
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
             
             <div className="flex justify-center pb-6">
               <Button 
@@ -173,3 +137,4 @@ const NewUserTrayPopup = () => {
 };
 
 export default NewUserTrayPopup;
+
