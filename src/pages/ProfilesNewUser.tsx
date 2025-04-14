@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -66,7 +65,6 @@ const ProfilesNewUser = () => {
 
   return (
     <div className="container py-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
-      {/* Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-4 py-1 rounded-full inline-flex items-center gap-1.5 mb-2">
           <Zap className="h-3.5 w-3.5" />
@@ -78,7 +76,6 @@ const ProfilesNewUser = () => {
         </p>
       </div>
       
-      {/* Main content */}
       <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
         <CardContent className="pt-6">
           <div className="grid md:grid-cols-2 gap-8 items-center">
