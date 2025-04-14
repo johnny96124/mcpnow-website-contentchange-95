@@ -6,15 +6,13 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogClose 
+  DialogTitle 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -52,7 +50,6 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
           <DialogDescription>
             Share your thoughts to help us improve MCP Now.
           </DialogDescription>
-          {/* Remove the duplicate close button */}
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">

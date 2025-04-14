@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   ChevronRight, 
@@ -8,8 +8,7 @@ import {
   Settings2, 
   Computer, 
   Layers,
-  BookOpen,
-  X
+  BookOpen
 } from "lucide-react";
 import { 
   Dialog, 
@@ -29,48 +28,12 @@ interface GettingStartedDialogProps {
 
 export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialogProps) => {
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
-  const [closing, setClosing] = useState(false);
-  const [animationTarget, setAnimationTarget] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const dialogRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    if (!open && !closing) {
-      setClosing(false);
-    }
-  }, [open, closing]);
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      // Get sidebar help icon position (approximate position in the bottom left)
-      const helpIconPosition = {
-        x: 40, // Approximate x position of help icon
-        y: window.innerHeight - 60 // Approximate y position of help icon
-      };
-      
-      // Calculate current dialog position
-      const dialogRect = dialogRef.current?.getBoundingClientRect();
-      if (dialogRect) {
-        setAnimationTarget({
-          x: helpIconPosition.x - (dialogRect.x + dialogRect.width / 2),
-          y: helpIconPosition.y - (dialogRect.y + dialogRect.height / 2)
-        });
-        
-        // Start animation
-        setClosing(true);
-        
-        // Delay actual closing to allow animation to play
-        setTimeout(() => {
-          markOnboardingAsSeen();
-          setClosing(false);
-          onOpenChange(false);
-        }, 300); // Match the animation duration
-      } else {
-        markOnboardingAsSeen();
-        onOpenChange(false);
-      }
-    } else {
-      onOpenChange(true);
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      markOnboardingAsSeen();
     }
+    onOpenChange(open);
   };
 
   const toggleStep = (stepIndex: number) => {
@@ -185,27 +148,10 @@ export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialo
   ];
 
   return (
-    <Dialog open={open || closing} onOpenChange={handleOpenChange}>
-      <DialogContent 
-        ref={dialogRef}
-        className={`max-w-2xl ${closing ? 'animate-collapse' : ''}`}
-        style={
-          closing 
-            ? { 
-                animation: `collapseDialog 300ms ease-in forwards`,
-                transformOrigin: 'center',
-                transform: `scale(0.8) translate(${animationTarget.x}px, ${animationTarget.y}px)`,
-                opacity: 0
-              } 
-            : {}
-        }
-      >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Welcome to MCP Now</DialogTitle>
-          <DialogClose className="absolute top-4 right-4 rounded-full p-1">
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </DialogClose>
         </DialogHeader>
         
         <div className="space-y-4 py-4">

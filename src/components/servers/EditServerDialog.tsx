@@ -18,7 +18,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { DialogClose } from "@/components/ui/dialog";
 
 interface EditServerDialogProps {
   open: boolean;

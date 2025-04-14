@@ -18,7 +18,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { DialogClose } from "@/components/ui/dialog";
 
 interface AddServerDialogProps {
   open: boolean;
