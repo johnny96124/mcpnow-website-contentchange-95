@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -79,6 +78,7 @@ export function CreateProfileDialog({
           <DialogDescription>
             Group server instances into a managed profile.
           </DialogDescription>
+          {/* DialogContent already includes a default close button */}
         </DialogHeader>
         
         <Form {...form}>

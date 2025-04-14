@@ -11,13 +11,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
+// Ensure only one close mechanism is used
+import { 
+  Command, 
+  CommandEmpty, 
+  CommandGroup, 
+  CommandInput, 
+  CommandItem, 
+  CommandList 
 } from "@/components/ui/command";
 import {
   Popover,
@@ -86,6 +87,8 @@ export function ManageInstancesModal({
           <DialogDescription>
             Add or remove server instances from this profile.
           </DialogDescription>
+          {/* DialogContent already includes a default close button, 
+              so we remove any additional close buttons */}
         </DialogHeader>
 
         <div className="py-4 space-y-4">
