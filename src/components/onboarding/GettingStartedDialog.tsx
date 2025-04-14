@@ -8,7 +8,8 @@ import {
   Settings2, 
   Computer, 
   Layers,
-  BookOpen
+  BookOpen,
+  MinimizeIcon
 } from "lucide-react";
 import { 
   Dialog, 
@@ -28,12 +29,20 @@ interface GettingStartedDialogProps {
 
 export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialogProps) => {
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
+  const [isCollapsing, setIsCollapsing] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      markOnboardingAsSeen();
+      // Add collapse animation
+      setIsCollapsing(true);
+      setTimeout(() => {
+        markOnboardingAsSeen();
+        setIsCollapsing(false);
+        onOpenChange(false);
+      }, 300); // Animation duration
+    } else {
+      onOpenChange(open);
     }
-    onOpenChange(open);
   };
 
   const toggleStep = (stepIndex: number) => {
@@ -149,7 +158,9 @@ export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialo
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent 
+        className={`max-w-2xl ${isCollapsing ? 'animate-collapse-to-bottom-left' : ''}`}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Welcome to MCP Now</DialogTitle>
         </DialogHeader>
