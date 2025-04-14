@@ -623,7 +623,7 @@ const Discovery = () => {
       </ScrollArea>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
+        <DialogContent hideClose className="max-w-4xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
             <div className="h-full flex flex-col">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">

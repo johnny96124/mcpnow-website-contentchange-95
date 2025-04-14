@@ -162,17 +162,12 @@ export function AddToProfileDialog({
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               Skip
             </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Previous
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={!selectedProfileId || selectedProfileId === "create-new"}
-              >
-                Add to Profile
-              </Button>
-            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={!selectedProfileId || selectedProfileId === "create-new"}
+            >
+              Add to Profile
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -186,3 +181,4 @@ export function AddToProfileDialog({
     </>
   );
 }
+
