@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -326,7 +325,7 @@ export function HostCard({
                       
                       return (
                         <div key={definitionId} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                          <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+                          <div className="flex items-center gap-2">
                             <StatusIndicator 
                               status={
                                 isHostDisconnected ? 'none' :
@@ -336,8 +335,8 @@ export function HostCard({
                                 displayInstance.status === 'error' ? 'error' : 'inactive'
                               }
                             />
-                            <div className="text-sm flex items-center min-w-0 flex-1">
-                              <span className="font-medium truncate max-w-[80px] md:max-w-[120px] lg:max-w-[150px]">
+                            <div className="text-sm flex items-center">
+                              <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
                                 {displayInstance.definitionName}
                               </span>
                               
@@ -346,9 +345,9 @@ export function HostCard({
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-6 px-1 py-0 ml-1 whitespace-nowrap"
+                                    className="h-6 px-1 py-0 ml-1"
                                   >
-                                    <span className="text-xs text-muted-foreground hidden md:block truncate max-w-[80px] lg:max-w-[150px]">
+                                    <span className="text-xs text-muted-foreground hidden md:block">
                                       {displayInstance.name}
                                     </span>
                                     <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
@@ -374,7 +373,7 @@ export function HostCard({
                                         {displayInstance.id === instance.id && (
                                           <CircleCheck className="h-3 w-3 text-primary shrink-0" />
                                         )}
-                                        <span className="truncate">{instance.name}</span>
+                                        <span>{instance.name}</span>
                                       </div>
                                     </DropdownMenuItem>
                                   ))}
@@ -390,7 +389,6 @@ export function HostCard({
                               checked={displayInstance.enabled} 
                               onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
                               className="shrink-0"
-                              data-switch="true"
                             />
                           )}
                         </div>
