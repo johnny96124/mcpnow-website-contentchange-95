@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,11 @@ import {
   RefreshCw,
   HelpCircle,
   Zap,
-  Cursor,
+  MousePointer,
   CloudCog,
   Bot,
   Cpu,
+  ServerIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
@@ -28,7 +28,7 @@ const HostsNewUser = () => {
   
   const hostTypes = [
     {
-      icon: <Cursor className="h-10 w-10 text-blue-500" />,
+      icon: <MousePointer className="h-10 w-10 text-blue-500" />,
       name: "Cursor",
       description: "AI-powered code editor with intelligent completions and suggestions"
     },
@@ -129,7 +129,7 @@ const HostsNewUser = () => {
                 
                 <div className="flex items-start gap-2">
                   <div className="mt-1 p-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                    <Server className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <ServerIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <h3 className="text-sm font-medium">Add hosts manually</h3>
