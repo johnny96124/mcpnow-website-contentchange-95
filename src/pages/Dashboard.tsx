@@ -416,7 +416,7 @@ const Dashboard = () => {
                   </p>}
               </div>
             </CardContent>
-            <CardFooter className="pt-2 mt-auto border-t">
+            <CardFooter className="pt-2 mt-auto border-t px-[16px] py-[12px]">
               <Button asChild className="w-full">
                 <Link to="/profiles">
                   View All
@@ -428,7 +428,7 @@ const Dashboard = () => {
           <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
-                <CardTitle className="text-lg font-medium">Server Instances</CardTitle>
+                <CardTitle className="text-lg font-medium">Instances</CardTitle>
                 <CardDescription>{runningInstances} of {serverInstances.length} instances running</CardDescription>
               </div>
               <Server className="h-5 w-5 text-muted-foreground" />
@@ -446,7 +446,7 @@ const Dashboard = () => {
                   </p>}
               </div>
             </CardContent>
-            <CardFooter className="pt-2 mt-auto border-t">
+            <CardFooter className="pt-2 mt-auto border-t px-[16px] py-[12px]">
               <Button asChild className="w-full">
                 <Link to="/servers">
                   View All
