@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { PlusCircle, Trash2, Plus, AlertCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,11 +22,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { EndpointType, ServerInstance, serverDefinitions } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useNavigate } from "react-router-dom";
+import { ServerInstance } from "@/data/mockData";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
@@ -43,12 +41,6 @@ interface CreateProfileDialogProps {
   instances: ServerInstance[];
 }
 
-interface InstanceSelection {
-  id: string;
-  definitionId: string;
-  instanceId: string;
-}
-
 export function CreateProfileDialog({ 
   open, 
   onOpenChange, 
@@ -56,36 +48,7 @@ export function CreateProfileDialog({
   instances
 }: CreateProfileDialogProps) {
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [hasInstances, setHasInstances] = useState(true);
-  const [selections, setSelections] = useState<InstanceSelection[]>([{ 
-    id: `selection-${Date.now()}`, 
-    definitionId: "", 
-    instanceId: "" 
-  }]);
   
-  const instancesByDefinition = instances.reduce((acc, instance) => {
-    if (!acc[instance.definitionId]) {
-      acc[instance.definitionId] = [];
-    }
-    acc[instance.definitionId].push(instance);
-    return acc;
-  }, {} as Record<string, ServerInstance[]>);
-  
-  const definitionIds = [...new Set(instances.map(instance => instance.definitionId))];
-  
-  useEffect(() => {
-    setHasInstances(instances.length > 0);
-    
-    if (open) {
-      setSelections([{ 
-        id: `selection-${Date.now()}`, 
-        definitionId: "", 
-        instanceId: "" 
-      }]);
-    }
-  }, [open, instances]);
-
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -93,83 +56,13 @@ export function CreateProfileDialog({
     },
   });
 
-  const addSelection = () => {
-    setSelections([
-      ...selections, 
-      { 
-        id: `selection-${Date.now()}`, 
-        definitionId: "", 
-        instanceId: "" 
-      }
-    ]);
-  };
-
-  const removeSelection = (id: string) => {
-    if (selections.length > 1) {
-      setSelections(selections.filter(selection => selection.id !== id));
-    }
-  };
-
-  const updateDefinitionId = (id: string, definitionId: string) => {
-    setSelections(selections.map(selection => 
-      selection.id === id ? { ...selection, definitionId, instanceId: "" } : selection
-    ));
-  };
-
-  const updateInstanceId = (id: string, instanceId: string) => {
-    setSelections(selections.map(selection => 
-      selection.id === id ? { ...selection, instanceId } : selection
-    ));
-  };
-
-  const getDefinitionName = (definitionId: string) => {
-    const definition = serverDefinitions.find(def => def.id === definitionId);
-    return definition ? definition.name : 'Unknown Definition';
-  };
-
-  const getAvailableDefinitionIds = (currentSelectionId: string) => {
-    const usedDefinitionIds = selections
-      .filter(s => s.id !== currentSelectionId && s.definitionId)
-      .map(s => s.definitionId);
-    
-    return definitionIds.filter(defId => !usedDefinitionIds.includes(defId));
-  };
-
   const handleSubmit = (values: ProfileFormValues) => {
-    if (!hasInstances) {
-      navigate("/servers");
-      onOpenChange(false);
-      toast({
-        title: "No server instances available",
-        description: "You need to create server instances first before creating a profile.",
-      });
-      return;
-    }
-
-    const selectedInstanceIds = selections
-      .filter(selection => selection.instanceId)
-      .map(selection => selection.instanceId);
-
-    if (selectedInstanceIds.length === 0) {
-      toast({
-        title: "No instances selected",
-        description: "You must select at least one server instance for the profile.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     onCreateProfile({
       name: values.name,
-      instances: selectedInstanceIds,
+      instances: [],
     });
     
     form.reset();
-    setSelections([{ 
-      id: `selection-${Date.now()}`, 
-      definitionId: "", 
-      instanceId: "" 
-    }]);
     onOpenChange(false);
     
     toast({
@@ -188,129 +81,34 @@ export function CreateProfileDialog({
           </DialogDescription>
         </DialogHeader>
         
-        {!hasInstances ? (
-          <div className="py-4">
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                You need to create server instances before creating a profile.
-              </AlertDescription>
-            </Alert>
-            <Button 
-              onClick={() => {
-                navigate("/servers");
-                onOpenChange(false);
-              }} 
-              className="w-full mt-4"
-            >
-              Go to Servers Page
-            </Button>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter profile name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Profile Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Enter profile name" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <FormLabel>Server Instances</FormLabel>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={addSelection}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Instance
-                  </Button>
-                </div>
-
-                {selections.map((selection) => (
-                  <div key={selection.id} className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <Select
-                        value={selection.definitionId}
-                        onValueChange={(value) => updateDefinitionId(selection.id, value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select definition" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getAvailableDefinitionIds(selection.id).map(defId => (
-                            <SelectItem key={defId} value={defId}>
-                              {getDefinitionName(defId)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex-1">
-                      <Select
-                        value={selection.instanceId}
-                        onValueChange={(value) => updateInstanceId(selection.id, value)}
-                        disabled={!selection.definitionId}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select instance" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selection.definitionId && 
-                            instancesByDefinition[selection.definitionId]?.map(instance => (
-                              <SelectItem key={instance.id} value={instance.id}>
-                                {instance.name}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeSelection(selection.id)}
-                      disabled={selections.length <= 1}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-
-                <Alert variant="default" className="bg-blue-50 border-blue-200 mt-2">
-                  <AlertDescription className="text-xs text-blue-700">
-                    Each server definition can only be selected once.
-                    At least one server instance must be selected for the profile.
-                  </AlertDescription>
-                </Alert>
-              </div>
-
-              <DialogFooter className="pt-4">
-                <Button variant="outline" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
-                <Button 
-                  type="submit"
-                  disabled={!form.formState.isValid || selections.every(s => !s.instanceId)}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Create Profile
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
+            <DialogFooter className="pt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)} type="button">Cancel</Button>
+              <Button 
+                type="submit"
+                disabled={!form.formState.isValid}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create Profile
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
