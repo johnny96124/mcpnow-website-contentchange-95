@@ -28,7 +28,7 @@ interface GettingStartedDialogProps {
 export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialogProps) => {
   const [expandedStep, setExpandedStep] = useState<number | null>(0);
   const [closing, setClosing] = useState(false);
-  const [animationTarget, setAnimationTarget] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [animationOrigin, setAnimationOrigin] = useState<string>("60 calc(100vh - 60)");
   const dialogRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -39,33 +39,15 @@ export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialo
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      // Get sidebar help icon position (approximate position in the bottom left)
-      const helpIconPosition = {
-        x: 40, // Approximate x position of help icon
-        y: window.innerHeight - 60 // Approximate y position of help icon
-      };
+      setAnimationOrigin("60 calc(100vh - 60)");
       
-      // Calculate current dialog position
-      const dialogRect = dialogRef.current?.getBoundingClientRect();
-      if (dialogRect) {
-        setAnimationTarget({
-          x: helpIconPosition.x - (dialogRect.x + dialogRect.width / 2),
-          y: helpIconPosition.y - (dialogRect.y + dialogRect.height / 2)
-        });
-        
-        // Start animation
-        setClosing(true);
-        
-        // Delay actual closing to allow animation to play
-        setTimeout(() => {
-          markOnboardingAsSeen();
-          setClosing(false);
-          onOpenChange(false);
-        }, 300); // Match the animation duration
-      } else {
+      setClosing(true);
+      
+      setTimeout(() => {
         markOnboardingAsSeen();
+        setClosing(false);
         onOpenChange(false);
-      }
+      }, 300);
     } else {
       onOpenChange(true);
     }
@@ -186,17 +168,9 @@ export const GettingStartedDialog = ({ open, onOpenChange }: GettingStartedDialo
     <Dialog open={open || closing} onOpenChange={handleOpenChange}>
       <DialogContent 
         ref={dialogRef}
-        className={`max-w-2xl ${closing ? 'animate-collapse' : ''}`}
-        style={
-          closing 
-            ? { 
-                animation: `collapseDialog 300ms ease-in forwards`,
-                transformOrigin: 'center',
-                transform: `scale(0.8) translate(${animationTarget.x}px, ${animationTarget.y}px)`,
-                opacity: 0
-              } 
-            : {}
-        }
+        className={`max-w-2xl ${closing ? 'animate-collapse' : 'animate-expand'}`}
+        animationOrigin={animationOrigin}
+        hideClose={true}
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Welcome to MCP Now</DialogTitle>
