@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Laptop,
-  Server,
   Search,
   ArrowRight,
   RefreshCw,
-  Globe,
-  TerminalSquare,
-  Zap,
   HelpCircle,
+  Zap,
+  Cursor,
+  CloudCog,
+  Bot,
+  Cpu,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
@@ -28,24 +28,24 @@ const HostsNewUser = () => {
   
   const hostTypes = [
     {
-      icon: <Laptop className="h-10 w-10 text-blue-500" />,
-      name: "Local Machine",
-      description: "Your own computer can act as a host for development and testing"
+      icon: <Cursor className="h-10 w-10 text-blue-500" />,
+      name: "Cursor",
+      description: "AI-powered code editor with intelligent completions and suggestions"
     },
     {
-      icon: <Server className="h-10 w-10 text-purple-500" />,
-      name: "Dedicated Servers",
-      description: "Physical or cloud servers running Linux, macOS, or Windows"
+      icon: <CloudCog className="h-10 w-10 text-purple-500" />,
+      name: "Windsurf",
+      description: "Cloud-based development environment with seamless deployment features"
     },
     {
-      icon: <Globe className="h-10 w-10 text-green-500" />,
-      name: "Cloud Instances",
-      description: "AWS, GCP, or Azure virtual machines configured as hosts"
+      icon: <Cpu className="h-10 w-10 text-green-500" />,
+      name: "Cline",
+      description: "High-performance computing platform specialized for AI model inference"
     },
     {
-      icon: <TerminalSquare className="h-10 w-10 text-amber-500" />,
-      name: "Docker Containers",
-      description: "Containerized environments that can act as isolated hosts"
+      icon: <Bot className="h-10 w-10 text-amber-500" />,
+      name: "Claude",
+      description: "Advanced AI assistant with natural language understanding and reasoning"
     }
   ];
 
@@ -104,7 +104,7 @@ const HostsNewUser = () => {
       {/* Main content */}
       <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
         <CardContent className="pt-6">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid md:grid-cols-2 gap-8 items-start">
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold">What are hosts?</h2>
