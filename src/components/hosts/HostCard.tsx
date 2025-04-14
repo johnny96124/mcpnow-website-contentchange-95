@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface InstanceStatus {
   id: string;
@@ -340,50 +341,58 @@ export function HostCard({
                                 displayInstance.status === 'error' ? 'error' : 'inactive'
                               }
                             />
-                            <div className="text-sm">
-                              <span className="font-medium">{displayInstance.definitionName}</span>
+                            <div className="text-sm flex items-center">
+                              <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
+                                {displayInstance.definitionName}
+                              </span>
                               
-                              <Popover>
-                                <PopoverTrigger asChild>
+                              {/* Replace Popover with DropdownMenu for better positioning */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
                                     className="h-6 px-1 py-0 ml-1"
                                   >
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className="text-xs text-muted-foreground truncate max-w-[60px] md:max-w-[80px]">
                                       {displayInstance.name.split('-').pop()}
                                     </span>
-                                    <ChevronDown className="h-3 w-3 ml-1" />
+                                    <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
                                   </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-48 p-1">
-                                  <div className="space-y-1">
-                                    {instances.map(instance => (
-                                      <Button
-                                        key={instance.id}
-                                        variant={displayInstance.id === instance.id ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className={cn(
-                                          "w-full justify-start text-xs",
-                                          displayInstance.id === instance.id && "font-medium"
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent 
+                                  align="start"
+                                  className="w-48 p-1 max-h-[200px] overflow-y-auto"
+                                >
+                                  {instances.map(instance => (
+                                    <DropdownMenuItem
+                                      key={instance.id}
+                                      className={cn(
+                                        "w-full text-xs cursor-pointer",
+                                        displayInstance.id === instance.id && "bg-accent font-medium"
+                                      )}
+                                      onClick={() => handleSelectInstance(instance.id, definitionId)}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {displayInstance.id === instance.id && (
+                                          <CircleCheck className="h-3 w-3 text-primary shrink-0" />
                                         )}
-                                        onClick={() => handleSelectInstance(instance.id, definitionId)}
-                                      >
-                                        {instance.name.split('-').pop()}
-                                      </Button>
-                                    ))}
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
+                                        <span className="truncate">{instance.name.split('-').pop()}</span>
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                             {!isHostDisconnected && displayInstance.status === 'connecting' && (
-                              <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground" />
+                              <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
                             )}
                           </div>
                           {!isHostDisconnected && (
                             <Switch 
                               checked={displayInstance.enabled} 
                               onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                              className="shrink-0"
                             />
                           )}
                         </div>
