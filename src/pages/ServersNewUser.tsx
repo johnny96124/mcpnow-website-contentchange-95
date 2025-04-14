@@ -95,7 +95,7 @@ const ServersNewUser = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">What are servers?</h2>
+                <h2 className="text-xl font-semibold mb-4">What are servers?</h2>
                 <p className="text-muted-foreground">
                   Servers define how your application connects to models and external services.
                   They can be HTTP endpoints, standard I/O processes, or custom implementations.
@@ -142,19 +142,12 @@ const ServersNewUser = () => {
               
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button 
-                  onClick={() => setAddServerDialogOpen(true)} 
-                  className="gap-2" 
-                  size="lg"
-                >
-                  <Server className="h-4 w-4" />
-                  Create Server
-                </Button>
-                
-                <Button 
                   onClick={handleNavigateToDiscovery}
-                  variant="outline" 
+                  variant="default"
                   size="lg"
+                  className="gap-2"
                 >
+                  <Globe className="h-4 w-4" />
                   Browse Catalog
                 </Button>
                 
@@ -169,7 +162,7 @@ const ServersNewUser = () => {
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Supported server types</h2>
+              <h2 className="text-xl font-semibold mb-4">Supported server types</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {serverTypes.map((type) => (
                   <Card key={type.name} className="border hover:shadow-md transition-shadow">
