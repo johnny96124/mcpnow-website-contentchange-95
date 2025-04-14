@@ -10,7 +10,7 @@ import {
   ArrowRight,
   Zap,
   HelpCircle,
-  ServerStack,
+  Server,
   Boxes,
   PlusCircle,
   Network,
@@ -107,7 +107,7 @@ const ProfilesNewUser = () => {
                 
                 <div className="flex items-start gap-2">
                   <div className="mt-1 p-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30">
-                    <ServerStack className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <Server className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <h3 className="text-sm font-medium">Deploy as a unit</h3>
