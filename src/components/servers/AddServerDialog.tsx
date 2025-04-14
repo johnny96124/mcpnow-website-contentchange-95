@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -71,7 +70,6 @@ export function AddServerDialog({
   
   const serverType = form.watch("type");
   
-  // Reset URL and commandArgs when server type changes
   useEffect(() => {
     if (serverType === "HTTP_SSE") {
       form.setValue("commandArgs", "");
@@ -113,16 +111,14 @@ export function AddServerDialog({
     newVars[index][field] = value;
     setEnvironmentVars(newVars);
     
-    // Check for duplicate keys
     if (field === 'key') {
       const keyCount = newVars.filter(item => item.key === value && item.key !== "").length;
       setEnvKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
     }
     
-    // Update the form value
     const envObject: Record<string, string> = {};
     newVars.forEach(item => {
-      if (item.key.trim()) { // Only add if key is not empty
+      if (item.key.trim()) {
         envObject[item.key] = item.value;
       }
     });
@@ -134,16 +130,14 @@ export function AddServerDialog({
     newParams[index][field] = value;
     setUrlParams(newParams);
     
-    // Check for duplicate keys
     if (field === 'key') {
       const keyCount = newParams.filter(item => item.key === value && item.key !== "").length;
       setHeaderKeyError(keyCount > 1 ? "Duplicate key names are not allowed" : null);
     }
     
-    // Update the form value
     const headerObject: Record<string, string> = {};
     newParams.forEach(item => {
-      if (item.key.trim()) { // Only add if key is not empty
+      if (item.key.trim()) {
         headerObject[item.key] = item.value;
       }
     });
@@ -162,7 +156,6 @@ export function AddServerDialog({
     const newVars = environmentVars.filter((_, i) => i !== index);
     setEnvironmentVars(newVars);
     
-    // Update the form value
     const envObject: Record<string, string> = {};
     newVars.forEach(item => {
       if (item.key.trim()) {
@@ -177,7 +170,6 @@ export function AddServerDialog({
     const newParams = urlParams.filter((_, i) => i !== index);
     setUrlParams(newParams);
     
-    // Update the form value
     const headerObject: Record<string, string> = {};
     newParams.forEach(item => {
       if (item.key.trim()) {
@@ -189,9 +181,7 @@ export function AddServerDialog({
   };
   
   const onSubmit = (data: ServerFormValues) => {
-    // Validate required fields based on server type
     if (!validateRequiredFields()) {
-      // Don't proceed if validation fails
       return;
     }
     
@@ -478,7 +468,14 @@ export function AddServerDialog({
                   )}
                 />
                 
-                <DialogFooter>
+                <DialogFooter className="flex justify-between">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Skip
+                  </Button>
                   <Button 
                     type="submit"
                     disabled={!!envKeyError || !!headerKeyError}
