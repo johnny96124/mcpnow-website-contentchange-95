@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { PlusCircle, Search, RefreshCw, FileText, Info } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -13,6 +14,7 @@ import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
+import { Card, CardContent } from "@/components/ui/card";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -264,6 +266,45 @@ const Hosts = () => {
               onFixConfig={handleUpdateConfigDialog}
             />
           ))}
+          
+          {/* Add guidance card */}
+          <Card className="border-2 border-dashed bg-muted/50 hover:bg-muted/80 transition-colors">
+            <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center space-y-5">
+              <div className="rounded-full bg-primary/10 p-4">
+                <ServerCog className="h-8 w-8 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-semibold">Add More Hosts</h3>
+                <p className="text-muted-foreground">
+                  Scan your network for hosts or manually add host connections
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                <Button 
+                  onClick={handleScanForHosts} 
+                  disabled={isScanning} 
+                  variant="outline" 
+                  className="gap-2"
+                >
+                  {isScanning ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Scanning...
+                    </>
+                  ) : (
+                    <>
+                      <ScanLine className="h-4 w-4" />
+                      Scan for Hosts
+                    </>
+                  )}
+                </Button>
+                <Button onClick={() => setAddHostDialogOpen(true)} className="gap-2">
+                  <PlusCircle className="h-4 w-4" />
+                  Add Host Manually
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
           
           {isScanning && (
             <div className="border rounded-lg overflow-hidden shadow-sm h-[400px]">
