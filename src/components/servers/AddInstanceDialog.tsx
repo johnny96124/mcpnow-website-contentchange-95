@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Info, Plus, Trash2 } from "lucide-react";
+import { Info, Plus, Trash2, X } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -20,6 +20,7 @@ import {
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -56,6 +57,9 @@ export function AddInstanceDialog({
   
   // For HTTP_SSE type
   const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([]);
+
+  // For info box visibility
+  const [showInfoBox, setShowInfoBox] = useState<boolean>(true);
 
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
@@ -118,6 +122,9 @@ export function AddInstanceDialog({
           ]);
         }
       }
+      
+      // Reset info box visibility
+      setShowInfoBox(true);
     }
   }, [open, initialValues, serverDefinition, form, editMode, instanceId]);
 
@@ -197,6 +204,31 @@ export function AddInstanceDialog({
             {editMode ? "Edit the instance settings" : serverDefinition.description}
           </DialogDescription>
         </DialogHeader>
+        
+        {/* What is an Instance explanation box */}
+        {!editMode && showInfoBox && (
+          <Alert className="bg-blue-50 dark:bg-blue-950/30 rounded-md p-4 border border-blue-100 dark:border-blue-900 mb-4 relative">
+            <div className="flex gap-2 items-center">
+              <Info className="h-4 w-4 text-blue-500" />
+              <h3 className="font-medium text-blue-800 dark:text-blue-300">
+                What is an Instance?
+              </h3>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-2 right-2 h-6 w-6 p-1 text-blue-600"
+              onClick={() => setShowInfoBox(false)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+            <AlertDescription className="mt-2 text-sm text-blue-700 dark:text-blue-400">
+              An instance is a running copy of a server with specific configuration settings. 
+              You can create multiple instances of the same server type with different settings 
+              to serve different purposes or environments.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -458,19 +490,21 @@ export function AddInstanceDialog({
               </>
             )}
             
-            <DialogFooter className="pt-2">
+            <DialogFooter className="flex justify-between">
               <Button 
                 type="button" 
-                variant="outline" 
+                variant="ghost" 
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                Skip
               </Button>
-              <Button 
-                type="submit"
-              >
-                {editMode ? "Save Changes" : "Create Instance"}
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  type="submit"
+                >
+                  {editMode ? "Save Changes" : "Create Instance"}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

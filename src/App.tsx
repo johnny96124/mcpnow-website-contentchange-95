@@ -14,6 +14,8 @@ import Hosts from "./pages/Hosts";
 import HostsNewUser from "./pages/HostsNewUser";
 import Profiles from "./pages/Profiles";
 import Servers from "./pages/Servers";
+import ServersNewUser from "./pages/ServersNewUser";
+import ProfilesNewUser from "./pages/ProfilesNewUser";
 import Discovery from "./pages/Discovery";
 import Settings from "./pages/Settings";
 import TrayPopup from "./pages/TrayPopup";
@@ -43,7 +45,9 @@ const App = () => {
                   <Route path="hosts" element={<Hosts />} />
                   <Route path="hosts/new-user" element={<HostsNewUser />} />
                   <Route path="profiles" element={<Profiles />} />
+                  <Route path="profiles/new-user" element={<ProfilesNewUser />} />
                   <Route path="servers" element={<Servers />} />
+                  <Route path="servers/new-user" element={<ServersNewUser />} />
                   <Route path="discovery" element={<Discovery />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
