@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -347,10 +348,10 @@ export function HostCard({
                                     size="sm" 
                                     className="h-6 px-1 py-0 ml-1"
                                   >
-                                    <span className="text-xs text-muted-foreground hidden md:block">
+                                    <span className="text-xs text-muted-foreground hidden md:inline-block truncate max-w-[150px]">
                                       {displayInstance.name}
                                     </span>
-                                    <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
+                                    <span className="text-xs text-muted-foreground inline-block md:hidden truncate max-w-[60px]">
                                       {displayInstance.name.split('-').pop()}
                                     </span>
                                     <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
@@ -369,11 +370,11 @@ export function HostCard({
                                       )}
                                       onClick={() => handleSelectInstance(instance.id, definitionId)}
                                     >
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 w-full">
                                         {displayInstance.id === instance.id && (
                                           <CircleCheck className="h-3 w-3 text-primary shrink-0" />
                                         )}
-                                        <span>{instance.name}</span>
+                                        <span className="truncate-text">{instance.name}</span>
                                       </div>
                                     </DropdownMenuItem>
                                   ))}
@@ -385,11 +386,13 @@ export function HostCard({
                             )}
                           </div>
                           {!isHostDisconnected && (
-                            <Switch 
-                              checked={displayInstance.enabled} 
-                              onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
-                              className="shrink-0"
-                            />
+                            <div className="switch-container shrink-0">
+                              <Switch 
+                                checked={displayInstance.enabled} 
+                                onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                                className="shrink-0"
+                              />
+                            </div>
                           )}
                         </div>
                       );
