@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { ServerInstance } from "@/data/mockData";
 
 const profileSchema = z.object({
   name: z.string().min(1, { message: "Profile name is required" }),
