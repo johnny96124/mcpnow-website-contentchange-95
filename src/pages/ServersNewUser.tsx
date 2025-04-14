@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import {
   HelpCircle,
   Terminal,
   CirclePlus,
+  Globe,  // Added Globe icon import
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { markServersOnboardingAsSeen } from "@/utils/localStorage";
