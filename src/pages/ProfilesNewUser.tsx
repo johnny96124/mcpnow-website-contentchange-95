@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,7 @@ const ProfilesNewUser = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">What are profiles?</h2>
+                <h2 className="text-xl font-semibold mb-4">What are profiles?</h2>
                 <p className="text-muted-foreground">
                   Profiles allow you to group server instances together, making it easier to manage 
                   and deploy related services. A profile can include multiple server instances 
@@ -169,7 +170,7 @@ const ProfilesNewUser = () => {
             </div>
             
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Profile features</h2>
+              <h2 className="text-xl font-semibold mb-4">Profile features</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {profileFeatures.map((feature) => (
                   <Card key={feature.name} className="border hover:shadow-md transition-shadow">
@@ -211,3 +212,4 @@ const ProfilesNewUser = () => {
 };
 
 export default ProfilesNewUser;
+
