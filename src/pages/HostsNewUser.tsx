@@ -2,66 +2,51 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Search,
-  ArrowRight,
-  RefreshCw,
-  HelpCircle,
-  Zap,
-  MousePointer,
-  CloudCog,
-  Bot,
-  Cpu,
-  ServerIcon,
-} from "lucide-react";
+import { Search, ArrowRight, RefreshCw, HelpCircle, Zap, MousePointer, CloudCog, Bot, Cpu, ServerIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
 import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
-
 const HostsNewUser = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { getAvailableHosts } = useHostProfiles();
-  
-  const hostTypes = [
-    {
-      icon: <MousePointer className="h-10 w-10 text-blue-500" />,
-      name: "Cursor",
-      description: "AI-powered code editor with intelligent completions and suggestions"
-    },
-    {
-      icon: <CloudCog className="h-10 w-10 text-purple-500" />,
-      name: "Windsurf",
-      description: "Cloud-based development environment with seamless deployment features"
-    },
-    {
-      icon: <Cpu className="h-10 w-10 text-green-500" />,
-      name: "Cline",
-      description: "High-performance computing platform specialized for AI model inference"
-    },
-    {
-      icon: <Bot className="h-10 w-10 text-amber-500" />,
-      name: "Claude",
-      description: "Advanced AI assistant with natural language understanding and reasoning"
-    }
-  ];
-
+  const {
+    getAvailableHosts
+  } = useHostProfiles();
+  const hostTypes = [{
+    icon: <MousePointer className="h-10 w-10 text-blue-500" />,
+    name: "Cursor",
+    description: "AI-powered code editor with intelligent completions and suggestions"
+  }, {
+    icon: <CloudCog className="h-10 w-10 text-purple-500" />,
+    name: "Windsurf",
+    description: "Cloud-based development environment with seamless deployment features"
+  }, {
+    icon: <Cpu className="h-10 w-10 text-green-500" />,
+    name: "Cline",
+    description: "High-performance computing platform specialized for AI model inference"
+  }, {
+    icon: <Bot className="h-10 w-10 text-amber-500" />,
+    name: "Claude",
+    description: "Advanced AI assistant with natural language understanding and reasoning"
+  }];
   const handleScan = () => {
     setIsScanning(true);
-    
+
     // Simulate scanning process
     setTimeout(() => {
       const success = Math.random() > 0.3; // 70% chance of success
-      
+
       if (success) {
         toast({
           title: "Host discovered!",
-          description: "We found a local host on your network.",
+          description: "We found a local host on your network."
         });
-        
+
         // Redirect to main hosts page after successful scan
         setTimeout(() => {
           navigate("/hosts");
@@ -70,25 +55,20 @@ const HostsNewUser = () => {
         toast({
           title: "No hosts found",
           description: "We couldn't find any hosts automatically.",
-          variant: "destructive",
+          variant: "destructive"
         });
         setDialogOpen(true);
       }
-      
       setIsScanning(false);
     }, 2500);
   };
-  
   const handleSkip = () => {
     navigate("/hosts");
   };
-  
   const handleOpenGuide = () => {
     setDialogOpen(true);
   };
-
-  return (
-    <div className="container py-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
+  return <div className="container py-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
       {/* Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-4 py-1 rounded-full inline-flex items-center gap-1.5 mb-2">
@@ -96,9 +76,7 @@ const HostsNewUser = () => {
           <span className="text-xs font-medium">Getting Started</span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Welcome to Hosts</h1>
-        <p className="text-muted-foreground text-lg">
-          Hosts are machines that run your server profiles and instances. Let's set up your first host.
-        </p>
+        <p className="text-muted-foreground text-lg">Hosts are applications that support MCP and run your server profiles.</p>
       </div>
       
       {/* Main content */}
@@ -153,30 +131,17 @@ const HostsNewUser = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={handleScan} 
-                  className="gap-2" 
-                  size="lg"
-                  disabled={isScanning}
-                >
-                  {isScanning ? (
-                    <>
+                <Button onClick={handleScan} className="gap-2" size="lg" disabled={isScanning}>
+                  {isScanning ? <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
                       Scanning...
-                    </>
-                  ) : (
-                    <>
+                    </> : <>
                       <Search className="h-4 w-4" />
                       Scan for Hosts
-                    </>
-                  )}
+                    </>}
                 </Button>
                 
-                <Button 
-                  onClick={handleSkip} 
-                  variant="outline" 
-                  size="lg"
-                >
+                <Button onClick={handleSkip} variant="outline" size="lg">
                   Skip for Now
                 </Button>
               </div>
@@ -185,8 +150,7 @@ const HostsNewUser = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Supported host types</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {hostTypes.map((type) => (
-                  <Card key={type.name} className="border hover:shadow-md transition-shadow">
+                {hostTypes.map(type => <Card key={type.name} className="border hover:shadow-md transition-shadow">
                     <CardContent className="p-4 flex gap-3 items-start">
                       <div>{type.icon}</div>
                       <div>
@@ -194,8 +158,7 @@ const HostsNewUser = () => {
                         <p className="text-xs text-muted-foreground">{type.description}</p>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
               
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
@@ -204,11 +167,7 @@ const HostsNewUser = () => {
                   <h3 className="font-medium text-amber-800 dark:text-amber-300">Need help?</h3>
                   <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
                     If you're not sure how to set up a host, 
-                    <Button 
-                      variant="link" 
-                      className="h-auto p-0 text-sm text-amber-700 dark:text-amber-400 font-medium underline"
-                      onClick={handleOpenGuide}
-                    >
+                    <Button variant="link" className="h-auto p-0 text-sm text-amber-700 dark:text-amber-400 font-medium underline" onClick={handleOpenGuide}>
                       view our configuration guide
                     </Button>
                     .
@@ -220,14 +179,7 @@ const HostsNewUser = () => {
         </CardContent>
       </Card>
 
-      <HostConfigGuideDialog 
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        profile={null}
-        hosts={getAvailableHosts()}
-      />
-    </div>
-  );
+      <HostConfigGuideDialog open={dialogOpen} onOpenChange={setDialogOpen} profile={null} hosts={getAvailableHosts()} />
+    </div>;
 };
-
 export default HostsNewUser;
