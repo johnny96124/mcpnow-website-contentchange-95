@@ -6,12 +6,7 @@ import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { useServerContext } from "@/context/ServerContext";
 import { InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { toast } from "sonner";
-import { 
-  hasSeenOnboarding, 
-  hasSeenHostsOnboarding,
-  hasSeenServersOnboarding,
-  hasSeenProfilesOnboarding
-} from "@/utils/localStorage";
+import { hasSeenOnboarding, hasSeenHostsOnboarding } from "@/utils/localStorage";
 
 const DefaultLayout = () => {
   const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
@@ -28,16 +23,6 @@ const DefaultLayout = () => {
     // Check hosts onboarding
     if (location.pathname === '/hosts' && !hasSeenHostsOnboarding()) {
       navigate('/hosts/new-user');
-    }
-    
-    // Check servers onboarding
-    if (location.pathname === '/servers' && !hasSeenServersOnboarding()) {
-      navigate('/servers/new-user');
-    }
-    
-    // Check profiles onboarding
-    if (location.pathname === '/profiles' && !hasSeenProfilesOnboarding()) {
-      navigate('/profiles/new-user');
     }
     
     setCheckingOnboarding(false);
