@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -193,8 +192,6 @@ export function HostCard({
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
   
-  // Configure Host First Flow - Render components based on configuration status
-  // If configuration is needed, simplify the UI to focus on that step first
   if (needsConfiguration) {
     return (
       <Card className="overflow-hidden flex flex-col h-[400px]">
@@ -241,7 +238,6 @@ export function HostCard({
     );
   }
   
-  // Standard card UI for already configured hosts
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
@@ -253,7 +249,6 @@ export function HostCard({
           <div className="flex items-center gap-2">
             <StatusIndicator 
               status={
-                // Always show as disconnected when no profile is selected
                 !profileId ? 'inactive' :
                 isConnecting ? 'warning' :
                 host.connectionStatus === 'connected' ? 'active' : 
@@ -262,7 +257,6 @@ export function HostCard({
                 host.configStatus === 'unknown' ? 'warning' : 'inactive'
               } 
               label={
-                // Always show as disconnected when no profile is selected
                 !profileId ? 'Disconnected' :
                 isConnecting ? 'Connecting' :
                 host.connectionStatus === 'connected' ? 'Connected' : 
@@ -346,7 +340,6 @@ export function HostCard({
                                 {displayInstance.definitionName}
                               </span>
                               
-                              {/* Replace Popover with DropdownMenu for better positioning */}
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button 
@@ -354,7 +347,10 @@ export function HostCard({
                                     size="sm" 
                                     className="h-6 px-1 py-0 ml-1"
                                   >
-                                    <span className="text-xs text-muted-foreground truncate max-w-[60px] md:max-w-[80px]">
+                                    <span className="text-xs text-muted-foreground hidden md:block">
+                                      {displayInstance.name}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
                                       {displayInstance.name.split('-').pop()}
                                     </span>
                                     <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
@@ -362,7 +358,7 @@ export function HostCard({
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent 
                                   align="start"
-                                  className="w-48 p-1 max-h-[200px] overflow-y-auto"
+                                  className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
                                 >
                                   {instances.map(instance => (
                                     <DropdownMenuItem
@@ -377,7 +373,7 @@ export function HostCard({
                                         {displayInstance.id === instance.id && (
                                           <CircleCheck className="h-3 w-3 text-primary shrink-0" />
                                         )}
-                                        <span className="truncate">{instance.name.split('-').pop()}</span>
+                                        <span>{instance.name}</span>
                                       </div>
                                     </DropdownMenuItem>
                                   ))}
