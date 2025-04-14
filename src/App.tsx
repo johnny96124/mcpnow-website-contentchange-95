@@ -11,6 +11,7 @@ import DefaultLayout from "./layouts/DefaultLayout";
 import Dashboard from "./pages/Dashboard";
 import EmptyDashboard from "./pages/EmptyDashboard";
 import Hosts from "./pages/Hosts";
+import HostsNewUser from "./pages/HostsNewUser";
 import Profiles from "./pages/Profiles";
 import Servers from "./pages/Servers";
 import Discovery from "./pages/Discovery";
@@ -40,6 +41,7 @@ const App = () => {
                   <Route path="new-user" element={<NewUserDashboard />} />
                   <Route path="empty-dashboard" element={<EmptyDashboard />} />
                   <Route path="hosts" element={<Hosts />} />
+                  <Route path="hosts/new-user" element={<HostsNewUser />} />
                   <Route path="profiles" element={<Profiles />} />
                   <Route path="servers" element={<Servers />} />
                   <Route path="discovery" element={<Discovery />} />

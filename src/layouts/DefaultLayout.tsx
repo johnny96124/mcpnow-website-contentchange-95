@@ -6,7 +6,7 @@ import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { useServerContext } from "@/context/ServerContext";
 import { InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { toast } from "sonner";
-import { hasSeenOnboarding } from "@/utils/localStorage";
+import { hasSeenOnboarding, hasSeenHostsOnboarding } from "@/utils/localStorage";
 
 const DefaultLayout = () => {
   const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
@@ -15,10 +15,16 @@ const DefaultLayout = () => {
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   
   useEffect(() => {
-    // Only redirect on the main dashboard page
+    // Check main onboarding
     if (location.pathname === '/' && !hasSeenOnboarding()) {
       navigate('/new-user');
     }
+    
+    // Check hosts onboarding
+    if (location.pathname === '/hosts' && !hasSeenHostsOnboarding()) {
+      navigate('/hosts/new-user');
+    }
+    
     setCheckingOnboarding(false);
   }, [navigate, location.pathname]);
   
