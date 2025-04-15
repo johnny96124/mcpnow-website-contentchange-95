@@ -148,7 +148,7 @@ const ServersNewUser = () => {
                   className="gap-2"
                 >
                   <Globe className="h-4 w-4" />
-                  Browse Catalog
+                  Browse Servers
                 </Button>
                 
                 <Button 
@@ -180,10 +180,12 @@ const ServersNewUser = () => {
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
                 <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-amber-800 dark:text-amber-300">Getting started</h3>
+                  <h3 className="font-medium text-amber-800 dark:text-amber-300">Need help?</h3>
                   <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                    We recommend starting with our Discovery page to find pre-configured servers that match your needs.
-                    You can also create custom server definitions tailored to your specific requirements.
+                    If you're not sure how to set up a host,{" "}
+                    <a href="#" className="text-amber-800 dark:text-amber-300 underline font-medium">
+                      view our configuration guide
+                    </a>.
                   </p>
                 </div>
               </div>

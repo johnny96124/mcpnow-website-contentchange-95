@@ -7,7 +7,6 @@ import {
   Layers,
   Settings,
   Share2,
-  ArrowRight,
   Zap,
   HelpCircle,
   Server,
@@ -149,17 +148,6 @@ const ProfilesNewUser = () => {
                 </Button>
                 
                 <Button 
-                  onClick={() => {
-                    markProfilesOnboardingAsSeen();
-                    navigate("/servers");
-                  }}
-                  variant="outline" 
-                  size="lg"
-                >
-                  Create Server Instance First
-                </Button>
-                
-                <Button 
                   onClick={handleSkip} 
                   variant="ghost" 
                   size="lg"
@@ -185,14 +173,15 @@ const ProfilesNewUser = () => {
                 ))}
               </div>
               
-              <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 p-4 rounded-lg flex items-start gap-3">
-                <HelpCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
+                <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-indigo-800 dark:text-indigo-300">Profile workflow</h3>
-                  <p className="text-sm text-indigo-700 dark:text-indigo-400 mt-1">
-                    The recommended workflow is to first create server instances, then group them into profiles,
-                    and finally assign those profiles to hosts for execution. This approach provides maximum flexibility
-                    and organization.
+                  <h3 className="font-medium text-amber-800 dark:text-amber-300">Need help?</h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                    If you're not sure how to set up a host,{" "}
+                    <a href="#" className="text-amber-800 dark:text-amber-300 underline font-medium">
+                      view our configuration guide
+                    </a>.
                   </p>
                 </div>
               </div>
@@ -212,4 +201,3 @@ const ProfilesNewUser = () => {
 };
 
 export default ProfilesNewUser;
-
