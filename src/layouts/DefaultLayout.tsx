@@ -45,7 +45,8 @@ const DefaultLayout = () => {
   
   const handleCreateInstance = (data: InstanceFormValues) => {
     toast.success(`Instance created: ${data.name}`, {
-      position: "top-right"
+      position: "top-right",
+      duration: 3000,
     });
     closeAddInstanceDialog();
   };
