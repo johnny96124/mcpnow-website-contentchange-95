@@ -56,7 +56,6 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
@@ -135,7 +134,6 @@ const Discovery = () => {
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
   const [addToProfileOpen, setAddToProfileOpen] = useState(false);
-  const [hostGuideOpen, setHostGuideOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
 
@@ -300,7 +298,6 @@ const Discovery = () => {
     if (!selectedDefinition) return;
     
     const profile = addInstanceToProfile(profileId, selectedDefinition.id);
-    setSelectedProfile(profile);
     
     toast({
       title: "Instance Added",
@@ -308,8 +305,6 @@ const Discovery = () => {
     });
     
     setAddToProfileOpen(false);
-    
-    setHostGuideOpen(true);
   };
 
   const handleNavigateToServers = () => {
@@ -893,13 +888,6 @@ const Discovery = () => {
         onAddToProfile={handleAddToProfile}
         serverDefinition={selectedDefinition}
         profiles={allProfiles}
-      />
-
-      <HostConfigGuideDialog
-        open={hostGuideOpen}
-        onOpenChange={setHostGuideOpen}
-        profile={selectedProfile}
-        hosts={getAvailableHosts()}
       />
     </div>
   );
