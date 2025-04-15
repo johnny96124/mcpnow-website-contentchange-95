@@ -45,6 +45,9 @@ export function AddToProfileDialog({
   const handleSubmit = () => {
     if (selectedProfileId) {
       onAddToProfile(selectedProfileId);
+      // Simply close the dialog after adding to profile
+      // No redirection to Hosts page - will stay on Discovery
+      onOpenChange(false);
     }
   };
 
@@ -181,4 +184,3 @@ export function AddToProfileDialog({
     </>
   );
 }
-
