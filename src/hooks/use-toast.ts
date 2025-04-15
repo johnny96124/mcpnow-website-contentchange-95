@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -13,6 +14,7 @@ type ToasterToast = ToastProps & {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center"
 }
 
 const actionTypes = {
@@ -154,6 +156,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
+      position: "top-right", // Default position to top-right
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
