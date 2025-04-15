@@ -20,7 +20,8 @@ import {
   Users,
   Watch,
   Wrench,
-  X
+  X,
+  WifiOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,7 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useHostProfiles } from "@/hooks/use-host-profiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 const ITEMS_PER_PAGE = 12;
@@ -351,6 +352,15 @@ const Discovery = () => {
             >
               <FolderOpen className="mr-2 h-4 w-4" />
               My Servers
+            </Button>
+            
+            <Button 
+              variant="outline"
+              className="bg-transparent text-white border-white/40 hover:bg-white/10"
+              onClick={() => navigate("/discovery/no-network")}
+            >
+              <WifiOff className="mr-2 h-4 w-4" />
+              Test No Network State
             </Button>
           </div>
         </div>
