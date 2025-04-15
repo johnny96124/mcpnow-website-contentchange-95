@@ -1,12 +1,9 @@
 
 import { useState } from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { NoNetworkState } from "@/components/discovery/NoNetworkState";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DiscoveryNoNetwork = () => {
   const [isRetrying, setIsRetrying] = useState(false);
@@ -27,6 +24,10 @@ const DiscoveryNoNetwork = () => {
     }, 2000);
   };
 
+  const handleNavigateToServers = () => {
+    navigate("/servers");
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
@@ -36,6 +37,14 @@ const DiscoveryNoNetwork = () => {
             Discover server definitions created by the community. Find what's popular,
             trending, and recently updated to enhance your development workflow.
           </p>
+          
+          <Button 
+            variant="outline" 
+            className="bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
+            onClick={handleNavigateToServers}
+          >
+            My Servers
+          </Button>
         </div>
         
         <div className="absolute right-8 top-1/2 transform -translate-y-1/2 opacity-10">
@@ -45,57 +54,9 @@ const DiscoveryNoNetwork = () => {
         </div>
       </div>
       
-      <div className="flex flex-col gap-4 mb-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex-1 min-w-[280px]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search servers, APIs, collections..."
-                className="pl-10 bg-background border-input"
-                disabled
-              />
-            </div>
-          </div>
-          
-          <div className="w-[180px]">
-            <Button variant="outline" className="w-full" disabled>
-              Most Popular
-            </Button>
-          </div>
-        </div>
-        
-        <Tabs defaultValue="all" className="w-full">
-          <div className="flex justify-between items-center border-b pb-1">
-            <TabsList className="bg-transparent p-0 h-9">
-              <TabsTrigger 
-                value="all" 
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-                disabled
-              >
-                All
-              </TabsTrigger>
-              <TabsTrigger 
-                value="official"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-                disabled
-              >
-                Official
-              </TabsTrigger>
-              <TabsTrigger 
-                value="community"
-                className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3"
-                disabled
-              >
-                Community
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </Tabs>
-      </div>
-      
-      <div className="h-[calc(100vh-380px)] flex items-center justify-center">
-        <NoNetworkState onRetry={handleRetry} />
+      {/* No Network State - immediately after the banner */}
+      <div className="mt-6">
+        <NoNetworkState onRetry={handleRetry} isRetrying={isRetrying} />
       </div>
     </div>
   );
