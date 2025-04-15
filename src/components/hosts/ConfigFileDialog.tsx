@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Save, AlertTriangle, RotateCw, RefreshCw, Settings, Check, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -9,8 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -235,7 +233,6 @@ export function ConfigFileDialog({
           
           let formatted = JSON.stringify(parsed, null, 2);
           
-          // Highlight the mcpnow section with a special class
           const mcpnowRegex = /"mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/gs;
           
           formatted = formatted.replace(mcpnowRegex, (match) => {
@@ -282,19 +279,12 @@ export function ConfigFileDialog({
                            isViewOnly ? "View configuration file details" :
                            "Edit configuration file details";
 
-  // Removed showConfigurationCreatedAlert as it's no longer needed
-
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
       <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{dialogTitle}</DialogTitle>
-            {isViewOnly && !needsUpdate && !hasEndpointMismatch && (
-              <Badge className="bg-green-500 text-white">
-                <Check className="h-3 w-3 mr-1" /> Correctly configured
-              </Badge>
-            )}
           </div>
           <DialogDescription>
             {dialogDescription}
@@ -394,8 +384,6 @@ export function ConfigFileDialog({
             </div>
           )}
         </div>
-        
-        {/* Removed the green alert box that was here */}
         
         <DialogFooter className="flex justify-end space-x-2">
           {isCreateMode ? (
