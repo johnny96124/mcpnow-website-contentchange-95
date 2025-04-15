@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle,
   ExternalLink,
@@ -16,24 +17,23 @@ import {
   Computer,
   Settings2,
   Layers
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel";
-import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
-import { useState, useEffect } from "react";
-import { useServerContext } from "@/context/ServerContext";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { OfficialBadge } from "@/components/discovery/OfficialBadge";
-import type { ServerDefinition, EndpointType } from "@/data/mockData";
+} from '@/components/ui/carousel';
+import { profiles, hosts, serverInstances, serverDefinitions } from '@/data/mockData';
+import { useServerContext } from '@/context/ServerContext';
+import { EndpointLabel } from '@/components/status/EndpointLabel';
+import { OfficialBadge } from '@/components/discovery/OfficialBadge';
+import type { ServerDefinition, EndpointType } from '@/data/mockData';
 
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
@@ -606,64 +606,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-        <div className="flex items-center gap-2 mb-4">
-          <HelpCircle className="h-5 w-5 text-blue-500" />
-          <h2 className="text-2xl font-bold tracking-tight">Getting Started with MCP Now</h2>
-        </div>
-        
-        <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
-          <CardContent className="pt-6">
-            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-              Follow these simple steps to configure and start using MCP Now effectively.
-            </p>
-            
-            <div className="space-y-3">
-              {beginnerGuideSteps.map((step, index) => (
-                <div 
-                  key={index}
-                  className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900"
-                >
-                  <button 
-                    className="w-full flex items-center justify-between p-4 text-left"
-                    onClick={() => toggleStep(index)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2">
-                        {step.icon}
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Step {index + 1}: {step.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{step.description}</p>
-                      </div>
-                    </div>
-                    {expandedStep === index ? (
-                      <ChevronUp className="h-4 w-4 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
-                    )}
-                  </button>
-                  
-                  {expandedStep === index && (
-                    <div className="p-4 pt-0 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                      {step.content}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-6 flex justify-center">
-              <Button asChild className="gap-2">
-                <Link to="/discovery">
-                  Start Setup Process
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
