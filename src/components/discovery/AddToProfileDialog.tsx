@@ -45,6 +45,7 @@ export function AddToProfileDialog({
   const handleSubmit = () => {
     if (selectedProfileId) {
       onAddToProfile(selectedProfileId);
+      onOpenChange(false); // Close dialog after adding to profile
     }
   };
 
@@ -181,4 +182,3 @@ export function AddToProfileDialog({
     </>
   );
 }
-
