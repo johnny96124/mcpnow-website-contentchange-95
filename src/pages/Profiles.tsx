@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Edit, 
@@ -17,7 +18,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>([]);
@@ -29,7 +29,9 @@ const Profiles = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
+  // Initialize with profiles from data source and add Default profile
   useEffect(() => {
+    // Add a default empty profile if it doesn't exist
     const defaultProfileExists = profiles.some(profile => profile.name === "Default");
     
     if (!defaultProfileExists) {
@@ -163,8 +165,6 @@ const Profiles = () => {
     profile.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const clearSearch = () => setSearchQuery("");
-
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -202,101 +202,90 @@ const Profiles = () => {
         </div>
       </div>
       
-      {filteredProfiles.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProfiles.map((profile) => {
-            const instances = getServerInstances(profile);
-            
-            return (
-              <Card key={profile.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl">{profile.name}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div>
-                    <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
-                    {instances.length > 0 ? (
-                      <ScrollArea className="h-[200px] rounded-md border">
-                        <div className="space-y-1 p-1">
-                          {instances.map(instance => instance && (
-                            <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
-                              <span className="text-sm">
-                                <span className="font-medium">{getDefinitionName(instance.definitionId)}</span>
-                                {' - '}
-                                <span className="text-muted-foreground">{instance.name}</span>
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    ) : (
-                      <div className="text-center p-2 text-muted-foreground text-sm border rounded-md">
-                        No server instances added
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-                <Separator />
-                <CardFooter className="flex justify-between pt-3">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-destructive"
-                    onClick={() => handleDeleteClick(profile)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleEditProfile(profile)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredProfiles.map((profile) => {
+          const instances = getServerInstances(profile);
           
-          <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[400px]">
-            <CardContent className="flex flex-col items-center justify-center p-6">
-              <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">
-                Create a new profile to group server instances together
-              </p>
-              <Button 
-                className="mt-4" 
-                onClick={() => {
-                  if (serverInstances.length === 0) {
-                    toast({
-                      title: "No instances available",
-                      description: "Please create at least one server instance first.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  setIsCreateProfileOpen(true);
-                }}
-              >
-                Create Profile
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        <NoSearchResults 
-          query={searchQuery} 
-          onClear={clearSearch} 
-          title="No profiles found" 
-          description="No profiles match your search for" 
-        />
-      )}
-      
-      <div className="h-10"></div>
+          return (
+            <Card key={profile.id}>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl">{profile.name}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <label className="text-sm font-medium block mb-1">Server Instances ({instances.length})</label>
+                  {instances.length > 0 ? (
+                    <ScrollArea className="h-[200px] rounded-md border">
+                      <div className="space-y-1 p-1">
+                        {instances.map(instance => instance && (
+                          <div key={instance.id} className="flex items-center p-2 bg-secondary rounded-md">
+                            <span className="text-sm">
+                              <span className="font-medium">{getDefinitionName(instance.definitionId)}</span>
+                              {' - '}
+                              <span className="text-muted-foreground">{instance.name}</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : (
+                    <div className="text-center p-2 text-muted-foreground text-sm border rounded-md">
+                      No server instances added
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <Separator />
+              <CardFooter className="flex justify-between pt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => handleDeleteClick(profile)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleEditProfile(profile)}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
+        
+        <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[400px]">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground text-center">
+              Create a new profile to group server instances together
+            </p>
+            <Button 
+              className="mt-4" 
+              onClick={() => {
+                if (serverInstances.length === 0) {
+                  toast({
+                    title: "No instances available",
+                    description: "Please create at least one server instance first.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
+                setIsCreateProfileOpen(true);
+              }}
+            >
+              Create Profile
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
       
       <CreateProfileDialog
         open={isCreateProfileOpen}
