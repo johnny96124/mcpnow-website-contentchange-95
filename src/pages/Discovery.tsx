@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -21,8 +20,7 @@ import {
   Users,
   Watch,
   Wrench,
-  X,
-  WifiOff
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -353,15 +351,6 @@ const Discovery = () => {
             >
               <FolderOpen className="mr-2 h-4 w-4" />
               My Servers
-            </Button>
-            
-            <Button 
-              variant="outline"
-              className="bg-transparent text-white border-white/40 hover:bg-white/10"
-              onClick={() => navigate("/discovery/no-network")}
-            >
-              <WifiOff className="mr-2 h-4 w-4" />
-              Test No Network State
             </Button>
           </div>
         </div>
