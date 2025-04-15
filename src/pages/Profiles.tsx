@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Edit, 
@@ -19,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
 const Profiles = () => {
-  const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
+  const [localProfiles, setLocalProfiles] = useState<Profile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -27,6 +28,20 @@ const Profiles = () => {
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Initialize profiles with the default empty one and the ones from mockData
+    const defaultProfile: Profile = {
+      id: 'default-profile',
+      name: 'Default',
+      endpointType: "HTTP_SSE",
+      endpoint: "http://localhost:8008/mcp",
+      enabled: true,
+      instances: [],
+    };
+    
+    setLocalProfiles([defaultProfile, ...profiles]);
+  }, []);
 
   const getServerInstances = (profile: Profile) => {
     return profile.instances.map(
@@ -65,15 +80,6 @@ const Profiles = () => {
     newEndpoint: string,
     newEndpointType: EndpointType
   ) => {
-    if (selectedInstanceIds.length === 0) {
-      toast({
-        title: "Cannot save profile",
-        description: "A profile must have at least one instance",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLocalProfiles(prev => 
       prev.map(p => 
         p.id === editedProfile.id 
@@ -123,15 +129,15 @@ const Profiles = () => {
       setLocalProfiles(prev => {
         const updatedProfiles = [...prev];
         
-        if (updatedProfiles.length > 0) {
+        if (updatedProfiles.length > 1) {  // Skip default profile
           const fiveInstanceIds = serverInstances.slice(0, 5).map(instance => instance.id);
           
-          updatedProfiles[0] = {
-            ...updatedProfiles[0],
+          updatedProfiles[1] = {  // Update the second profile (first one is "Default")
+            ...updatedProfiles[1],
             instances: fiveInstanceIds
           };
           
-          console.log("Updated first profile with 5 instances:", updatedProfiles[0]);
+          console.log("Updated second profile with 5 instances:", updatedProfiles[1]);
         }
         
         return updatedProfiles;

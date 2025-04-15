@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -14,6 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 
 interface InstanceStatus {
   id: string;
@@ -22,6 +24,7 @@ interface InstanceStatus {
   definitionName: string;
   status: 'connected' | 'connecting' | 'error' | 'disconnected';
   enabled: boolean;
+  errorMessage?: string;
 }
 
 interface HostCardProps {
@@ -39,6 +42,7 @@ interface HostCardProps {
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId?: string) => void;
   onFixConfig: (hostId: string) => void;
+  onDeleteHost?: (hostId: string) => void;
 }
 
 export function HostCard({ 
@@ -47,10 +51,13 @@ export function HostCard({
   onProfileChange, 
   onOpenConfigDialog,
   onCreateConfig,
-  onFixConfig
+  onFixConfig,
+  onDeleteHost
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
+  const [showErrorInfo, setShowErrorInfo] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   
   const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
@@ -105,7 +112,8 @@ export function HostCard({
                 const success = Math.random() > 0.2;
                 newStatuses[instanceIndex] = {
                   ...newStatuses[instanceIndex],
-                  status: success ? 'connected' : 'error'
+                  status: success ? 'connected' : 'error',
+                  errorMessage: success ? undefined : `Failed to connect to ${newStatuses[instanceIndex].definitionName}: Connection timeout`
                 };
               }
               
@@ -167,7 +175,8 @@ export function HostCard({
             const success = Math.random() > 0.2;
             return {
               ...instance,
-              status: success ? 'connected' : 'error'
+              status: success ? 'connected' : 'error',
+              errorMessage: success ? undefined : `Failed to connect to ${instance.definitionName}: Connection refused`
             };
           }
           return instance;
@@ -186,6 +195,24 @@ export function HostCard({
     });
     
     return definitionMap;
+  };
+
+  const handleDeleteHost = () => {
+    if (onDeleteHost) {
+      onDeleteHost(host.id);
+      toast({
+        title: "Host deleted",
+        description: `${host.name} has been removed successfully.`,
+      });
+    }
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleShowError = (instanceId: string) => {
+    const instance = instanceStatuses.find(i => i.id === instanceId);
+    if (instance && instance.errorMessage) {
+      setShowErrorInfo(instance.errorMessage);
+    }
   };
   
   const profileConnectionStatus = getProfileConnectionStatus();
@@ -234,6 +261,18 @@ export function HostCard({
             </Button>
           </div>
         </CardContent>
+
+        <CardFooter className="mt-auto pt-4 border-t">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-destructive hover:text-destructive ml-auto"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Host
+          </Button>
+        </CardFooter>
       </Card>
     );
   }
@@ -383,6 +422,17 @@ export function HostCard({
                             {!isHostDisconnected && displayInstance.status === 'connecting' && (
                               <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
                             )}
+                            
+                            {!isHostDisconnected && displayInstance.status === 'error' && displayInstance.errorMessage && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-5 w-5 p-0 text-red-500"
+                                onClick={() => handleShowError(displayInstance.id)}
+                              >
+                                <AlertCircle className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                           {!isHostDisconnected && (
                             <Switch 
@@ -408,23 +458,71 @@ export function HostCard({
             </p>
           </div>
         )}
+
+        {showErrorInfo && (
+          <div className="p-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded-md">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-red-800 dark:text-red-300">Connection Error</p>
+                <p className="text-xs text-red-700 dark:text-red-400">{showErrorInfo}</p>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 p-0 ml-auto text-red-500"
+                onClick={() => setShowErrorInfo(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
       
       <Separator className="mt-auto" />
       
-      <CardFooter className="mt-2">
-        <div className="flex justify-end w-full">
-          <Button 
-            variant="outline"
-            onClick={() => onOpenConfigDialog(host.id)}
-            disabled={!host.configPath}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            View Config
-          </Button>
-        </div>
+      <CardFooter className="mt-2 flex justify-between">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-destructive hover:text-destructive"
+          onClick={() => setIsDeleteDialogOpen(true)}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Host
+        </Button>
+        
+        <Button 
+          variant="outline"
+          onClick={() => onOpenConfigDialog(host.id)}
+          disabled={!host.configPath}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          View Config
+        </Button>
       </CardFooter>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Host</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {host.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteHost}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

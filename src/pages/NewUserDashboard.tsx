@@ -140,15 +140,6 @@ const NewUserDashboard = () => {
                     </Button>
                   </div>
                 </div>
-                
-                <div className="mt-6 flex justify-center">
-                  <Button asChild className="gap-2">
-                    <Link to="/discovery">
-                      Start Setup Process
-                      <ExternalLink className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </div>
               </CardContent>
             </Card>
           </CollapsibleContent>
