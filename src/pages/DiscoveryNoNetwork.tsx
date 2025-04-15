@@ -97,16 +97,6 @@ const DiscoveryNoNetwork = () => {
       <div className="h-[calc(100vh-380px)] flex items-center justify-center">
         <NoNetworkState onRetry={handleRetry} />
       </div>
-      
-      {/* Add a back button at the bottom for testing */}
-      <div className="mt-6 flex justify-center">
-        <Button 
-          variant="outline"
-          onClick={() => navigate('/discovery')}
-        >
-          Return to Discovery Page
-        </Button>
-      </div>
     </div>
   );
 };
