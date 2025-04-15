@@ -26,7 +26,7 @@ const DiscoveryNoNetwork = () => {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
         <div className="flex justify-between items-start relative z-10">
           <div className="max-w-3xl">
             <h1 className="text-3xl font-bold mb-2">All Server Definitions</h1>
@@ -50,8 +50,6 @@ const DiscoveryNoNetwork = () => {
           <div className="w-48 h-48 rounded-full border-4 border-white absolute -right-8 top-16"></div>
         </div>
       </div>
-      
-      {/* Removed search, filter, sort, and tabs UI in no-network state */}
       
       <div className="mt-8">
         <NoNetworkState onRetry={handleRetry} isRetrying={isRetrying} />
