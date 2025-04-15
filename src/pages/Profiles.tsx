@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Edit, 
@@ -19,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 
 const Profiles = () => {
-  const [localProfiles, setLocalProfiles] = useState<Profile[]>(profiles);
+  const [localProfiles, setLocalProfiles] = useState<Profile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [isCreateProfileOpen, setIsCreateProfileOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -27,6 +28,27 @@ const Profiles = () => {
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  // Initialize with profiles from data source and add Default profile
+  useEffect(() => {
+    // Add a default empty profile if it doesn't exist
+    const defaultProfileExists = profiles.some(profile => profile.name === "Default");
+    
+    if (!defaultProfileExists) {
+      const defaultProfile: Profile = {
+        id: `profile-default-${Date.now()}`,
+        name: "Default",
+        endpointType: "HTTP_SSE",
+        endpoint: "http://localhost:8008/mcp",
+        enabled: true,
+        instances: []
+      };
+      
+      setLocalProfiles([...profiles, defaultProfile]);
+    } else {
+      setLocalProfiles([...profiles]);
+    }
+  }, []);
 
   const getServerInstances = (profile: Profile) => {
     return profile.instances.map(
@@ -65,15 +87,6 @@ const Profiles = () => {
     newEndpoint: string,
     newEndpointType: EndpointType
   ) => {
-    if (selectedInstanceIds.length === 0) {
-      toast({
-        title: "Cannot save profile",
-        description: "A profile must have at least one instance",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLocalProfiles(prev => 
       prev.map(p => 
         p.id === editedProfile.id 

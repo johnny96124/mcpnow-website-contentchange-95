@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PlusCircle, Trash2, Plus, AlertCircle, Info } from "lucide-react";
 import {
@@ -92,8 +93,16 @@ export function EditProfileDialog({
   };
 
   const removeSelection = (id: string) => {
-    if (selections.length > 1) {
-      setSelections(selections.filter(selection => selection.id !== id));
+    // Allow removing all selections for the profile
+    setSelections(selections.filter(selection => selection.id !== id));
+    
+    // If we removed the last selection, add an empty one
+    if (selections.length === 1 && selections[0].id === id) {
+      setSelections([{ 
+        id: `selection-${Date.now()}`, 
+        definitionId: "", 
+        instanceId: "" 
+      }]);
     }
   };
 
@@ -127,17 +136,23 @@ export function EditProfileDialog({
       .filter(selection => selection.instanceId)
       .map(selection => selection.instanceId);
 
-    if (selectedInstanceIds.length === 0) {
-      toast({
-        title: "No instances selected",
-        description: "You must select at least one server instance for the profile.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Allow saving with zero instances
     onSave(profile, profileName, selectedInstanceIds, profile.endpoint, profile.endpointType);
     onOpenChange(false);
+  };
+
+  // Clear all selections
+  const handleClearAll = () => {
+    setSelections([{ 
+      id: `selection-${Date.now()}`, 
+      definitionId: "", 
+      instanceId: "" 
+    }]);
+    
+    toast({
+      title: "All instances removed",
+      description: "You can add new instances or save the profile with no instances."
+    });
   };
 
   return (
@@ -164,15 +179,29 @@ export function EditProfileDialog({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Server Instances</label>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={addSelection}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Instance
-              </Button>
+              <div className="flex gap-2">
+                {selections.some(s => s.instanceId) && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    className="text-destructive"
+                    onClick={handleClearAll}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Clear All
+                  </Button>
+                )}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={addSelection}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Instance
+                </Button>
+              </div>
             </div>
 
             {selections.map((selection) => (
@@ -220,7 +249,6 @@ export function EditProfileDialog({
                   variant="ghost"
                   size="icon"
                   onClick={() => removeSelection(selection.id)}
-                  disabled={selections.length <= 1}
                   className="text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -233,7 +261,7 @@ export function EditProfileDialog({
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-xs text-blue-700">
               Each server definition can only be selected once.
-              At least one server instance must be selected for the profile.
+              Profiles can be saved with zero instances if needed.
             </AlertDescription>
           </Alert>
         </div>
@@ -242,7 +270,7 @@ export function EditProfileDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button 
             onClick={handleSave}
-            disabled={!profileName.trim() || selections.every(s => !s.instanceId)}
+            disabled={!profileName.trim()}
           >
             Save Changes
           </Button>

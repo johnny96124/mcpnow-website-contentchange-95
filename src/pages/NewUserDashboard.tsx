@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ExternalLink, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
@@ -93,64 +93,79 @@ const NewUserDashboard = () => {
           </div>
           
           <CollapsibleContent className="animate-accordion-down">
-            <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
-              <CardContent className="pt-6 space-y-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Follow these simple steps to configure and start using MCP Now effectively.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 bg-white dark:bg-gray-900">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2">
-                        <ExternalLink className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Step 1: Install Servers from Discovery</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Browse and install server definitions for your workflow.
-                        </p>
-                      </div>
-                    </div>
-                    <Button asChild size="sm" variant="outline" className="gap-1 mt-2">
-                      <Link to="/discovery">
-                        Go to Discovery
-                        <ExternalLink className="h-4 w-4 ml-1" />
-                      </Link>
-                    </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+                <CardContent className="p-4 h-full flex flex-col">
+                  <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <Server className="h-5 w-5" />
                   </div>
-                  
-                  <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 bg-white dark:bg-gray-900">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2">
-                        <ExternalLink className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Step 2: Create Server Instances</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Configure server instances with your specific settings.
-                        </p>
-                      </div>
-                    </div>
-                    <Button asChild size="sm" variant="outline" className="gap-1 mt-2">
-                      <Link to="/servers">
-                        Manage Servers
-                        <ExternalLink className="h-4 w-4 ml-1" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="mt-6 flex justify-center">
-                  <Button asChild className="gap-2">
+                  <h3 className="font-medium mb-2">1. Install Servers</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
+                    Browse and install server definitions for your workflow.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
                     <Link to="/discovery">
-                      Start Setup Process
-                      <ExternalLink className="h-4 w-4 ml-1" />
+                      Go to Discovery
+                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
                     </Link>
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <Card className="border-purple-100 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/20">
+                <CardContent className="p-4 h-full flex flex-col">
+                  <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <Settings2 className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-medium mb-2">2. Create Instances</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
+                    Configure server instances with your specific settings.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
+                    <Link to="/servers">
+                      Manage Servers
+                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-green-100 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
+                <CardContent className="p-4 h-full flex flex-col">
+                  <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <Database className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-medium mb-2">3. Create Profiles</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
+                    Group server instances into functional profiles.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
+                    <Link to="/profiles">
+                      Manage Profiles
+                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-amber-100 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
+                <CardContent className="p-4 h-full flex flex-col">
+                  <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <Monitor className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-medium mb-2">4. Connect Hosts</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
+                    Link your profiles to hosts for deployment.
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
+                    <Link to="/hosts">
+                      Manage Hosts
+                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </div>

@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -14,6 +15,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface InstanceStatus {
   id: string;
@@ -22,6 +26,7 @@ interface InstanceStatus {
   definitionName: string;
   status: 'connected' | 'connecting' | 'error' | 'disconnected';
   enabled: boolean;
+  errorMessage?: string;
 }
 
 interface HostCardProps {
@@ -51,7 +56,11 @@ export function HostCard({
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
+  const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
   const needsConfiguration = host.configStatus === 'unknown' || host.configStatus === 'misconfigured';
@@ -88,7 +97,8 @@ export function HostCard({
               definitionId: instance.definitionId,
               definitionName: getDefinitionName(instance.definitionId),
               status: 'connecting',
-              enabled: true
+              enabled: true,
+              errorMessage: ''
             } : null;
           })
           .filter(Boolean) as InstanceStatus[];
@@ -103,9 +113,18 @@ export function HostCard({
               
               if (instanceIndex !== -1) {
                 const success = Math.random() > 0.2;
+                const errorMessages = [
+                  "Connection timeout. Check network settings and try again.",
+                  "Authentication failed. Invalid credentials provided.",
+                  "Connection refused. Server might be down or unreachable.",
+                  "Failed to establish secure connection. Check SSL configuration.",
+                  "Port access denied. Check firewall settings."
+                ];
+                
                 newStatuses[instanceIndex] = {
                   ...newStatuses[instanceIndex],
-                  status: success ? 'connected' : 'error'
+                  status: success ? 'connected' : 'error',
+                  errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
                 };
               }
               
@@ -165,9 +184,18 @@ export function HostCard({
         return prev.map(instance => {
           if (instance.id === instanceId) {
             const success = Math.random() > 0.2;
+            const errorMessages = [
+              "Connection timeout. Check network settings and try again.",
+              "Authentication failed. Invalid credentials provided.",
+              "Connection refused. Server might be down or unreachable.",
+              "Failed to establish secure connection. Check SSL configuration.",
+              "Port access denied. Check firewall settings."
+            ];
+            
             return {
               ...instance,
-              status: success ? 'connected' : 'error'
+              status: success ? 'connected' : 'error',
+              errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
             };
           }
           return instance;
@@ -186,6 +214,24 @@ export function HostCard({
     });
     
     return definitionMap;
+  };
+
+  const handleShowError = (instance: InstanceStatus) => {
+    setSelectedErrorInstance(instance);
+    setIsErrorDialogOpen(true);
+  };
+
+  const handleDeleteHost = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteHost = () => {
+    // In a real app, this would call an API to delete the host
+    toast({
+      title: "Host deleted",
+      description: `${host.name} has been removed successfully`
+    });
+    setIsDeleteDialogOpen(false);
   };
   
   const profileConnectionStatus = getProfileConnectionStatus();
@@ -234,6 +280,39 @@ export function HostCard({
             </Button>
           </div>
         </CardContent>
+
+        <Separator className="mt-auto" />
+        
+        <CardFooter className="mt-2 justify-between">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="text-destructive"
+            onClick={handleDeleteHost}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Host
+          </Button>
+        </CardFooter>
+
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Host</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this host? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button variant="destructive" onClick={confirmDeleteHost}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </Card>
     );
   }
@@ -322,9 +401,16 @@ export function HostCard({
                   <div className="space-y-1">
                     {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
                       const displayInstance = instances[0];
+                      const hasError = displayInstance.enabled && displayInstance.status === 'error';
                       
                       return (
-                        <div key={definitionId} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                        <div 
+                          key={definitionId} 
+                          className={cn(
+                            "flex items-center justify-between p-2 rounded",
+                            hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
+                          )}
+                        >
                           <div className="flex items-center gap-2">
                             <StatusIndicator 
                               status={
@@ -384,13 +470,26 @@ export function HostCard({
                               <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
                             )}
                           </div>
-                          {!isHostDisconnected && (
-                            <Switch 
-                              checked={displayInstance.enabled} 
-                              onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
-                              className="shrink-0"
-                            />
-                          )}
+                          <div className="flex items-center gap-2">
+                            {hasError && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="h-6 px-1 py-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                onClick={() => handleShowError(displayInstance)}
+                              >
+                                <AlertCircle className="h-3.5 w-3.5" />
+                                <span className="ml-1 text-xs">View Error</span>
+                              </Button>
+                            )}
+                            {!isHostDisconnected && (
+                              <Switch 
+                                checked={displayInstance.enabled} 
+                                onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                                className="shrink-0"
+                              />
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -412,19 +511,83 @@ export function HostCard({
       
       <Separator className="mt-auto" />
       
-      <CardFooter className="mt-2">
-        <div className="flex justify-end w-full">
-          <Button 
-            variant="outline"
-            onClick={() => onOpenConfigDialog(host.id)}
-            disabled={!host.configPath}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            View Config
-          </Button>
-        </div>
+      <CardFooter className="mt-2 justify-between">
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="text-destructive"
+          onClick={handleDeleteHost}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete Host
+        </Button>
+        
+        <Button 
+          variant="outline"
+          onClick={() => onOpenConfigDialog(host.id)}
+          disabled={!host.configPath}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          View Config
+        </Button>
       </CardFooter>
+
+      {/* Error Dialog */}
+      <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600">
+              <AlertCircle className="h-5 w-5 mr-2" />
+              Connection Error
+            </DialogTitle>
+            <DialogDescription>
+              Error details for {selectedErrorInstance?.definitionName} - {selectedErrorInstance?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Alert variant="destructive" className="mt-2">
+            <AlertTitle className="font-medium">Connection Failed</AlertTitle>
+            <AlertDescription className="mt-2">
+              {selectedErrorInstance?.errorMessage || "Unknown error occurred"}
+            </AlertDescription>
+          </Alert>
+          
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p>Try the following:</p>
+            <ul className="list-disc pl-5 mt-2 space-y-1">
+              <li>Check your network connection</li>
+              <li>Verify server configuration</li>
+              <li>Ensure the host is running and accessible</li>
+              <li>Check credentials if authentication failed</li>
+            </ul>
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button onClick={() => setIsErrorDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Host</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this host? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmDeleteHost}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
