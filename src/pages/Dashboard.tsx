@@ -34,6 +34,8 @@ import { useServerContext } from '@/context/ServerContext';
 import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
@@ -51,6 +53,8 @@ const Dashboard = () => {
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [showCarouselControls, setShowCarouselControls] = useState(false);
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
+  const [isUserFlowOpen, setIsUserFlowOpen] = useState(true);
+  const [selectedTab, setSelectedTab] = useState("visual");
   const { openAddInstanceDialog } = useServerContext();
   const navigate = useNavigate();
   
@@ -286,113 +290,6 @@ const Dashboard = () => {
     setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
   };
 
-  const beginnerGuideSteps = [
-    {
-      title: "Install Servers from Discovery",
-      description: "Browse and install server definitions for your workflow.",
-      icon: <Download className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Start by installing server definitions from our Discovery page:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Navigate to the <Link to="/discovery" className="text-blue-500 hover:underline">Discovery</Link> page</li>
-            <li>Browse available server types based on your needs</li>
-            <li>Click "Install" to add server definitions to your environment</li>
-            <li>Explore official and community-created server options</li>
-          </ol>
-          <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/discovery">
-                Go to Discovery
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Create Instances & Configure Parameters",
-      description: "Create and customize server instances with specific settings.",
-      icon: <Settings2 className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Once you've installed server definitions, create instances with custom configurations:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Go to <Link to="/servers" className="text-blue-500 hover:underline">Servers</Link> page</li>
-            <li>Click "Add Instance" on an installed server</li>
-            <li>Set name, parameters, and environment variables</li>
-            <li>Configure connection details specific to your needs</li>
-          </ol>
-          <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/servers">
-                Manage Servers
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Create Profiles & Add Instances",
-      description: "Organize server instances into profiles for easier management.",
-      icon: <Layers className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Create profiles to group your server instances logically:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Visit the <Link to="/profiles" className="text-blue-500 hover:underline">Profiles</Link> page</li>
-            <li>Create a new profile with a relevant name</li>
-            <li>Add your configured server instances to the profile</li>
-            <li>Enable the profile to activate all included instances</li>
-          </ol>
-          <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/profiles">
-                Create Profiles
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Associate Hosts with Profiles",
-      description: "Connect your profiles to hosts to deploy server instances.",
-      icon: <Computer className="h-6 w-6" />,
-      content: (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Finally, associate your profiles with hosts to run your server instances:
-          </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Go to the <Link to="/hosts" className="text-blue-500 hover:underline">Hosts</Link> page</li>
-            <li>Add a new host or select an existing one</li>
-            <li>Assign your created profile to the host</li>
-            <li>Monitor status and control your server instances</li>
-          </ol>
-          <div className="pt-2">
-            <Button asChild size="sm" variant="outline" className="gap-1">
-              <Link to="/hosts">
-                Manage Hosts
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      )
-    }
-  ];
-
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -540,7 +437,8 @@ const Dashboard = () => {
                   >
                     <span className="font-medium">{profile.name}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      profile.enabled ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
+                      profile.enabled ? 
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
                       'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
                     }`}>
                       {profile.enabled ? 'Enabled' : 'Disabled'}
@@ -605,8 +503,6 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
-
-      
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
@@ -720,6 +616,242 @@ const Dashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-800 animate-fade-in">
+        <Collapsible 
+          open={isUserFlowOpen} 
+          onOpenChange={setIsUserFlowOpen}
+          className="w-full rounded-lg border border-gray-200 dark:border-gray-800"
+        >
+          <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-900 rounded-t-lg">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="h-5 w-5 text-blue-500" />
+              <h2 className="text-xl font-bold">MCP Now Setup Process</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/discovery">
+                  Start Setup Process
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-1">
+                  {isUserFlowOpen ? (
+                    <ChevronUp className="h-5 w-5" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {isUserFlowOpen ? "Hide" : "Show"} setup guide
+                  </span>
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+          </div>
+          
+          <CollapsibleContent className="p-4 bg-white dark:bg-gray-950 rounded-b-lg animate-accordion-down">
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+              <TabsList className="mb-4 grid grid-cols-2 w-full max-w-md mx-auto">
+                <TabsTrigger value="visual">Visual Guide</TabsTrigger>
+                <TabsTrigger value="steps">Step-by-Step</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="visual" className="mt-0">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
+                    <CardHeader className="pb-2">
+                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                        <span className="font-bold text-lg">1</span>
+                      </div>
+                      <CardTitle className="text-lg">Install Servers</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Browse and install server definitions from Discovery.
+                      </p>
+                      <div className="flex justify-center text-5xl">
+                        <Download className="h-12 w-12 text-blue-500/70" />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-0">
+                      <Button asChild size="sm" variant="outline" className="w-full">
+                        <Link to="/discovery">
+                          Go to Discovery
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+
+                  <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/20">
+                    <CardHeader className="pb-2">
+                      <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                        <span className="font-bold text-lg">2</span>
+                      </div>
+                      <CardTitle className="text-lg">Create Instances</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Configure server instances with specific settings.
+                      </p>
+                      <div className="flex justify-center text-5xl">
+                        <Settings2 className="h-12 w-12 text-purple-500/70" />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-0">
+                      <Button asChild size="sm" variant="outline" className="w-full">
+                        <Link to="/servers">
+                          Manage Servers
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+
+                  <Card className="border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/20">
+                    <CardHeader className="pb-2">
+                      <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                        <span className="font-bold text-lg">3</span>
+                      </div>
+                      <CardTitle className="text-lg">Create Profiles</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Group server instances into logical profiles. A profile contains multiple 
+                        servers that work together.
+                      </p>
+                      <div className="flex justify-center text-5xl">
+                        <Layers className="h-12 w-12 text-green-500/70" />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-0">
+                      <Button asChild size="sm" variant="outline" className="w-full">
+                        <Link to="/profiles">
+                          Manage Profiles
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+
+                  <Card className="border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/20">
+                    <CardHeader className="pb-2">
+                      <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                        <span className="font-bold text-lg">4</span>
+                      </div>
+                      <CardTitle className="text-lg">Connect Hosts</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        Link your profiles to hosts where they will run. This deploys your configured 
+                        servers to actual machines.
+                      </p>
+                      <div className="flex justify-center text-5xl">
+                        <Computer className="h-12 w-12 text-amber-500/70" />
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-0">
+                      <Button asChild size="sm" variant="outline" className="w-full">
+                        <Link to="/hosts">
+                          Manage Hosts
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="steps" className="mt-0 space-y-4">
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <ol className="space-y-6">
+                    <li className="relative pl-10">
+                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                        <span className="font-medium">1</span>
+                      </div>
+                      <div>
+                        <h3 className="font-medium flex items-center">
+                          <Download className="mr-2 h-4 w-4 inline" /> 
+                          Install Servers from Discovery
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Browse the catalog and install server definitions that match your needs. 
+                          These determine what types of servers you can create.
+                        </p>
+                        <Button asChild size="sm" variant="outline" className="mt-2">
+                          <Link to="/discovery">
+                            Go to Discovery
+                          </Link>
+                        </Button>
+                      </div>
+                    </li>
+                    
+                    <li className="relative pl-10">
+                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
+                        <span className="font-medium">2</span>
+                      </div>
+                      <div>
+                        <h3 className="font-medium flex items-center">
+                          <Settings2 className="mr-2 h-4 w-4 inline" /> 
+                          Create Instances & Configure Parameters
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Create server instances from your installed definitions. Configure parameters 
+                          specific to each server type.
+                        </p>
+                        <Button asChild size="sm" variant="outline" className="mt-2">
+                          <Link to="/servers">
+                            Manage Servers
+                          </Link>
+                        </Button>
+                      </div>
+                    </li>
+                    
+                    <li className="relative pl-10">
+                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
+                        <span className="font-medium">3</span>
+                      </div>
+                      <div>
+                        <h3 className="font-medium flex items-center">
+                          <Layers className="mr-2 h-4 w-4 inline" /> 
+                          Create Profiles & Add Instances
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Group your server instances into logical profiles. A profile contains multiple 
+                          servers that work together.
+                        </p>
+                        <Button asChild size="sm" variant="outline" className="mt-2">
+                          <Link to="/profiles">
+                            Manage Profiles
+                          </Link>
+                        </Button>
+                      </div>
+                    </li>
+                    
+                    <li className="relative pl-10">
+                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300">
+                        <span className="font-medium">4</span>
+                      </div>
+                      <div>
+                        <h3 className="font-medium flex items-center">
+                          <Computer className="mr-2 h-4 w-4 inline" /> 
+                          Associate Hosts with Profiles
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Connect your profiles to hosts where they will run. This deploys your configured 
+                          servers to actual machines.
+                        </p>
+                        <Button asChild size="sm" variant="outline" className="mt-2">
+                          <Link to="/hosts">
+                            Manage Hosts
+                          </Link>
+                        </Button>
+                      </div>
+                    </li>
+                  </ol>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </div>
   );
 };
