@@ -29,6 +29,10 @@ const Profiles = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
   useEffect(() => {
     const defaultProfileExists = profiles.some(profile => profile.name === "Default");
     
