@@ -17,7 +17,6 @@ import Servers from "./pages/Servers";
 import ServersNewUser from "./pages/ServersNewUser";
 import ProfilesNewUser from "./pages/ProfilesNewUser";
 import Discovery from "./pages/Discovery";
-import DiscoveryNoNetwork from "./pages/DiscoveryNoNetwork";
 import Settings from "./pages/Settings";
 import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
@@ -50,7 +49,6 @@ const App = () => {
                   <Route path="servers" element={<Servers />} />
                   <Route path="servers/new-user" element={<ServersNewUser />} />
                   <Route path="discovery" element={<Discovery />} />
-                  <Route path="discovery/no-network" element={<DiscoveryNoNetwork />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

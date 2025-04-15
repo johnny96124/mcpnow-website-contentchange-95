@@ -20,8 +20,7 @@ import {
   Users,
   Watch,
   Wrench,
-  X,
-  WifiOff
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -352,15 +351,6 @@ const Discovery = () => {
             >
               <FolderOpen className="mr-2 h-4 w-4" />
               My Servers
-            </Button>
-            
-            <Button 
-              variant="secondary"
-              className="bg-white/20 text-white hover:bg-white/30"
-              onClick={() => navigate("/discovery/no-network")}
-            >
-              <WifiOff className="mr-2 h-4 w-4" />
-              Test No Network
             </Button>
           </div>
         </div>
