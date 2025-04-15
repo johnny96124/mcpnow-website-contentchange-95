@@ -11,7 +11,6 @@ import {
   X,
   Database,
   HelpCircle,
-  ChevronRight,
   ChevronDown,
   ChevronUp,
   Computer,
@@ -35,7 +34,6 @@ import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
@@ -291,7 +289,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
@@ -617,7 +615,7 @@ const Dashboard = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-800 animate-fade-in">
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-800 animate-fade-in mb-10">
         <Collapsible 
           open={isUserFlowOpen} 
           onOpenChange={setIsUserFlowOpen}
@@ -628,227 +626,120 @@ const Dashboard = () => {
               <HelpCircle className="h-5 w-5 text-blue-500" />
               <h2 className="text-xl font-bold">MCP Now Setup Process</h2>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/discovery">
-                  Start Setup Process
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1">
+                {isUserFlowOpen ? (
+                  <ChevronUp className="h-5 w-5" />
+                ) : (
+                  <ChevronDown className="h-5 w-5" />
+                )}
+                <span className="sr-only">
+                  {isUserFlowOpen ? "Hide" : "Show"} setup guide
+                </span>
               </Button>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1">
-                  {isUserFlowOpen ? (
-                    <ChevronUp className="h-5 w-5" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">
-                    {isUserFlowOpen ? "Hide" : "Show"} setup guide
-                  </span>
-                </Button>
-              </CollapsibleTrigger>
-            </div>
+            </CollapsibleTrigger>
           </div>
           
-          <CollapsibleContent className="p-4 bg-white dark:bg-gray-950 rounded-b-lg animate-accordion-down">
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="mb-4 grid grid-cols-2 w-full max-w-md mx-auto">
-                <TabsTrigger value="visual">Visual Guide</TabsTrigger>
-                <TabsTrigger value="steps">Step-by-Step</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="visual" className="mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
-                    <CardHeader className="pb-2">
-                      <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                        <span className="font-bold text-lg">1</span>
-                      </div>
-                      <CardTitle className="text-lg">Install Servers</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Browse and install server definitions from Discovery.
-                      </p>
-                      <div className="flex justify-center text-5xl">
-                        <Download className="h-12 w-12 text-blue-500/70" />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button asChild size="sm" variant="outline" className="w-full">
-                        <Link to="/discovery">
-                          Go to Discovery
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
+          <CollapsibleContent className="p-4 bg-white dark:bg-gray-950 rounded-b-lg animate-accordion-down mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
+                <CardHeader className="pb-2">
+                  <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <span className="font-bold text-lg">1</span>
+                  </div>
+                  <CardTitle className="text-lg">Install Servers</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Browse and install server definitions from Discovery.
+                  </p>
+                  <div className="flex justify-center text-5xl">
+                    <Download className="h-12 w-12 text-blue-500/70" />
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button asChild size="sm" variant="outline" className="w-full">
+                    <Link to="/discovery">
+                      Go to Discovery
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                  <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/20">
-                    <CardHeader className="pb-2">
-                      <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                        <span className="font-bold text-lg">2</span>
-                      </div>
-                      <CardTitle className="text-lg">Create Instances</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Configure server instances with specific settings.
-                      </p>
-                      <div className="flex justify-center text-5xl">
-                        <Settings2 className="h-12 w-12 text-purple-500/70" />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button asChild size="sm" variant="outline" className="w-full">
-                        <Link to="/servers">
-                          Manage Servers
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
+              <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/20">
+                <CardHeader className="pb-2">
+                  <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <span className="font-bold text-lg">2</span>
+                  </div>
+                  <CardTitle className="text-lg">Create Instances</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Configure server instances with specific settings.
+                  </p>
+                  <div className="flex justify-center text-5xl">
+                    <Settings2 className="h-12 w-12 text-purple-500/70" />
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button asChild size="sm" variant="outline" className="w-full">
+                    <Link to="/servers">
+                      Manage Servers
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                  <Card className="border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/20">
-                    <CardHeader className="pb-2">
-                      <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                        <span className="font-bold text-lg">3</span>
-                      </div>
-                      <CardTitle className="text-lg">Create Profiles</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Group server instances into logical profiles. A profile contains multiple 
-                        servers that work together.
-                      </p>
-                      <div className="flex justify-center text-5xl">
-                        <Layers className="h-12 w-12 text-green-500/70" />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button asChild size="sm" variant="outline" className="w-full">
-                        <Link to="/profiles">
-                          Manage Profiles
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
+              <Card className="border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/20">
+                <CardHeader className="pb-2">
+                  <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <span className="font-bold text-lg">3</span>
+                  </div>
+                  <CardTitle className="text-lg">Create Profiles</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Group server instances into logical profiles. A profile contains multiple 
+                    servers that work together.
+                  </p>
+                  <div className="flex justify-center text-5xl">
+                    <Layers className="h-12 w-12 text-green-500/70" />
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button asChild size="sm" variant="outline" className="w-full">
+                    <Link to="/profiles">
+                      Manage Profiles
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                  <Card className="border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/20">
-                    <CardHeader className="pb-2">
-                      <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                        <span className="font-bold text-lg">4</span>
-                      </div>
-                      <CardTitle className="text-lg">Connect Hosts</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Link your profiles to hosts where they will run. This deploys your configured 
-                        servers to actual machines.
-                      </p>
-                      <div className="flex justify-center text-5xl">
-                        <Computer className="h-12 w-12 text-amber-500/70" />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
-                      <Button asChild size="sm" variant="outline" className="w-full">
-                        <Link to="/hosts">
-                          Manage Hosts
-                        </Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="steps" className="mt-0 space-y-4">
-                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                  <ol className="space-y-6">
-                    <li className="relative pl-10">
-                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
-                        <span className="font-medium">1</span>
-                      </div>
-                      <div>
-                        <h3 className="font-medium flex items-center">
-                          <Download className="mr-2 h-4 w-4 inline" /> 
-                          Install Servers from Discovery
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Browse the catalog and install server definitions that match your needs. 
-                          These determine what types of servers you can create.
-                        </p>
-                        <Button asChild size="sm" variant="outline" className="mt-2">
-                          <Link to="/discovery">
-                            Go to Discovery
-                          </Link>
-                        </Button>
-                      </div>
-                    </li>
-                    
-                    <li className="relative pl-10">
-                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                        <span className="font-medium">2</span>
-                      </div>
-                      <div>
-                        <h3 className="font-medium flex items-center">
-                          <Settings2 className="mr-2 h-4 w-4 inline" /> 
-                          Create Instances & Configure Parameters
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Create server instances from your installed definitions. Configure parameters 
-                          specific to each server type.
-                        </p>
-                        <Button asChild size="sm" variant="outline" className="mt-2">
-                          <Link to="/servers">
-                            Manage Servers
-                          </Link>
-                        </Button>
-                      </div>
-                    </li>
-                    
-                    <li className="relative pl-10">
-                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
-                        <span className="font-medium">3</span>
-                      </div>
-                      <div>
-                        <h3 className="font-medium flex items-center">
-                          <Layers className="mr-2 h-4 w-4 inline" /> 
-                          Create Profiles & Add Instances
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Group your server instances into logical profiles. A profile contains multiple 
-                          servers that work together.
-                        </p>
-                        <Button asChild size="sm" variant="outline" className="mt-2">
-                          <Link to="/profiles">
-                            Manage Profiles
-                          </Link>
-                        </Button>
-                      </div>
-                    </li>
-                    
-                    <li className="relative pl-10">
-                      <div className="absolute left-0 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300">
-                        <span className="font-medium">4</span>
-                      </div>
-                      <div>
-                        <h3 className="font-medium flex items-center">
-                          <Computer className="mr-2 h-4 w-4 inline" /> 
-                          Associate Hosts with Profiles
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Connect your profiles to hosts where they will run. This deploys your configured 
-                          servers to actual machines.
-                        </p>
-                        <Button asChild size="sm" variant="outline" className="mt-2">
-                          <Link to="/hosts">
-                            Manage Hosts
-                          </Link>
-                        </Button>
-                      </div>
-                    </li>
-                  </ol>
-                </div>
-              </TabsContent>
-            </Tabs>
+              <Card className="border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/20">
+                <CardHeader className="pb-2">
+                  <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
+                    <span className="font-bold text-lg">4</span>
+                  </div>
+                  <CardTitle className="text-lg">Connect Hosts</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    Link your profiles to hosts where they will run. This deploys your configured 
+                    servers to actual machines.
+                  </p>
+                  <div className="flex justify-center text-5xl">
+                    <Computer className="h-12 w-12 text-amber-500/70" />
+                  </div>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button asChild size="sm" variant="outline" className="w-full">
+                    <Link to="/hosts">
+                      Manage Hosts
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </div>
