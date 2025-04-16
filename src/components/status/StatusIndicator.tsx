@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { CircleDot } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface StatusIndicatorProps {
   iconOnly?: boolean;
   size?: 'sm' | 'md' | 'lg';
   useIcon?: boolean;
+  reversed?: boolean;
 }
 
 export function StatusIndicator({ 
@@ -18,7 +20,8 @@ export function StatusIndicator({
   className,
   iconOnly = false,
   size = 'md',
-  useIcon = false
+  useIcon = false,
+  reversed = false
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -35,19 +38,43 @@ export function StatusIndicator({
     'lg': useIcon ? 'h-5 w-5' : 'h-3 w-3'
   }[size];
 
+  const statusColorClass = {
+    'active': 'text-green-500',
+    'warning': 'text-yellow-500',
+    'error': 'text-red-500',
+    'inactive': 'text-gray-400',
+    'none': '',
+    'verified': 'text-blue-500'
+  }[status];
+
+  const labelSize = size === 'sm' ? 'text-xs' : 'text-sm';
+
+  const dotElement = status !== 'none' && (
+    useIcon ? (
+      <CircleDot className={cn("text-muted-foreground", sizeClass, statusColorClass)} />
+    ) : (
+      <span className={cn("status-dot rounded-full", statusClass, sizeClass)}></span>
+    )
+  );
+
+  const labelElement = !iconOnly && label && (
+    <span className={cn("font-medium", labelSize)}>
+      {label}
+    </span>
+  );
+
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
-      {status !== 'none' && (
-        useIcon ? (
-          <CircleDot className={cn("text-muted-foreground", sizeClass)} />
-        ) : (
-          <span className={cn("status-dot rounded-full", statusClass, sizeClass)}></span>
-        )
-      )}
-      {!iconOnly && label && (
-        <span className={cn("font-medium", size === 'sm' ? 'text-xs' : 'text-sm')}>
-          {label}
-        </span>
+      {!reversed ? (
+        <>
+          {dotElement}
+          {labelElement}
+        </>
+      ) : (
+        <>
+          {labelElement}
+          {dotElement}
+        </>
       )}
     </div>
   );
