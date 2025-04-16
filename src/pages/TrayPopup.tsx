@@ -1,21 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { Check, ChevronDown, ExternalLink, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  ExternalLink, 
+  ChevronDown, 
+  User
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { NoSearchResults } from "@/components/servers/NoSearchResults";
 
 interface InstanceStatus {
@@ -36,26 +33,20 @@ const TrayPopup = () => {
     }, {} as Record<string, string>)
   );
 
-  // Track active instances for each profile and definition combination
-  const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
-  
   // Track instance status for each profile
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
-  // Track expanded state for instance lists
-  const [expandedHosts, setExpandedHosts] = useState<Record<string, boolean>>({});
+  // Track active instances for each definition in a host
+  const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
-    // Directly update profile without confirmation
     setSelectedProfileIds(prev => ({
       ...prev,
       [hostId]: profileId
     }));
     
-    // Simulate connecting to new instances
     initializeProfileInstances(hostId, profileId);
     
-    // Show toast
     const profile = profiles.find(p => p.id === profileId);
     toast.success(`Profile changed to ${profile?.name}`);
   };
@@ -109,14 +100,12 @@ const TrayPopup = () => {
             [hostId]: hostInstances
           };
         });
-      }, 1000 + (index * 500)); // Stagger the connections
+      }, 1000 + (index * 500));
     });
   };
 
   // Toggle instance enabled state
   const toggleInstanceEnabled = (hostId: string, instanceId: string) => {
-    if (!instanceId) return; // Guard against undefined instance id
-    
     setInstanceStatuses(prev => {
       const hostInstances = [...(prev[hostId] || [])];
       const instanceIndex = hostInstances.findIndex(i => i.id === instanceId);
@@ -125,11 +114,9 @@ const TrayPopup = () => {
         hostInstances[instanceIndex] = {
           ...hostInstances[instanceIndex],
           enabled: !hostInstances[instanceIndex].enabled,
-          // If enabling, set to connecting first
           status: !hostInstances[instanceIndex].enabled ? 'connecting' : 'stopped'
         };
         
-        // If enabling, simulate connection after a delay
         if (!hostInstances[instanceIndex].enabled) {
           setTimeout(() => {
             setInstanceStatuses(prevState => {
@@ -158,125 +145,43 @@ const TrayPopup = () => {
       };
     });
     
-    // Show toast
-    const instance = instanceStatuses[hostId]?.find(i => i.id === instanceId);
-    const action = instance && !instance.enabled ? 'enabled' : 'disabled';
-    toast.success(`Server instance ${action}`);
+    toast.success(`Server instance ${instanceStatuses[hostId]?.find(i => i.id === instanceId)?.enabled ? 'disabled' : 'enabled'}`);
   };
 
-  // Handle instance selection
-  const handleInstanceChange = (hostId: string, definitionId: string, instanceId: string) => {
-    setActiveInstances(prev => {
-      const hostInstances = {...(prev[hostId] || {})};
-      hostInstances[definitionId] = instanceId;
-      
-      return {
-        ...prev,
-        [hostId]: hostInstances
-      };
-    });
-    
-    // This would be where you'd make an API call to actually change the active instance
-    console.log(`Changed instance for ${definitionId} to ${instanceId} for host ${hostId}`);
-    
-    // Show status as connecting
-    setInstanceStatuses(prev => {
-      const hostInstances = [...(prev[hostId] || [])];
-      const instance = hostInstances.find(i => i.id === instanceId);
-      
-      if (instance && instance.enabled) {
-        const instanceIndex = hostInstances.findIndex(i => i.id === instanceId);
-        hostInstances[instanceIndex] = {
-          ...hostInstances[instanceIndex],
-          status: 'connecting'
-        };
-        
-        // Simulate connection after a delay
-        setTimeout(() => {
-          setInstanceStatuses(prevState => {
-            const updatedHostInstances = [...(prevState[hostId] || [])];
-            const idx = updatedHostInstances.findIndex(i => i.id === instanceId);
-            
-            if (idx !== -1 && updatedHostInstances[idx].status === 'connecting') {
-              updatedHostInstances[idx] = {
-                ...updatedHostInstances[idx],
-                status: Math.random() > 0.2 ? 'running' : 'error'
-              };
-            }
-            
-            return {
-              ...prevState,
-              [hostId]: updatedHostInstances
-            };
-          });
-        }, 1500);
-      }
-      
-      return {
-        ...prev,
-        [hostId]: hostInstances
-      };
-    });
-    
-    toast.success("Server instance activated");
-  };
-
-  // Toggle expanded state for instance list
-  const toggleExpanded = (hostId: string) => {
-    setExpandedHosts(prev => ({
-      ...prev,
-      [hostId]: !prev[hostId]
-    }));
-  };
-
-  // Group instances by definition for a host
-  const getInstancesByDefinition = (hostId: string) => {
+  // Get instances grouped by definition for a host
+  const getInstancesForHost = (hostId: string) => {
     const profileId = selectedProfileIds[hostId];
     if (!profileId) return [];
     
     const profile = profiles.find(p => p.id === profileId);
     if (!profile) return [];
     
-    const hostStatusInstances = instanceStatuses[hostId] || [];
-    const result: Array<{
-      definition: typeof serverDefinitions[0],
-      instances: typeof serverInstances,
-      activeInstanceId: string,
-      status: InstanceStatus | undefined
-    }> = [];
+    // Get all instances for this profile
+    const profileInstances = serverInstances.filter(instance => 
+      profile.instances.includes(instance.id)
+    );
     
-    // Get all definition IDs for instances in this profile
-    const definitionIds = new Set<string>();
-    hostStatusInstances.forEach(instance => {
-      definitionIds.add(instance.definitionId);
+    // Group by definitionId
+    const groupedInstances: Record<string, typeof serverInstances> = {};
+    profileInstances.forEach(instance => {
+      if (!groupedInstances[instance.definitionId]) {
+        groupedInstances[instance.definitionId] = [];
+      }
+      groupedInstances[instance.definitionId].push(instance);
     });
     
-    // For each definition, get its instances
-    definitionIds.forEach(defId => {
+    return Object.entries(groupedInstances).map(([defId, instances]) => {
       const definition = serverDefinitions.find(d => d.id === defId);
-      if (!definition) return;
+      const activeInstanceId = activeInstances[hostId]?.[defId] || instances[0]?.id;
+      const status = instanceStatuses[hostId]?.find(s => s.id === activeInstanceId);
       
-      // Get instances for this definition in this profile
-      const definitionInstances = serverInstances.filter(instance => 
-        instance.definitionId === defId && 
-        profile.instances.includes(instance.id)
-      );
-      
-      // Get the active instance ID for this definition
-      const activeInstanceId = activeInstances[hostId]?.[defId] || definitionInstances[0]?.id || '';
-      
-      // Get status for this definition
-      const status = hostStatusInstances.find(s => s.id === activeInstanceId);
-      
-      result.push({
+      return {
         definition,
-        instances: definitionInstances,
+        instances,
         activeInstanceId,
         status
-      });
+      };
     });
-    
-    return result;
   };
 
   // Initialize instances for hosts with selected profiles on component mount
@@ -293,16 +198,6 @@ const TrayPopup = () => {
     window.open("/", "_blank");
   };
 
-  // Filter to only show connected/active hosts
-  const activeHosts = hosts.filter(h => 
-    h.connectionStatus === 'connected' || h.profileId
-  );
-  
-  // Add disconnected hosts without profiles
-  const disconnectedHosts = hosts.filter(h => 
-    h.connectionStatus !== 'connected' && !h.profileId
-  );
-  
   return (
     <div className="w-[420px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
       <div className="flex items-center justify-between p-2 mb-2">
@@ -327,198 +222,26 @@ const TrayPopup = () => {
       
       <ScrollArea className="h-full max-h-[calc(80vh-60px)]">
         <div className="pr-3">
-          {activeHosts.length === 0 && disconnectedHosts.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              <p>No active connections</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Active hosts section */}
-              {activeHosts.map(host => {
-                const profileId = selectedProfileIds[host.id] || '';
-                const profile = profiles.find(p => p.id === profileId);
-                const isExpanded = expandedHosts[host.id] || false;
-                const instanceGroups = getInstancesByDefinition(host.id);
-                
-                // Count total instances to determine if we need expand/collapse button
-                const totalInstances = instanceGroups.length;
-                const showExpandCollapse = totalInstances > 2;
-                
-                // Get the instances to display (all if expanded, only first 2 if collapsed)
-                const displayInstances = isExpanded ? instanceGroups : instanceGroups.slice(0, 2);
-                
-                return (
-                  <Card key={host.id} className="overflow-hidden shadow-sm">
-                    <div className="flex items-center justify-between p-3 bg-card">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-slate-900 text-white p-1 rounded w-8 h-8 flex items-center justify-center">
-                          {host.icon ? <span className="text-lg">{host.icon}</span> : host.name.substring(0, 1)}
-                        </div>
-                        <h3 className="font-medium">{host.name}</h3>
-                      </div>
-                      <StatusIndicator 
-                        status={host.connectionStatus === 'connected' ? 'active' : 'inactive'} 
-                        label={host.connectionStatus === 'connected' ? 'Connected' : 'Disconnected'}
-                      />
-                    </div>
-                    
-                    <div className="p-3 pt-2">
-                      {/* Profile selector - no confirmation dialog */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Profile:</span>
-                        <Select
-                          value={profileId}
-                          onValueChange={(value) => handleProfileChange(host.id, value)}
-                        >
-                          <SelectTrigger className="h-8 flex-1">
-                            <SelectValue placeholder="Select profile">
-                              {profile && (
-                                <div className="flex items-center gap-2">
-                                  <StatusIndicator 
-                                    status={profile.enabled ? 'active' : 'inactive'} 
-                                  />
-                                  <span>{profile.name}</span>
-                                </div>
-                              )}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {profiles.map(profile => (
-                              <SelectItem key={profile.id} value={profile.id}>
-                                <div className="flex items-center gap-2">
-                                  <StatusIndicator 
-                                    status={profile.enabled ? 'active' : 'inactive'} 
-                                  />
-                                  <span>{profile.name}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      {/* Server instances */}
-                      {profileId && displayInstances.length > 0 && (
-                        <div className="mt-3 bg-slate-50 rounded-md p-3">
-                          <p className="text-xs text-muted-foreground mb-2">Active server instances:</p>
-                          <div className="space-y-2">
-                            {displayInstances.map(({ definition, instances, activeInstanceId, status }) => (
-                              <div key={definition.id} className="flex items-center justify-between">
-                                {/* Definition name with reduced font size and single line with truncation */}
-                                <div className="flex-1 min-w-0 mr-2">
-                                  <span className="text-xs font-medium truncate block">{definition.name}</span>
-                                </div>
-                                
-                                <div className="flex items-center gap-2">
-                                  {/* Instance selector - redesigned dropdown */}
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="h-8 text-xs px-2 py-1 flex items-center gap-1"
-                                      >
-                                        <StatusIndicator 
-                                          status={
-                                            !status?.enabled ? 'inactive' :
-                                            status.status === 'running' ? 'active' : 
-                                            status.status === 'connecting' ? 'warning' :
-                                            status.status === 'error' ? 'error' : 'inactive'
-                                          } 
-                                        />
-                                        <span className="truncate max-w-[120px]">
-                                          {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop() || 'Select'}
-                                        </span>
-                                        <ChevronDown className="h-3 w-3" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-40">
-                                      {instances.map(instance => (
-                                        <DropdownMenuItem
-                                          key={instance.id}
-                                          className={cn(
-                                            "text-xs flex items-center justify-between",
-                                            instance.id === activeInstanceId && "bg-accent"
-                                          )}
-                                          onClick={() => handleInstanceChange(host.id, definition.id, instance.id)}
-                                          disabled={instance.id === activeInstanceId}
-                                        >
-                                          <span className="truncate max-w-[120px]">{instance.name.split('-').pop()}</span>
-                                          {instance.id === activeInstanceId && (
-                                            <Check className="h-3 w-3" />
-                                          )}
-                                        </DropdownMenuItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  
-                                  {/* Toggle switch */}
-                                  <Switch 
-                                    checked={status?.enabled || false} 
-                                    onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                            
-                            {/* Expand/Collapse button - only show for more than 2 instances */}
-                            {showExpandCollapse && (
-                              <div className="flex justify-end mt-1">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="text-xs text-primary flex items-center gap-1 h-6 px-2"
-                                  onClick={() => toggleExpanded(host.id)}
-                                >
-                                  {isExpanded ? (
-                                    <>
-                                      <span>Collapse</span>
-                                      <ChevronUp className="h-3 w-3" />
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>View all</span>
-                                      <ChevronDown className="h-3 w-3" />
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Empty state for no profile */}
-                      {!profileId && (
-                        <div className="mt-3 p-4 border-2 border-dashed rounded-md text-center text-muted-foreground">
-                          <p className="text-sm">Select a profile to view server instances</p>
-                        </div>
-                      )}
-                      
-                      {/* Empty state for no instances */}
-                      {profileId && displayInstances.length === 0 && (
-                        <div className="mt-3 p-4 border-2 border-dashed rounded-md text-center text-muted-foreground">
-                          <p className="text-sm">No server instances available</p>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })}
+          <div className="space-y-3">
+            {hosts.map(host => {
+              const profileId = selectedProfileIds[host.id] || '';
+              const profile = profiles.find(p => p.id === profileId);
+              const isConnected = host.connectionStatus === 'connected';
+              const instanceGroups = getInstancesForHost(host.id);
               
-              {/* Disconnected hosts without profiles */}
-              {disconnectedHosts.map(host => (
+              return (
                 <Card key={host.id} className="overflow-hidden shadow-sm">
+                  {/* Host header */}
                   <div className="flex items-center justify-between p-3 bg-card">
                     <div className="flex items-center gap-2">
                       <div className="bg-slate-900 text-white p-1 rounded w-8 h-8 flex items-center justify-center">
-                        {host.icon ? <span className="text-lg">{host.icon}</span> : host.name.substring(0, 1)}
+                        {host.icon || host.name.substring(0, 1)}
                       </div>
                       <h3 className="font-medium">{host.name}</h3>
                     </div>
                     <StatusIndicator 
-                      status="inactive" 
-                      label="Disconnected"
+                      status={isConnected ? 'active' : 'inactive'} 
+                      label={isConnected ? 'Connected' : 'Disconnected'}
                     />
                   </div>
                   
@@ -527,10 +250,20 @@ const TrayPopup = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Profile:</span>
                       <Select
+                        value={profileId}
                         onValueChange={(value) => handleProfileChange(host.id, value)}
                       >
                         <SelectTrigger className="h-8 flex-1">
-                          <SelectValue placeholder="Select a profile" />
+                          <SelectValue placeholder="Select profile">
+                            {profile && (
+                              <div className="flex items-center gap-2">
+                                <StatusIndicator 
+                                  status={profile.enabled ? 'active' : 'inactive'} 
+                                />
+                                <span>{profile.name}</span>
+                              </div>
+                            )}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {profiles.map(profile => (
@@ -547,19 +280,79 @@ const TrayPopup = () => {
                       </Select>
                     </div>
                     
+                    {/* Profile selected with instances */}
+                    {profileId && instanceGroups.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs text-muted-foreground mb-2">Active server instances:</p>
+                        <div className="space-y-2">
+                          {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
+                            <div key={definition?.id} className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0 mr-2">
+                                <span className="text-xs font-medium truncate block">{definition?.name}</span>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <Select
+                                  value={activeInstanceId}
+                                  onValueChange={(value) => {
+                                    setActiveInstances(prev => ({
+                                      ...prev,
+                                      [host.id]: {
+                                        ...(prev[host.id] || {}),
+                                        [definition?.id || ""]: value
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <SelectTrigger className="h-8 text-xs px-2 py-1 flex items-center gap-1 w-[120px]">
+                                    <StatusIndicator 
+                                      status={
+                                        !status?.enabled ? 'inactive' :
+                                        status.status === 'running' ? 'active' : 
+                                        status.status === 'connecting' ? 'warning' :
+                                        status.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                    />
+                                    <SelectValue className="truncate">
+                                      {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop()}
+                                    </SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {instances.map(instance => (
+                                      <SelectItem key={instance.id} value={instance.id}>
+                                        {instance.name.split('-').pop()}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                
+                                <Switch 
+                                  checked={status?.enabled || false} 
+                                  onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* No profile selected state */}
-                    <div className="mt-3">
-                      <NoSearchResults 
-                        entityName="profile"
-                        title="Select a profile"
-                        message="Select a profile to connect mcp server to host"
-                      />
-                    </div>
+                    {!profileId && (
+                      <div className="mt-3">
+                        <NoSearchResults 
+                          entityName="profile"
+                          title="Select a profile"
+                          message="Select a profile to connect mcp server to host"
+                          icon={<User className="h-12 w-12 text-muted-foreground mb-4" />}
+                        />
+                      </div>
+                    )}
                   </div>
                 </Card>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       </ScrollArea>
     </div>

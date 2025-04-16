@@ -1,5 +1,5 @@
 
-import { FileSearch, AlertCircle } from "lucide-react";
+import { FileSearch, AlertCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 
@@ -31,7 +31,7 @@ export function NoSearchResults({
     : `Please select ${entityName} to continue`;
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed rounded-lg">
+    <div className="flex flex-col items-center justify-center p-4 text-center border-2 border-dashed rounded-lg">
       {icon || (query ? (
         <FileSearch className="h-12 w-12 text-muted-foreground mb-4" />
       ) : (
