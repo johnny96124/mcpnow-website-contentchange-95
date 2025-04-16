@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
+import { NoSearchResults } from "@/components/servers/NoSearchResults";
 
 interface InstanceStatus {
   id: string;
@@ -297,6 +298,11 @@ const TrayPopup = () => {
     h.connectionStatus === 'connected' || h.profileId
   );
   
+  // Add disconnected hosts without profiles
+  const disconnectedHosts = hosts.filter(h => 
+    h.connectionStatus !== 'connected' && !h.profileId
+  );
+  
   return (
     <div className="w-[420px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
       <div className="flex items-center justify-between p-2 mb-2">
@@ -321,12 +327,13 @@ const TrayPopup = () => {
       
       <ScrollArea className="h-full max-h-[calc(80vh-60px)]">
         <div className="pr-3">
-          {activeHosts.length === 0 ? (
+          {activeHosts.length === 0 && disconnectedHosts.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
               <p>No active connections</p>
             </div>
           ) : (
             <div className="space-y-3">
+              {/* Active hosts section */}
               {activeHosts.map(host => {
                 const profileId = selectedProfileIds[host.id] || '';
                 const profile = profiles.find(p => p.id === profileId);
@@ -498,6 +505,59 @@ const TrayPopup = () => {
                   </Card>
                 );
               })}
+              
+              {/* Disconnected hosts without profiles */}
+              {disconnectedHosts.map(host => (
+                <Card key={host.id} className="overflow-hidden shadow-sm">
+                  <div className="flex items-center justify-between p-3 bg-card">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-slate-900 text-white p-1 rounded w-8 h-8 flex items-center justify-center">
+                        {host.icon ? <span className="text-lg">{host.icon}</span> : host.name.substring(0, 1)}
+                      </div>
+                      <h3 className="font-medium">{host.name}</h3>
+                    </div>
+                    <StatusIndicator 
+                      status="inactive" 
+                      label="Disconnected"
+                    />
+                  </div>
+                  
+                  <div className="p-3 pt-2">
+                    {/* Profile selector */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">Profile:</span>
+                      <Select
+                        onValueChange={(value) => handleProfileChange(host.id, value)}
+                      >
+                        <SelectTrigger className="h-8 flex-1">
+                          <SelectValue placeholder="Select a profile" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {profiles.map(profile => (
+                            <SelectItem key={profile.id} value={profile.id}>
+                              <div className="flex items-center gap-2">
+                                <StatusIndicator 
+                                  status={profile.enabled ? 'active' : 'inactive'} 
+                                />
+                                <span>{profile.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* No profile selected state */}
+                    <div className="mt-3">
+                      <NoSearchResults 
+                        entityName="profile"
+                        title="Select a profile"
+                        message="Select a profile to connect mcp server to host"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
         </div>
