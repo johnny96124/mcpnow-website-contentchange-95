@@ -24,8 +24,21 @@ interface InstanceStatus {
 }
 
 const TrayPopup = () => {
+  // Add Cline host to the hosts array for display purposes only
+  const displayHosts = [
+    ...hosts, 
+    {
+      id: "cline-host",
+      name: "Cline",
+      icon: "🔄",
+      connectionStatus: 'disconnected',
+      configStatus: 'configured',
+      configPath: "/path/to/config.json"
+    }
+  ];
+
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
-    hosts.reduce((acc, host) => {
+    displayHosts.reduce((acc, host) => {
       if (host.profileId) {
         acc[host.id] = host.profileId;
       }
@@ -186,7 +199,7 @@ const TrayPopup = () => {
 
   // Initialize instances for hosts with selected profiles on component mount
   useEffect(() => {
-    hosts.forEach(host => {
+    displayHosts.forEach(host => {
       const profileId = selectedProfileIds[host.id];
       if (profileId) {
         initializeProfileInstances(host.id, profileId);
@@ -223,7 +236,7 @@ const TrayPopup = () => {
       <ScrollArea className="h-full max-h-[calc(80vh-60px)]">
         <div className="pr-3">
           <div className="space-y-3">
-            {hosts.map(host => {
+            {displayHosts.map(host => {
               const profileId = selectedProfileIds[host.id] || '';
               const profile = profiles.find(p => p.id === profileId);
               const isConnected = host.connectionStatus === 'connected';
