@@ -642,18 +642,18 @@ const Dashboard = () => {
           
           <CollapsibleContent className="p-4 bg-white dark:bg-gray-950 rounded-b-lg animate-accordion-down mb-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-              <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
+              <Card className="border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20 flex flex-col">
                 <CardHeader className="pb-2">
                   <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
                     <span className="font-bold text-lg">1</span>
                   </div>
                   <CardTitle className="text-lg">Install Servers</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 flex-grow">
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Browse and install server definitions from Discovery.
                   </p>
-                  <div className="flex justify-center text-5xl">
+                  <div className="flex justify-center text-5xl flex-grow items-center">
                     <Download className="h-12 w-12 text-blue-500/70" />
                   </div>
                 </CardContent>
@@ -666,18 +666,18 @@ const Dashboard = () => {
                 </CardFooter>
               </Card>
 
-              <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/20">
+              <Card className="border-purple-100 dark:border-purple-900 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/20 flex flex-col">
                 <CardHeader className="pb-2">
                   <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
                     <span className="font-bold text-lg">2</span>
                   </div>
                   <CardTitle className="text-lg">Create Instances</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 flex-grow">
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Configure server instances with specific settings.
                   </p>
-                  <div className="flex justify-center text-5xl">
+                  <div className="flex justify-center text-5xl flex-grow items-center">
                     <Settings2 className="h-12 w-12 text-purple-500/70" />
                   </div>
                 </CardContent>
@@ -690,19 +690,19 @@ const Dashboard = () => {
                 </CardFooter>
               </Card>
 
-              <Card className="border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/20">
+              <Card className="border-green-100 dark:border-green-900 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/20 flex flex-col">
                 <CardHeader className="pb-2">
                   <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
                     <span className="font-bold text-lg">3</span>
                   </div>
                   <CardTitle className="text-lg">Create Profiles</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 flex-grow">
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Group server instances into logical profiles. A profile contains multiple 
                     servers that work together.
                   </p>
-                  <div className="flex justify-center text-5xl">
+                  <div className="flex justify-center text-5xl flex-grow items-center">
                     <Layers className="h-12 w-12 text-green-500/70" />
                   </div>
                 </CardContent>
@@ -715,19 +715,19 @@ const Dashboard = () => {
                 </CardFooter>
               </Card>
 
-              <Card className="border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/20">
+              <Card className="border-amber-100 dark:border-amber-900 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/20 flex flex-col">
                 <CardHeader className="pb-2">
                   <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
                     <span className="font-bold text-lg">4</span>
                   </div>
                   <CardTitle className="text-lg">Connect Hosts</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 flex-grow">
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Link your profiles to hosts where they will run. This deploys your configured 
                     servers to actual machines.
                   </p>
-                  <div className="flex justify-center text-5xl">
+                  <div className="flex justify-center text-5xl flex-grow items-center">
                     <Computer className="h-12 w-12 text-amber-500/70" />
                   </div>
                 </CardContent>
