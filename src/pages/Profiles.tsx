@@ -302,6 +302,7 @@ const Profiles = () => {
         onOpenChange={setIsCreateProfileOpen}
         onCreateProfile={handleCreateProfile}
         instances={serverInstances}
+        showInstanceSelection={true}
       />
       
       {selectedProfile && (
