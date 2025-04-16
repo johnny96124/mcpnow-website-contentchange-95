@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -79,6 +78,17 @@ export function HostCard({
   const getDefinitionName = (definitionId: string) => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : 'Unknown';
+  };
+
+  const getInstanceStatusCounts = () => {
+    const enabledInstances = instanceStatuses.filter(instance => instance.enabled);
+    
+    return {
+      connected: enabledInstances.filter(instance => instance.status === 'connected').length,
+      connecting: enabledInstances.filter(instance => instance.status === 'connecting').length,
+      error: enabledInstances.filter(instance => instance.status === 'error').length,
+      total: enabledInstances.length
+    };
   };
   
   useEffect(() => {
@@ -237,6 +247,7 @@ export function HostCard({
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
+  const statusCounts = getInstanceStatusCounts();
   
   if (needsConfiguration) {
     return (
@@ -395,6 +406,35 @@ export function HostCard({
         {profileId && (
           <>
             {instanceStatuses.length > 0 && (
+              <div className="flex flex-col gap-1 mb-2">
+                <label className="text-sm font-medium">Instance Status</label>
+                <div className="flex items-center gap-3 bg-muted/50 p-2 rounded-md">
+                  {statusCounts.connected > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
+                      <span className="text-sm">{statusCounts.connected} active</span>
+                    </div>
+                  )}
+                  {statusCounts.connecting > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
+                      <span className="text-sm">{statusCounts.connecting} connecting</span>
+                    </div>
+                  )}
+                  {statusCounts.error > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
+                      <span className="text-sm">{statusCounts.error} error</span>
+                    </div>
+                  )}
+                  {statusCounts.total === 0 && (
+                    <span className="text-sm text-muted-foreground">No active instances</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium">Server Instances</label>
                 <ScrollArea className="h-[140px] border rounded-md p-1">
@@ -533,7 +573,6 @@ export function HostCard({
         </Button>
       </CardFooter>
 
-      {/* Error Dialog */}
       <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -569,7 +608,6 @@ export function HostCard({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
