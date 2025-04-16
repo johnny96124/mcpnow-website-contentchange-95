@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { 
   Edit, 
   Trash2, 
-  Globe,
-  TerminalSquare,
   PlusCircle,
   Search,
+  ServerIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +58,11 @@ const Profiles = () => {
   };
 
   const handleEditProfile = (profile: Profile) => {
+    setSelectedProfile(profile);
+    setIsEditProfileOpen(true);
+  };
+
+  const handleAddInstance = (profile: Profile) => {
     setSelectedProfile(profile);
     setIsEditProfileOpen(true);
   };
@@ -234,8 +238,17 @@ const Profiles = () => {
                         </div>
                       </ScrollArea>
                     ) : (
-                      <div className="text-center p-6 text-muted-foreground text-sm border rounded-md h-[200px] flex items-center justify-center">
-                        No server instances added
+                      <div className="text-center p-6 text-muted-foreground text-sm border rounded-md h-[200px] flex flex-col items-center justify-center">
+                        <p className="mb-4">No server instances added</p>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center"
+                          onClick={() => handleAddInstance(profile)}
+                        >
+                          <ServerIcon className="mr-2 h-4 w-4" />
+                          Add Instance
+                        </Button>
                       </div>
                     )}
                   </div>
