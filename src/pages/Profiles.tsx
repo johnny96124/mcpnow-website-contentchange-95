@@ -234,14 +234,14 @@ const Profiles = () => {
                         </div>
                       </ScrollArea>
                     ) : (
-                      <div className="text-center p-2 text-muted-foreground text-sm border rounded-md">
+                      <div className="text-center p-6 text-muted-foreground text-sm border rounded-md h-[200px] flex items-center justify-center">
                         No server instances added
                       </div>
                     )}
                   </div>
                 </CardContent>
                 <Separator />
-                <CardFooter className="flex justify-between pt-3">
+                <CardFooter className="flex justify-between pt-3 mt-auto">
                   <Button 
                     variant="outline" 
                     size="sm"

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -112,9 +113,31 @@ export function CreateProfileDialog({
   };
 
   const removeSelection = (id: string) => {
-    if (selections.length > 1) {
-      setSelections(selections.filter(selection => selection.id !== id));
+    // Allow removing all selections for the profile
+    setSelections(selections.filter(selection => selection.id !== id));
+    
+    // If we removed the last selection, add an empty one
+    if (selections.length === 1 && selections[0].id === id) {
+      setSelections([{ 
+        id: `selection-${Date.now()}`, 
+        definitionId: "", 
+        instanceId: "" 
+      }]);
     }
+  };
+
+  // Clear all selections
+  const handleClearAll = () => {
+    setSelections([{ 
+      id: `selection-${Date.now()}`, 
+      definitionId: "", 
+      instanceId: "" 
+    }]);
+    
+    toast({
+      title: "All instances removed",
+      description: "You can add new instances or save the profile with no instances."
+    });
   };
 
   const updateDefinitionId = (id: string, definitionId: string) => {
@@ -172,15 +195,29 @@ export function CreateProfileDialog({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium">Server Instances</h4>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={addSelection}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Instance
-                  </Button>
+                  <div className="flex gap-2">
+                    {selections.some(s => s.instanceId) && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        className="text-destructive"
+                        onClick={handleClearAll}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        Clear All
+                      </Button>
+                    )}
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={addSelection}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Instance
+                    </Button>
+                  </div>
                 </div>
 
                 {selections.map((selection) => (
