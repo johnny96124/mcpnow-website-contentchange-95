@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Edit, 
@@ -302,6 +303,7 @@ const Profiles = () => {
         onOpenChange={setIsCreateProfileOpen}
         onCreateProfile={handleCreateProfile}
         instances={serverInstances}
+        simpleMode={false}
       />
       
       {selectedProfile && (
