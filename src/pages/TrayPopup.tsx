@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -202,7 +201,7 @@ const TrayPopup = () => {
   };
 
   return (
-    <div className="w-[420px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[53vh]">
+    <div className="w-[420px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
       <div className="flex items-center justify-between p-2 mb-2">
         <div className="flex items-center gap-2">
           <img 
@@ -223,7 +222,7 @@ const TrayPopup = () => {
         </Button>
       </div>
       
-      <ScrollArea className="h-full max-h-[calc(53vh-60px)]">
+      <ScrollArea className="h-full max-h-[calc(80vh-60px)]">
         <div className="pr-3">
           <div className="space-y-3">
             {displayHosts.map(host => {
