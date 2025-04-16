@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -31,9 +30,10 @@ const TrayPopup = () => {
       id: "cline-host",
       name: "Cline",
       icon: "🔄",
-      connectionStatus: 'disconnected',
-      configStatus: 'configured',
-      configPath: "/path/to/config.json"
+      connectionStatus: 'disconnected' as const,
+      configStatus: 'configured' as const,
+      configPath: "/path/to/config.json",
+      profileId: ""
     }
   ];
 
@@ -64,15 +64,12 @@ const TrayPopup = () => {
     toast.success(`Profile changed to ${profile?.name}`);
   };
 
-  // Initialize instance statuses for a host's profile
   const initializeProfileInstances = (hostId: string, profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     if (!profile) return;
     
-    // Get all instances for this profile
     const profileInstanceIds = profile.instances;
     
-    // Create initial instance statuses all in connecting state
     const initialInstances: InstanceStatus[] = profileInstanceIds
       .map(instanceId => {
         const instance = serverInstances.find(s => s.id === instanceId);
@@ -86,13 +83,11 @@ const TrayPopup = () => {
       })
       .filter(Boolean) as InstanceStatus[];
     
-    // Update statuses
     setInstanceStatuses(prev => ({
       ...prev,
       [hostId]: initialInstances
     }));
     
-    // Simulate connecting instances with different timings
     initialInstances.forEach((instance, index) => {
       setTimeout(() => {
         setInstanceStatuses(prev => {
@@ -100,7 +95,6 @@ const TrayPopup = () => {
           const instanceIndex = hostInstances.findIndex(i => i.id === instance.id);
           
           if (instanceIndex !== -1) {
-            // Match the original instance status from serverInstances
             const originalInstance = serverInstances.find(s => s.id === instance.id);
             hostInstances[instanceIndex] = {
               ...hostInstances[instanceIndex],
@@ -117,7 +111,6 @@ const TrayPopup = () => {
     });
   };
 
-  // Toggle instance enabled state
   const toggleInstanceEnabled = (hostId: string, instanceId: string) => {
     setInstanceStatuses(prev => {
       const hostInstances = [...(prev[hostId] || [])];
@@ -161,7 +154,6 @@ const TrayPopup = () => {
     toast.success(`Server instance ${instanceStatuses[hostId]?.find(i => i.id === instanceId)?.enabled ? 'disabled' : 'enabled'}`);
   };
 
-  // Get instances grouped by definition for a host
   const getInstancesForHost = (hostId: string) => {
     const profileId = selectedProfileIds[hostId];
     if (!profileId) return [];
@@ -169,12 +161,10 @@ const TrayPopup = () => {
     const profile = profiles.find(p => p.id === profileId);
     if (!profile) return [];
     
-    // Get all instances for this profile
     const profileInstances = serverInstances.filter(instance => 
       profile.instances.includes(instance.id)
     );
     
-    // Group by definitionId
     const groupedInstances: Record<string, typeof serverInstances> = {};
     profileInstances.forEach(instance => {
       if (!groupedInstances[instance.definitionId]) {
@@ -197,7 +187,6 @@ const TrayPopup = () => {
     });
   };
 
-  // Initialize instances for hosts with selected profiles on component mount
   useEffect(() => {
     displayHosts.forEach(host => {
       const profileId = selectedProfileIds[host.id];
@@ -244,7 +233,6 @@ const TrayPopup = () => {
               
               return (
                 <Card key={host.id} className="overflow-hidden shadow-sm">
-                  {/* Host header */}
                   <div className="flex items-center justify-between p-3 bg-card">
                     <div className="flex items-center gap-2">
                       <div className="bg-slate-900 text-white p-1 rounded w-8 h-8 flex items-center justify-center">
@@ -259,7 +247,6 @@ const TrayPopup = () => {
                   </div>
                   
                   <div className="p-3 pt-2">
-                    {/* Profile selector */}
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Profile:</span>
                       <Select
@@ -293,7 +280,6 @@ const TrayPopup = () => {
                       </Select>
                     </div>
                     
-                    {/* Profile selected with instances */}
                     {profileId && instanceGroups.length > 0 && (
                       <div className="mt-3">
                         <p className="text-xs text-muted-foreground mb-2">Active server instances:</p>
@@ -350,7 +336,6 @@ const TrayPopup = () => {
                       </div>
                     )}
                     
-                    {/* No profile selected state */}
                     {!profileId && (
                       <div className="mt-3">
                         <NoSearchResults 
