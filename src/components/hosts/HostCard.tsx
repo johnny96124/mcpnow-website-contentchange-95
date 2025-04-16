@@ -236,7 +236,6 @@ export function HostCard({
   };
 
   const confirmDeleteHost = () => {
-    // In a real app, this would call an API to delete the host
     toast({
       title: "Host deleted",
       description: `${host.name} has been removed successfully`
@@ -406,37 +405,33 @@ export function HostCard({
         {profileId && (
           <>
             {instanceStatuses.length > 0 && (
-              <div className="flex flex-col gap-1 mb-2">
-                <label className="text-sm font-medium">Instance Status</label>
-                <div className="flex items-center gap-3 bg-muted/50 p-2 rounded-md">
-                  {statusCounts.connected > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                      <span className="text-sm">{statusCounts.connected} active</span>
-                    </div>
-                  )}
-                  {statusCounts.connecting > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-full bg-yellow-500"></div>
-                      <span className="text-sm">{statusCounts.connecting} connecting</span>
-                    </div>
-                  )}
-                  {statusCounts.error > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-full bg-red-500"></div>
-                      <span className="text-sm">{statusCounts.error} error</span>
-                    </div>
-                  )}
-                  {statusCounts.total === 0 && (
-                    <span className="text-sm text-muted-foreground">No active instances</span>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {instanceStatuses.length > 0 && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium">Server Instances</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Server Instances</label>
+                  <div className="flex items-center gap-2 text-xs">
+                    {statusCounts.connected > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                        <span>{statusCounts.connected} active</span>
+                      </div>
+                    )}
+                    {statusCounts.connecting > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                        <span>{statusCounts.connecting} connecting</span>
+                      </div>
+                    )}
+                    {statusCounts.error > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                        <span>{statusCounts.error} error</span>
+                      </div>
+                    )}
+                    {statusCounts.total === 0 && (
+                      <span className="text-muted-foreground">No active instances</span>
+                    )}
+                  </div>
+                </div>
                 <ScrollArea className="h-[140px] border rounded-md p-1">
                   <div className="space-y-1">
                     {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {

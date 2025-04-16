@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -24,7 +23,6 @@ interface InstanceStatus {
 }
 
 const TrayPopup = () => {
-  // Add Cline host to the hosts array for display purposes only
   const displayHosts = [
     ...hosts, 
     {
@@ -47,10 +45,8 @@ const TrayPopup = () => {
     }, {} as Record<string, string>)
   );
 
-  // Track instance status for each profile
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
-  // Track active instances for each definition in a host
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
@@ -188,6 +184,19 @@ const TrayPopup = () => {
     });
   };
 
+  const getInstanceStatusCounts = (hostId: string) => {
+    if (!instanceStatuses[hostId]) return { active: 0, connecting: 0, error: 0, total: 0 };
+    
+    const instances = instanceStatuses[hostId].filter(instance => instance.enabled);
+    
+    return {
+      active: instances.filter(i => i.status === 'running').length,
+      connecting: instances.filter(i => i.status === 'connecting').length,
+      error: instances.filter(i => i.status === 'error').length,
+      total: instances.length
+    };
+  };
+
   useEffect(() => {
     displayHosts.forEach(host => {
       const profileId = selectedProfileIds[host.id];
@@ -231,6 +240,7 @@ const TrayPopup = () => {
               const profile = profiles.find(p => p.id === profileId);
               const isConnected = host.connectionStatus === 'connected';
               const instanceGroups = getInstancesForHost(host.id);
+              const statusCounts = getInstanceStatusCounts(host.id);
               
               return (
                 <Card key={host.id} className="overflow-hidden shadow-sm">
@@ -283,7 +293,29 @@ const TrayPopup = () => {
                     
                     {profileId && instanceGroups.length > 0 && (
                       <div className="mt-3">
-                        <p className="text-xs text-muted-foreground mb-2">Active server instances:</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs text-muted-foreground">Active server instances:</p>
+                          <div className="flex items-center gap-2 text-xs">
+                            {statusCounts.active > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                <span>{statusCounts.active} active</span>
+                              </div>
+                            )}
+                            {statusCounts.connecting > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                <span>{statusCounts.connecting} connecting</span>
+                              </div>
+                            )}
+                            {statusCounts.error > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                                <span>{statusCounts.error} error</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                         <div className="space-y-2">
                           {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
                             <div key={definition?.id} className="flex items-center justify-between">
