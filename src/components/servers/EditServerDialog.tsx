@@ -235,10 +235,24 @@ export function EditServerDialog({
                 )}
               />
               
-              <div className="flex items-center space-x-2">
-                <div className="font-medium text-sm">Server Type:</div>
-                <div className="text-sm">{serverDefinition.type}</div>
-              </div>
+              <FormField
+                control={form.control}
+                name="type"
+                render={() => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      Server Type
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        value={serverDefinition?.type || ""} 
+                        readOnly 
+                        className="bg-gray-100 cursor-not-allowed"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               
               {isHttpSse && (
                 <FormField
