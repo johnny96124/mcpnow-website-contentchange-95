@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, ServerIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -18,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { NoSearchResults } from "@/components/servers/NoSearchResults";
 
 interface InstanceStatus {
   id: string;
@@ -226,7 +226,6 @@ export function HostCard({
   };
 
   const confirmDeleteHost = () => {
-    // In a real app, this would call an API to delete the host
     toast({
       title: "Host deleted",
       description: `${host.name} has been removed successfully`
@@ -501,11 +500,13 @@ export function HostCard({
         )}
         
         {!profileId && (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground text-center">
-              Select a profile to connect mcp server to host
-            </p>
-          </div>
+          <NoSearchResults 
+            entityName="server instances"
+            message="Select a profile to connect mcp server to host"
+            icon={<ServerIcon className="h-10 w-10 text-muted-foreground mb-4" />}
+            showButton={false}
+            customClassName="border-slate-200"
+          />
         )}
       </CardContent>
       
@@ -533,7 +534,6 @@ export function HostCard({
         </Button>
       </CardFooter>
 
-      {/* Error Dialog */}
       <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -569,7 +569,6 @@ export function HostCard({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
