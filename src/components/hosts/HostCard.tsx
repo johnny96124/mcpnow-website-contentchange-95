@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -452,52 +451,6 @@ export function HostCard({
                             hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
                           )}
                         >
-                          <div className="flex-1 min-w-0 mr-2">
-                            <span className="text-sm font-medium truncate block">
-                              {displayInstance.definitionName}
-                            </span>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-6 px-1 py-0 mt-0.5"
-                                >
-                                  <span className="text-xs text-muted-foreground hidden md:block">
-                                    {displayInstance.name}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
-                                    {displayInstance.name.split('-').pop()}
-                                  </span>
-                                  <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent 
-                                align="start"
-                                className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
-                              >
-                                {instances.map(instance => (
-                                  <DropdownMenuItem
-                                    key={instance.id}
-                                    className={cn(
-                                      "w-full text-xs cursor-pointer",
-                                      displayInstance.id === instance.id && "bg-accent font-medium"
-                                    )}
-                                    onClick={() => handleSelectInstance(instance.id, definitionId)}
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      {displayInstance.id === instance.id && (
-                                        <CircleCheck className="h-3 w-3 text-primary shrink-0" />
-                                      )}
-                                      <span>{instance.name}</span>
-                                    </div>
-                                  </DropdownMenuItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                          
                           <div className="flex items-center gap-2">
                             <StatusIndicator 
                               status={
@@ -508,11 +461,56 @@ export function HostCard({
                                 displayInstance.status === 'error' ? 'error' : 'inactive'
                               }
                             />
-                            
+                            <div className="text-sm flex items-center">
+                              <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
+                                {displayInstance.definitionName}
+                              </span>
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 px-1 py-0 ml-1"
+                                  >
+                                    <span className="text-xs text-muted-foreground hidden md:block">
+                                      {displayInstance.name}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
+                                      {displayInstance.name.split('-').pop()}
+                                    </span>
+                                    <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent 
+                                  align="start"
+                                  className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
+                                >
+                                  {instances.map(instance => (
+                                    <DropdownMenuItem
+                                      key={instance.id}
+                                      className={cn(
+                                        "w-full text-xs cursor-pointer",
+                                        displayInstance.id === instance.id && "bg-accent font-medium"
+                                      )}
+                                      onClick={() => handleSelectInstance(instance.id, definitionId)}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {displayInstance.id === instance.id && (
+                                          <CircleCheck className="h-3 w-3 text-primary shrink-0" />
+                                        )}
+                                        <span>{instance.name}</span>
+                                      </div>
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                             {!isHostDisconnected && displayInstance.status === 'connecting' && (
                               <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
                             )}
-
+                          </div>
+                          <div className="flex items-center gap-2">
                             {hasError && (
                               <Button 
                                 variant="ghost" 
@@ -524,7 +522,6 @@ export function HostCard({
                                 <span className="ml-1 text-xs">View Error</span>
                               </Button>
                             )}
-                            
                             {!isHostDisconnected && (
                               <Switch 
                                 checked={displayInstance.enabled} 

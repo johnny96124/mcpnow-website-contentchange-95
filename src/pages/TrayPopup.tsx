@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -286,15 +287,7 @@ const TrayPopup = () => {
                         <div className="space-y-2">
                           {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
                             <div key={definition?.id} className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <StatusIndicator 
-                                  status={
-                                    !status?.enabled ? 'inactive' :
-                                    status.status === 'running' ? 'active' : 
-                                    status.status === 'connecting' ? 'warning' :
-                                    status.status === 'error' ? 'error' : 'inactive'
-                                  } 
-                                />
+                              <div className="flex-1 min-w-0 mr-2">
                                 <span className="text-xs font-medium truncate block">{definition?.name}</span>
                               </div>
                               
@@ -312,6 +305,14 @@ const TrayPopup = () => {
                                   }}
                                 >
                                   <SelectTrigger className="h-8 text-xs px-2 py-1 flex items-center gap-1 w-[120px]">
+                                    <StatusIndicator 
+                                      status={
+                                        !status?.enabled ? 'inactive' :
+                                        status.status === 'running' ? 'active' : 
+                                        status.status === 'connecting' ? 'warning' :
+                                        status.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                    />
                                     <SelectValue className="truncate">
                                       {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop()}
                                     </SelectValue>
