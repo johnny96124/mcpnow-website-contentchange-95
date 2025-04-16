@@ -199,7 +199,7 @@ export function EditServerDialog({
       <DialogContent className="sm:max-w-md overflow-y-auto max-h-[85vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Edit Server: {serverDefinition.name}
+            Edit Server: {serverDefinition?.name}
             {isCustomServer && (
               <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md ml-2">
                 Custom
@@ -235,9 +235,13 @@ export function EditServerDialog({
                 )}
               />
               
-              <div className="flex items-center space-x-2">
-                <div className="font-medium text-sm">Server Type:</div>
-                <div className="text-sm">{serverDefinition.type}</div>
+              <div className="space-y-2">
+                <FormLabel className="flex items-center">
+                  Server Type
+                </FormLabel>
+                <div className="text-sm font-medium">
+                  {serverDefinition?.type}
+                </div>
               </div>
               
               {isHttpSse && (
