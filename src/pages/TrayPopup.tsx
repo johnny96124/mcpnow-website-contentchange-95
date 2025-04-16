@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -201,7 +202,7 @@ const TrayPopup = () => {
   };
 
   return (
-    <div className="w-[420px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
+    <div className="w-[280px] p-2 bg-background rounded-lg shadow-lg animate-fade-in max-h-[80vh]">
       <div className="flex items-center justify-between p-2 mb-2">
         <div className="flex items-center gap-2">
           <img 
