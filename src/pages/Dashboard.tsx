@@ -495,9 +495,7 @@ const Dashboard = () => {
                 </CardContent>
                 <CardFooter className="pt-0">
                   <Button asChild size="sm" variant="outline" className="w-full">
-                    <Link to="/discovery">
-                      Go to Discovery
-                    </Link>
+                    <Link to="/discovery">Explore Discovery</Link>
                   </Button>
                 </CardFooter>
               </Card>
