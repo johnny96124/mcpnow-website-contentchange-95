@@ -38,33 +38,17 @@ export function StatusIndicator({
     'lg': useIcon ? 'h-5 w-5' : 'h-3 w-3'
   }[size];
 
-  const textSizeClass = size === 'sm' ? 'text-xs' : 'text-sm';
-
   return (
-    <div className={cn(
-      "flex items-center gap-1.5", 
-      inline ? "inline-flex" : "", 
-      className
-    )}>
+    <div className={cn("flex items-center gap-1.5", inline ? "inline-flex" : "", className)}>
       {status !== 'none' && (
         useIcon ? (
           <CircleDot className={cn("text-muted-foreground", sizeClass)} />
         ) : (
-          <span className={cn(
-            "status-dot rounded-full", 
-            statusClass, 
-            sizeClass,
-            "ring-2 ring-opacity-30",
-            status === 'active' && "ring-green-300",
-            status === 'warning' && "ring-amber-300",
-            status === 'error' && "ring-red-300",
-            status === 'inactive' && "ring-gray-300",
-            status === 'verified' && "ring-green-300",
-          )}></span>
+          <span className={cn("status-dot rounded-full", statusClass, sizeClass)}></span>
         )
       )}
       {!iconOnly && label && (
-        <span className={cn("font-medium", textSizeClass)}>
+        <span className={cn("font-medium", size === 'sm' ? 'text-xs' : 'text-sm')}>
           {label}
         </span>
       )}

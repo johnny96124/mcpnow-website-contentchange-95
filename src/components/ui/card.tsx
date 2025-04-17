@@ -10,7 +10,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-200",
+      "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200 hover:shadow-md",
       className
     )}
     {...props}
@@ -37,7 +37,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight",
+      "text-2xl font-semibold leading-none tracking-tight",
       className
     )}
     {...props}
@@ -87,8 +87,8 @@ if (typeof document !== 'undefined') {
     style.id = 'mcpnow-highlight-style';
     style.textContent = `
       .mcpnow-highlight {
-        background-color: rgba(79, 70, 229, 0.1);
-        border-left: 2px solid #6366f1;
+        background-color: rgba(59, 130, 246, 0.1);
+        border-left: 2px solid #3b82f6;
         padding-left: 8px;
         display: inline-block;
         width: 100%;
