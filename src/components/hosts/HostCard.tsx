@@ -1,23 +1,22 @@
-
-import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Filter } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { CircleCheck, CircleX, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { profiles, serverInstances, serverDefinitions } from "@/data/mockData";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle as AlertCircleIcon, Trash2, X, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
 
 type InstanceStatusType = 'connected' | 'connecting' | 'error' | 'disconnected';
 
@@ -193,14 +192,67 @@ export function HostCard({
     setInstanceStatuses(prev => {
       return prev.map(instance => {
         if (instance.id === instanceId) {
+          // Allow toggling even in error state
+          const newEnabledState = !instance.enabled;
+          
+          // If enabling an error instance, reset its status to 'connecting'
+          const newStatus = newEnabledState 
+            ? (instance.status === 'error' ? 'connecting' : instance.status)
+            : instance.status;
+          
           return {
             ...instance,
-            enabled: !instance.enabled
+            enabled: newEnabledState,
+            status: newStatus,
+            // Clear error message when re-enabling
+            errorMessage: newEnabledState && instance.status === 'error' ? undefined : instance.errorMessage
           };
         }
         return instance;
       });
     });
+
+    // Trigger connection attempt for newly enabled instance
+    const instance = instanceStatuses.find(i => i.id === instanceId);
+    if (instance && !instance.enabled) {
+      setTimeout(() => {
+        setInstanceStatuses(prev => {
+          return prev.map(i => {
+            if (i.id === instanceId) {
+              const success = Math.random() > 0.2;
+              const errorMessages = [
+                "Connection timeout. Check network settings and try again.",
+                "Authentication failed. Invalid credentials provided.",
+                "Connection refused. Server might be down or unreachable.",
+                "Failed to establish secure connection. Check SSL configuration.",
+                "Port access denied. Check firewall settings."
+              ];
+              
+              const newStatus = success ? 'connected' : 'error';
+              const newEnabled = newStatus === 'error' ? false : true;
+              
+              if (newStatus === 'error') {
+                toast({
+                  variant: "destructive",
+                  title: `Connection error: ${i.definitionName}`,
+                  description: "Instance has been disabled due to connection error."
+                });
+              }
+              
+              return {
+                ...i,
+                status: newStatus,
+                enabled: newEnabled,
+                errorMessage: newStatus === 'error' 
+                  ? errorMessages[Math.floor(Math.random() * errorMessages.length)] 
+                  : undefined
+              };
+            }
+            return i;
+          });
+        });
+      }, 1000);
+    }
   };
 
   const handleSelectInstance = (instanceId: string, definitionId: string) => {
@@ -532,6 +584,8 @@ export function HostCard({
                                   displayInstance.status === 'connecting' ? 'warning' :
                                   displayInstance.status === 'error' ? 'error' : 'inactive'
                                 }
+                                useIcon={true}
+                                className={hasError ? "text-red-500" : ""} // Ensure red color for error instances
                               />
                               <div className="text-sm flex items-center">
                                 <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
@@ -599,7 +653,7 @@ export function HostCard({
                                   checked={displayInstance.enabled} 
                                   onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
                                   className="shrink-0"
-                                  disabled={hasError}
+                                  // Removed disabled prop to allow interaction even for error instances
                                 />
                               )}
                             </div>
@@ -659,7 +713,7 @@ export function HostCard({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center text-red-600">
-              <AlertCircle className="h-5 w-5 mr-2" />
+              <AlertCircleIcon className="h-5 w-5 mr-2" />
               Connection Error
             </DialogTitle>
             <DialogDescription>
