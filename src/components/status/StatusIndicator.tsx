@@ -12,9 +12,6 @@ interface StatusIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   useIcon?: boolean;
   inline?: boolean;
-  clickable?: boolean;
-  isSelected?: boolean;
-  onStatusClick?: () => void;
 }
 
 export function StatusIndicator({ 
@@ -24,10 +21,7 @@ export function StatusIndicator({
   iconOnly = false,
   size = 'md',
   useIcon = false,
-  inline = false,
-  clickable = false,
-  isSelected = false,
-  onStatusClick
+  inline = false
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -44,34 +38,8 @@ export function StatusIndicator({
     'lg': useIcon ? 'h-5 w-5' : 'h-3 w-3'
   }[size];
 
-  const handleClick = () => {
-    if (clickable && onStatusClick) {
-      onStatusClick();
-    }
-  };
-
-  const selectedBackgroundClass = isSelected && clickable ? 
-    `bg-opacity-30 ${
-      status === 'active' ? 'bg-green-100 dark:bg-green-900' : 
-      status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900' : 
-      status === 'error' ? 'bg-red-100 dark:bg-red-900' : 
-      status === 'inactive' ? 'bg-gray-100 dark:bg-gray-900' :
-      status === 'verified' ? 'bg-blue-100 dark:bg-blue-900' :
-      'bg-transparent'
-    }` : '';
-
   return (
-    <div 
-      className={cn(
-        "flex items-center gap-1.5", 
-        inline ? "inline-flex" : "", 
-        clickable ? "cursor-pointer hover:opacity-80" : "",
-        selectedBackgroundClass,
-        clickable ? "px-2 py-1 rounded-md" : "",
-        className
-      )}
-      onClick={handleClick}
-    >
+    <div className={cn("flex items-center gap-1.5", inline ? "inline-flex" : "", className)}>
       {status !== 'none' && (
         useIcon ? (
           <CircleDot className={cn("text-muted-foreground", sizeClass)} />

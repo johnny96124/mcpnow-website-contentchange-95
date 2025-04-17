@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
   ChevronDown, 
-  User,
-  AlertCircle
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +13,6 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { NoSearchResults } from "@/components/servers/NoSearchResults";
-import { cn } from "@/lib/utils";
 
 interface InstanceStatus {
   id: string;
@@ -51,9 +48,6 @@ const TrayPopup = () => {
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
-  
-  // New state for filtered status
-  const [statusFilter, setStatusFilter] = useState<Record<string, 'running' | 'connecting' | 'error' | 'stopped' | null>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
     setSelectedProfileIds(prev => ({
@@ -137,11 +131,6 @@ const TrayPopup = () => {
                   ...updatedHostInstances[idx],
                   status: Math.random() > 0.2 ? 'running' : 'error'
                 };
-                
-                // If status became error, disable the instance
-                if (updatedHostInstances[idx].status === 'error') {
-                  updatedHostInstances[idx].enabled = false;
-                }
               }
               
               return {
@@ -160,24 +149,6 @@ const TrayPopup = () => {
     });
     
     toast.success(`Server instance ${instanceStatuses[hostId]?.find(i => i.id === instanceId)?.enabled ? 'disabled' : 'enabled'}`);
-  };
-  
-  // Handle status filter toggle
-  const toggleStatusFilter = (hostId: string, status: 'running' | 'connecting' | 'error' | 'stopped' | null) => {
-    setStatusFilter(prev => {
-      // If clicking the same status again, clear the filter
-      if (prev[hostId] === status) {
-        return {
-          ...prev,
-          [hostId]: null
-        };
-      }
-      
-      return {
-        ...prev,
-        [hostId]: status
-      };
-    });
   };
 
   const getInstancesForHost = (hostId: string) => {
@@ -204,19 +175,13 @@ const TrayPopup = () => {
       const activeInstanceId = activeInstances[hostId]?.[defId] || instances[0]?.id;
       const status = instanceStatuses[hostId]?.find(s => s.id === activeInstanceId);
       
-      // Apply filter if one is set
-      const currentFilter = statusFilter[hostId];
-      if (currentFilter && status?.status !== currentFilter) {
-        return null;
-      }
-      
       return {
         definition,
         instances,
         activeInstanceId,
         status
       };
-    }).filter(Boolean);
+    });
   };
 
   const getInstanceStatusCounts = (hostId: string) => {
@@ -243,13 +208,6 @@ const TrayPopup = () => {
   
   const openDashboard = () => {
     window.open("/", "_blank");
-  };
-  
-  const handleViewError = (hostId: string, definitionName: string) => {
-    toast.error(`Error connecting to ${definitionName}`, {
-      description: "Check server configuration or network connection",
-      duration: 5000
-    });
   };
 
   return (
@@ -333,138 +291,80 @@ const TrayPopup = () => {
                       </Select>
                     </div>
                     
-                    {profileId && (
+                    {profileId && instanceGroups.length > 0 && (
                       <div className="mt-3">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs text-muted-foreground">Active server instances:</p>
-                            {statusCounts.error > 0 && (
-                              <span className="inline-flex items-center text-xs text-red-600 bg-red-50 dark:bg-red-950/20 px-1.5 py-0.5 rounded-full">
-                                <AlertCircle className="h-3 w-3 mr-1" />
-                                {statusCounts.error} error{statusCounts.error > 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </div>
+                          <p className="text-xs text-muted-foreground">Active server instances:</p>
                           <div className="flex items-center gap-2 text-xs">
-                            {/* Clickable status filters */}
                             {statusCounts.active > 0 && (
-                              <StatusIndicator 
-                                status="active"
-                                label={`${statusCounts.active} active`}
-                                size="sm"
-                                clickable={true}
-                                isSelected={statusFilter[host.id] === 'running'}
-                                onStatusClick={() => toggleStatusFilter(host.id, statusFilter[host.id] === 'running' ? null : 'running')}
-                              />
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                <span>{statusCounts.active} active</span>
+                              </div>
                             )}
                             {statusCounts.connecting > 0 && (
-                              <StatusIndicator 
-                                status="warning"
-                                label={`${statusCounts.connecting} connecting`}
-                                size="sm"
-                                clickable={true}
-                                isSelected={statusFilter[host.id] === 'connecting'}
-                                onStatusClick={() => toggleStatusFilter(host.id, statusFilter[host.id] === 'connecting' ? null : 'connecting')}
-                              />
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                <span>{statusCounts.connecting} connecting</span>
+                              </div>
                             )}
                             {statusCounts.error > 0 && (
-                              <StatusIndicator 
-                                status="error"
-                                label={`${statusCounts.error} error`}
-                                size="sm"
-                                clickable={true}
-                                isSelected={statusFilter[host.id] === 'error'}
-                                onStatusClick={() => toggleStatusFilter(host.id, statusFilter[host.id] === 'error' ? null : 'error')}
-                              />
+                              <div className="flex items-center gap-1.5">
+                                <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                                <span>{statusCounts.error} error</span>
+                              </div>
                             )}
                           </div>
                         </div>
-                        
-                        {statusFilter[host.id] && instanceGroups.length === 0 && (
-                          <div className="text-center p-3 text-sm text-muted-foreground">
-                            No instances matching the selected filter
-                            <Button 
-                              variant="link" 
-                              size="sm" 
-                              onClick={() => toggleStatusFilter(host.id, null)}
-                              className="block mx-auto mt-1"
-                            >
-                              Clear filter
-                            </Button>
-                          </div>
-                        )}
-                        
                         <div className="space-y-2">
-                          {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => {
-                            const isErrorStatus = status?.status === 'error';
-                            
-                            return (
-                              <div 
-                                key={definition?.id} 
-                                className={cn(
-                                  "flex items-center justify-between",
-                                  isErrorStatus ? "bg-red-50 dark:bg-red-900/20 rounded-md p-2" : ""
-                                )}
-                              >
-                                <div className="flex-1 min-w-0 mr-2">
-                                  <span className="text-xs font-medium truncate block">{definition?.name}</span>
-                                </div>
-                                
-                                <div className="flex items-center gap-2">
-                                  {isErrorStatus && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-6 text-xs px-2 py-0 text-red-600"
-                                      onClick={() => handleViewError(host.id, definition?.name || '')}
-                                    >
-                                      <AlertCircle className="h-3.5 w-3.5 mr-1" />
-                                      View Error
-                                    </Button>
-                                  )}
-                                  
-                                  <Select
-                                    value={activeInstanceId}
-                                    onValueChange={(value) => {
-                                      setActiveInstances(prev => ({
-                                        ...prev,
-                                        [host.id]: {
-                                          ...(prev[host.id] || {}),
-                                          [definition?.id || ""]: value
-                                        }
-                                      }));
-                                    }}
-                                  >
-                                    <SelectTrigger className="h-8 text-xs px-2 py-1 flex items-center gap-1 w-[120px]">
-                                      <StatusIndicator 
-                                        status={
-                                          !status?.enabled ? 'inactive' :
-                                          status.status === 'running' ? 'active' : 
-                                          status.status === 'connecting' ? 'warning' :
-                                          status.status === 'error' ? 'error' : 'inactive'
-                                        } 
-                                      />
-                                      <SelectValue className="truncate">
-                                        {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop()}
-                                      </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {instances.map(instance => (
-                                        <SelectItem key={instance.id} value={instance.id}>
-                                          {instance.name.split('-').pop()}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  
-                                  <Switch 
-                                    checked={status?.enabled || false} 
-                                    onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
-                                  />
-                                </div>
+                          {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
+                            <div key={definition?.id} className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0 mr-2">
+                                <span className="text-xs font-medium truncate block">{definition?.name}</span>
                               </div>
-                            );
-                          })}
+                              
+                              <div className="flex items-center gap-2">
+                                <Select
+                                  value={activeInstanceId}
+                                  onValueChange={(value) => {
+                                    setActiveInstances(prev => ({
+                                      ...prev,
+                                      [host.id]: {
+                                        ...(prev[host.id] || {}),
+                                        [definition?.id || ""]: value
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <SelectTrigger className="h-8 text-xs px-2 py-1 flex items-center gap-1 w-[120px]">
+                                    <StatusIndicator 
+                                      status={
+                                        !status?.enabled ? 'inactive' :
+                                        status.status === 'running' ? 'active' : 
+                                        status.status === 'connecting' ? 'warning' :
+                                        status.status === 'error' ? 'error' : 'inactive'
+                                      } 
+                                    />
+                                    <SelectValue className="truncate">
+                                      {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop()}
+                                    </SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {instances.map(instance => (
+                                      <SelectItem key={instance.id} value={instance.id}>
+                                        {instance.name.split('-').pop()}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                
+                                <Switch 
+                                  checked={status?.enabled || false} 
+                                  onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
