@@ -12,6 +12,8 @@ interface StatusIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   useIcon?: boolean;
   inline?: boolean;
+  onClick?: (status: StatusType) => void;
+  clickable?: boolean;
 }
 
 export function StatusIndicator({ 
@@ -21,7 +23,9 @@ export function StatusIndicator({
   iconOnly = false,
   size = 'md',
   useIcon = false,
-  inline = false
+  inline = false,
+  onClick,
+  clickable = false
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -38,8 +42,23 @@ export function StatusIndicator({
     'lg': useIcon ? 'h-5 w-5' : 'h-3 w-3'
   }[size];
 
+  const handleClick = () => {
+    if (clickable && onClick) {
+      onClick(status);
+    }
+  };
+
   return (
-    <div className={cn("flex items-center gap-1.5", inline ? "inline-flex" : "", className)}>
+    <div 
+      className={cn(
+        "flex items-center gap-1.5", 
+        inline ? "inline-flex" : "", 
+        clickable ? "cursor-pointer hover:bg-muted/50 px-1.5 py-0.5 rounded transition-colors" : "",
+        className
+      )}
+      onClick={handleClick}
+      role={clickable ? "button" : undefined}
+    >
       {status !== 'none' && (
         useIcon ? (
           <CircleDot className={cn("text-muted-foreground", sizeClass)} />

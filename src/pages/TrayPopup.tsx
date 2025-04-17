@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
   ChevronDown, 
-  User
+  User,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,6 +22,7 @@ interface InstanceStatus {
   name: string;
   status: 'running' | 'connecting' | 'error' | 'stopped';
   enabled: boolean;
+  errorMessage?: string;
 }
 
 const TrayPopup = () => {
@@ -48,6 +51,9 @@ const TrayPopup = () => {
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
+
+  // Add state for status filter
+  const [statusFilter, setStatusFilter] = useState<Record<string, string | null>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
     setSelectedProfileIds(prev => ({
@@ -93,9 +99,16 @@ const TrayPopup = () => {
           
           if (instanceIndex !== -1) {
             const originalInstance = serverInstances.find(s => s.id === instance.id);
+            const newStatus = originalInstance?.status || 'stopped';
+            
+            // Set enabled to false when status is error
+            const enabled = newStatus === 'error' ? false : hostInstances[instanceIndex].enabled;
+            
             hostInstances[instanceIndex] = {
               ...hostInstances[instanceIndex],
-              status: originalInstance?.status || 'stopped'
+              status: newStatus,
+              enabled: enabled,
+              errorMessage: newStatus === 'error' ? 'Connection failed. Server might be down.' : undefined
             };
           }
           
@@ -114,13 +127,15 @@ const TrayPopup = () => {
       const instanceIndex = hostInstances.findIndex(i => i.id === instanceId);
       
       if (instanceIndex !== -1) {
+        const newEnabled = !hostInstances[instanceIndex].enabled;
         hostInstances[instanceIndex] = {
           ...hostInstances[instanceIndex],
-          enabled: !hostInstances[instanceIndex].enabled,
-          status: !hostInstances[instanceIndex].enabled ? 'connecting' : 'stopped'
+          enabled: newEnabled,
+          status: newEnabled ? 'connecting' : 'stopped',
+          errorMessage: newEnabled ? undefined : hostInstances[instanceIndex].errorMessage
         };
         
-        if (!hostInstances[instanceIndex].enabled) {
+        if (newEnabled) {
           setTimeout(() => {
             setInstanceStatuses(prevState => {
               const updatedHostInstances = [...(prevState[hostId] || [])];
@@ -129,7 +144,10 @@ const TrayPopup = () => {
               if (idx !== -1 && updatedHostInstances[idx].status === 'connecting') {
                 updatedHostInstances[idx] = {
                   ...updatedHostInstances[idx],
-                  status: Math.random() > 0.2 ? 'running' : 'error'
+                  status: Math.random() > 0.2 ? 'running' : 'error',
+                  // If new status is error, disable the instance
+                  enabled: Math.random() > 0.2 ? updatedHostInstances[idx].enabled : false,
+                  errorMessage: Math.random() > 0.2 ? undefined : 'Connection failed. Server might be down.'
                 };
               }
               
@@ -197,6 +215,36 @@ const TrayPopup = () => {
     };
   };
 
+  const handleStatusFilterClick = (hostId: string, status: string | null) => {
+    setStatusFilter(prev => ({
+      ...prev,
+      [hostId]: prev[hostId] === status ? null : status
+    }));
+  };
+
+  const getFilteredInstanceGroups = (hostId: string, instanceGroups: ReturnType<typeof getInstancesForHost>) => {
+    const currentFilter = statusFilter[hostId];
+    if (!currentFilter) return instanceGroups;
+
+    return instanceGroups.filter(group => {
+      if (!group.status) return false;
+      
+      if (currentFilter === 'active' && group.status.status === 'running' && group.status.enabled) {
+        return true;
+      }
+      
+      if (currentFilter === 'connecting' && group.status.status === 'connecting' && group.status.enabled) {
+        return true;
+      }
+      
+      if (currentFilter === 'error' && group.status.status === 'error') {
+        return true;
+      }
+      
+      return false;
+    });
+  };
+
   useEffect(() => {
     displayHosts.forEach(host => {
       const profileId = selectedProfileIds[host.id];
@@ -240,7 +288,9 @@ const TrayPopup = () => {
               const profile = profiles.find(p => p.id === profileId);
               const isConnected = host.connectionStatus === 'connected';
               const instanceGroups = getInstancesForHost(host.id);
+              const filteredInstanceGroups = getFilteredInstanceGroups(host.id, instanceGroups);
               const statusCounts = getInstanceStatusCounts(host.id);
+              const currentFilter = statusFilter[host.id];
               
               return (
                 <Card key={host.id} className="overflow-hidden shadow-sm">
@@ -297,27 +347,39 @@ const TrayPopup = () => {
                           <p className="text-xs text-muted-foreground">Active server instances:</p>
                           <div className="flex items-center gap-2 text-xs">
                             {statusCounts.active > 0 && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                                <span>{statusCounts.active} active</span>
-                              </div>
+                              <StatusIndicator 
+                                status="active"
+                                label={`${statusCounts.active} active`}
+                                size="sm"
+                                clickable={true}
+                                onClick={() => handleStatusFilterClick(host.id, 'active')}
+                                className={currentFilter === 'active' ? 'bg-muted text-primary' : ''}
+                              />
                             )}
                             {statusCounts.connecting > 0 && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                <span>{statusCounts.connecting} connecting</span>
-                              </div>
+                              <StatusIndicator 
+                                status="warning"
+                                label={`${statusCounts.connecting} connecting`}
+                                size="sm"
+                                clickable={true}
+                                onClick={() => handleStatusFilterClick(host.id, 'connecting')}
+                                className={currentFilter === 'connecting' ? 'bg-muted text-primary' : ''}
+                              />
                             )}
                             {statusCounts.error > 0 && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                                <span>{statusCounts.error} error</span>
-                              </div>
+                              <StatusIndicator 
+                                status="error"
+                                label={`${statusCounts.error} error`}
+                                size="sm"
+                                clickable={true}
+                                onClick={() => handleStatusFilterClick(host.id, 'error')}
+                                className={currentFilter === 'error' ? 'bg-muted text-primary' : ''}
+                              />
                             )}
                           </div>
                         </div>
                         <div className="space-y-2">
-                          {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
+                          {filteredInstanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
                             <div key={definition?.id} className="flex items-center justify-between">
                               <div className="flex-1 min-w-0 mr-2">
                                 <span className="text-xs font-medium truncate block">{definition?.name}</span>
@@ -342,7 +404,8 @@ const TrayPopup = () => {
                                         !status?.enabled ? 'inactive' :
                                         status.status === 'running' ? 'active' : 
                                         status.status === 'connecting' ? 'warning' :
-                                        status.status === 'error' ? 'error' : 'inactive'
+                                        status.status === 'error' ? 'error' :
+                                        'inactive'
                                       } 
                                     />
                                     <SelectValue className="truncate">
@@ -358,13 +421,30 @@ const TrayPopup = () => {
                                   </SelectContent>
                                 </Select>
                                 
-                                <Switch 
-                                  checked={status?.enabled || false} 
-                                  onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
-                                />
+                                <div className="flex items-center gap-1">
+                                  {status?.status === 'error' && (
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 w-6 p-0 text-red-500"
+                                    >
+                                      <AlertCircle className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  <Switch 
+                                    checked={status?.enabled || false} 
+                                    onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
+                                  />
+                                </div>
                               </div>
                             </div>
                           ))}
+                          
+                          {filteredInstanceGroups.length === 0 && currentFilter && (
+                            <div className="p-4 text-center text-muted-foreground text-sm">
+                              No {currentFilter} instances found
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
