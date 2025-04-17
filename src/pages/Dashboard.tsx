@@ -534,10 +534,7 @@ const Dashboard = () => {
                   <CardTitle className="text-lg">Create Profiles</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 flex-grow">
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Group server instances into logical profiles. A profile contains multiple 
-                    servers that work together.
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Group multiple server instances into logical profiles. </p>
                   <div className="flex justify-center text-5xl flex-grow items-center">
                     <Layers className="h-12 w-12 text-green-500/70" />
                   </div>
