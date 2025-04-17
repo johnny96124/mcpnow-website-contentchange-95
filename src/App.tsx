@@ -41,19 +41,29 @@ const App = () => {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/tray" element={<TrayPopup />} />
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
-                <Route path="/" element={<DefaultLayout />}>
-                  <Route path="dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<DefaultLayout />}>
+                  <Route index element={<Dashboard />} />
                   <Route path="new-user" element={<NewUserDashboard />} />
-                  <Route path="empty-dashboard" element={<EmptyDashboard />} />
-                  <Route path="hosts" element={<Hosts />} />
-                  <Route path="hosts/new-user" element={<HostsNewUser />} />
-                  <Route path="profiles" element={<Profiles />} />
-                  <Route path="profiles/new-user" element={<ProfilesNewUser />} />
-                  <Route path="servers" element={<Servers />} />
-                  <Route path="servers/new-user" element={<ServersNewUser />} />
-                  <Route path="discovery" element={<Discovery />} />
-                  <Route path="discovery/no-network" element={<DiscoveryNoNetwork />} />
-                  <Route path="settings" element={<Settings />} />
+                  <Route path="empty" element={<EmptyDashboard />} />
+                </Route>
+                <Route path="/hosts" element={<DefaultLayout />}>
+                  <Route index element={<Hosts />} />
+                  <Route path="new-user" element={<HostsNewUser />} />
+                </Route>
+                <Route path="/profiles" element={<DefaultLayout />}>
+                  <Route index element={<Profiles />} />
+                  <Route path="new-user" element={<ProfilesNewUser />} />
+                </Route>
+                <Route path="/servers" element={<DefaultLayout />}>
+                  <Route index element={<Servers />} />
+                  <Route path="new-user" element={<ServersNewUser />} />
+                </Route>
+                <Route path="/discovery" element={<DefaultLayout />}>
+                  <Route index element={<Discovery />} />
+                  <Route path="no-network" element={<DiscoveryNoNetwork />} />
+                </Route>
+                <Route path="/settings" element={<DefaultLayout />}>
+                  <Route index element={<Settings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

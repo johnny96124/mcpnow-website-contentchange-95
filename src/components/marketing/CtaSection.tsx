@@ -1,16 +1,16 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ServerIcon, Sparkles, Cpu, Bot } from "lucide-react";
+import { ArrowRight, Download, Sparkles, Cpu, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const CtaSection: React.FC = () => {
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-blue-50/50 dark:from-blue-950/5 dark:via-transparent dark:to-blue-950/5 z-0"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-3xl opacity-30 z-0"></div>
-      <div className="absolute top-20 right-20 w-20 h-20 bg-purple-400/30 rounded-full blur-2xl"></div>
+      <div className="absolute top-20 right-20 w-20 h-20 bg-blue-400/30 rounded-full blur-2xl"></div>
       <div className="absolute bottom-20 left-20 w-40 h-40 bg-blue-400/20 rounded-full blur-3xl"></div>
       
       <div className="container relative z-10">
@@ -30,7 +30,7 @@ const CtaSection: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
             >
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Ready to transform your AI workflow?</span>
+              <span className="text-sm font-medium text-primary">Ready to simplify MCP management?</span>
             </motion.div>
             
             <motion.h2 
@@ -40,7 +40,7 @@ const CtaSection: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              Start deploying AI models <br /> with unparalleled ease
+              Start managing your MCP <br /> configurations with ease
             </motion.h2>
             
             <motion.p 
@@ -50,7 +50,7 @@ const CtaSection: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              Join thousands of developers, researchers, and enterprises who have streamlined their AI infrastructure with mcpnow.
+              Join the community of developers and AI enthusiasts who have streamlined their MCP workflow with MCP Now.
             </motion.p>
             
             <motion.div 
@@ -60,16 +60,15 @@ const CtaSection: React.FC = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <Link to="/hosts/new-user">
-                <Button size="lg" className="gap-2 group">
-                  Get Started For Free
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
+              <Button size="lg" className="gap-2 group" id="mac-download" onClick={() => window.open("#mac-download", "_blank")}>
+                <Download className="h-4 w-4" />
+                Download Now
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
               
-              <Link to="#demo">
+              <Link to="/hosts">
                 <Button variant="outline" size="lg">
-                  Request Demo
+                  Open Dashboard
                 </Button>
               </Link>
             </motion.div>
@@ -83,23 +82,23 @@ const CtaSection: React.FC = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="bg-primary/10 rounded-full p-2">
-                  <ServerIcon className="h-5 w-5 text-primary" />
+                  <Download className="h-5 w-5 text-primary" />
                 </div>
-                <span className="font-medium">No credit card required</span>
+                <span className="font-medium">Free download</span>
               </div>
               
               <div className="flex items-center gap-3">
                 <div className="bg-primary/10 rounded-full p-2">
                   <Cpu className="h-5 w-5 text-primary" />
                 </div>
-                <span className="font-medium">Free plan available</span>
+                <span className="font-medium">Easy setup</span>
               </div>
               
               <div className="flex items-center gap-3">
                 <div className="bg-primary/10 rounded-full p-2">
                   <Bot className="h-5 w-5 text-primary" />
                 </div>
-                <span className="font-medium">Setup in minutes</span>
+                <span className="font-medium">Works with major MCP hosts</span>
               </div>
             </motion.div>
           </motion.div>
@@ -127,7 +126,7 @@ const CtaSection: React.FC = () => {
               >
                 <img 
                   src={image} 
-                  alt={`mcpnow user case ${index + 1}`}
+                  alt={`MCP Now user interface ${index + 1}`}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" 
                 />
               </motion.div>

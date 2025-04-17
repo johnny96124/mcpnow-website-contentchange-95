@@ -1,38 +1,38 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Server, Mail, MapPin, Phone, Facebook, Twitter, Instagram, Linkedin, Github } from "lucide-react";
+import { Mail, MapPin, Phone, Facebook, Twitter, Instagram, Linkedin, Github } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-muted/30 border-t relative">
+    <footer className="bg-blue-50/50 dark:bg-blue-950/10 border-t relative">
       <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-background to-transparent opacity-70 pointer-events-none"></div>
       
       <div className="container py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <Server className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold tracking-tight">mcpnow</span>
+              <img src="/lovable-uploads/3a4a1f99-ed19-4f29-95f8-8def69cd20b3.png" alt="MCP Now Logo" className="h-8 w-8" />
+              <span className="text-xl font-bold tracking-tight">MCP Now</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-              Simplifying AI model deployment and management for developers, researchers, and enterprises.
+              Simplifying Model Context Protocol management for developers and AI enthusiasts.
             </p>
             
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                 <span className="text-muted-foreground">
-                  123 AI Boulevard, San Francisco, CA 94107
+                  123 AI Avenue, San Francisco, CA 94107
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-muted-foreground" />
-                <a href="mailto:contact@mcpnow.ai" className="text-muted-foreground hover:text-foreground transition-colors">
-                  contact@mcpnow.ai
+                <a href="mailto:contact@mcpnow.app" className="text-muted-foreground hover:text-foreground transition-colors">
+                  contact@mcpnow.app
                 </a>
               </div>
               <div className="flex items-center gap-3">
@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-3 text-sm">
               <li><a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</a></li>
+              <li><a href="#download" className="text-muted-foreground hover:text-foreground transition-colors">Download</a></li>
               <li><Link to="/docs" className="text-muted-foreground hover:text-foreground transition-colors">Documentation</Link></li>
               <li><Link to="/changelog" className="text-muted-foreground hover:text-foreground transition-colors">Changelog</Link></li>
               <li><Link to="/integrations" className="text-muted-foreground hover:text-foreground transition-colors">Integrations</Link></li>
@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
             <div className="space-y-2">
               <h3 className="font-semibold text-lg">Subscribe to our newsletter</h3>
-              <p className="text-sm text-muted-foreground">Get the latest updates on AI model management and deployment.</p>
+              <p className="text-sm text-muted-foreground">Get the latest updates on MCP Now features and improvements.</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
               <Input 
@@ -99,7 +99,7 @@ const Footer: React.FC = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} mcpnow. All rights reserved.
+            © {new Date().getFullYear()} MCP Now. All rights reserved.
           </p>
           
           <div className="flex gap-6">

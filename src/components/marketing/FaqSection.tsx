@@ -16,42 +16,42 @@ interface FaqItem {
 
 const faqs: FaqItem[] = [
   {
-    question: "What is mcpnow?",
-    answer: "mcpnow is a comprehensive platform for deploying, managing, and scaling AI models across multiple hosts. It provides an intuitive interface for creating model profiles, connecting to hosts, and monitoring performance — all designed to simplify AI infrastructure management."
+    question: "What is MCP Now?",
+    answer: "MCP Now is a powerful desktop application that simplifies the management of Model Context Protocol (MCP) configurations. It serves as a local proxy service that bridges AI applications (MCP Hosts like Cursor, Claude Desktop) with various MCP servers, functioning as a central hub for MCP server discovery, configuration, and management."
   },
   {
-    question: "Do I need specialized hardware to use mcpnow?",
-    answer: "No, mcpnow works with a variety of hardware configurations. While having GPUs will enhance performance for many AI models, you can use mcpnow with standard CPUs as well. The platform will help you optimize resource usage for whatever hardware you have available."
+    question: "What is the Model Context Protocol (MCP)?",
+    answer: "The Model Context Protocol (MCP) is a standardized communication protocol that enables AI applications to interact with various AI models and services. It provides a consistent way for applications to send requests to and receive responses from AI models, regardless of the underlying implementation."
   },
   {
-    question: "Can I use mcpnow with my existing AI models?",
-    answer: "Yes, mcpnow is designed to work with most standard AI model formats and frameworks, including PyTorch, TensorFlow, Hugging Face models, and many others. You can create profiles for your existing models and deploy them through the platform."
+    question: "How does MCP Now work?",
+    answer: "MCP Now acts as a local proxy service that sits between your AI applications (MCP Hosts) and MCP servers. It automatically discovers available MCP servers, allows you to configure them, and manages the connections between your applications and these servers. This simplifies the setup process and provides a centralized way to manage all your MCP configurations."
   },
   {
-    question: "How does mcpnow handle security and privacy?",
-    answer: "Security is a top priority for mcpnow. The platform offers enterprise-grade security features including encryption, role-based access control, and secure API endpoints. You maintain complete control over your models and data, with options to keep everything within your own infrastructure."
+    question: "What are MCP Hosts and how do they work with MCP Now?",
+    answer: "MCP Hosts are applications that implement the MCP client side of the protocol, such as Cursor and Claude Desktop. These applications connect to MCP Now, which then routes their requests to appropriate MCP servers based on your configuration. This allows these applications to leverage various AI models and services without having to implement direct connections to each one."
   },
   {
-    question: "Does mcpnow support team collaboration?",
-    answer: "Absolutely. mcpnow offers robust team collaboration features, allowing team members to share access to hosts and model profiles with appropriate permissions. This makes it ideal for research teams, development groups, and enterprise environments."
+    question: "Is MCP Now free to use?",
+    answer: "Yes, MCP Now is currently available as a free download. We are committed to providing a powerful tool for the community to simplify MCP configuration management."
   },
   {
-    question: "What kind of support is available?",
-    answer: "Free users have access to our community support forums and documentation. Pro users receive priority email support, while Enterprise customers benefit from dedicated support channels and optional SLAs. We're committed to helping you succeed with mcpnow regardless of your plan."
+    question: "Which operating systems does MCP Now support?",
+    answer: "MCP Now currently supports macOS (both Intel and Apple Silicon). Windows support is coming soon. We are continuously working to expand platform support based on user feedback."
   },
   {
-    question: "Can I try mcpnow before purchasing?",
-    answer: "Yes, we offer a free plan with core features that you can use indefinitely. This allows you to experience the platform's capabilities before deciding to upgrade. We also offer demos for enterprise customers interested in our advanced features."
+    question: "Do I need technical knowledge to use MCP Now?",
+    answer: "MCP Now is designed to be user-friendly and does not require extensive technical knowledge. The intuitive interface guides you through the process of discovering and configuring MCP servers. However, some basic understanding of the MCP ecosystem can be helpful."
   },
   {
-    question: "Is mcpnow suitable for both small startups and large enterprises?",
-    answer: "Absolutely. mcpnow's scalable architecture makes it suitable for organizations of all sizes. Small startups can begin with the free tier and scale up as they grow, while enterprises can leverage our advanced security, administration, and integration features from day one."
+    question: "Can I contribute to MCP Now's development?",
+    answer: "While MCP Now is not currently open source, we welcome feature suggestions and feedback from the community. If you have ideas for improving MCP Now, please share them through our feedback channels."
   }
 ];
 
 const FaqSection: React.FC = () => {
   return (
-    <section id="faq" className="py-24 bg-muted/40 relative">
+    <section id="faq" className="py-24 bg-blue-50/50 dark:bg-blue-950/10 relative">
       <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-background to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
       
@@ -69,7 +69,7 @@ const FaqSection: React.FC = () => {
           </div>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Have a question about mcpnow? Find answers to common questions below.
+            Have questions about MCP Now? Find answers to common questions below.
           </p>
         </motion.div>
         
@@ -111,7 +111,7 @@ const FaqSection: React.FC = () => {
         >
           <h3 className="text-xl font-semibold mb-2">Still have questions?</h3>
           <p className="text-muted-foreground mb-4">
-            Our support team is ready to assist you with any inquiries about mcpnow's features, pricing, or implementation.
+            Our support team is ready to assist you with any inquiries about MCP Now's features or implementation.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a href="#contact" className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">

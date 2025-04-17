@@ -3,8 +3,14 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Menu, X, Server } from "lucide-react";
+import { Menu, X, Download, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,8 +48,8 @@ const Navbar: React.FC = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <Server className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold tracking-tight">mcpnow</span>
+            <img src="/lovable-uploads/3a4a1f99-ed19-4f29-95f8-8def69cd20b3.png" alt="MCP Now Logo" className="h-8 w-8" />
+            <span className="text-xl font-bold tracking-tight">MCP Now</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <button onClick={() => scrollToSection("features")} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
@@ -52,9 +58,6 @@ const Navbar: React.FC = () => {
             <button onClick={() => scrollToSection("use-cases")} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               Use Cases
             </button>
-            <button onClick={() => scrollToSection("pricing")} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Pricing
-            </button>
             <button onClick={() => scrollToSection("faq")} className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               FAQ
             </button>
@@ -62,11 +65,24 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="default" className="gap-2">
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => window.open("#mac-download", "_blank")}>
+                  macOS (Universal)
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled className="text-muted-foreground">
+                  Windows (Coming soon)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link to="/hosts">
               <Button variant="outline">Dashboard</Button>
-            </Link>
-            <Link to="/hosts/new-user">
-              <Button>Get Started</Button>
             </Link>
           </div>
           <ThemeToggle />
@@ -101,23 +117,18 @@ const Navbar: React.FC = () => {
             Use Cases
           </button>
           <button 
-            onClick={() => scrollToSection("pricing")} 
-            className="block w-full text-left py-2 text-base font-medium"
-          >
-            Pricing
-          </button>
-          <button 
             onClick={() => scrollToSection("faq")} 
             className="block w-full text-left py-2 text-base font-medium"
           >
             FAQ
           </button>
           <div className="pt-4 flex flex-col gap-4 border-t">
+            <Button variant="default" className="justify-start gap-2" onClick={() => window.open("#mac-download", "_blank")}>
+              <Download className="h-4 w-4" />
+              Download for macOS
+            </Button>
             <Link to="/hosts" onClick={() => setMobileMenuOpen(false)}>
               <Button variant="outline" className="w-full">Dashboard</Button>
-            </Link>
-            <Link to="/hosts/new-user" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full">Get Started</Button>
             </Link>
           </div>
         </div>
