@@ -58,7 +58,6 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<'connected' | 'connecting' | 'error' | 'disconnected' | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -135,7 +134,6 @@ export function HostCard({
                 newStatuses[instanceIndex] = {
                   ...newStatuses[instanceIndex],
                   status: success ? 'connected' : 'error',
-                  enabled: success ? newStatuses[instanceIndex].enabled : false,
                   errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
                 };
               }
@@ -207,7 +205,6 @@ export function HostCard({
             return {
               ...instance,
               status: success ? 'connected' : 'error',
-              enabled: success ? instance.enabled : false,
               errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
             };
           }
@@ -220,11 +217,7 @@ export function HostCard({
   const getInstancesByDefinition = () => {
     const definitionMap = new Map<string, InstanceStatus[]>();
     
-    const filteredInstances = statusFilter 
-      ? instanceStatuses.filter(instance => instance.status === statusFilter)
-      : instanceStatuses;
-    
-    filteredInstances.forEach(instance => {
+    instanceStatuses.forEach(instance => {
       const defInstances = definitionMap.get(instance.definitionId) || [];
       defInstances.push(instance);
       definitionMap.set(instance.definitionId, defInstances);
@@ -248,10 +241,6 @@ export function HostCard({
       description: `${host.name} has been removed successfully`
     });
     setIsDeleteDialogOpen(false);
-  };
-  
-  const handleStatusFilterClick = (status: 'connected' | 'connecting' | 'error' | 'disconnected') => {
-    setStatusFilter(prevStatus => prevStatus === status ? null : status);
   };
   
   const profileConnectionStatus = getProfileConnectionStatus();
@@ -421,31 +410,22 @@ export function HostCard({
                   <label className="text-sm font-medium">Server Instances</label>
                   <div className="flex items-center gap-2 text-xs">
                     {statusCounts.connected > 0 && (
-                      <StatusIndicator 
-                        status="active"
-                        label={`${statusCounts.connected} active`}
-                        size="sm"
-                        onClick={() => handleStatusFilterClick('connected')}
-                        selected={statusFilter === 'connected'}
-                      />
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                        <span>{statusCounts.connected} active</span>
+                      </div>
                     )}
                     {statusCounts.connecting > 0 && (
-                      <StatusIndicator 
-                        status="warning"
-                        label={`${statusCounts.connecting} connecting`}
-                        size="sm"
-                        onClick={() => handleStatusFilterClick('connecting')}
-                        selected={statusFilter === 'connecting'}
-                      />
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                        <span>{statusCounts.connecting} connecting</span>
+                      </div>
                     )}
                     {statusCounts.error > 0 && (
-                      <StatusIndicator 
-                        status="error"
-                        label={`${statusCounts.error} error`}
-                        size="sm"
-                        onClick={() => handleStatusFilterClick('error')}
-                        selected={statusFilter === 'error'}
-                      />
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                        <span>{statusCounts.error} error</span>
+                      </div>
                     )}
                     {statusCounts.total === 0 && (
                       <span className="text-muted-foreground">No active instances</span>
@@ -457,21 +437,20 @@ export function HostCard({
                     {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
                       const displayInstance = instances[0];
                       const hasError = displayInstance.enabled && displayInstance.status === 'error';
-                      const isError = displayInstance.status === 'error';
                       
                       return (
                         <div 
                           key={definitionId} 
                           className={cn(
                             "flex items-center justify-between p-2 rounded",
-                            isError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
+                            hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
                           )}
                         >
                           <div className="flex items-center gap-2">
                             <StatusIndicator 
                               status={
                                 isHostDisconnected ? 'none' :
-                                !displayInstance.enabled && !isError ? 'inactive' :
+                                !displayInstance.enabled ? 'inactive' :
                                 displayInstance.status === 'connected' ? 'active' :
                                 displayInstance.status === 'connecting' ? 'warning' :
                                 displayInstance.status === 'error' ? 'error' : 'inactive'
@@ -527,7 +506,7 @@ export function HostCard({
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            {isError && (
+                            {hasError && (
                               <Button 
                                 variant="ghost" 
                                 size="sm"
@@ -549,19 +528,6 @@ export function HostCard({
                         </div>
                       );
                     })}
-                    
-                    {Array.from(instancesByDefinition.entries()).length === 0 && statusFilter && (
-                      <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
-                        No {statusFilter} instances found. 
-                        <Button 
-                          variant="link" 
-                          className="px-1 py-0 h-auto text-sm"
-                          onClick={() => setStatusFilter(null)}
-                        >
-                          Clear filter
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </ScrollArea>
               </div>
