@@ -68,11 +68,6 @@ export default {
 					warning: 'hsl(var(--status-warning))',
 					error: 'hsl(var(--status-error))',
 					inactive: 'hsl(var(--status-inactive))'
-				},
-				toast: {
-					DEFAULT: 'hsl(var(--toast-background))',
-					foreground: 'hsl(var(--toast-foreground))',
-					border: 'hsl(var(--toast-border))',
 				}
 			},
 			borderRadius: {
@@ -150,26 +145,6 @@ export default {
 						opacity: '1',
 						transform: 'scale(1)'
 					}
-				},
-				'toast-in': {
-          '0%': { 
-            transform: 'translateX(100%)',
-            opacity: '0'
-          },
-          '100%': { 
-            transform: 'translateX(0)',
-            opacity: '1'
-          },
-				},
-				'toast-out': {
-          '0%': { 
-            transform: 'translateX(0)',
-            opacity: '1'
-          },
-          '100%': { 
-            transform: 'translateX(100%)',
-            opacity: '0'
-          },
 				}
 			},
 			animation: {
@@ -180,9 +155,7 @@ export default {
 				'slide-in-from-right-full': 'slide-in-from-right 0.3s ease-out',
 				'slide-out-to-right-full': 'slide-out-to-right 0.3s ease-out',
 				'collapse': 'collapse-dialog 0.3s ease-in forwards',
-				'expand': 'expand-dialog 0.3s ease-out forwards',
-				'toast-in': 'toast-in 0.3s ease-out',
-				'toast-out': 'toast-out 0.3s ease-out'
+				'expand': 'expand-dialog 0.3s ease-out forwards'
 			}
 		}
 	},

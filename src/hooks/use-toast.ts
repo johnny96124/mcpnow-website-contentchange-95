@@ -6,8 +6,8 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 3
-const TOAST_REMOVE_DELAY = 3000
+const TOAST_LIMIT = 1
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -15,7 +15,6 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center"
-  duration?: number
 }
 
 const actionTypes = {
@@ -58,7 +57,7 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string, duration = TOAST_REMOVE_DELAY) => {
+const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
   }
@@ -69,7 +68,7 @@ const addToRemoveQueue = (toastId: string, duration = TOAST_REMOVE_DELAY) => {
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
-  }, duration)
+  }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
 }
@@ -96,11 +95,10 @@ export const reducer = (state: State, action: Action): State => {
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
       if (toastId) {
-        const toast = state.toasts.find(t => t.id === toastId);
-        addToRemoveQueue(toastId, toast?.duration);
+        addToRemoveQueue(toastId)
       } else {
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id, toast?.duration)
+          addToRemoveQueue(toast.id)
         })
       }
 
@@ -145,7 +143,6 @@ type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
   const id = genId()
-  const duration = props.duration || TOAST_REMOVE_DELAY
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -159,8 +156,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      duration,
-      position: props.position || "top-right",
+      position: "top-right", // Default position to top-right
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()

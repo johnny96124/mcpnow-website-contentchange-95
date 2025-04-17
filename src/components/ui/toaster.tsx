@@ -8,23 +8,17 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
-import { Bell } from "lucide-react"
 
 export function Toaster() {
   const { toasts } = useToast()
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, position = "top-right", ...props }) {
+      {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">
-              {title && (
-                <ToastTitle>
-                  {props.variant !== "destructive" && <Bell className="h-3.5 w-3.5 text-primary/70" />}
-                  {title}
-                </ToastTitle>
-              )}
+              {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>{description}</ToastDescription>
               )}
@@ -34,7 +28,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport />
+      <ToastViewport className="fixed top-0 right-0 flex flex-col p-4 sm:top-0 sm:right-0 sm:flex-col md:max-w-[420px]" />
     </ToastProvider>
   )
 }
