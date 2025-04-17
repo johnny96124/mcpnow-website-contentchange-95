@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -67,11 +68,7 @@ export default {
 					warning: 'hsl(var(--status-warning))',
 					error: 'hsl(var(--status-error))',
 					inactive: 'hsl(var(--status-inactive))'
-				},
-				soft-blue: '#D3E4FD',
-				soft-orange: '#FEC6A1',
-				soft-green: '#F2FCE2',
-				soft-yellow: '#FEF7CD'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
