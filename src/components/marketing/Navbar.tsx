@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Server } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Navbar: React.FC = () => {
