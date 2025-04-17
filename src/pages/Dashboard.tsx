@@ -554,10 +554,7 @@ const Dashboard = () => {
                   <CardTitle className="text-lg">Connect Hosts</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 flex-grow">
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Link your profiles to hosts where they will run. This deploys your configured 
-                    servers to actual machines.
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Link your profiles to hosts where they can run MCP. </p>
                   <div className="flex justify-center text-5xl flex-grow items-center">
                     <Computer className="h-12 w-12 text-amber-500/70" />
                   </div>
