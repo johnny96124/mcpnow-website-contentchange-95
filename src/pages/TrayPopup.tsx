@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -235,12 +234,11 @@ const TrayPopup = () => {
     
     if (!statusFilter) return allInstances;
     
-    // Convert status filter to instance status
-    const statusMapping: Record<StatusFilter, string> = {
+    // Convert status filter to instance status - FIX HERE
+    const statusMapping: Record<string, string> = {
       'active': 'running',
       'error': 'error',
-      'connecting': 'connecting',
-      'null': ''
+      'connecting': 'connecting'
     };
     
     const matchingStatus = statusFilter ? statusMapping[statusFilter] : '';
