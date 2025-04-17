@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -18,12 +19,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
+type InstanceStatusType = 'connected' | 'connecting' | 'error' | 'disconnected';
+
 interface InstanceStatus {
   id: string;
   name: string;
   definitionId: string;
   definitionName: string;
-  status: 'connected' | 'connecting' | 'error' | 'disconnected';
+  status: InstanceStatusType;
   enabled: boolean;
   errorMessage?: string;
 }
@@ -58,7 +61,7 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<InstanceStatusType | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -91,26 +94,10 @@ export function HostCard({
       total: enabledInstances.length
     };
   };
-  
-  const handleStatusFilterClick = (status: string | null) => {
-    setStatusFilter(prev => prev === status ? null : status);
-  };
-  
-  const getFilteredInstances = () => {
-    if (!statusFilter) return instanceStatuses;
-    
-    return instanceStatuses.filter(instance => {
-      if (statusFilter === 'connected' && instance.status === 'connected' && instance.enabled) {
-        return true;
-      }
-      if (statusFilter === 'connecting' && instance.status === 'connecting' && instance.enabled) {
-        return true;
-      }
-      if (statusFilter === 'error' && instance.status === 'error') {
-        return true;
-      }
-      return false;
-    });
+
+  // Add filter handler
+  const handleFilterByStatus = (status: InstanceStatusType | null) => {
+    setStatusFilter(status === statusFilter ? null : status);
   };
   
   useEffect(() => {
@@ -154,14 +141,30 @@ export function HostCard({
                 ];
                 
                 const newStatus = success ? 'connected' : 'error';
-                const newEnabled = success ? newStatuses[instanceIndex].enabled : false;
+                const newEnabled = success || newStatuses[instanceIndex].enabled;
                 
-                newStatuses[instanceIndex] = {
-                  ...newStatuses[instanceIndex],
-                  status: newStatus,
-                  enabled: newEnabled,
-                  errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
-                };
+                // Automatically turn off switch if error occurs
+                if (newStatus === 'error') {
+                  newStatuses[instanceIndex] = {
+                    ...newStatuses[instanceIndex],
+                    status: newStatus,
+                    enabled: false, // Automatically disable on error
+                    errorMessage: errorMessages[Math.floor(Math.random() * errorMessages.length)]
+                  };
+                  
+                  // Show toast notification about error
+                  toast({
+                    variant: "destructive",
+                    title: `Connection error: ${newStatuses[instanceIndex].definitionName}`,
+                    description: "Instance has been disabled due to connection error."
+                  });
+                } else {
+                  newStatuses[instanceIndex] = {
+                    ...newStatuses[instanceIndex],
+                    status: newStatus,
+                    errorMessage: ''
+                  };
+                }
               }
               
               return newStatuses;
@@ -190,49 +193,14 @@ export function HostCard({
     setInstanceStatuses(prev => {
       return prev.map(instance => {
         if (instance.id === instanceId) {
-          const newEnabled = !instance.enabled;
-          
           return {
             ...instance,
-            enabled: newEnabled,
-            status: newEnabled && instance.status === 'error' ? 'connecting' : instance.status,
-            errorMessage: newEnabled ? '' : instance.errorMessage
+            enabled: !instance.enabled
           };
         }
         return instance;
       });
     });
-    
-    const instance = instanceStatuses.find(i => i.id === instanceId);
-    if (instance && !instance.enabled && instance.status === 'error') {
-      setTimeout(() => {
-        setInstanceStatuses(prev => {
-          return prev.map(i => {
-            if (i.id === instanceId && i.status === 'connecting') {
-              const success = Math.random() > 0.2;
-              const errorMessages = [
-                "Connection timeout. Check network settings and try again.",
-                "Authentication failed. Invalid credentials provided.",
-                "Connection refused. Server might be down or unreachable.",
-                "Failed to establish secure connection. Check SSL configuration.",
-                "Port access denied. Check firewall settings."
-              ];
-              
-              const newStatus = success ? 'connected' : 'error';
-              const newEnabled = success ? i.enabled : false;
-              
-              return {
-                ...i,
-                status: newStatus,
-                enabled: newEnabled,
-                errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
-              };
-            }
-            return i;
-          });
-        });
-      }, 1500);
-    }
   };
 
   const handleSelectInstance = (instanceId: string, definitionId: string) => {
@@ -264,7 +232,18 @@ export function HostCard({
             ];
             
             const newStatus = success ? 'connected' : 'error';
-            const newEnabled = success ? instance.enabled : false;
+            
+            // If error occurred, automatically disable the instance
+            const newEnabled = newStatus === 'error' ? false : instance.enabled;
+            
+            if (newStatus === 'error' && instance.enabled) {
+              // Show toast notification about error and auto-disable
+              toast({
+                variant: "destructive",
+                title: `Connection error: ${instance.definitionName}`,
+                description: "Instance has been disabled due to connection error."
+              });
+            }
             
             return {
               ...instance,
@@ -280,10 +259,9 @@ export function HostCard({
   };
   
   const getInstancesByDefinition = () => {
-    const filteredInstances = getFilteredInstances();
     const definitionMap = new Map<string, InstanceStatus[]>();
     
-    filteredInstances.forEach(instance => {
+    instanceStatuses.forEach(instance => {
       const defInstances = definitionMap.get(instance.definitionId) || [];
       defInstances.push(instance);
       definitionMap.set(instance.definitionId, defInstances);
@@ -313,6 +291,24 @@ export function HostCard({
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
   const statusCounts = getInstanceStatusCounts();
+  
+  // Filter instances by status if a filter is active
+  const filteredInstancesByDefinition = new Map(instancesByDefinition);
+  if (statusFilter !== null) {
+    Array.from(filteredInstancesByDefinition.keys()).forEach(defId => {
+      const instances = filteredInstancesByDefinition.get(defId) || [];
+      const filteredInstances = instances.filter(instance => 
+        (instance.status === statusFilter) && 
+        (statusFilter !== 'connected' || instance.enabled)
+      );
+      
+      if (filteredInstances.length === 0) {
+        filteredInstancesByDefinition.delete(defId);
+      } else {
+        filteredInstancesByDefinition.set(defId, filteredInstances);
+      }
+    });
+  }
   
   if (needsConfiguration) {
     return (
@@ -475,47 +471,49 @@ export function HostCard({
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium">Server Instances</label>
                   <div className="flex items-center gap-2 text-xs">
-                    {statusCounts.connected > 0 && (
-                      <StatusIndicator 
-                        status="active"
-                        label={`${statusCounts.connected} active`}
-                        size="sm"
-                        clickable={true}
-                        onClick={() => handleStatusFilterClick('connected')}
-                        className={statusFilter === 'connected' ? 'bg-muted text-primary' : ''}
-                      />
-                    )}
+                    <StatusIndicator 
+                      status="active"
+                      label={`${statusCounts.connected} active`}
+                      isClickable={true}
+                      onClick={() => handleFilterByStatus('connected')}
+                      className={statusFilter === 'connected' ? "bg-accent" : ""}
+                    />
                     {statusCounts.connecting > 0 && (
                       <StatusIndicator 
                         status="warning"
                         label={`${statusCounts.connecting} connecting`}
-                        size="sm"
-                        clickable={true}
-                        onClick={() => handleStatusFilterClick('connecting')}
-                        className={statusFilter === 'connecting' ? 'bg-muted text-primary' : ''}
+                        isClickable={true}
+                        onClick={() => handleFilterByStatus('connecting')}
+                        className={statusFilter === 'connecting' ? "bg-accent" : ""}
                       />
                     )}
                     {statusCounts.error > 0 && (
                       <StatusIndicator 
                         status="error"
                         label={`${statusCounts.error} error`}
-                        size="sm"
-                        clickable={true}
-                        onClick={() => handleStatusFilterClick('error')}
-                        className={statusFilter === 'error' ? 'bg-muted text-primary' : ''}
+                        isClickable={true}
+                        onClick={() => handleFilterByStatus('error')}
+                        className={statusFilter === 'error' ? "bg-accent" : ""}
                       />
                     )}
-                    {statusCounts.total === 0 && (
-                      <span className="text-muted-foreground">No active instances</span>
+                    {statusFilter !== null && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-5 w-5 rounded-full" 
+                        onClick={() => setStatusFilter(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     )}
                   </div>
                 </div>
                 <ScrollArea className="h-[140px] border rounded-md p-1">
-                  <div className="space-y-1">
-                    {Array.from(instancesByDefinition.entries()).length > 0 ? (
-                      Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
+                  {filteredInstancesByDefinition.size > 0 ? (
+                    <div className="space-y-1">
+                      {Array.from(filteredInstancesByDefinition.entries()).map(([definitionId, instances]) => {
                         const displayInstance = instances[0];
-                        const hasError = displayInstance.enabled && displayInstance.status === 'error';
+                        const hasError = displayInstance.status === 'error';
                         
                         return (
                           <div 
@@ -585,7 +583,7 @@ export function HostCard({
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              {displayInstance.status === 'error' && (
+                              {hasError && (
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
@@ -601,18 +599,23 @@ export function HostCard({
                                   checked={displayInstance.enabled} 
                                   onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
                                   className="shrink-0"
+                                  disabled={hasError}
                                 />
                               )}
                             </div>
                           </div>
                         );
-                      })
-                    ) : (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        {statusFilter ? `No ${statusFilter} instances found` : 'No instances available'}
-                      </div>
-                    )}
-                  </div>
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-muted-foreground text-sm">
+                        {statusFilter !== null 
+                          ? `No ${statusFilter} instances found` 
+                          : "No instances found"}
+                      </p>
+                    </div>
+                  )}
                 </ScrollArea>
               </div>
             )}
