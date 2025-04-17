@@ -33,11 +33,18 @@ const HeroSection: React.FC = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link to="#features">
+              <button onClick={() => {
+                const element = document.getElementById("features");
+                if (element) {
+                  const yOffset = -80;
+                  const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+              }}>
                 <Button variant="outline" size="lg">
                   Explore Features
                 </Button>
-              </Link>
+              </button>
             </div>
             
             <div className="flex items-center gap-8 text-sm text-muted-foreground">
@@ -60,11 +67,11 @@ const HeroSection: React.FC = () => {
             <div className="relative rounded-xl border bg-gradient-to-br from-background via-muted/50 to-muted p-2 shadow-lg">
               <div className="bg-background rounded-lg overflow-hidden border">
                 <img 
-                  src="/placeholder.svg" 
-                  alt="mcpnow dashboard" 
+                  src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2920&q=80" 
+                  alt="mcpnow dashboard interface showing AI model management" 
                   width={600} 
                   height={400}
-                  className="w-full h-auto"
+                  className="w-full h-auto object-cover"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-gradient-to-br from-primary/40 via-primary/30 to-primary/10 p-8 rounded-full blur-3xl opacity-50"></div>
