@@ -14,6 +14,7 @@ import {
   Globe,
   Terminal,
   CirclePlus,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { serverDefinitions } from "@/data/mockData";
@@ -79,8 +80,8 @@ const ServersNewUser = () => {
     <div className="container py-8 max-w-5xl mx-auto space-y-8 animate-fade-in">
       {/* Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-4 py-1 rounded-full inline-flex items-center gap-1.5 mb-2">
-          <Zap className="h-3.5 w-3.5" />
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-4 py-1.5 rounded-full inline-flex items-center gap-2 mb-2 shadow-sm">
+          <Sparkles className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">Getting Started</span>
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Welcome to Servers</h1>
@@ -90,8 +91,9 @@ const ServersNewUser = () => {
       </div>
       
       {/* Main content */}
-      <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
-        <CardContent className="pt-6">
+      <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors overflow-hidden shadow-sm hover:shadow-md">
+        <div className="absolute inset-0 bg-gradient-subtle from-blue-50/20 to-purple-50/20 dark:from-blue-950/10 dark:to-purple-950/10"></div>
+        <CardContent className="pt-6 relative">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -103,36 +105,36 @@ const ServersNewUser = () => {
               </div>
               
               <div className="space-y-4">
-                <div className="flex items-start gap-2">
-                  <div className="mt-1 p-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <div className="flex items-start gap-3 group hover-lift hover:bg-blue-50/50 dark:hover:bg-blue-900/20 p-3 rounded-lg">
+                  <div className="mt-1 p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 shadow-sm group-hover:shadow">
                     <Server className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium">Create custom servers</h3>
+                    <h3 className="text-sm font-semibold">Create custom servers</h3>
                     <p className="text-xs text-muted-foreground">
                       Define your own servers with specific connection details
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-2">
-                  <div className="mt-1 p-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                <div className="flex items-start gap-3 group hover-lift hover:bg-purple-50/50 dark:hover:bg-purple-900/20 p-3 rounded-lg">
+                  <div className="mt-1 p-2 rounded-full bg-purple-100 dark:bg-purple-900/50 shadow-sm group-hover:shadow">
                     <Globe className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium">Discover popular servers</h3>
+                    <h3 className="text-sm font-semibold">Discover popular servers</h3>
                     <p className="text-xs text-muted-foreground">
                       Browse our catalog of pre-configured server definitions
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-2">
-                  <div className="mt-1 p-1.5 rounded-full bg-green-100 dark:bg-green-900/30">
+                <div className="flex items-start gap-3 group hover-lift hover:bg-green-50/50 dark:hover:bg-green-900/20 p-3 rounded-lg">
+                  <div className="mt-1 p-2 rounded-full bg-green-100 dark:bg-green-900/50 shadow-sm group-hover:shadow">
                     <CirclePlus className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium">Create server instances</h3>
+                    <h3 className="text-sm font-semibold">Create server instances</h3>
                     <p className="text-xs text-muted-foreground">
                       Set up multiple instances of the same server with different configurations
                     </p>
@@ -145,7 +147,7 @@ const ServersNewUser = () => {
                   onClick={handleNavigateToDiscovery}
                   variant="default"
                   size="lg"
-                  className="gap-2"
+                  className="gap-2 animate-pulse-subtle shadow-md"
                 >
                   <Globe className="h-4 w-4" />
                   Browse Servers
@@ -164,10 +166,14 @@ const ServersNewUser = () => {
             <div className="space-y-4">
               <h2 className="text-xl font-semibold mb-4">Supported server types</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {serverTypes.map((type) => (
-                  <Card key={type.name} className="border hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 flex gap-3 items-start">
-                      <div>{type.icon}</div>
+                {serverTypes.map((type, index) => (
+                  <Card 
+                    key={type.name} 
+                    className="border hover:shadow-md transition-all duration-300 hover:-translate-y-1 overflow-hidden group"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-secondary/20 dark:to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="p-4 flex gap-3 items-start relative">
+                      <div className="p-2 rounded-full bg-card shadow-soft">{type.icon}</div>
                       <div>
                         <h3 className="font-medium">{type.name}</h3>
                         <p className="text-xs text-muted-foreground">{type.description}</p>
@@ -177,13 +183,13 @@ const ServersNewUser = () => {
                 ))}
               </div>
               
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3 shadow-sm">
                 <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                 <div>
                   <h3 className="font-medium text-amber-800 dark:text-amber-300">Need help?</h3>
                   <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
                     If you're not sure how to set up a host,{" "}
-                    <a href="#" className="text-amber-800 dark:text-amber-300 underline font-medium">
+                    <a href="#" className="text-amber-800 dark:text-amber-300 underline font-medium hover:text-amber-900 transition-colors">
                       view our configuration guide
                     </a>.
                   </p>
