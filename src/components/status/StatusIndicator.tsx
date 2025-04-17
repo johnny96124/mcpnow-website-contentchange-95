@@ -12,6 +12,8 @@ interface StatusIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   useIcon?: boolean;
   inline?: boolean;
+  onClick?: () => void;
+  selected?: boolean;
 }
 
 export function StatusIndicator({ 
@@ -21,7 +23,9 @@ export function StatusIndicator({
   iconOnly = false,
   size = 'md',
   useIcon = false,
-  inline = false
+  inline = false,
+  onClick,
+  selected = false
 }: StatusIndicatorProps) {
   const statusClass = {
     'active': 'status-active',
@@ -38,8 +42,34 @@ export function StatusIndicator({
     'lg': useIcon ? 'h-5 w-5' : 'h-3 w-3'
   }[size];
 
+  const getStatusBgClass = () => {
+    if (!selected) return "";
+    
+    switch (status) {
+      case 'active': return 'bg-green-100 dark:bg-green-900/20';
+      case 'warning': return 'bg-yellow-100 dark:bg-yellow-900/20';
+      case 'error': return 'bg-red-100 dark:bg-red-900/20';
+      case 'inactive': return 'bg-slate-100 dark:bg-slate-900/20';
+      case 'verified': return 'bg-blue-100 dark:bg-blue-900/20';
+      default: return '';
+    }
+  };
+
+  const clickableClasses = onClick ? 'cursor-pointer hover:bg-muted/50 rounded transition-colors' : '';
+  const selectedClasses = getStatusBgClass();
+
   return (
-    <div className={cn("flex items-center gap-1.5", inline ? "inline-flex" : "", className)}>
+    <div 
+      className={cn(
+        "flex items-center gap-1.5", 
+        inline ? "inline-flex" : "", 
+        clickableClasses,
+        selectedClasses,
+        onClick ? "px-2 py-1" : "",
+        className
+      )}
+      onClick={onClick}
+    >
       {status !== 'none' && (
         useIcon ? (
           <CircleDot className={cn("text-muted-foreground", sizeClass)} />

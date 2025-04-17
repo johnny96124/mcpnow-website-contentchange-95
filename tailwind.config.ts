@@ -67,7 +67,12 @@ export default {
 					active: 'hsl(var(--status-active))',
 					warning: 'hsl(var(--status-warning))',
 					error: 'hsl(var(--status-error))',
-					inactive: 'hsl(var(--status-inactive))'
+					inactive: 'hsl(var(--status-inactive))',
+					'active-bg': 'rgba(var(--status-active-rgb), 0.15)',
+					'warning-bg': 'rgba(var(--status-warning-rgb), 0.15)',
+					'error-bg': 'rgba(var(--status-error-rgb), 0.15)',
+					'inactive-bg': 'rgba(var(--status-inactive-rgb), 0.15)',
+					'verified-bg': 'rgba(var(--status-verified-rgb), 0.15)',
 				}
 			},
 			borderRadius: {
