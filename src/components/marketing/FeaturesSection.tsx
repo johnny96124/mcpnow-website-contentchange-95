@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Laptop, Cpu, MousePointer, CloudCog, Bot, BarChart3, Zap, Lock, Globe, Network } from "lucide-react";
+import { ArrowRight, Laptop, Cpu, MousePointer, CloudCog, Bot, BarChart3, Zap, Lock, Globe, Network, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 

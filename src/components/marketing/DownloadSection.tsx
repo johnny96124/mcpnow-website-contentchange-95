@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Apple, Windows, CheckCheck } from "lucide-react";
+import { Download, Apple, Monitor, CheckCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 const DownloadSection: React.FC = () => {
@@ -71,7 +70,7 @@ const DownloadSection: React.FC = () => {
               >
                 <div className="p-8 text-center space-y-6">
                   <div className="bg-blue-100/50 dark:bg-blue-900/20 rounded-full p-4 mx-auto w-16 h-16 flex items-center justify-center">
-                    <Windows className="h-8 w-8 text-muted-foreground" />
+                    <Monitor className="h-8 w-8 text-muted-foreground" />
                   </div>
                   <h3 className="text-2xl font-bold text-muted-foreground">Windows</h3>
                   <p className="text-muted-foreground">Windows installer (coming soon)</p>
