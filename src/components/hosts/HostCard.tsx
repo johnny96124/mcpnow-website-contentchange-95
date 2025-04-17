@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -17,6 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+
+type StatusFilter = 'all' | 'active' | 'error' | 'connecting' | string;
 
 interface InstanceStatus {
   id: string;
@@ -58,6 +61,8 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selectedDefinitionId, setSelectedDefinitionId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -131,9 +136,13 @@ export function HostCard({
                   "Port access denied. Check firewall settings."
                 ];
                 
+                const newStatus = success ? 'connected' : 'error';
+                
                 newStatuses[instanceIndex] = {
                   ...newStatuses[instanceIndex],
-                  status: success ? 'connected' : 'error',
+                  status: newStatus,
+                  // If error, automatically disable the instance
+                  enabled: success ? newStatuses[instanceIndex].enabled : false,
                   errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
                 };
               }
@@ -164,14 +173,41 @@ export function HostCard({
     setInstanceStatuses(prev => {
       return prev.map(instance => {
         if (instance.id === instanceId) {
+          const newEnabled = !instance.enabled;
+          
+          // If we're enabling a previously errored instance, we reset its status to connecting
+          const newStatus = newEnabled && instance.status === 'error' ? 'connecting' : instance.status;
+          
           return {
             ...instance,
-            enabled: !instance.enabled
+            enabled: newEnabled,
+            status: newStatus,
           };
         }
         return instance;
       });
     });
+    
+    // If we're re-enabling an errored instance, simulate the reconnection attempt
+    const instance = instanceStatuses.find(i => i.id === instanceId);
+    if (instance && !instance.enabled && instance.status === 'error') {
+      setTimeout(() => {
+        setInstanceStatuses(prev => {
+          return prev.map(i => {
+            if (i.id === instanceId) {
+              const success = Math.random() > 0.3; // 70% chance of success on retry
+              
+              return {
+                ...i,
+                status: success ? 'connected' : 'error',
+                enabled: success ? true : false,
+              };
+            }
+            return i;
+          });
+        });
+      }, 1500);
+    }
   };
 
   const handleSelectInstance = (instanceId: string, definitionId: string) => {
@@ -205,6 +241,8 @@ export function HostCard({
             return {
               ...instance,
               status: success ? 'connected' : 'error',
+              // If error, automatically disable the instance
+              enabled: success ? instance.enabled : false,
               errorMessage: success ? '' : errorMessages[Math.floor(Math.random() * errorMessages.length)]
             };
           }
@@ -217,7 +255,20 @@ export function HostCard({
   const getInstancesByDefinition = () => {
     const definitionMap = new Map<string, InstanceStatus[]>();
     
-    instanceStatuses.forEach(instance => {
+    // Apply filters
+    const filteredInstances = instanceStatuses.filter(instance => {
+      if (selectedDefinitionId && instance.definitionId !== selectedDefinitionId) {
+        return false;
+      }
+      
+      if (statusFilter === 'all') return true;
+      if (statusFilter === 'active' && instance.status === 'connected' && instance.enabled) return true;
+      if (statusFilter === 'error' && instance.status === 'error') return true;
+      if (statusFilter === 'connecting' && instance.status === 'connecting' && instance.enabled) return true;
+      return false;
+    });
+    
+    filteredInstances.forEach(instance => {
       const defInstances = definitionMap.get(instance.definitionId) || [];
       defInstances.push(instance);
       definitionMap.set(instance.definitionId, defInstances);
@@ -241,6 +292,16 @@ export function HostCard({
       description: `${host.name} has been removed successfully`
     });
     setIsDeleteDialogOpen(false);
+  };
+  
+  const handleStatusFilterToggle = (definitionId: string) => {
+    if (selectedDefinitionId === definitionId) {
+      // If clicking the same definition again, clear the filter
+      setSelectedDefinitionId(null);
+    } else {
+      // Set the filter to the selected definition
+      setSelectedDefinitionId(definitionId);
+    }
   };
   
   const profileConnectionStatus = getProfileConnectionStatus();
@@ -443,7 +504,7 @@ export function HostCard({
                           key={definitionId} 
                           className={cn(
                             "flex items-center justify-between p-2 rounded",
-                            hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
+                            displayInstance.status === 'error' ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
                           )}
                         >
                           <div className="flex items-center gap-2">
@@ -457,7 +518,10 @@ export function HostCard({
                               }
                             />
                             <div className="text-sm flex items-center">
-                              <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
+                              <span 
+                                className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]"
+                                onClick={() => handleStatusFilterToggle(definitionId)}
+                              >
                                 {displayInstance.definitionName}
                               </span>
                               
@@ -466,7 +530,8 @@ export function HostCard({
                                   <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-6 px-1 py-0 ml-1"
+                                    className="h-6 px-1 py-0 ml-1 cursor-pointer"
+                                    onClick={() => handleStatusFilterToggle(definitionId)}
                                   >
                                     <span className="text-xs text-muted-foreground hidden md:block">
                                       {displayInstance.name}
@@ -506,7 +571,7 @@ export function HostCard({
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            {hasError && (
+                            {displayInstance.status === 'error' && (
                               <Button 
                                 variant="ghost" 
                                 size="sm"
@@ -522,6 +587,7 @@ export function HostCard({
                                 checked={displayInstance.enabled} 
                                 onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
                                 className="shrink-0"
+                                isError={displayInstance.status === 'error'}
                               />
                             )}
                           </div>
