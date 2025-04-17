@@ -67,7 +67,8 @@ export default {
 					active: 'hsl(var(--status-active))',
 					warning: 'hsl(var(--status-warning))',
 					error: 'hsl(var(--status-error))',
-					inactive: 'hsl(var(--status-inactive))'
+					inactive: 'hsl(var(--status-inactive))',
+					verified: 'hsl(var(--status-verified))'
 				}
 			},
 			borderRadius: {
