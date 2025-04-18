@@ -23,6 +23,7 @@ import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import NotFound from "./pages/NotFound";
 import NewUserDashboard from "./pages/NewUserDashboard";
+import LandingPage from "./pages/LandingPage";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -37,10 +38,11 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/tray" element={<TrayPopup />} />
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/" element={<DefaultLayout />}>
-                  <Route index element={<Dashboard />} />
+                  <Route path="dashboard" element={<Dashboard />} />
                   <Route path="new-user" element={<NewUserDashboard />} />
                   <Route path="empty-dashboard" element={<EmptyDashboard />} />
                   <Route path="hosts" element={<Hosts />} />
