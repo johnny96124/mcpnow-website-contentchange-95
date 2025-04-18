@@ -136,12 +136,12 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
 
                 <div className="flex items-center space-x-2">
                   {event.profileName && (
-                    <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200">
+                    <Badge variant="custom" className="text-gray-800 dark:text-gray-200">
                       {event.profileName}
                     </Badge>
                   )}
                   {event.hostName && (
-                    <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200">
+                    <Badge variant="custom" className="text-gray-800 dark:text-gray-200 ml-2">
                       {event.hostName}
                     </Badge>
                   )}
