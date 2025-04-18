@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -86,22 +85,12 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
             <div 
               key={event.id} 
               className={cn(
-                "border rounded-md overflow-hidden transition-all",
-                isSuccess
-                  ? "border-green-400 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
-                  : event.isError 
-                    ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
-                    : "border-gray-200 dark:border-gray-800"
+                "border rounded-md overflow-hidden transition-all border-gray-200 dark:border-gray-800"
               )}
             >
               <div 
                 className={cn(
-                  "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
-                  isSuccess
-                    ? "bg-green-100 dark:bg-green-900/30"
-                    : event.isError 
-                      ? "bg-red-100 dark:bg-red-900/30" 
-                      : "bg-gray-50 dark:bg-gray-800/50"
+                  "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer bg-white dark:bg-gray-900"
                 )}
                 onClick={() => toggleEventExpansion(event.id)}
               >
@@ -169,15 +158,14 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                   {/* Show Request section */}
                   <div 
                     className={cn(
-                      "p-3 font-mono text-xs overflow-auto",
-                      EVENT_TYPE_COLORS.request.bg,
+                      "p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900",
                       EVENT_TYPE_COLORS.request.text, 
                       "border-t",
                       EVENT_TYPE_COLORS.request.border
                     )}
                   >
                     <div className="flex items-center mb-2">
-                      <span className="font-bold mr-2 uppercase">Request</span>
+                      <span className="font-bold mr-2 uppercase text-blue-600 dark:text-blue-400">Request</span>
                     </div>
                     <pre className="whitespace-pre-wrap break-all">
                       {JSON.stringify(event.params || event.content, null, 2)}
@@ -187,27 +175,23 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                   {/* Show Response or Error section */}
                   <div 
                     className={cn(
-                      "p-3 font-mono text-xs overflow-auto",
+                      "p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t",
                       isSuccess
-                        ? EVENT_TYPE_COLORS.response.bg
+                        ? "border-green-200 dark:border-green-800"
                         : event.isError 
-                          ? EVENT_TYPE_COLORS.error.bg 
-                          : EVENT_TYPE_COLORS.response.bg,
-                      isSuccess
-                        ? EVENT_TYPE_COLORS.response.text
-                        : event.isError 
-                          ? EVENT_TYPE_COLORS.error.text 
-                          : EVENT_TYPE_COLORS.response.text,
-                      "border-t",
-                      isSuccess
-                        ? EVENT_TYPE_COLORS.response.border
-                        : event.isError 
-                          ? EVENT_TYPE_COLORS.error.border 
-                          : EVENT_TYPE_COLORS.response.border
+                          ? "border-red-200 dark:border-red-800" 
+                          : "border-gray-200 dark:border-gray-800"
                     )}
                   >
                     <div className="flex items-center mb-2">
-                      <span className="font-bold mr-2 uppercase">
+                      <span className={cn(
+                        "font-bold mr-2 uppercase",
+                        isSuccess 
+                          ? "text-green-600 dark:text-green-400" 
+                          : event.isError 
+                            ? "text-red-600 dark:text-red-400" 
+                            : "text-blue-600 dark:text-blue-400"
+                      )}>
                         {event.isError ? 'Error' : 'Response'}
                       </span>
                     </div>
@@ -224,4 +208,3 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     </ScrollArea>
   );
 }
-
