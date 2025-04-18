@@ -158,11 +158,11 @@ export function ServerToolsList({
           [tool.id]: mockResponse
         }));
         
-        // Also add this to events
+        // Also add this to events - change 'server' to 'response'
         const newEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "server",
+          type: "response",
           category: "Tools",
           content: mockResponse.data,
           profileName: "Current Profile",
@@ -188,11 +188,11 @@ export function ServerToolsList({
           [tool.id]: mockError
         }));
         
-        // Also add this to events as an error
+        // Also add this to events as an error - change 'server' to 'error'
         const newErrorEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "server",
+          type: "error",
           category: "Tools",
           content: {
             error: mockError.error,
