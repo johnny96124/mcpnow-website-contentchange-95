@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -9,14 +8,15 @@ import { cn } from "@/lib/utils";
 export interface ServerEvent {
   id: string;
   timestamp: string;
-  type: 'server' | 'client';
+  type: 'request' | 'response' | 'error' | 'notification';
+  direction: 'incoming' | 'outgoing';
   content: any;
+  method?: string;
+  toolDetails?: string;
   isError?: boolean;
   profileName?: string;
   hostName?: string;
-  method?: string;
   params?: any;
-  jsonrpc?: string;
 }
 
 interface ServerEventsListProps {
@@ -34,8 +34,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     }));
   };
   
-  const formatTime = (timestamp: string) => {
-    return timestamp.split(' ')[0]; // Extract just the time portion
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
   };
   
   const formatJSON = (data: any): string => {
@@ -47,11 +48,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
   };
   
   const getEventSummary = (event: ServerEvent): string => {
-    if (event.method) {
-      return `${event.method}`;
-    } else if (typeof event.content === 'object' && event.content) {
-      if (event.content.text) return event.content.text.substring(0, 60) + (event.content.text.length > 60 ? '...' : '');
-      return 'Event data';
+    if (event.method && event.toolDetails) {
+      const summary = `${event.toolDetails}`;
+      return summary.length > 60 ? summary.substring(0, 60) + '...' : summary;
     }
     return 'Event';
   };
@@ -95,22 +94,31 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
               onClick={() => toggleEventExpansion(event.id)}
             >
               <div className="flex items-center space-x-2">
-                <span className="font-semibold">{formatTime(event.timestamp)}</span>
+                <span className="font-semibold">{formatTimestamp(event.timestamp)}</span>
                 <Badge 
-                  variant={event.type === 'server' ? 'outline' : 'default'} 
+                  variant="outline" 
                   className={cn(
                     "text-[10px] py-0 h-5",
-                    event.type === 'server' 
-                      ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200" 
+                    event.direction === 'incoming'
+                      ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200"
                       : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
                   )}
                 >
-                  {event.type}
+                  {event.direction}
                 </Badge>
                 {event.isError && (
                   <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                 )}
-                <span className="max-w-[300px] truncate">{getEventSummary(event)}</span>
+                {event.method && (
+                  <span className="text-gray-600 dark:text-gray-400 font-semibold">
+                    {event.method}
+                  </span>
+                )}
+                {event.toolDetails && (
+                  <span className="text-gray-500 dark:text-gray-500 max-w-[300px] truncate">
+                    {event.toolDetails}
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 {event.profileName && (

@@ -54,8 +54,9 @@ export function ServerToolsList({
     return [
       {
         id: "1",
-        timestamp: "04:59:47 server",
-        type: "server",
+        timestamp: "2024-04-18T04:59:47",
+        type: "error",
+        direction: "incoming",
         content: {
           id: 3,
           result: {
@@ -70,14 +71,18 @@ export function ServerToolsList({
           jsonrpc: "2.0"
         },
         isError: true,
+        method: "tools/call",
+        toolDetails: "get_transcript (url: abc, lang: en)",
         profileName: "General Development",
         hostName: "Default Host"
       },
       {
         id: "2",
-        timestamp: "04:59:47 client",
-        type: "client",
+        timestamp: "2024-04-18T04:59:47",
+        type: "request",
+        direction: "outgoing",
         method: "tools/call",
+        toolDetails: "get_transcript (url: abc, lang: en)",
         params: {
           name: "get_transcript",
           meta: { progressToken: 1 },
@@ -98,34 +103,18 @@ export function ServerToolsList({
       },
       {
         id: "3",
-        timestamp: "04:59:46 server",
-        type: "server",
+        timestamp: "2024-04-18T04:59:46",
+        type: "notification",
+        direction: "incoming",
         content: {
           method: "sse/connection",
           params: { message: "SSE Connection established" },
           jsonrpc: "2.0"
         },
+        method: "sse/connection",
+        toolDetails: "Connection established",
         profileName: "General Development",
         hostName: "Default Host"
-      },
-      {
-        id: "4",
-        timestamp: "04:58:04 server",
-        type: "server",
-        content: {
-          id: 2,
-          result: {
-            content: [
-              {
-                text: "We want to have them as many as we can to make honey. At Secret Garden Bees, a honey farm in Linden, North Carolina. Farmer Jim Hartman has one eye on his bees and the other on his bank account. Ideally, he will get 100 pounds of honey per hive per year. How do you feel about paying more for things? Well, you know, if you find someone who says, I'm happy about paying more for something, you point them out to me. People who already couldn't afford fresh vegetables, who couldn't already afford to put good food on their on their plate, they're the ones who are really going to be hurt by this. Did you ever think, when you voted for President Trump, that things were going to cost you more? And you're going to lose money? I never thought I was going to lose this much money this fast. Jim is a Republican who voted for Donald Trump three times. How do you feel about your vote for Donald Trump now? Well, I feel like perhaps I should have considered some other options. Among other things, Jim imports packaging supplies for his honey. So he's paying real close attention to the tariffs Trump just put in place. We just bought our year supply of bottles from Taiwan and our year supply of quarks from Portugal about three weeks ago. So that would have been, you know, another 5 or 6000 out of my pocket, which is partly why he's repairing instead of replacing this 40 year old forklift. The cost of equipment has just gone through the roof to buy anything like that, because it just would be cost prohibitive. He's also holding off on improvements around the farm. Well, we're not going to hire any more people. That's for sure. It's more than just the tariffs. For the past two years, Jim has been selling honey to the federal government, which then provides it to food pantries and food banks. But after Donald Trump took office, the USDA cut those programs suddenly, as part of the federal government's effort to streamline spending. For a lot of other local farmers around here, it was a major source of reliable revenue for me. And it's going to cost me around 150,000 a year, 150,000. Yeah, yeah, roughly 50% of my revenue. That's a huge hit as a massive hit. Not far from Jim's farm, we found other Trump supporters who give the president high marks on tariffs. How do you feel about the tariffs? Well, I feel like for years we've been get getting ripped off. And, why not make it fair. You know zero zero. And I think Trump was up front and told him we're going to tariff some of the countries have they're already starting to come around. It's going to be good. I really think it's going to be fine.",
-                type: "text"
-              }
-            ]
-          },
-          jsonrpc: "2.0"
-        },
-        profileName: "Development",
-        hostName: "Local Host"
       }
     ];
   }
