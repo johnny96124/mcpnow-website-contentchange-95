@@ -2,18 +2,7 @@
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  AlertTriangle, 
-  Clock, 
-  ArrowRight, 
-  ArrowLeft,
-  MessageSquare,
-  CheckCircle2,
-  XCircle,
-  Loader2
-} from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -28,8 +17,6 @@ export interface ServerEvent {
   method?: string;
   params?: any;
   jsonrpc?: string;
-  messageType?: 'request' | 'result' | 'error' | 'notification';
-  progress?: 'ongoing' | 'completed' | 'failed';
 }
 
 interface ServerEventsListProps {
@@ -48,7 +35,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
   };
   
   const formatTime = (timestamp: string) => {
-    return timestamp.split(' ')[0];
+    return timestamp.split(' ')[0]; // Extract just the time portion
   };
   
   const formatJSON = (data: any): string => {
@@ -59,25 +46,6 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     }
   };
   
-  const getMessageTypeIcon = (event: ServerEvent) => {
-    if (event.type === 'client') {
-      return <ArrowRight className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-    }
-    if (event.isError) {
-      return <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
-    }
-    if (event.messageType === 'result' && event.progress === 'completed') {
-      return <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-    }
-    if (event.messageType === 'result' && event.progress === 'ongoing') {
-      return <Loader2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 animate-spin" />;
-    }
-    if (event.messageType === 'notification') {
-      return <MessageSquare className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />;
-    }
-    return <ArrowLeft className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />;
-  };
-  
   const getEventSummary = (event: ServerEvent): string => {
     if (event.method) {
       return `${event.method}`;
@@ -86,27 +54,6 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
       return 'Event data';
     }
     return 'Event';
-  };
-
-  const getMessageTypeBadge = (event: ServerEvent) => {
-    let variant: "outline" | "default" = "outline";
-    let className = "text-[10px] py-0 h-5";
-    
-    if (event.messageType === 'request') {
-      className += " bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200";
-    } else if (event.messageType === 'result') {
-      className += " bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200";
-    } else if (event.messageType === 'notification') {
-      className += " bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200";
-    } else if (event.isError) {
-      className += " bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 border-red-200";
-    }
-
-    return (
-      <Badge variant={variant} className={className}>
-        {event.messageType || (event.isError ? 'error' : 'event')}
-      </Badge>
-    );
   };
   
   if (events.length === 0) {
@@ -149,8 +96,20 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
             >
               <div className="flex items-center space-x-2">
                 <span className="font-semibold">{formatTime(event.timestamp)}</span>
-                {getMessageTypeBadge(event)}
-                {getMessageTypeIcon(event)}
+                <Badge 
+                  variant={event.type === 'server' ? 'outline' : 'default'} 
+                  className={cn(
+                    "text-[10px] py-0 h-5",
+                    event.type === 'server' 
+                      ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200" 
+                      : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                  )}
+                >
+                  {event.type}
+                </Badge>
+                {event.isError && (
+                  <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                )}
                 <span className="max-w-[300px] truncate">{getEventSummary(event)}</span>
               </div>
               <div className="flex items-center space-x-2">
