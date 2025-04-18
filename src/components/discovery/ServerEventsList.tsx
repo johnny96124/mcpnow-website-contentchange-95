@@ -1,23 +1,20 @@
 
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ServerEvent, EventCategory } from "@/types/events";
 
-export interface ServerEvent {
-  id: string;
-  timestamp: string;
-  type: 'server' | 'client';
-  content: any;
-  isError?: boolean;
-  profileName?: string;
-  hostName?: string;
-  method?: string;
-  params?: any;
-  jsonrpc?: string;
-}
+const CATEGORY_COLORS: Record<EventCategory, { bg: string; text: string; border: string }> = {
+  Tools: { bg: "bg-blue-100", text: "text-blue-800", border: "border-blue-200" },
+  Resources: { bg: "bg-green-100", text: "text-green-800", border: "border-green-200" },
+  Prompts: { bg: "bg-purple-100", text: "text-purple-800", border: "border-purple-200" },
+  Ping: { bg: "bg-yellow-100", text: "text-yellow-800", border: "border-yellow-200" },
+  Sampling: { bg: "bg-orange-100", text: "text-orange-800", border: "border-orange-200" },
+  Roots: { bg: "bg-red-100", text: "text-red-800", border: "border-red-200" }
+};
 
 interface ServerEventsListProps {
   events: ServerEvent[];
@@ -34,26 +31,24 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     }));
   };
   
-  const formatTime = (timestamp: string) => {
-    return timestamp.split(' ')[0]; // Extract just the time portion
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return {
+      date: format(date, "MMM dd, yyyy"),
+      time: format(date, "HH:mm:ss")
+    };
   };
   
-  const formatJSON = (data: any): string => {
-    try {
-      return JSON.stringify(data, null, 2);
-    } catch (e) {
-      return String(data);
+  const formatMethodDetails = (method: string, params: any) => {
+    if (!method) return '';
+    let details = '';
+    if (method === 'tools/call' && params?.name) {
+      details = params.name;
+      if (params.arguments) {
+        details += ` (${Object.values(params.arguments).join(', ')})`;
+      }
     }
-  };
-  
-  const getEventSummary = (event: ServerEvent): string => {
-    if (event.method) {
-      return `${event.method}`;
-    } else if (typeof event.content === 'object' && event.content) {
-      if (event.content.text) return event.content.text.substring(0, 60) + (event.content.text.length > 60 ? '...' : '');
-      return 'Event data';
-    }
-    return 'Event';
+    return details;
   };
   
   if (events.length === 0) {
@@ -75,71 +70,94 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
   return (
     <ScrollArea className="h-[500px] pr-4">
       <div className="space-y-2">
-        {events.map((event) => (
-          <div 
-            key={event.id} 
-            className={cn(
-              "border rounded-md overflow-hidden transition-all",
-              event.isError 
-                ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
-                : "border-gray-200 dark:border-gray-800"
-            )}
-          >
+        {events.map((event) => {
+          const { date, time } = formatTimestamp(event.timestamp);
+          const methodDetails = formatMethodDetails(event.method || '', event.params);
+          
+          return (
             <div 
+              key={event.id} 
               className={cn(
-                "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
+                "border rounded-md overflow-hidden transition-all",
                 event.isError 
-                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
-                  : "bg-gray-50 dark:bg-gray-800/50"
+                  ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
+                  : "border-gray-200 dark:border-gray-800"
               )}
-              onClick={() => toggleEventExpansion(event.id)}
             >
-              <div className="flex items-center space-x-2">
-                <span className="font-semibold">{formatTime(event.timestamp)}</span>
-                <Badge 
-                  variant={event.type === 'server' ? 'outline' : 'default'} 
-                  className={cn(
-                    "text-[10px] py-0 h-5",
-                    event.type === 'server' 
-                      ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200" 
-                      : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+              <div 
+                className={cn(
+                  "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
+                  event.isError 
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                    : "bg-gray-50 dark:bg-gray-800/50"
+                )}
+                onClick={() => toggleEventExpansion(event.id)}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="flex flex-col items-start">
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400">{date}</span>
+                    <span className="font-semibold">{time}</span>
+                  </div>
+
+                  {event.category && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-[10px] py-0 h-5",
+                        CATEGORY_COLORS[event.category].bg,
+                        CATEGORY_COLORS[event.category].text,
+                        CATEGORY_COLORS[event.category].border
+                      )}
+                    >
+                      {event.category}
+                    </Badge>
                   )}
-                >
-                  {event.type}
-                </Badge>
-                {event.isError && (
-                  <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                )}
-                <span className="max-w-[300px] truncate">{getEventSummary(event)}</span>
+
+                  {event.isError && (
+                    <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                  )}
+
+                  {event.method && (
+                    <div className="flex items-center gap-2 max-w-[300px]">
+                      <span className="font-medium">{event.method}</span>
+                      {methodDetails && (
+                        <span className="text-gray-500 dark:text-gray-400 truncate">
+                          {methodDetails}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {event.profileName && (
+                    <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200">
+                      {event.profileName}
+                    </Badge>
+                  )}
+                  {event.hostName && (
+                    <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200">
+                      {event.hostName}
+                    </Badge>
+                  )}
+                  {expandedEvents[event.id] ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                {event.profileName && (
-                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200">
-                    {event.profileName}
-                  </Badge>
-                )}
-                {event.hostName && (
-                  <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200">
-                    {event.hostName}
-                  </Badge>
-                )}
-                {expandedEvents[event.id] ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </div>
+              
+              {expandedEvents[event.id] && (
+                <div className="p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto">
+                  <pre className="whitespace-pre-wrap break-all">
+                    {JSON.stringify(event.content, null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
-            
-            {expandedEvents[event.id] && (
-              <div className="p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto">
-                <pre className="whitespace-pre-wrap break-all">
-                  {formatJSON(event.content)}
-                </pre>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ScrollArea>
   );
