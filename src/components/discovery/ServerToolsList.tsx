@@ -1,4 +1,3 @@
-
 import { Tool, ToolParameter } from "@/data/mockData";
 import { 
   Accordion, 
@@ -56,7 +55,7 @@ export function ServerToolsList({
       {
         id: "1",
         timestamp: "04:59:47 server",
-        type: "result", // Changed from "server" to "result"
+        type: "server",
         content: {
           id: 3,
           result: {
@@ -77,7 +76,7 @@ export function ServerToolsList({
       {
         id: "2",
         timestamp: "04:59:47 client",
-        type: "request", // Changed from "client" to "request"
+        type: "client",
         method: "tools/call",
         params: {
           name: "get_transcript",
@@ -100,7 +99,7 @@ export function ServerToolsList({
       {
         id: "3",
         timestamp: "04:59:46 server",
-        type: "notification", // Changed from "server" to "notification"
+        type: "server",
         content: {
           method: "sse/connection",
           params: { message: "SSE Connection established" },
@@ -112,7 +111,7 @@ export function ServerToolsList({
       {
         id: "4",
         timestamp: "04:58:04 server",
-        type: "result", // Changed from "server" to "result"
+        type: "server",
         content: {
           id: 2,
           result: {
@@ -191,7 +190,7 @@ export function ServerToolsList({
         const newEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "result", // Changed from "server" to "result"
+          type: "server",
           content: mockResponse.data,
           profileName: "Current Profile",
           hostName: "Active Host",
@@ -220,7 +219,7 @@ export function ServerToolsList({
         const newErrorEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "error", // Changed from "server" to "error"
+          type: "server",
           content: {
             error: mockError.error,
             tool: tool.name
