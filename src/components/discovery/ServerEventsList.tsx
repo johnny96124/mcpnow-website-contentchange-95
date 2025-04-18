@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -80,23 +80,28 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
         {events.map((event) => {
           const { date, time } = formatTimestamp(event.timestamp);
           const methodDetails = formatMethodDetails(event.method || '', event.params);
+          const isSuccess = !event.isError && event.type === 'response';
           
           return (
             <div 
               key={event.id} 
               className={cn(
                 "border rounded-md overflow-hidden transition-all",
-                event.isError 
-                  ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
-                  : "border-gray-200 dark:border-gray-800"
+                isSuccess
+                  ? "border-green-400 dark:border-green-800 bg-green-50 dark:bg-green-900/20"
+                  : event.isError 
+                    ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
+                    : "border-gray-200 dark:border-gray-800"
               )}
             >
               <div 
                 className={cn(
                   "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
-                  event.isError 
-                    ? "bg-red-100 dark:bg-red-900/30" 
-                    : "bg-gray-50 dark:bg-gray-800/50"
+                  isSuccess
+                    ? "bg-green-100 dark:bg-green-900/30"
+                    : event.isError 
+                      ? "bg-red-100 dark:bg-red-900/30" 
+                      : "bg-gray-50 dark:bg-gray-800/50"
                 )}
                 onClick={() => toggleEventExpansion(event.id)}
               >
@@ -122,6 +127,10 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
 
                   {event.isError && (
                     <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                  )}
+
+                  {isSuccess && (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                   )}
 
                   {event.method && (
@@ -157,7 +166,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
               
               {expandedEvents[event.id] && (
                 <div className="flex flex-col">
-                  {/* Always show the Request section for both normal and error events */}
+                  {/* Show Request section */}
                   <div 
                     className={cn(
                       "p-3 font-mono text-xs overflow-auto",
@@ -175,20 +184,26 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     </pre>
                   </div>
                   
-                  {/* Show Response or Error section based on event type */}
+                  {/* Show Response or Error section */}
                   <div 
                     className={cn(
                       "p-3 font-mono text-xs overflow-auto",
-                      event.isError 
-                        ? EVENT_TYPE_COLORS.error.bg 
-                        : EVENT_TYPE_COLORS.response.bg,
-                      event.isError 
-                        ? EVENT_TYPE_COLORS.error.text 
-                        : EVENT_TYPE_COLORS.response.text,
+                      isSuccess
+                        ? EVENT_TYPE_COLORS.response.bg
+                        : event.isError 
+                          ? EVENT_TYPE_COLORS.error.bg 
+                          : EVENT_TYPE_COLORS.response.bg,
+                      isSuccess
+                        ? EVENT_TYPE_COLORS.response.text
+                        : event.isError 
+                          ? EVENT_TYPE_COLORS.error.text 
+                          : EVENT_TYPE_COLORS.response.text,
                       "border-t",
-                      event.isError 
-                        ? EVENT_TYPE_COLORS.error.border 
-                        : EVENT_TYPE_COLORS.response.border
+                      isSuccess
+                        ? EVENT_TYPE_COLORS.response.border
+                        : event.isError 
+                          ? EVENT_TYPE_COLORS.error.border 
+                          : EVENT_TYPE_COLORS.response.border
                     )}
                   >
                     <div className="flex items-center mb-2">
@@ -209,3 +224,4 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     </ScrollArea>
   );
 }
+
