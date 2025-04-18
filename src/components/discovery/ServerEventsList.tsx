@@ -1,19 +1,22 @@
+
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 
 export interface ServerEvent {
   id: string;
   timestamp: string;
-  type: "request" | "result" | "error" | "notification";
+  type: 'server' | 'client';
   content: any;
+  isError?: boolean;
+  profileName?: string;
+  hostName?: string;
   method?: string;
   params?: any;
-  direction: "incoming" | "outgoing";
-  progressToken?: number;
+  jsonrpc?: string;
 }
 
 interface ServerEventsListProps {
@@ -31,9 +34,8 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     }));
   };
   
-  const formatEventTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return format(date, "yyyy-MM-dd HH:mm:ss");
+  const formatTime = (timestamp: string) => {
+    return timestamp.split(' ')[0]; // Extract just the time portion
   };
   
   const formatJSON = (data: any): string => {
@@ -45,30 +47,15 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
   };
   
   const getEventSummary = (event: ServerEvent): string => {
-    if (event.type === 'request' && event.method) {
-      let summary = `${event.method}`;
-      if (event.params?.name) {
-        summary += `: ${event.params.name}`;
-      }
-      return summary.length > 60 ? summary.substring(0, 57) + '...' : summary;
+    if (event.method) {
+      return `${event.method}`;
+    } else if (typeof event.content === 'object' && event.content) {
+      if (event.content.text) return event.content.text.substring(0, 60) + (event.content.text.length > 60 ? '...' : '');
+      return 'Event data';
     }
-    return event.method || 'Event';
+    return 'Event';
   };
-
-  const groupEvents = (events: ServerEvent[]) => {
-    const groups: Record<string, ServerEvent[]> = {};
-    events.forEach(event => {
-      const key = event.progressToken?.toString() || event.id;
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(event);
-    });
-    return Object.values(groups);
-  };
-
-  const groupedEvents = groupEvents(events);
-
+  
   if (events.length === 0) {
     return (
       <div className="py-8 text-center">
@@ -88,68 +75,71 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
   return (
     <ScrollArea className="h-[500px] pr-4">
       <div className="space-y-2">
-        {groupedEvents.map((group) => {
-          const requestEvent = group.find(e => e.type === 'request');
-          const groupId = requestEvent?.id || group[0].id;
-          
-          return (
+        {events.map((event) => (
+          <div 
+            key={event.id} 
+            className={cn(
+              "border rounded-md overflow-hidden transition-all",
+              event.isError 
+                ? "border-red-400 dark:border-red-800 bg-red-50 dark:bg-red-900/20" 
+                : "border-gray-200 dark:border-gray-800"
+            )}
+          >
             <div 
-              key={groupId} 
-              className="border rounded-md overflow-hidden transition-all border-gray-200 dark:border-gray-800"
-            >
-              <div 
-                className="flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer bg-gray-50 dark:bg-gray-800/50"
-                onClick={() => toggleEventExpansion(groupId)}
-              >
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold">
-                    {formatEventTimestamp(requestEvent?.timestamp || group[0].timestamp)}
-                  </span>
-                  <span className="max-w-[400px] truncate">
-                    {getEventSummary(requestEvent || group[0])}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  {expandedEvents[groupId] ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-              </div>
-              
-              {expandedEvents[groupId] && (
-                <div className="p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto">
-                  {group.map((event) => (
-                    <div key={event.id} className="mb-4 last:mb-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-[10px] py-0 h-5",
-                            event.direction === 'outgoing' 
-                              ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200" 
-                              : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border-green-200"
-                          )}
-                        >
-                          {event.direction === 'outgoing' ? (
-                            <ArrowRight className="h-3 w-3 mr-1" />
-                          ) : (
-                            <ArrowLeft className="h-3 w-3 mr-1" />
-                          )}
-                          {event.type}
-                        </Badge>
-                      </div>
-                      <pre className="whitespace-pre-wrap break-all bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                        {formatJSON(event.content)}
-                      </pre>
-                    </div>
-                  ))}
-                </div>
+              className={cn(
+                "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
+                event.isError 
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                  : "bg-gray-50 dark:bg-gray-800/50"
               )}
+              onClick={() => toggleEventExpansion(event.id)}
+            >
+              <div className="flex items-center space-x-2">
+                <span className="font-semibold">{formatTime(event.timestamp)}</span>
+                <Badge 
+                  variant={event.type === 'server' ? 'outline' : 'default'} 
+                  className={cn(
+                    "text-[10px] py-0 h-5",
+                    event.type === 'server' 
+                      ? "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-blue-200" 
+                      : "bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+                  )}
+                >
+                  {event.type}
+                </Badge>
+                {event.isError && (
+                  <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                )}
+                <span className="max-w-[300px] truncate">{getEventSummary(event)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {event.profileName && (
+                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 border-purple-200">
+                    {event.profileName}
+                  </Badge>
+                )}
+                {event.hostName && (
+                  <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 border-amber-200">
+                    {event.hostName}
+                  </Badge>
+                )}
+                {expandedEvents[event.id] ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </div>
             </div>
-          );
-        })}
+            
+            {expandedEvents[event.id] && (
+              <div className="p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto">
+                <pre className="whitespace-pre-wrap break-all">
+                  {formatJSON(event.content)}
+                </pre>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </ScrollArea>
   );
