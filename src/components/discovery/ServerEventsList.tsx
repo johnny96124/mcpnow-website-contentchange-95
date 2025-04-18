@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -94,13 +95,13 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                 className={cn(
                   "flex items-center justify-between px-3 py-2 text-xs font-mono cursor-pointer",
                   event.isError 
-                    ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
+                    ? "bg-red-100 dark:bg-red-900/30" 
                     : "bg-gray-50 dark:bg-gray-800/50"
                 )}
                 onClick={() => toggleEventExpansion(event.id)}
               >
                 <div className="flex items-center space-x-3">
-                  <div className="flex flex-col items-start">
+                  <div className="flex flex-col items-start text-gray-800 dark:text-gray-200">
                     <span className="text-[10px] text-gray-500 dark:text-gray-400">{date}</span>
                     <span className="font-semibold">{time}</span>
                   </div>
@@ -127,7 +128,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     <div className="flex items-center gap-2 max-w-[300px]">
                       <span className="font-medium">{event.method}</span>
                       {methodDetails && (
-                        <span className="text-gray-500 dark:text-gray-400 truncate">
+                        <span className="text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
                           {methodDetails}
                         </span>
                       )}
@@ -155,26 +156,50 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
               </div>
               
               {expandedEvents[event.id] && (
-                <div 
-                  className={cn(
-                    "p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto",
-                    EVENT_TYPE_COLORS[event.type].bg,
-                    EVENT_TYPE_COLORS[event.type].text,
-                    EVENT_TYPE_COLORS[event.type].border,
-                    "border-t"
-                  )}
-                >
-                  <div className="flex items-center mb-2">
-                    <span className="font-bold mr-2 uppercase">
-                      {event.type === 'request' ? 'Request' : 
-                       event.type === 'response' ? 'Response' : 
-                       event.type === 'error' ? 'Error' : 
-                       'Notification'}
-                    </span>
+                <div className="flex flex-col">
+                  {/* Always show the Request section for both normal and error events */}
+                  <div 
+                    className={cn(
+                      "p-3 font-mono text-xs overflow-auto",
+                      EVENT_TYPE_COLORS.request.bg,
+                      EVENT_TYPE_COLORS.request.text, 
+                      "border-t",
+                      EVENT_TYPE_COLORS.request.border
+                    )}
+                  >
+                    <div className="flex items-center mb-2">
+                      <span className="font-bold mr-2 uppercase">Request</span>
+                    </div>
+                    <pre className="whitespace-pre-wrap break-all">
+                      {JSON.stringify(event.params || event.content, null, 2)}
+                    </pre>
                   </div>
-                  <pre className="whitespace-pre-wrap break-all">
-                    {JSON.stringify(event.content, null, 2)}
-                  </pre>
+                  
+                  {/* Show Response or Error section based on event type */}
+                  <div 
+                    className={cn(
+                      "p-3 font-mono text-xs overflow-auto",
+                      event.isError 
+                        ? EVENT_TYPE_COLORS.error.bg 
+                        : EVENT_TYPE_COLORS.response.bg,
+                      event.isError 
+                        ? EVENT_TYPE_COLORS.error.text 
+                        : EVENT_TYPE_COLORS.response.text,
+                      "border-t",
+                      event.isError 
+                        ? EVENT_TYPE_COLORS.error.border 
+                        : EVENT_TYPE_COLORS.response.border
+                    )}
+                  >
+                    <div className="flex items-center mb-2">
+                      <span className="font-bold mr-2 uppercase">
+                        {event.isError ? 'Error' : 'Response'}
+                      </span>
+                    </div>
+                    <pre className="whitespace-pre-wrap break-all">
+                      {JSON.stringify(event.content, null, 2)}
+                    </pre>
+                  </div>
                 </div>
               )}
             </div>

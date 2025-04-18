@@ -71,6 +71,12 @@ export function ServerToolsList({
           },
           jsonrpc: "2.0"
         },
+        method: "tools/call",
+        params: {
+          name: "get_transcript",
+          meta: { progressToken: 1 },
+          arguments: { url: "abc", lang: "en" }
+        },
         isError: true,
         profileName: "General Development",
         hostName: "Default Host"
@@ -98,6 +104,50 @@ export function ServerToolsList({
           },
           jsonrpc: "2.0"
         }
+      },
+      {
+        id: "3",
+        timestamp: "2024-04-18T04:58:32.000Z",
+        type: "request",
+        category: "Tools",
+        method: "tools/call",
+        params: {
+          name: "search_web",
+          meta: { progressToken: 2 },
+          arguments: { query: "latest AI research papers" }
+        },
+        jsonrpc: "2.0",
+        profileName: "General Development",
+        hostName: "Default Host",
+        content: {
+          method: "tools/call",
+          params: {
+            name: "search_web",
+            arguments: { query: "latest AI research papers" }
+          },
+          jsonrpc: "2.0"
+        }
+      },
+      {
+        id: "4",
+        timestamp: "2024-04-18T04:58:34.000Z",
+        type: "response",
+        category: "Tools",
+        method: "search_web",
+        content: {
+          id: 2,
+          result: {
+            content: [
+              {
+                text: "Found 5 results for 'latest AI research papers'",
+                type: "text"
+              }
+            ]
+          },
+          jsonrpc: "2.0"
+        },
+        profileName: "General Development",
+        hostName: "Default Host"
       }
     ];
   }
@@ -158,10 +208,26 @@ export function ServerToolsList({
           [tool.id]: mockResponse
         }));
         
-        // Also add this to events - change 'server' to 'response'
-        const newEvent: ServerEvent = {
-          id: `event-${Date.now()}`,
-          timestamp: new Date().toLocaleTimeString() + " server",
+        // Create request event first
+        const requestEvent: ServerEvent = {
+          id: `event-req-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          type: "request",
+          category: "Tools",
+          content: {
+            method: tool.name,
+            params: toolInputs[tool.id] || {}
+          },
+          profileName: "Current Profile",
+          hostName: "Active Host",
+          method: tool.name,
+          params: toolInputs[tool.id] || {}
+        };
+        
+        // Then add response event
+        const responseEvent: ServerEvent = {
+          id: `event-res-${Date.now()}`,
+          timestamp: new Date().toISOString(),
           type: "response",
           category: "Tools",
           content: mockResponse.data,
@@ -170,7 +236,8 @@ export function ServerToolsList({
           method: tool.name
         };
         
-        setEvents(prev => [newEvent, ...prev]);
+        // Add both events to the list
+        setEvents(prev => [responseEvent, requestEvent, ...prev]);
         
         toast({
           title: `Tool Executed: ${tool.name}`,
@@ -188,23 +255,41 @@ export function ServerToolsList({
           [tool.id]: mockError
         }));
         
-        // Also add this to events as an error - change 'server' to 'error'
-        const newErrorEvent: ServerEvent = {
-          id: `event-${Date.now()}`,
-          timestamp: new Date().toLocaleTimeString() + " server",
+        // Create request event first
+        const requestEvent: ServerEvent = {
+          id: `event-req-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          type: "request",
+          category: "Tools",
+          content: {
+            method: tool.name,
+            params: toolInputs[tool.id] || {}
+          },
+          profileName: "Current Profile",
+          hostName: "Active Host",
+          method: tool.name,
+          params: toolInputs[tool.id] || {}
+        };
+        
+        // Then add error event
+        const errorEvent: ServerEvent = {
+          id: `event-err-${Date.now()}`,
+          timestamp: new Date().toISOString(),
           type: "error",
           category: "Tools",
           content: {
             error: mockError.error,
             tool: tool.name
           },
+          method: tool.name,
+          params: toolInputs[tool.id] || {},
           isError: true,
           profileName: "Current Profile",
-          hostName: "Active Host",
-          method: tool.name
+          hostName: "Active Host"
         };
         
-        setEvents(prev => [newErrorEvent, ...prev]);
+        // Add both events to the list
+        setEvents(prev => [errorEvent, requestEvent, ...prev]);
         
         toast({
           title: `Tool Execution Failed: ${tool.name}`,
