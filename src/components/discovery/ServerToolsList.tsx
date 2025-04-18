@@ -51,63 +51,63 @@ export function ServerToolsList({
   const [events, setEvents] = useState<ServerEvent[]>(generateMockEvents());
   
   function generateMockEvents(): ServerEvent[] {
-  return [
-    {
-      id: "1",
-      timestamp: "2024-04-18 04:59:47",
-      type: "error",
-      direction: "incoming",
-      content: {
-        id: 3,
-        result: {
-          content: [
-            {
-              text: "Error executing tool get_transcript: couldn't find a video ID from the provided URL: abc.",
-              type: "text"
-            }
-          ]
+    return [
+      {
+        id: "1",
+        timestamp: "2024-04-18 04:59:47",
+        type: "error",
+        direction: "incoming",
+        content: {
+          id: 3,
+          result: {
+            content: [
+              {
+                text: "Error executing tool get_transcript: couldn't find a video ID from the provided URL: abc.",
+                type: "text"
+              }
+            ]
+          },
+          jsonrpc: "2.0"
         },
-        jsonrpc: "2.0"
+        method: "tools/call",
+        progressToken: 1
       },
-      method: "tools/call",
-      progressToken: 1
-    },
-    {
-      id: "2",
-      timestamp: "2024-04-18 04:59:47",
-      type: "request",
-      direction: "outgoing",
-      method: "tools/call",
-      params: {
-        name: "get_transcript",
-        arguments: { url: "abc", lang: "en" },
-        meta: { progressToken: 1 }
-      },
-      content: {
+      {
+        id: "2",
+        timestamp: "2024-04-18 04:59:47",
+        type: "request",
+        direction: "outgoing",
         method: "tools/call",
         params: {
           name: "get_transcript",
-          meta: { progressToken: 1 },
-          arguments: { url: "abc", lang: "en" }
+          arguments: { url: "abc", lang: "en" },
+          meta: { progressToken: 1 }
         },
-        jsonrpc: "2.0"
+        content: {
+          method: "tools/call",
+          params: {
+            name: "get_transcript",
+            meta: { progressToken: 1 },
+            arguments: { url: "abc", lang: "en" }
+          },
+          jsonrpc: "2.0"
+        },
+        progressToken: 1
       },
-      progressToken: 1
-    },
-    {
-      id: "3",
-      timestamp: "2024-04-18 04:59:46",
-      type: "notification",
-      direction: "incoming",
-      content: {
-        method: "sse/connection",
-        params: { message: "SSE Connection established" },
-        jsonrpc: "2.0"
-      },
-      method: "sse/connection"
-    }
-  ];
-}
+      {
+        id: "3",
+        timestamp: "2024-04-18 04:59:46",
+        type: "notification",
+        direction: "incoming",
+        content: {
+          method: "sse/connection",
+          params: { message: "SSE Connection established" },
+          jsonrpc: "2.0"
+        },
+        method: "sse/connection"
+      }
+    ];
+  }
   
   if (!tools || tools.length === 0) {
     return (
@@ -169,10 +169,8 @@ export function ServerToolsList({
         const newEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "server",
+          type: "result",
           content: mockResponse.data,
-          profileName: "Current Profile",
-          hostName: "Active Host",
           method: tool.name,
           direction: "incoming"
         };
@@ -199,14 +197,11 @@ export function ServerToolsList({
         const newErrorEvent: ServerEvent = {
           id: `event-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString() + " server",
-          type: "server",
+          type: "error",
           content: {
             error: mockError.error,
             tool: tool.name
           },
-          isError: true,
-          profileName: "Current Profile",
-          hostName: "Active Host",
           method: tool.name,
           direction: "incoming"
         };

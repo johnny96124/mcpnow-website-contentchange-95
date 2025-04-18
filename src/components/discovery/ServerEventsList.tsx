@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -56,7 +55,6 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
     return event.method || 'Event';
   };
 
-  // Group events by progressToken
   const groupEvents = (events: ServerEvent[]) => {
     const groups: Record<string, ServerEvent[]> = {};
     events.forEach(event => {
