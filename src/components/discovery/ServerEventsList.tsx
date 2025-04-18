@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, ChevronUp, AlertTriangle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ServerEvent, EventCategory } from "@/types/events";
+import { ServerEvent, EventCategory, EventType } from "@/types/events";
 
 const CATEGORY_COLORS: Record<EventCategory, { bg: string; text: string; border: string }> = {
   Tools: { bg: "bg-blue-100", text: "text-blue-800", border: "border-blue-200" },
@@ -14,6 +13,13 @@ const CATEGORY_COLORS: Record<EventCategory, { bg: string; text: string; border:
   Ping: { bg: "bg-yellow-100", text: "text-yellow-800", border: "border-yellow-200" },
   Sampling: { bg: "bg-orange-100", text: "text-orange-800", border: "border-orange-200" },
   Roots: { bg: "bg-red-100", text: "text-red-800", border: "border-red-200" }
+};
+
+const EVENT_TYPE_COLORS: Record<EventType, { bg: string; text: string; border: string }> = {
+  request: { bg: "bg-blue-50", text: "text-blue-800", border: "border-blue-200" },
+  response: { bg: "bg-green-50", text: "text-green-800", border: "border-green-200" },
+  error: { bg: "bg-red-50", text: "text-red-800", border: "border-red-200" },
+  notification: { bg: "bg-yellow-50", text: "text-yellow-800", border: "border-yellow-200" }
 };
 
 interface ServerEventsListProps {
@@ -149,7 +155,23 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
               </div>
               
               {expandedEvents[event.id] && (
-                <div className="p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto">
+                <div 
+                  className={cn(
+                    "p-3 bg-white dark:bg-gray-900 font-mono text-xs overflow-auto",
+                    EVENT_TYPE_COLORS[event.type].bg,
+                    EVENT_TYPE_COLORS[event.type].text,
+                    EVENT_TYPE_COLORS[event.type].border,
+                    "border-t"
+                  )}
+                >
+                  <div className="flex items-center mb-2">
+                    <span className="font-bold mr-2 uppercase">
+                      {event.type === 'request' ? 'Request' : 
+                       event.type === 'response' ? 'Response' : 
+                       event.type === 'error' ? 'Error' : 
+                       'Notification'}
+                    </span>
+                  </div>
                   <pre className="whitespace-pre-wrap break-all">
                     {JSON.stringify(event.content, null, 2)}
                   </pre>
