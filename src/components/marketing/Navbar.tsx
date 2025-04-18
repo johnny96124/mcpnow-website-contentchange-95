@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Menu, X, Server } from "lucide-react";
+import { Menu, X, Server, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Navbar: React.FC = () => {
@@ -18,8 +18,8 @@ const Navbar: React.FC = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <Server className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold tracking-tight">mcpnow</span>
+            <Server className="h-6 w-6 text-blue-600" />
+            <span className="text-xl font-bold tracking-tight">MCP Now</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
@@ -28,9 +28,6 @@ const Navbar: React.FC = () => {
             <Link to="#use-cases" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               Use Cases
             </Link>
-            <Link to="#pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Pricing
-            </Link>
             <Link to="#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               FAQ
             </Link>
@@ -38,12 +35,10 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/hosts">
-              <Button variant="outline">Dashboard</Button>
-            </Link>
-            <Link to="/docs">
-              <Button>Get Started</Button>
-            </Link>
+            <Button variant="primary" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
           </div>
           <ThemeToggle />
           <button
@@ -78,13 +73,6 @@ const Navbar: React.FC = () => {
             Use Cases
           </Link>
           <Link 
-            to="#pricing" 
-            className="block py-2 text-base font-medium"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Pricing
-          </Link>
-          <Link 
             to="#faq" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
@@ -92,12 +80,10 @@ const Navbar: React.FC = () => {
             FAQ
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
-            <Link to="/hosts" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full">Dashboard</Button>
-            </Link>
-            <Link to="/docs" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full">Get Started</Button>
-            </Link>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+              <Download className="mr-2 h-4 w-4" />
+              Download
+            </Button>
           </div>
         </div>
       </div>
