@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="primary" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+            <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
@@ -80,7 +80,7 @@ const Navbar: React.FC = () => {
             FAQ
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+            <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
@@ -92,3 +92,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
