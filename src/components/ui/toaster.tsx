@@ -8,19 +8,42 @@ import {
   ToastTitle,
   ToastViewport,
 } from "@/components/ui/toast"
+import { Info, Check, X } from "lucide-react"
 
 export function Toaster() {
   const { toasts } = useToast()
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, type = "default", ...props }) {
+        const Icon = type === "success" ? Check : type === "error" ? X : Info
+        const bgColor = type === "success" 
+          ? "bg-green-50 dark:bg-green-950" 
+          : type === "error" 
+          ? "bg-red-50 dark:bg-red-950"
+          : "bg-gray-50 dark:bg-gray-950"
+        
+        const iconColor = type === "success"
+          ? "text-green-500"
+          : type === "error"
+          ? "text-red-500"
+          : "text-blue-500"
+
         return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
+          <Toast key={id} className={`${bgColor} flex items-start gap-3`} {...props}>
+            <div className={`${iconColor} mt-1.5`}>
+              <Icon size={20} />
+            </div>
+            <div className="grid gap-1 flex-1">
+              {title && (
+                <ToastTitle className="text-sm font-medium">
+                  {title}
+                </ToastTitle>
+              )}
               {description && (
-                <ToastDescription>{description}</ToastDescription>
+                <ToastDescription className="text-sm opacity-90">
+                  {description}
+                </ToastDescription>
               )}
             </div>
             {action}
@@ -28,7 +51,7 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport className="fixed top-0 right-0 flex flex-col p-4 sm:top-0 sm:right-0 sm:flex-col md:max-w-[420px]" />
+      <ToastViewport />
     </ToastProvider>
   )
 }
