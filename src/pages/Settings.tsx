@@ -7,7 +7,6 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/components/theme/theme-provider";
 import { useToast } from "@/components/ui/use-toast";
-import { useEnhancedToast } from "@/hooks/use-enhanced-toast";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
@@ -17,7 +16,6 @@ const APP_VERSION = "1.0.0";
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
-  const enhancedToast = useEnhancedToast();
   
   const [settings, setSettings] = useState({
     startOnLogin: true,
@@ -48,41 +46,37 @@ const Settings = () => {
     });
 
     if (key === 'language') {
-      enhancedToast.success(
-        "Language updated",
-        value === 'en' ? "Language set to English" : "语言设置为中文",
-        { nonBlocking: true }
-      );
+      toast({
+        title: "Language updated",
+        description: value === 'en' ? "Language set to English" : "语言设置为中文"
+      });
     }
 
     if (key === 'sendErrorLogs') {
-      enhancedToast.info(
-        "Error logging settings updated",
-        value ? "Error logging has been enabled" : "Error logging has been disabled",
-        { nonBlocking: true }
-      );
+      toast({
+        title: "Error logging settings updated",
+        description: value ? "Error logging has been enabled" : "Error logging has been disabled"
+      });
     }
   };
 
   const handleSavePort = () => {
     setInitialPort(settings.port);
     setPortChanged(false);
-    enhancedToast.success(
-      "Port settings saved",
-      `Default port has been set to ${settings.port}`,
-      { nonBlocking: true }
-    );
+    toast({
+      title: "Port settings saved",
+      description: `Default port has been set to ${settings.port}`
+    });
   };
   
   const handleResetPort = () => {
     updateSetting('port', DEFAULT_PORT);
     setInitialPort(DEFAULT_PORT);
     setPortChanged(false);
-    enhancedToast.info(
-      "Port reset",
-      "Default port has been reset to 8008",
-      { nonBlocking: true }
-    );
+    toast({
+      title: "Port reset",
+      description: "Default port has been reset to 8008"
+    });
   };
   
   const checkForUpdates = () => {
@@ -90,11 +84,10 @@ const Settings = () => {
     setTimeout(() => {
       setCheckingForUpdate(false);
       setUpdateAvailable(true);
-      enhancedToast.info(
-        "Update available",
-        "A new version (1.1.0) is available to download.",
-        { nonBlocking: true }
-      );
+      toast({
+        title: "Update available",
+        description: "A new version (1.1.0) is available to download."
+      });
     }, 2000);
   };
   
@@ -109,11 +102,10 @@ const Settings = () => {
           clearInterval(interval);
           setDownloadingUpdate(false);
           setUpdateReady(true);
-          enhancedToast.success(
-            "Update downloaded",
-            "Update is ready to install.",
-            { nonBlocking: true }
-          );
+          toast({
+            title: "Update downloaded",
+            description: "Update is ready to install."
+          });
           return 100;
         }
         return newProgress;
@@ -122,11 +114,10 @@ const Settings = () => {
   };
   
   const installUpdate = () => {
-    enhancedToast.info(
-      "Installing update",
-      "The application will restart to complete the installation.",
-      { nonBlocking: true }
-    );
+    toast({
+      title: "Installing update",
+      description: "The application will restart to complete the installation."
+    });
     
     setTimeout(() => {
       setUpdateAvailable(false);

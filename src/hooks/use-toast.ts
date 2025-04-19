@@ -6,7 +6,7 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 5  // Increased limit to allow more toasts at once
+const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
@@ -15,7 +15,6 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center"
-  nonBlocking?: boolean
 }
 
 const actionTypes = {
@@ -157,8 +156,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      position: props.position || "top-right",
-      nonBlocking: props.nonBlocking !== undefined ? props.nonBlocking : true, // Default to non-blocking
+      position: "top-right", // Default position to top-right
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
