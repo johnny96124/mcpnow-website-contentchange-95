@@ -455,7 +455,7 @@ export function ServerToolsList({
               className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4"
             >
               <History className="w-4 h-4 mr-2" />
-              Message History
+              Event History
             </TabsTrigger>
           </TabsList>
         </div>
@@ -618,35 +618,37 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
         </div>
       )}
       
-      <div className="mt-2">
-        {parameter.type === 'string' && (
-          <Textarea
-            placeholder={`Enter ${parameter.name} value...`}
-            className="h-20 text-sm"
-            value={value || ''}
-            onChange={(e) => onChange && onChange(e.target.value)}
-          />
-        )}
-        {parameter.type === 'number' && (
-          <Input
-            type="number"
-            placeholder={`Enter ${parameter.name} value...`}
-            className="text-sm"
-            value={value || ''}
-            onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
-          />
-        )}
-        {parameter.type === 'boolean' && (
-          <select
-            className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
-            value={value?.toString() || "false"}
-            onChange={(e) => onChange && onChange(e.target.value === "true")}
-          >
-            <option value="true">True</option>
-            <option value="false">False</option>
-          </select>
-        )}
-      </div>
+      {debugMode && (
+        <div className="mt-2">
+          {parameter.type === 'string' && (
+            <Textarea
+              placeholder={`Enter ${parameter.name} value...`}
+              className="h-20 text-sm"
+              value={value || ''}
+              onChange={(e) => onChange && onChange(e.target.value)}
+            />
+          )}
+          {parameter.type === 'number' && (
+            <Input
+              type="number"
+              placeholder={`Enter ${parameter.name} value...`}
+              className="text-sm"
+              value={value || ''}
+              onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
+            />
+          )}
+          {parameter.type === 'boolean' && (
+            <select
+              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+              value={value?.toString() || "false"}
+              onChange={(e) => onChange && onChange(e.target.value === "true")}
+            >
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          )}
+        </div>
+      )}
     </div>
   );
 }
