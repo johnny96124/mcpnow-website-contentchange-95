@@ -1,24 +1,23 @@
 
 import { NavLink } from "react-router-dom";
 import { 
-  ChevronDown, 
-  Database, 
-  GridIcon, 
-  LayoutDashboard, 
-  ScanLine, 
-  Settings, 
-  UsersRound,
+  LayoutDashboard,
+  Grid,
+  Monitor,
+  Database,
+  Servers,
+  Search,
+  Settings,
+  Moon,
+  Sun,
   BookOpen,
-  HelpCircle
+  MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Collapsible, 
-  CollapsibleContent, 
-  CollapsibleTrigger 
-} from "@/components/ui/collapsible";
+import { SocialLinks } from "./SocialLinks";
+import { useTheme } from "@/components/theme/theme-provider";
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
@@ -28,9 +27,24 @@ interface MainSidebarProps {
 }
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const { setTheme, theme } = useTheme();
   const [showGettingStarted, setShowGettingStarted] = useState(false);
   
+  const navigationItems = [
+    {
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      children: [
+        { title: "Overview", path: "/", icon: Grid }
+      ]
+    },
+    { title: "Hosts", path: "/hosts", icon: Monitor },
+    { title: "Profiles", path: "/profiles", icon: Database },
+    { title: "Servers", path: "/servers", icon: Servers },
+    { title: "Discovery", path: "/discovery", icon: Search },
+    { title: "Settings", path: "/settings", icon: Settings },
+  ];
+
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
       <div className="p-4 border-b">
@@ -43,120 +57,79 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           {!collapsed && <h1 className="text-lg font-semibold">MCP Now</h1>}
         </div>
       </div>
+      
       <ScrollArea className="flex-1 px-2 py-4">
-        <nav className="space-y-2">
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "w-full justify-start text-left font-medium",
-                  collapsed && "justify-center px-0"
+        <nav className="space-y-1">
+          {navigationItems.map((item) => (
+            item.children ? (
+              <div key={item.title} className="space-y-1">
+                <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </div>
+                {item.children.map((child) => (
+                  <NavLink
+                    key={child.path}
+                    to={child.path}
+                    end
+                    className={({ isActive }) => cn(
+                      "flex items-center gap-2 px-4 py-1.5 text-sm rounded-md",
+                      "hover:bg-accent hover:text-accent-foreground transition-colors",
+                      isActive && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    <child.icon className="h-5 w-5" />
+                    <span>{child.title}</span>
+                  </NavLink>
+                ))}
+              </div>
+            ) : (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => cn(
+                  "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md",
+                  "hover:bg-accent hover:text-accent-foreground transition-colors",
+                  isActive && "bg-accent text-accent-foreground"
                 )}
               >
-                <LayoutDashboard className="h-4 w-4 mr-2" />
-                {!collapsed && "Dashboard"}
-                {!collapsed && (
-                  <ChevronDown 
-                    className={cn(
-                      "h-4 w-4 ml-auto transition-transform",
-                      isOpen && "transform rotate-180"
-                    )} 
-                  />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              {!collapsed && (
-                <div className="space-y-1 pl-6 mt-1">
-                  <NavLink 
-                    to="/" 
-                    end
-                    className={({ isActive }) => 
-                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                    }
-                  >
-                    <GridIcon className="h-4 w-4" />
-                    Overview
-                  </NavLink>
-                  <NavLink 
-                    to="/hosts" 
-                    className={({ isActive }) => 
-                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                    }
-                  >
-                    <UsersRound className="h-4 w-4" />
-                    Hosts
-                  </NavLink>
-                  <NavLink 
-                    to="/profiles" 
-                    className={({ isActive }) => 
-                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                    }
-                  >
-                    <Database className="h-4 w-4" />
-                    Profiles
-                  </NavLink>
-                  <NavLink 
-                    to="/servers" 
-                    className={({ isActive }) => 
-                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
-                    }
-                  >
-                    <GridIcon className="h-4 w-4" />
-                    Servers
-                  </NavLink>
-                </div>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
-
-          <NavLink 
-            to="/discovery" 
-            className={({ isActive }) => 
-              cn(
-                "sidebar-item font-medium", 
-                isActive && "sidebar-item-active",
-                collapsed && "justify-center px-0"
-              )
-            }
-          >
-            <ScanLine className="h-4 w-4 mr-2" />
-            {!collapsed && "Discovery"}
-          </NavLink>
-
-          <NavLink 
-            to="/settings" 
-            className={({ isActive }) => 
-              cn(
-                "sidebar-item font-medium", 
-                isActive && "sidebar-item-active",
-                collapsed && "justify-center px-0"
-              )
-            }
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            {!collapsed && "Settings"}
-          </NavLink>
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </NavLink>
+            )
+          ))}
         </nav>
       </ScrollArea>
+
+      <SocialLinks />
+      
       <div className="border-t p-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-status-active"></div>
-            {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
-          </div>
-          <div className="flex gap-2 items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full h-8 w-8" 
-              onClick={() => setShowGettingStarted(true)}
-            >
-              <BookOpen className="h-5 w-5" />
-            </Button>
-            <HelpDialog />
-          </div>
+        <div className="flex justify-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full h-9 w-9"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full h-9 w-9" 
+            onClick={() => setShowGettingStarted(true)}
+          >
+            <BookOpen className="h-5 w-5" />
+            <span className="sr-only">Getting started guide</span>
+          </Button>
+
+          <HelpDialog />
         </div>
       </div>
       
