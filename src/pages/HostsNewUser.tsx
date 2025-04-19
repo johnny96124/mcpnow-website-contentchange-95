@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -112,7 +111,6 @@ const HostsNewUser = () => {
         </p>
       </div>
       
-      {/* Main content */}
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-semibold mb-4">What are hosts?</h2>
@@ -164,19 +162,19 @@ const HostsNewUser = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div>
                   <h3 className="text-lg font-medium mb-3">Supported host types</h3>
-                  {hostTypes.map((type) => (
-                    <Card key={type.name} className="border hover:shadow-md transition-shadow">
-                      <CardContent className="p-4 flex items-center gap-4">
-                        <div>{type.icon}</div>
-                        <div>
-                          <h4 className="font-medium">{type.name}</h4>
-                          <p className="text-xs text-muted-foreground">{type.description}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {hostTypes.map((type) => (
+                      <Card key={type.name} className="border hover:shadow-md transition-shadow">
+                        <CardContent className="p-4 flex flex-col items-center text-center">
+                          <div>{type.icon}</div>
+                          <h4 className="font-medium mt-2">{type.name}</h4>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{type.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
               </div>
               
