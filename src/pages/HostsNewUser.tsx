@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Zap,
   Server,
+  ChevronRight,
   HelpCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +29,7 @@ const HostsNewUser = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { getAvailableHosts } = useHostProfiles();
   
-  const hostTypes = [
+  const mainHostTypes = [
     {
       icon: <MousePointer className="h-10 w-10 text-blue-500" />,
       name: "Cursor",
@@ -48,11 +49,6 @@ const HostsNewUser = () => {
       icon: <Bot className="h-10 w-10 text-amber-500" />,
       name: "Claude",
       description: "Advanced AI assistant with natural language understanding and reasoning"
-    },
-    {
-      icon: <MoreHorizontal className="h-10 w-10 text-gray-500" />,
-      name: "And more",
-      description: "Explore additional host types and configurations"
     }
   ];
 
@@ -164,17 +160,27 @@ const HostsNewUser = () => {
 
                 <div>
                   <h3 className="text-lg font-medium mb-3">Supported host types</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                    {hostTypes.map((type) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {mainHostTypes.map((type) => (
                       <Card key={type.name} className="border hover:shadow-md transition-shadow">
-                        <CardContent className="p-4 flex flex-col items-center text-center">
+                        <CardContent className="p-4 flex items-center gap-4">
                           <div>{type.icon}</div>
-                          <h4 className="font-medium mt-2">{type.name}</h4>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{type.description}</p>
+                          <div>
+                            <h4 className="font-medium">{type.name}</h4>
+                            <p className="text-sm text-muted-foreground">{type.description}</p>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    className="mt-4 w-full justify-between text-muted-foreground hover:text-foreground"
+                  >
+                    Explore more host types
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
               
