@@ -9,6 +9,7 @@ import {
   Zap,
   MousePointer,
   CloudCog,
+  Bot,
   Cpu,
   ServerIcon,
   Network as NetworkIcon,
