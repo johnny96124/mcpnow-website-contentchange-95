@@ -13,6 +13,16 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   type?: ToastType
+  variant?: "default" | "destructive" // Add variant for compatibility with shadcn/ui
+}
+
+// Define ToastOptions interface to include both type and variant
+interface ToastOptions {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+  type?: ToastType
+  variant?: "default" | "destructive"
 }
 
 const actionTypes = {
@@ -135,13 +145,6 @@ function dispatch(action: Action) {
   })
 }
 
-interface ToastOptions {
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-  type?: ToastType
-}
-
 function toast(opts: ToastOptions) {
   const id = genId()
 
@@ -149,6 +152,11 @@ function toast(opts: ToastOptions) {
   let variant: "default" | "destructive" | undefined = undefined;
   if (opts.type === "error") {
     variant = "destructive";
+  }
+  
+  // Allow directly setting variant if provided
+  if (opts.variant) {
+    variant = opts.variant;
   }
 
   const update = (props: ToasterToast) =>

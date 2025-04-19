@@ -203,10 +203,15 @@ export function AIChartDialog({ open, onOpenChange, hostName, instanceStatuses }
     });
     
     // Process the response now that permission is granted
-    processResponse(
-      prev => prev.find(m => m.id === needsPermission.messageId - 1)?.content || "", 
-      needsPermission.services
-    );
+    const previousMessage = messages.find(m => m.id === needsPermission.messageId);
+    const userMessageIndex = messages.findIndex(m => m.id === needsPermission.messageId) - 1;
+    
+    if (userMessageIndex >= 0 && userMessageIndex < messages.length) {
+      const userMessage = messages[userMessageIndex];
+      processResponse(userMessage.content, needsPermission.services);
+    } else {
+      processResponse("", needsPermission.services);
+    }
     
     setNeedsPermission(null);
   };

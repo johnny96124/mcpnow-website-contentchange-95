@@ -1,4 +1,3 @@
-
 import { Tool, ToolParameter } from "@/data/mockData";
 import { 
   Accordion, 
@@ -243,6 +242,7 @@ export function ServerToolsList({
         toast({
           title: `Tool Executed: ${tool.name}`,
           description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
+          type: "success"
         });
       } else {
         // Mock error response
@@ -295,7 +295,7 @@ export function ServerToolsList({
         toast({
           title: `Tool Execution Failed: ${tool.name}`,
           description: `Failed to execute tool on server instance ${serverName || 'Unknown'}.`,
-          variant: "destructive"
+          type: "error"
         });
       }
     }, 1500);
@@ -320,7 +320,6 @@ export function ServerToolsList({
     return true;
   };
 
-  // For Discovery view, we only show the tools without tabs
   if (isDiscoveryView) {
     return (
       <div className="flex flex-col h-full">
@@ -369,7 +368,6 @@ export function ServerToolsList({
                       </div>
                     )}
                     
-                    {/* Tool execution results */}
                     {toolResults[tool.id] && (
                       <div className="mt-4">
                         <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
@@ -435,7 +433,6 @@ export function ServerToolsList({
     );
   }
 
-  // For normal view (Servers page), we show both Tools and Message History tabs
   return (
     <div className="flex flex-col h-full">
       <Tabs 
@@ -563,7 +560,6 @@ export function ServerToolsList({
                         </div>
                       )}
                       
-                      {/* Tool execution results */}
                       {toolResults[tool.id] && (
                         <div className="mt-4">
                           <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
