@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -779,4 +780,98 @@ const Discovery = () => {
                                 <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
                                   {formatNumber(selectedServer.views || 1320)}
                                 </div>
-                                <div className="text
+                                <div className="text-xs text-gray-500 dark:text-gray-400">Views</div>
+                              </div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.downloads || 240)}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">Downloads</div>
+                              </div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.watches || 58)}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">Stars</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {!installedServers[selectedServer.id] ? (
+                            <Button 
+                              className="w-full bg-blue-600 hover:bg-blue-700 py-5"
+                              onClick={() => handleInstall(selectedServer.id)}
+                              disabled={isInstalling[selectedServer.id]}
+                            >
+                              {isInstalling[selectedServer.id] ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Installing...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Install Server
+                                </>
+                              )}
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              className="w-full border-green-200 bg-green-50 text-green-600 hover:bg-green-100 py-5"
+                              onClick={handleNavigateToServers}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Server Installed
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6">
+                      {selectedServer.tools && selectedServer.tools.length > 0 ? (
+                        <ServerToolsList tools={selectedServer.tools} />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                          <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-4 mb-4">
+                            <Wrench className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-semibold mb-2">No tools available</h3>
+                          <p className="text-muted-foreground max-w-md">
+                            This server definition does not include any custom tools or utilities.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <AddInstanceDialog
+        open={addInstanceOpen}
+        onOpenChange={setAddInstanceOpen}
+        onSubmit={handleCreateInstance}
+        defaultHostId=""
+        definitionName={selectedDefinition?.name || ""}
+      />
+      
+      <AddToProfileDialog
+        open={addToProfileOpen}
+        onOpenChange={setAddToProfileOpen}
+        onSubmit={handleAddToProfile}
+        profiles={allProfiles}
+      />
+    </div>
+  );
+};
+
+export default Discovery;
