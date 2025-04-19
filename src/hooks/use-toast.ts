@@ -13,7 +13,7 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   type?: ToastType
-  variant?: "default" | "destructive" // Make sure variant is properly typed here
+  variant?: "default" | "destructive"
 }
 
 // Define ToastOptions interface to include both type and variant
@@ -149,7 +149,7 @@ function toast(opts: ToastOptions) {
   const id = genId()
 
   // Set variant based on type for backward compatibility
-  let variant: "default" | "destructive" | undefined = undefined;
+  let variant: "default" | "destructive" = "default";
   if (opts.type === "error") {
     variant = "destructive";
   }
@@ -172,7 +172,7 @@ function toast(opts: ToastOptions) {
       ...opts,
       id,
       type: opts.type,
-      variant, // This variable is now properly typed
+      variant, 
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
