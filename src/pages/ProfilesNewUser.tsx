@@ -3,73 +3,23 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import {
   Layers,
   Zap,
   Share2,
   Network,
-  Settings,
-  HelpCircle,
   Server,
-  Boxes,
   PlusCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { serverInstances } from "@/data/mockData";
 import { markProfilesOnboardingAsSeen } from "@/utils/localStorage";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
-import { StatusIndicator } from "@/components/status/StatusIndicator";
-import { Switch } from "@/components/ui/switch";
 
 const ProfilesNewUser = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [createProfileDialogOpen, setCreateProfileDialogOpen] = useState(false);
-  
-  const profileFeatures = [
-    {
-      icon: <Boxes className="h-8 w-8 text-purple-500" />,
-      name: "Group Instances",
-      description: "Combine multiple server instances into organized profiles"
-    },
-    {
-      icon: <Share2 className="h-8 w-8 text-indigo-500" />,
-      name: "Shared Endpoints",
-      description: "Define a single endpoint for a collection of instances"
-    },
-    {
-      icon: <Settings className="h-8 w-8 text-blue-500" />,
-      name: "Configurable Settings",
-      description: "Customize how profiles handle requests and connections"
-    },
-    {
-      icon: <Network className="h-8 w-8 text-teal-500" />,
-      name: "Host Assignment",
-      description: "Assign profiles to specific hosts for execution"
-    }
-  ];
-  
-  const exampleProfiles = [
-    {
-      name: "Production APIs",
-      instances: 3,
-      status: "active",
-      description: "API servers for the production environment"
-    },
-    {
-      name: "Development Tools",
-      instances: 2,
-      status: "inactive",
-      description: "Local development environment setup"
-    },
-    {
-      name: "Machine Learning",
-      instances: 4,
-      status: "active",
-      description: "ML model inference servers"
-    }
-  ];
 
   const handleCreateProfile = ({ name, instances }: { name: string; instances: string[] }) => {
     toast({
@@ -185,75 +135,6 @@ const ProfilesNewUser = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <Separator />
-        
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Profile Features</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {profileFeatures.map((feature) => (
-              <Card 
-                key={feature.name} 
-                className="border hover:shadow-md transition-shadow"
-              >
-                <CardContent className="p-4 flex flex-col items-center text-center">
-                  <div className="p-3 rounded-full bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 mb-3">
-                    {feature.icon}
-                  </div>
-                  <h3 className="font-medium">{feature.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-        
-        <Separator />
-        
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Example Profiles</h2>
-          <div className="space-y-3">
-            {exampleProfiles.map((profile) => (
-              <Card 
-                key={profile.name} 
-                className="border hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors"
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{profile.name}</h3>
-                        <StatusIndicator 
-                          status={profile.status as any} 
-                          label={profile.status} 
-                          size="sm" 
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">{profile.description}</p>
-                    </div>
-                    <Switch disabled checked={profile.status === "active"} />
-                  </div>
-                  <div className="mt-3 text-xs text-muted-foreground">
-                    <span className="font-medium">{profile.instances} instances</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-        
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
-          <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-          <div>
-            <h3 className="font-medium text-amber-800 dark:text-amber-300">Need help?</h3>
-            <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-              If you're not sure how to set up a profile, 
-              <a href="#" className="text-amber-800 dark:text-amber-300 underline font-medium ml-1">
-                view our configuration guide
-              </a>.
-            </p>
-          </div>
         </div>
       </div>
 
