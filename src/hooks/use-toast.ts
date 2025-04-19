@@ -135,9 +135,14 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+interface ToastOptions {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+  type?: ToastType
+}
 
-function toast({ ...props }: Toast) {
+function toast(opts: ToastOptions) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -150,7 +155,7 @@ function toast({ ...props }: Toast) {
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...opts,
       id,
       open: true,
       onOpenChange: (open) => {
