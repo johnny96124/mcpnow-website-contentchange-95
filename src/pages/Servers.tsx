@@ -507,7 +507,7 @@ const Servers = () => {
       <EditServerDialog open={editServerOpen} onOpenChange={setEditServerOpen} serverDefinition={selectedDefinition} onUpdateServer={handleUpdateServer} />
       
       <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-4xl h-[700px] flex flex-col">
+        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wrench className="h-5 w-5 text-purple-500" />
