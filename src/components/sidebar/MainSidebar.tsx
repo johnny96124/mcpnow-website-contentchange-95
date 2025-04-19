@@ -2,14 +2,15 @@
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
-  Database, 
-  GridIcon, 
+  Grid, 
   LayoutDashboard, 
-  ScanLine, 
+  MonitorDot,
+  ServerIcon,
   Settings, 
   UsersRound,
+  Database,
   BookOpen,
-  HelpCircle
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ import {
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { SocialLinks } from "./SocialLinks";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -50,7 +53,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
               <Button 
                 variant="ghost" 
                 className={cn(
-                  "w-full justify-start text-left font-medium",
+                  "w-full justify-start text-left text-sm",
                   collapsed && "justify-center px-0"
                 )}
               >
@@ -76,7 +79,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
                       cn("sidebar-item text-sm", isActive && "sidebar-item-active")
                     }
                   >
-                    <GridIcon className="h-4 w-4" />
+                    <Grid className="h-4 w-4" />
                     Overview
                   </NavLink>
                   <NavLink 
@@ -85,7 +88,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
                       cn("sidebar-item text-sm", isActive && "sidebar-item-active")
                     }
                   >
-                    <UsersRound className="h-4 w-4" />
+                    <MonitorDot className="h-4 w-4" />
                     Hosts
                   </NavLink>
                   <NavLink 
@@ -103,7 +106,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
                       cn("sidebar-item text-sm", isActive && "sidebar-item-active")
                     }
                   >
-                    <GridIcon className="h-4 w-4" />
+                    <ServerIcon className="h-4 w-4" />
                     Servers
                   </NavLink>
                 </div>
@@ -115,13 +118,13 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             to="/discovery" 
             className={({ isActive }) => 
               cn(
-                "sidebar-item font-medium", 
+                "sidebar-item text-sm", 
                 isActive && "sidebar-item-active",
                 collapsed && "justify-center px-0"
               )
             }
           >
-            <ScanLine className="h-4 w-4 mr-2" />
+            <UsersRound className="h-4 w-4 mr-2" />
             {!collapsed && "Discovery"}
           </NavLink>
 
@@ -129,7 +132,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             to="/settings" 
             className={({ isActive }) => 
               cn(
-                "sidebar-item font-medium", 
+                "sidebar-item text-sm", 
                 isActive && "sidebar-item-active",
                 collapsed && "justify-center px-0"
               )
@@ -140,23 +143,21 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </NavLink>
         </nav>
       </ScrollArea>
+      
+      <SocialLinks />
+      
       <div className="border-t p-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-status-active"></div>
-            {!collapsed && <span className="text-sm text-muted-foreground">Connected</span>}
-          </div>
-          <div className="flex gap-2 items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="rounded-full h-8 w-8" 
-              onClick={() => setShowGettingStarted(true)}
-            >
-              <BookOpen className="h-5 w-5" />
-            </Button>
-            <HelpDialog />
-          </div>
+        <div className="flex justify-between items-center gap-2">
+          <ThemeToggle />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full h-8 w-8" 
+            onClick={() => setShowGettingStarted(true)}
+          >
+            <BookOpen className="h-4 w-4" />
+          </Button>
+          <HelpDialog />
         </div>
       </div>
       
