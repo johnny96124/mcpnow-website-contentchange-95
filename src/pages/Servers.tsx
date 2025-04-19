@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { NoSearchResults } from "@/components/servers/NoSearchResults";
+
 const Servers = () => {
   const [definitions, setDefinitions] = useState<ServerDefinition[]>(serverDefinitions);
   const [instances, setInstances] = useState<ServerInstance[]>(serverInstances);
@@ -46,6 +47,7 @@ const Servers = () => {
     toast
   } = useToast();
   const navigate = useNavigate();
+
   const instancesByDefinition = instances.reduce((acc, instance) => {
     const {
       definitionId
@@ -56,6 +58,7 @@ const Servers = () => {
     acc[definitionId].push(instance);
     return acc;
   }, {} as Record<string, ServerInstance[]>);
+
   const realProfileAssociations = profiles.reduce((acc, profile) => {
     profile.instances.forEach(instanceId => {
       if (!acc[instanceId]) {
@@ -65,9 +68,11 @@ const Servers = () => {
     });
     return acc;
   }, {} as Record<string, typeof profiles>);
+
   const clearSearch = () => {
     setSearchQuery("");
   };
+
   useEffect(() => {
     let filtered = [...instances];
     if (searchQuery) {
@@ -111,10 +116,12 @@ const Servers = () => {
     }
     setFilteredDefinitions(filteredDefs);
   }, [instances, searchQuery, sortConfig, definitions]);
+
   const truncateText = (text: string, maxLength = 24): string => {
     if (text.length <= maxLength) return text;
     return `${text.substring(0, maxLength)}...`;
   };
+
   const renderProfileBadges = (instanceId: string) => {
     const associatedProfiles = realProfileAssociations[instanceId] || [];
     if (associatedProfiles.length === 0) {
@@ -137,10 +144,12 @@ const Servers = () => {
         </HoverCardContent>
       </HoverCard>;
   };
+
   const handleOpenAddInstance = (definition: ServerDefinition) => {
     setSelectedDefinition(definition);
     setAddInstanceOpen(true);
   };
+
   const handleViewDetails = (instance: ServerInstance) => {
     const definition = definitions.find(d => d.id === instance.definitionId);
     if (!definition) return;
@@ -148,10 +157,12 @@ const Servers = () => {
     setSelectedInstance(instance);
     setEditInstanceOpen(true);
   };
+
   const handleEditServer = (definition: ServerDefinition) => {
     setSelectedDefinition(definition);
     setEditServerOpen(true);
   };
+
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedDefinition) return;
     if (data.instanceId) {
@@ -188,6 +199,7 @@ const Servers = () => {
       });
     }
   };
+
   const handleDeleteInstance = (instanceId: string) => {
     setInstances(instances.filter(instance => instance.id !== instanceId));
     toast({
@@ -195,6 +207,7 @@ const Servers = () => {
       description: "The instance has been deleted successfully."
     });
   };
+
   const handleDeleteDefinition = (definitionId: string) => {
     const definitionInstances = instancesByDefinition[definitionId] || [];
     if (definitionInstances.length > 0) {
@@ -207,9 +220,11 @@ const Servers = () => {
       description: "The server and its instances have been deleted successfully."
     });
   };
+
   const handleAddNewServer = () => {
     setAddServerDialogOpen(true);
   };
+
   const handleCreateServer = (serverData: {
     name: string;
     type: 'HTTP_SSE' | 'STDIO';
@@ -239,6 +254,7 @@ const Servers = () => {
     });
     setAddServerDialogOpen(false);
   };
+
   const handleUpdateServer = (data: EditServerFormValues) => {
     if (!selectedDefinition) return;
     const updatedDefinition: ServerDefinition = {
@@ -258,27 +274,40 @@ const Servers = () => {
       description: `${updatedDefinition.name} has been updated successfully.`
     });
   };
+
   const handleNavigateToDiscovery = () => {
     navigate('/discovery');
   };
+
   const handleConnect = (instanceId: string) => {
     setInstanceStatuses(prev => ({
       ...prev,
       [instanceId]: 'connecting'
     }));
+    
     setTimeout(() => {
       const isSuccessful = Math.random() > 0.3;
       setInstanceStatuses(prev => ({
         ...prev,
         [instanceId]: isSuccessful ? 'success' : 'failed'
       }));
-      toast({
-        title: isSuccessful ? "Connection Successful" : "Connection Failed",
-        description: isSuccessful ? "The server instance is running properly." : "Could not connect to the server instance. Please check your configuration.",
-        variant: isSuccessful ? "default" : "destructive"
-      });
+      
+      if (isSuccessful) {
+        toast({
+          title: "Connection Successful",
+          description: "The server instance is running properly.",
+          type: "success"
+        });
+      } else {
+        toast({
+          title: "Connection Failed",
+          description: "Could not connect to the server instance. Please check your configuration.",
+          type: "error"
+        });
+      }
     }, 2000);
   };
+
   const handleOpenToolsDialog = (instanceId: string, definitionId: string) => {
     const instance = instances.find(i => i.id === instanceId);
     const definition = definitions.find(d => d.id === definitionId);
@@ -292,7 +321,9 @@ const Servers = () => {
       setToolsDialogOpen(true);
     }
   };
+
   const hasSearchResults = filteredDefinitions.length > 0;
+
   return <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
@@ -529,4 +560,5 @@ const Servers = () => {
       </Dialog>
     </div>;
 };
+
 export default Servers;
