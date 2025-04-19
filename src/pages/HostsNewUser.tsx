@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import {
   Search,
   ArrowRight,
@@ -11,7 +13,6 @@ import {
   CloudCog,
   Cpu,
   Bot,
-  MoreHorizontal,
   Zap,
   Server,
   ChevronRight,
@@ -162,15 +163,24 @@ const HostsNewUser = () => {
                   <h3 className="text-lg font-medium mb-3">Supported host types</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {mainHostTypes.map((type) => (
-                      <Card key={type.name} className="border hover:shadow-md transition-shadow">
-                        <CardContent className="p-4 flex items-center gap-4">
-                          <div>{type.icon}</div>
-                          <div>
-                            <h4 className="font-medium">{type.name}</h4>
-                            <p className="text-sm text-muted-foreground">{type.description}</p>
+                      <HoverCard key={type.name}>
+                        <HoverCardTrigger asChild>
+                          <Card className="border hover:shadow-md transition-shadow cursor-pointer">
+                            <CardContent className="p-4 flex items-center gap-4">
+                              <div>{type.icon}</div>
+                              <h4 className="font-medium">{type.name}</h4>
+                            </CardContent>
+                          </Card>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                          <div className="flex justify-between space-x-4">
+                            <div>
+                              <h4 className="font-semibold">{type.name}</h4>
+                              <p className="text-sm text-muted-foreground">{type.description}</p>
+                            </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </HoverCardContent>
+                      </HoverCard>
                     ))}
                   </div>
                   
