@@ -1,10 +1,10 @@
-
 import { Eye, Download, UserRound, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EndpointType } from "@/data/mockData";
 
 interface ServerLogoCardProps {
   id: string;
@@ -12,7 +12,7 @@ interface ServerLogoCardProps {
   description: string;
   downloads: number;
   views?: number;
-  type?: string;
+  type?: EndpointType | 'Custom' | 'WS';
   isOfficial?: boolean;
   author?: string;
   updated?: string;
