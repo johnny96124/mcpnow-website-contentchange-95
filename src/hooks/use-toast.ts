@@ -13,6 +13,7 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   type?: ToastType
+  variant?: "default" | "destructive"
 }
 
 const actionTypes = {
@@ -140,10 +141,17 @@ interface ToastOptions {
   description?: React.ReactNode
   action?: ToastActionElement
   type?: ToastType
+  variant?: "default" | "destructive"
 }
 
 function toast(opts: ToastOptions) {
   const id = genId()
+
+  // Convert type to variant for backwards compatibility
+  let variant: "default" | "destructive" | undefined = opts.variant;
+  if (!variant && opts.type === "error") {
+    variant = "destructive";
+  }
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -157,11 +165,12 @@ function toast(opts: ToastOptions) {
     toast: {
       ...opts,
       id,
+      variant,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
-    },
+    } as ToasterToast,
   })
 
   return {
