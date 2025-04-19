@@ -56,7 +56,7 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useHostProfiles } from "@/hooks/use-hostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 const ITEMS_PER_PAGE = 12;
@@ -482,8 +482,20 @@ const Discovery = () => {
                   className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
                   onClick={() => handleViewDetails(server)}
                 >
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  <CardHeader className="pb-2 space-y-0 px-5 pt-5">
+                  <div 
+                    className="absolute inset-0 opacity-[0.08] dark:opacity-[0.12] transition-opacity duration-200 group-hover:opacity-[0.12] dark:group-hover:opacity-[0.16]"
+                    style={{
+                      backgroundImage: `url(${server.icon || '/placeholder.svg'})`,
+                      backgroundSize: '120%',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      filter: 'blur(8px)',
+                    }}
+                  />
+                  
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background opacity-90" />
+
+                  <CardHeader className="pb-2 space-y-0 px-5 pt-5 relative">
                     <div className="flex justify-between items-start gap-2 mb-1">
                       <div className="flex flex-col">
                         <CardTitle 
@@ -503,13 +515,13 @@ const Discovery = () => {
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="px-5 py-2 flex-1">
+                  <CardContent className="px-5 py-2 flex-1 relative">
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                       {server.description}
                     </p>
                   </CardContent>
                   
-                  <CardFooter className="px-5 py-4 border-t flex flex-col gap-2 bg-gray-50 dark:bg-gray-900">
+                  <CardFooter className="px-5 py-4 border-t flex flex-col gap-2 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm relative">
                     <div className="flex items-start justify-between w-full">
                       <div className="flex flex-col text-xs text-muted-foreground w-3/5">
                         <div className="grid grid-cols-1 gap-1">
