@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/components/theme/theme-provider";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
@@ -48,16 +48,14 @@ const Settings = () => {
     if (key === 'language') {
       toast({
         title: "Language updated",
-        description: value === 'en' ? "Language set to English" : "语言设置为中文",
-        noBlock: true,
+        description: value === 'en' ? "Language set to English" : "语言设置为中文"
       });
     }
 
     if (key === 'sendErrorLogs') {
       toast({
         title: "Error logging settings updated",
-        description: value ? "Error logging has been enabled" : "Error logging has been disabled",
-        noBlock: true,
+        description: value ? "Error logging has been enabled" : "Error logging has been disabled"
       });
     }
   };
@@ -67,8 +65,7 @@ const Settings = () => {
     setPortChanged(false);
     toast({
       title: "Port settings saved",
-      description: `Default port has been set to ${settings.port}`,
-      noBlock: true,
+      description: `Default port has been set to ${settings.port}`
     });
   };
   
@@ -78,8 +75,7 @@ const Settings = () => {
     setPortChanged(false);
     toast({
       title: "Port reset",
-      description: "Default port has been reset to 8008",
-      noBlock: true,
+      description: "Default port has been reset to 8008"
     });
   };
   
@@ -90,8 +86,7 @@ const Settings = () => {
       setUpdateAvailable(true);
       toast({
         title: "Update available",
-        description: "A new version (1.1.0) is available to download.",
-        noBlock: true,
+        description: "A new version (1.1.0) is available to download."
       });
     }, 2000);
   };
@@ -109,8 +104,7 @@ const Settings = () => {
           setUpdateReady(true);
           toast({
             title: "Update downloaded",
-            description: "Update is ready to install.",
-            noBlock: true,
+            description: "Update is ready to install."
           });
           return 100;
         }
@@ -122,8 +116,7 @@ const Settings = () => {
   const installUpdate = () => {
     toast({
       title: "Installing update",
-      description: "The application will restart to complete the installation.",
-      noBlock: true,
+      description: "The application will restart to complete the installation."
     });
     
     setTimeout(() => {

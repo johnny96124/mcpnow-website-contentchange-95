@@ -15,8 +15,6 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: ToastActionElement
   position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center"
-  className?: string // Add className to allow custom styling
-  noBlock?: boolean // Add noBlock to prevent blocking interactions
 }
 
 const actionTypes = {
@@ -158,8 +156,7 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      position: props.position || "top-right", // Default position to top-right
-      noBlock: props.noBlock ?? true, // Default to non-blocking behavior
+      position: "top-right", // Default position to top-right
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()

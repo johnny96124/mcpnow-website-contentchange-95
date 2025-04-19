@@ -14,25 +14,21 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, noBlock, className, ...props }) {
+      {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast 
-            key={id} 
-            {...props}
-            className={`${noBlock ? "pointer-events-none" : ""} ${className || ""}`}
-          >
-            <div className={`grid gap-1 ${noBlock ? "" : "pointer-events-auto"}`}>
+          <Toast key={id} {...props}>
+            <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>{description}</ToastDescription>
               )}
             </div>
             {action}
-            <ToastClose className={noBlock ? "pointer-events-auto" : ""} />
+            <ToastClose />
           </Toast>
         )
       })}
-      <ToastViewport className="fixed top-0 right-0 flex flex-col p-4 sm:top-0 sm:right-0 sm:flex-col md:max-w-[420px] z-50" />
+      <ToastViewport className="fixed top-0 right-0 flex flex-col p-4 sm:top-0 sm:right-0 sm:flex-col md:max-w-[420px]" />
     </ToastProvider>
   )
 }
