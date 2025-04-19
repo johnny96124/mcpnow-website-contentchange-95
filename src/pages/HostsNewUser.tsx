@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,11 +12,15 @@ import {
   CloudCog,
   Cpu,
   Bot,
-  MoreHorizontal
+  MoreHorizontal,
+  Zap,
+  Server,
+  HelpCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 
 const HostsNewUser = () => {
   const navigate = useNavigate();
@@ -135,7 +140,7 @@ const HostsNewUser = () => {
                     
                     <div className="flex items-start gap-3">
                       <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
-                        <ServerIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                        <Server className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                       </div>
                       <div>
                         <h3 className="text-sm font-medium">Add hosts manually</h3>
