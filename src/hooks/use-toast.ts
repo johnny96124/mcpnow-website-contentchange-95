@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
@@ -16,7 +15,6 @@ type ToasterToast = ToastProps & {
   variant?: "default" | "destructive"
 }
 
-// Define ToastOptions interface to include both type and variant
 interface ToastOptions {
   title?: React.ReactNode
   description?: React.ReactNode
@@ -148,13 +146,11 @@ function dispatch(action: Action) {
 function toast(opts: ToastOptions) {
   const id = genId()
 
-  // Set variant based on type for backward compatibility
   let variant: "default" | "destructive" = "default";
   if (opts.type === "error") {
     variant = "destructive";
   }
   
-  // Allow directly setting variant if provided
   if (opts.variant) {
     variant = opts.variant;
   }
