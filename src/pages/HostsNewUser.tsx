@@ -7,17 +7,14 @@ import {
   Search,
   ArrowRight,
   RefreshCw,
-  HelpCircle,
-  Zap,
   MousePointer,
   CloudCog,
-  Bot,
   Cpu,
-  ServerIcon,
+  Bot,
+  MoreHorizontal
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
-import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 
 const HostsNewUser = () => {
@@ -47,6 +44,11 @@ const HostsNewUser = () => {
       icon: <Bot className="h-10 w-10 text-amber-500" />,
       name: "Claude",
       description: "Advanced AI assistant with natural language understanding and reasoning"
+    },
+    {
+      icon: <MoreHorizontal className="h-10 w-10 text-gray-500" />,
+      name: "And more",
+      description: "Explore additional host types and configurations"
     }
   ];
 
