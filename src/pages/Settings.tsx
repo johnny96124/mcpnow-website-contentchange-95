@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
-import { Laptop, Moon, RefreshCw, Sun, Download, Check } from "lucide-react";
+import { Laptop, Moon, RefreshCw, Sun, Download, Check, Globe, BugOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/components/theme/theme-provider";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
@@ -22,7 +22,9 @@ const Settings = () => {
     port: DEFAULT_PORT,
     autoUpdate: true,
     minimizeToTray: true,
-    downloadMajorUpdates: false
+    downloadMajorUpdates: false,
+    language: 'en',
+    sendErrorLogs: true,
   });
   
   const [initialPort, setInitialPort] = useState(settings.port);
@@ -130,6 +132,50 @@ const Settings = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Language</label>
+                <p className="text-xs text-muted-foreground">
+                  Choose your preferred display language
+                </p>
+              </div>
+              <Select
+                value={settings.language}
+                onValueChange={(value) => updateSetting('language', value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue defaultValue="en" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      English
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="zh">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      中文
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-sm font-medium">Send Error Logs</label>
+                <p className="text-xs text-muted-foreground">
+                  Help improve MCP Now by sending anonymous error reports
+                </p>
+              </div>
+              <Switch
+                checked={settings.sendErrorLogs}
+                onCheckedChange={(checked) => updateSetting('sendErrorLogs', checked)}
+              />
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <label className="text-sm font-medium">Start on login</label>
