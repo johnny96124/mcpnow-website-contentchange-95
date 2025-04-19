@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, ExternalLink, Info, Loader2, Server, UsersRound, Download, X, Database, HelpCircle, ChevronDown, ChevronUp, Computer, Settings2, Layers } from 'lucide-react';
@@ -244,9 +243,10 @@ const Dashboard = () => {
               {trendingServers.map(server => (
                 <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
                   <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
-                    <CardHeader className="space-y-0 p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
+                    <CardHeader className="space-y-0 p-4 pb-0">
+                      <div className="flex items-start justify-start gap-3">
+                        <ServerLogo name={server.name} />
+                        <div>
                           <CardTitle className="text-xl group-hover:text-primary transition-colors">
                             {server.name}
                           </CardTitle>
@@ -257,11 +257,10 @@ const Dashboard = () => {
                             {server.isOfficial && <OfficialBadge />}
                           </div>
                         </div>
-                        <ServerLogo name={server.name} />
                       </div>
                     </CardHeader>
                     
-                    <CardContent className="space-y-4 p-4 pt-0">
+                    <CardContent className="space-y-4 p-4 pt-2">
                       <p className="text-sm text-muted-foreground line-clamp-2 h-10">
                         {server.description}
                       </p>
