@@ -12,12 +12,14 @@ import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
     return `${(count / 1000).toFixed(1)}k`;
   }
   return count.toString();
 };
+
 const AUTOPLAY_INTERVAL = 5000; // 5 seconds between slides
 
 const Dashboard = () => {
@@ -36,9 +38,11 @@ const Dashboard = () => {
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
+
   const handleNavigateToServers = () => {
     navigate('/servers');
   };
+
   const trendingServers = [{
     id: "trend1",
     name: "FastGPT Server",
@@ -180,10 +184,12 @@ const Dashboard = () => {
     features: ["Multiple personality templates", "Context management", "Knowledge base integration", "Multi-turn conversations"],
     repository: "https://github.com/chattech/chatbot"
   }];
+
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
   };
+
   const handleInstall = (serverId: string) => {
     const server = trendingServers.find(item => item.id === serverId);
     if (!server) return;
@@ -202,10 +208,13 @@ const Dashboard = () => {
       }));
     }, 1500);
   };
+
   const toggleStep = (stepIndex: number) => {
     setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
   };
-  return <div className="space-y-8 animate-fade-in pb-16">
+
+  return (
+    <div className="space-y-8 animate-fade-in pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
@@ -224,19 +233,29 @@ const Dashboard = () => {
         
         <div className="w-full relative group" onMouseEnter={() => setShowCarouselControls(true)} onMouseLeave={() => setShowCarouselControls(false)}>
           <Carousel opts={{
-          align: "start",
-          loop: true,
-          skipSnaps: true,
-          startIndex: 1
-        }} className="w-full">
+            align: "start",
+            loop: true,
+            skipSnaps: true,
+            startIndex: 1
+          }} className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
-                  <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300">
+              {trendingServers.map(server => (
+                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
+                  <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
                     <CardHeader className="space-y-0 p-4">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                          {server.name}
-                        </CardTitle>
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                            {server.name}
+                          </CardTitle>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {server.type}
+                            </Badge>
+                            {server.isOfficial && <OfficialBadge />}
+                          </div>
+                        </div>
+                        <ServerLogo name={server.name} />
                       </div>
                     </CardHeader>
                     
@@ -258,7 +277,8 @@ const Dashboard = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </CarouselItem>)}
+                </CarouselItem>
+              ))}
             </CarouselContent>
             
             <div className={`transition-opacity duration-300 ${showCarouselControls ? 'opacity-100' : 'opacity-0'}`}>
@@ -571,6 +591,8 @@ const Dashboard = () => {
           </CollapsibleContent>
         </Collapsible>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Dashboard;
