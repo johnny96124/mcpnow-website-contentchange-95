@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
@@ -73,7 +72,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
               {!collapsed && (
                 <div className="space-y-1 pl-6 mt-1">
                   <NavLink 
-                    to="/" 
+                    to="/dashboard" 
                     end
                     className={({ isActive }) => 
                       cn("sidebar-item text-sm", isActive && "sidebar-item-active")
