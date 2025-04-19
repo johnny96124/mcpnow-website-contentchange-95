@@ -513,9 +513,7 @@ const Servers = () => {
               <Wrench className="h-5 w-5 text-purple-500" />
               <span>Server Tools - {selectedServerTools.serverName}</span>
             </DialogTitle>
-            <DialogDescription>
-              Debug, execute tools, and view event history for this server instance
-            </DialogDescription>
+            <DialogDescription>Debug, execute tools, and view message history for this server instance</DialogDescription>
           </DialogHeader>
           
           <div className="flex-1 overflow-hidden py-4">
