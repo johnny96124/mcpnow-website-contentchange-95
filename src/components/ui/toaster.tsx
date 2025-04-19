@@ -15,7 +15,7 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, type = "default", variant, ...props }) {
+      {toasts.map(function ({ id, title, description, action, type = "default", ...props }) {
         const Icon = type === "success" ? Check : type === "error" ? X : Info
         const bgColor = type === "success" 
           ? "bg-green-50 dark:bg-green-950" 
