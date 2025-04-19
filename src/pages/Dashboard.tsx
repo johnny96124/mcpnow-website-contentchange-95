@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, ExternalLink, Info, Loader2, Server, UsersRound, Download, X, Database, HelpCircle, ChevronDown, ChevronUp, Computer, Settings2, Layers } from 'lucide-react';
@@ -10,6 +11,7 @@ import { profiles, hosts, serverInstances, serverDefinitions } from '@/data/mock
 import { useServerContext } from '@/context/ServerContext';
 import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
+import { ServerLogo } from '@/components/servers/ServerLogo';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
