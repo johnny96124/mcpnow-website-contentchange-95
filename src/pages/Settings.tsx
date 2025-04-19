@@ -1,10 +1,10 @@
+
 import { useState, useEffect } from "react";
-import { Laptop, Moon, RefreshCw, Sun, Download, Check, Languages, Bug } from "lucide-react";
+import { Laptop, Moon, RefreshCw, Sun, Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTheme } from "@/components/theme/theme-provider";
 import { useToast } from "@/components/ui/use-toast";
 import { Progress } from "@/components/ui/progress";
@@ -22,9 +22,7 @@ const Settings = () => {
     port: DEFAULT_PORT,
     autoUpdate: true,
     minimizeToTray: true,
-    downloadMajorUpdates: false,
-    language: 'en',
-    sendErrorLogs: true
+    downloadMajorUpdates: false
   });
   
   const [initialPort, setInitialPort] = useState(settings.port);
@@ -44,20 +42,6 @@ const Settings = () => {
       ...settings,
       [key]: value
     });
-
-    if (key === 'language') {
-      toast({
-        title: "Language updated",
-        description: value === 'en' ? "Language set to English" : "语言设置为中文"
-      });
-    }
-
-    if (key === 'sendErrorLogs') {
-      toast({
-        title: "Error logging settings updated",
-        description: value ? "Error logging has been enabled" : "Error logging has been disabled"
-      });
-    }
   };
 
   const handleSavePort = () => {
@@ -81,6 +65,7 @@ const Settings = () => {
   
   const checkForUpdates = () => {
     setCheckingForUpdate(true);
+    // Simulate checking for updates
     setTimeout(() => {
       setCheckingForUpdate(false);
       setUpdateAvailable(true);
@@ -95,6 +80,7 @@ const Settings = () => {
     setDownloadingUpdate(true);
     setDownloadProgress(0);
     
+    // Simulate download progress
     const interval = setInterval(() => {
       setDownloadProgress(prev => {
         const newProgress = prev + 10;
@@ -119,6 +105,7 @@ const Settings = () => {
       description: "The application will restart to complete the installation."
     });
     
+    // Simulate app restart
     setTimeout(() => {
       setUpdateAvailable(false);
       setUpdateReady(false);
@@ -153,41 +140,6 @@ const Settings = () => {
               <Switch
                 checked={settings.startOnLogin}
                 onCheckedChange={(checked) => updateSetting('startOnLogin', checked)}
-              />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium">System Language</label>
-                <p className="text-xs text-muted-foreground">
-                  Choose your preferred language
-                </p>
-              </div>
-              <Select 
-                value={settings.language}
-                onValueChange={(value) => updateSetting('language', value)}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <Languages className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="zh">中文</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <label className="text-sm font-medium">Send Error Logs</label>
-                <p className="text-xs text-muted-foreground">
-                  Help improve MCP Now by sending anonymous error reports
-                </p>
-              </div>
-              <Switch
-                checked={settings.sendErrorLogs}
-                onCheckedChange={(checked) => updateSetting('sendErrorLogs', checked)}
               />
             </div>
             
