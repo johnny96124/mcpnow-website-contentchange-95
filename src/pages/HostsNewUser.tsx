@@ -9,9 +9,10 @@ import {
   Zap,
   MousePointer,
   CloudCog,
-  Bot,
   Cpu,
   ServerIcon,
+  Network as NetworkIcon,
+  Globe,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -127,7 +128,7 @@ const HostsNewUser = () => {
           
           <div className="flex items-start gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/30 rounded-md transition-colors">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-md text-purple-600 dark:text-purple-400">
-              <Network className="h-5 w-5" />
+              <Globe className="h-5 w-5" />
             </div>
             <div>
               <h3 className="font-medium">Connect remote hosts</h3>
@@ -187,7 +188,7 @@ const HostsNewUser = () => {
           
           <div className="bg-white dark:bg-card border p-4 rounded-lg flex items-start gap-3 shadow-sm">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-md text-purple-600 dark:text-purple-400">
-              <Network className="h-5 w-5" />
+              <Globe className="h-5 w-5" />
             </div>
             <div>
               <h3 className="font-medium">Remote Hosts</h3>
