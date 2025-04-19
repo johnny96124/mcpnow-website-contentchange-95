@@ -58,7 +58,6 @@ import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddI
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
-import { ServerLogo } from '@/components/servers/ServerLogo';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -483,7 +482,6 @@ const Discovery = () => {
                   className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
                   onClick={() => handleViewDetails(server)}
                 >
-                  <ServerLogo server={server} />
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">
@@ -777,3 +775,122 @@ const Discovery = () => {
                               <div className="bg-white dark:bg-gray-900 rounded-md p-3">
                                 <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
                                   {formatNumber(selectedServer.downloads || 386)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Installs</div>
+                              </div>
+                              
+                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.watches || 215)}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">Stars</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                          Available Tools
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          These tools are available for this server definition. Tools can be used after creating an instance.
+                        </p>
+                      </div>
+                      
+                      <ServerToolsList tools={selectedServer.tools} isDiscoveryView={true} />
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+              
+              <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  size="sm"
+                >
+                  Close
+                </Button>
+                
+                {installedServers[selectedServer.id] ? (
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className={`
+                      ${installedButtonHover[selectedServer.id] ?
+                        "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" :
+                        "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
+                      }
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigateToServers();
+                    }}
+                    onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: true }))}
+                    onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: false }))}
+                  >
+                    {installedButtonHover[selectedServer.id] ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 mr-2" />
+                        Check
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-3.5 w-3.5 mr-2" />
+                        Installed
+                      </>
+                    )}
+                  </Button>
+                ) : isInstalling[selectedServer.id] ? (
+                  <Button 
+                    disabled
+                    size="sm"
+                    className="bg-blue-50 text-blue-600 border-blue-200"
+                  >
+                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                    Installing...
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInstall(selectedServer.id);
+                    }}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Download className="h-3.5 w-3.5 mr-2" />
+                    Install Server
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AddInstanceDialog
+        open={addInstanceOpen}
+        onOpenChange={setAddInstanceOpen}
+        serverDefinition={selectedDefinition}
+        onCreateInstance={handleCreateInstance}
+      />
+
+      <AddToProfileDialog
+        open={addToProfileOpen}
+        onOpenChange={setAddToProfileOpen}
+        onAddToProfile={handleAddToProfile}
+        serverDefinition={selectedDefinition}
+        profiles={allProfiles}
+      />
+    </div>
+  );
+};
+
+export default Discovery;
