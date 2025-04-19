@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -56,7 +57,7 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { useHostProfiles } from "@/hooks/use-hostProfiles";
+import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 
