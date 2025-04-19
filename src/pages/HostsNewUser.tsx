@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -112,46 +111,65 @@ const HostsNewUser = () => {
           <h2 className="text-2xl font-semibold mb-4">What are hosts?</h2>
           <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
             <CardContent className="p-6">
-              <p className="text-muted-foreground mb-6">
-                Hosts are computers or servers that run your model profiles and instances.
-                You need at least one host to start using the platform.
-              </p>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
-                    <Search className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium">Scan for hosts</h3>
-                    <p className="text-xs text-muted-foreground">
-                      We'll automatically detect hosts on your local network
-                    </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Hosts are computers or servers that run your model profiles and instances.
+                    You need at least one host to start using the platform.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
+                        <Search className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Scan for hosts</h3>
+                        <p className="text-xs text-muted-foreground">
+                          We'll automatically detect hosts on your local network
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
+                        <ServerIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Add hosts manually</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Configure remote hosts or servers with custom settings
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
+                        <ArrowRight className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Connect profiles to hosts</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Link your model profiles to the appropriate hosts
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
-                    <ServerIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium">Add hosts manually</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Configure remote hosts or servers with custom settings
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
-                    <ArrowRight className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium">Connect profiles to hosts</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Link your model profiles to the appropriate hosts
-                    </p>
-                  </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium mb-3">Supported host types</h3>
+                  {hostTypes.map((type) => (
+                    <Card key={type.name} className="border hover:shadow-md transition-shadow">
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div>{type.icon}</div>
+                        <div>
+                          <h4 className="font-medium">{type.name}</h4>
+                          <p className="text-xs text-muted-foreground">{type.description}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
               
@@ -185,23 +203,6 @@ const HostsNewUser = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <Separator />
-        
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Supported host types</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {hostTypes.map((type) => (
-              <Card key={type.name} className="border hover:shadow-md transition-shadow">
-                <CardContent className="p-4 flex flex-col items-center text-center">
-                  <div className="mb-3">{type.icon}</div>
-                  <h3 className="font-medium">{type.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{type.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
         
         <Separator />
