@@ -5,7 +5,7 @@ import {
   Grid,
   Monitor,
   Database,
-  Servers,
+  Server,
   Search,
   Settings,
   Moon,
@@ -40,7 +40,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
     },
     { title: "Hosts", path: "/hosts", icon: Monitor },
     { title: "Profiles", path: "/profiles", icon: Database },
-    { title: "Servers", path: "/servers", icon: Servers },
+    { title: "Servers", path: "/servers", icon: Server },
     { title: "Discovery", path: "/discovery", icon: Search },
     { title: "Settings", path: "/settings", icon: Settings },
   ];
