@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
@@ -8,14 +9,6 @@ type ToastType = "default" | "success" | "error"
 
 type ToasterToast = ToastProps & {
   id: string
-  title?: React.ReactNode
-  description?: React.ReactNode
-  action?: ToastActionElement
-  type?: ToastType
-  variant?: "default" | "destructive"
-}
-
-interface ToastOptions {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
@@ -143,16 +136,21 @@ function dispatch(action: Action) {
   })
 }
 
+interface ToastOptions {
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+  type?: ToastType
+  variant?: "default" | "destructive"
+}
+
 function toast(opts: ToastOptions) {
   const id = genId()
 
-  let variant: "default" | "destructive" = "default";
-  if (opts.type === "error") {
+  // Convert type to variant for backwards compatibility
+  let variant: "default" | "destructive" | undefined = opts.variant;
+  if (!variant && opts.type === "error") {
     variant = "destructive";
-  }
-  
-  if (opts.variant) {
-    variant = opts.variant;
   }
 
   const update = (props: ToasterToast) =>
@@ -167,13 +165,12 @@ function toast(opts: ToastOptions) {
     toast: {
       ...opts,
       id,
-      type: opts.type,
       variant,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
-    },
+    } as ToasterToast,
   })
 
   return {

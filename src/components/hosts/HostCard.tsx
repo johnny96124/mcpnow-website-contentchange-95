@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, MessageSquare } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -17,7 +17,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { AIChartDialog } from "@/components/ai/AIChartDialog";
 
 interface InstanceStatus {
   id: string;
@@ -59,7 +58,6 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -245,18 +243,6 @@ export function HostCard({
     setIsDeleteDialogOpen(false);
   };
   
-  const handleOpenAIDialog = () => {
-    if (host.connectionStatus !== 'connected') {
-      toast({
-        title: "Host not connected",
-        description: "Please ensure the host is connected before using the AI assistant.",
-        type: "error"
-      });
-      return;
-    }
-    setIsAIDialogOpen(true);
-  };
-  
   const profileConnectionStatus = getProfileConnectionStatus();
   const selectedProfile = profiles.find(p => p.id === profileId);
   const instancesByDefinition = getInstancesByDefinition();
@@ -350,16 +336,6 @@ export function HostCard({
             <h3 className="font-medium text-lg">{host.name}</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full p-0 h-8 w-8"
-              onClick={handleOpenAIDialog}
-              disabled={host.connectionStatus !== 'connected'}
-            >
-              <MessageSquare className="h-5 w-5 text-primary" />
-              <span className="sr-only">Open AI Assistant</span>
-            </Button>
             <StatusIndicator 
               status={
                 !profileId ? 'inactive' :
@@ -380,7 +356,6 @@ export function HostCard({
           </div>
         </div>
       </CardHeader>
-      
       <CardContent className="pt-4 space-y-4 flex-1">
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
@@ -582,29 +557,15 @@ export function HostCard({
           Delete Host
         </Button>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={handleOpenAIDialog}
-            disabled={host.connectionStatus !== 'connected'}
-            className="flex items-center gap-2"
-          >
-            <MessageSquare className="h-4 w-4" />
-            AI Assistant
-          </Button>
-          
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenConfigDialog(host.id)}
-            disabled={!host.configPath}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            View Config
-          </Button>
-        </div>
+        <Button 
+          variant="outline"
+          onClick={() => onOpenConfigDialog(host.id)}
+          disabled={!host.configPath}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          View Config
+        </Button>
       </CardFooter>
 
       <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
@@ -660,13 +621,6 @@ export function HostCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <AIChartDialog 
-        open={isAIDialogOpen} 
-        onOpenChange={setIsAIDialogOpen}
-        hostName={host.name}
-        instanceStatuses={instanceStatuses.filter(i => i.enabled && i.status === 'connected')}
-      />
     </Card>
   );
 }
