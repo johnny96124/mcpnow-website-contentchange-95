@@ -49,7 +49,7 @@ const NewUserDashboard = () => {
               server={{
                 id: 'example',
                 name: 'API',
-                type: 'rest',
+                type: 'HTTP_SSE',
                 description: 'Example server'
               }}
             />
