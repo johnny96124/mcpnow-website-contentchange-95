@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, Clock, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -113,11 +113,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     </Badge>
                   )}
 
-                  {event.isError && (
+                  {event.isError ? (
                     <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                  )}
-
-                  {isSuccess && (
+                  ) : (
                     <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                   )}
 
@@ -186,7 +184,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                           ? "text-green-600 dark:text-green-400" 
                           : event.isError 
                             ? "text-red-600 dark:text-red-400" 
-                            : "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
                       )}>
                         {event.isError ? 'Error' : 'Response'}
                       </span>

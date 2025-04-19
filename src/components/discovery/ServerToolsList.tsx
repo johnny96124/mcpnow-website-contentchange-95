@@ -455,7 +455,7 @@ export function ServerToolsList({
               className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4"
             >
               <History className="w-4 h-4 mr-2" />
-              Event History
+              Message History
             </TabsTrigger>
           </TabsList>
         </div>
@@ -494,13 +494,67 @@ export function ServerToolsList({
                           </h4>
                           <div className="space-y-4">
                             {tool.parameters.map((param) => (
-                              <ParameterItem 
-                                key={param.name} 
-                                parameter={param} 
-                                debugMode={debugMode}
-                                value={toolInputs[tool.id]?.[param.name] || ""}
-                                onChange={(value) => handleInputChange(tool.id, param.name, value)}
-                              />
+                              <div key={param.name} className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
+                                <div className="flex items-center mb-2">
+                                  <span className="font-mono text-xs text-blue-600 dark:text-blue-400 mr-2">
+                                    {param.name}
+                                  </span>
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    {param.type}
+                                  </Badge>
+                                  {param.required && (
+                                    <Badge className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">
+                                      required
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                  {param.description}
+                                </p>
+
+                                {param.default !== undefined && (
+                                  <div className="mb-2 text-xs">
+                                    <span className="text-gray-500 dark:text-gray-500">Default: </span>
+                                    <code className="font-mono text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-1 rounded">
+                                      {typeof param.default === 'object' 
+                                        ? JSON.stringify(param.default) 
+                                        : String(param.default)
+                                      }
+                                    </code>
+                                  </div>
+                                )}
+                                
+                                <div className="mt-2">
+                                  {param.type === 'string' && (
+                                    <Textarea
+                                      placeholder={`Enter ${param.name}...`}
+                                      className="h-20 text-sm"
+                                      value={toolInputs[tool.id]?.[param.name] || ''}
+                                      onChange={(e) => handleInputChange(tool.id, param.name, e.target.value)}
+                                    />
+                                  )}
+                                  {param.type === 'number' && (
+                                    <Input
+                                      type="number"
+                                      placeholder={`Enter ${param.name}...`}
+                                      className="text-sm"
+                                      value={toolInputs[tool.id]?.[param.name] || ''}
+                                      onChange={(e) => handleInputChange(tool.id, param.name, parseFloat(e.target.value) || 0)}
+                                    />
+                                  )}
+                                  {param.type === 'boolean' && (
+                                    <select
+                                      className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+                                      value={toolInputs[tool.id]?.[param.name]?.toString() || "false"}
+                                      onChange={(e) => handleInputChange(tool.id, param.name, e.target.value === "true")}
+                                    >
+                                      <option value="true">True</option>
+                                      <option value="false">False</option>
+                                    </select>
+                                  )}
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </div>
