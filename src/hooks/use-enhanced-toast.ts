@@ -5,6 +5,7 @@ type ToastOptions = {
   position?: "top-right" | "top-left" | "bottom-right" | "bottom-left" | "top-center" | "bottom-center";
   duration?: number;
   nonBlocking?: boolean;
+  className?: string; // Added className property to fix TypeScript errors
 };
 
 const defaultOptions = {
