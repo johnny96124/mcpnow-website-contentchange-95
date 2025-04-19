@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor } from "lucide-react";
@@ -6,45 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 import { hasSeenOnboarding, markOnboardingAsSeen } from "@/utils/localStorage";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import ServerLogoCard from "@/components/servers/ServerLogoCard";
 
 const NewUserDashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [isGuideOpen, setIsGuideOpen] = useState(true);
   const navigate = useNavigate();
   
-  const trendingServers = [
-    {
-      id: "google-ai",
-      name: "Google AI Server",
-      description: "High-performance machine learning and AI model serving platform",
-      downloads: 15420,
-      logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
-    },
-    {
-      id: "openai-gpt",
-      name: "OpenAI GPT Server",
-      description: "Advanced language model server with streaming capabilities",
-      downloads: 12350,
-      logo: "https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg"
-    },
-    {
-      id: "microsoft-azure",
-      name: "Azure AI Services",
-      description: "Enterprise-grade AI and ML services with robust scaling",
-      downloads: 9840,
-      logo: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg"
-    },
-    {
-      id: "aws-bedrock",
-      name: "AWS Bedrock Server",
-      description: "Cloud-native AI model serving with AWS integration",
-      downloads: 8760,
-      logo: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
-    }
-  ];
-
   useEffect(() => {
     // Check if user has seen onboarding before
     if (hasSeenOnboarding()) {
@@ -57,11 +25,6 @@ const NewUserDashboard = () => {
     markOnboardingAsSeen();
   };
 
-  const handleViewDetails = (server: any) => {
-    // Placeholder for handling server details view
-    console.log(`View details for ${server.name}`);
-  };
-
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -69,8 +32,8 @@ const NewUserDashboard = () => {
         <p className="text-muted-foreground">Welcome to MCP Now. Let's get you started.</p>
       </div>
       
-      {/* Trending Servers Section */}
-      <div className="relative group">
+      {/* Trending Servers - Empty State */}
+      <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
           <Button variant="outline" size="sm" asChild>
@@ -81,30 +44,16 @@ const NewUserDashboard = () => {
           </Button>
         </div>
         
-        <div className="w-full relative group">
-          <Carousel opts={{
-            align: "start",
-            loop: true,
-            skipSnaps: true,
-            startIndex: 1
-          }} className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
-                  <ServerLogoCard
-                    {...server}
-                    onViewDetails={() => handleViewDetails(server)}
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            <div className="transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-              <CarouselPrevious className="absolute -left-4 hover:bg-primary hover:text-primary-foreground" />
-              <CarouselNext className="absolute -right-4 hover:bg-primary hover:text-primary-foreground" />
-            </div>
-          </Carousel>
-        </div>
+        <Card className="bg-muted/30">
+          <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
+            <p className="text-muted-foreground">
+              Discover trending server types in the Discovery section to get started.
+            </p>
+            <Button className="mt-4" asChild>
+              <Link to="/discovery">Browse Discovery</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Status Overview - Empty State */}
@@ -113,7 +62,7 @@ const NewUserDashboard = () => {
         <div className="grid gap-6 md:grid-cols-3">
           {["Hosts", "Profiles", "Server Instances"].map((item, index) => (
             <Card key={index} className="overflow-hidden">
-              <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
+              <CardContent className="p-6 flex flex-col items-center justify-center h-[180px] text-center">
                 <p className="text-muted-foreground">No {item.toLowerCase()} configured yet</p>
               </CardContent>
             </Card>
