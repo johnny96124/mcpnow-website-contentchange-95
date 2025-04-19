@@ -1,6 +1,7 @@
+import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
