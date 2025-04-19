@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -71,12 +70,30 @@ interface EnhancedServerDefinition extends ServerDefinition {
   author?: string;
 }
 
+// Default icons for different server types
+const DEFAULT_ICONS = {
+  rest: '/placeholder.svg',
+  graphql: '/lovable-uploads/3053ac06-3383-41b8-8cc4-fb7f2f48f805.png',
+  grpc: '/placeholder.svg',
+  websocket: '/placeholder.svg',
+  mqtt: '/placeholder.svg',
+  default: '/placeholder.svg'
+};
+
+// Function to get appropriate icon for a server
+const getServerIcon = (server: EnhancedServerDefinition): string => {
+  if (server.icon) return server.icon;
+  if (server.type && DEFAULT_ICONS[server.type]) return DEFAULT_ICONS[server.type];
+  return DEFAULT_ICONS.default;
+};
+
 const extendedItems: EnhancedServerDefinition[] = [
   ...discoveryItems.map(item => ({
     ...item,
     views: Math.floor(Math.random() * 50000) + 1000,
     updated: "2025-03-15",
-    author: item.author || "API Team"
+    author: item.author || "API Team",
+    icon: getServerIcon(item)
   })),
   ...discoveryItems.map((item, index) => ({
     ...item,
@@ -89,7 +106,8 @@ const extendedItems: EnhancedServerDefinition[] = [
     forks: Math.floor(Math.random() * 100) + 30,
     watches: Math.floor(Math.random() * 1000) + 200,
     author: item.author || "API Team",
-    downloads: Math.floor(Math.random() * 5000) + 500
+    downloads: Math.floor(Math.random() * 5000) + 500,
+    icon: getServerIcon(item)
   })),
   ...discoveryItems.map((item, index) => ({
     ...item,
@@ -101,7 +119,8 @@ const extendedItems: EnhancedServerDefinition[] = [
     author: "Community Contributor",
     categories: [...(item.categories || []), "Community"],
     downloads: Math.floor(Math.random() * 2000) + 100,
-    watches: Math.floor(Math.random() * 500) + 50
+    watches: Math.floor(Math.random() * 500) + 50,
+    icon: getServerIcon(item)
   }))
 ];
 
@@ -216,44 +235,6 @@ const Discovery = () => {
     );
   };
 
-  const filteredServers = getFilteredServers();
-  const visibleServers = filteredServers.slice(0, visibleItems);
-  const hasMore = visibleServers.length < filteredServers.length;
-  const isSearching = searchQuery.trim().length > 0;
-
-  useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting && hasMore && !isLoading) {
-          loadMoreItems();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [visibleItems, filteredServers.length, isLoading]);
-
-  const loadMoreItems = () => {
-    if (!hasMore) return;
-    
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      setVisibleItems(prev => prev + ITEMS_PER_PAGE);
-      setIsLoading(false);
-    }, 800);
-  };
-
   const handleViewDetails = (server: EnhancedServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
@@ -332,6 +313,44 @@ const Discovery = () => {
     if (diffDays < 30) return `${diffDays} days ago`;
     if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
     return `${Math.floor(diffDays / 365)} years ago`;
+  };
+
+  const filteredServers = getFilteredServers();
+  const visibleServers = filteredServers.slice(0, visibleItems);
+  const hasMore = visibleServers.length < filteredServers.length;
+  const isSearching = searchQuery.trim().length > 0;
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          loadMoreItems();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [visibleItems, filteredServers.length, isLoading]);
+
+  const loadMoreItems = () => {
+    if (!hasMore) return;
+    
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setVisibleItems(prev => prev + ITEMS_PER_PAGE);
+      setIsLoading(false);
+    }, 800);
   };
 
   return (
@@ -483,8 +502,9 @@ const Discovery = () => {
                   className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
                   onClick={() => handleViewDetails(server)}
                 >
+                  {/* Logo Background with Frosted Glass Effect */}
                   <div 
-                    className="absolute inset-0 opacity-[0.08] dark:opacity-[0.12] transition-opacity duration-200 group-hover:opacity-[0.12] dark:group-hover:opacity-[0.16]"
+                    className="absolute inset-0 opacity-[0.08] dark:opacity-[0.12] transition-opacity duration-200 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.20]"
                     style={{
                       backgroundImage: `url(${server.icon || '/placeholder.svg'})`,
                       backgroundSize: '120%',
@@ -494,7 +514,8 @@ const Discovery = () => {
                     }}
                   />
                   
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background opacity-90" />
+                  {/* Gradient Overlay for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background opacity-90" />
 
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5 relative">
                     <div className="flex justify-between items-start gap-2 mb-1">
@@ -635,7 +656,20 @@ const Discovery = () => {
           {selectedServer && (
             <div className="h-full flex flex-col">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-                <div className="flex justify-between items-start">
+                {/* Add background icon to dialog header */}
+                <div 
+                  className="absolute inset-0 opacity-[0.08] transition-opacity"
+                  style={{
+                    backgroundImage: `url(${selectedServer.icon || '/placeholder.svg'})`,
+                    backgroundSize: '180%',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'blur(10px)',
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-600/80 to-indigo-600/90" />
+                
+                <div className="flex justify-between items-start relative z-10">
                   <div className="space-y-1">
                     <DialogTitle className="text-xl font-bold leading-tight text-white">
                       {selectedServer.name}
@@ -751,159 +785,4 @@ const Discovery = () => {
                               <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                <span className="text-sm text-gray-800 dark:text-gray-200">
-                                  {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
-                              <a 
-                                href="#" 
-                                className="text-sm text-blue-600 flex items-center hover:underline"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Globe className="h-4 w-4 mr-2" />
-                                <span className="truncate">
-                                  {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                </span>
-                                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-                              </a>
-                            </div>
-                          </div>
-                          
-                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
-                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
-                            
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.views || 1320)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">Views</div>
-                              </div>
-                              
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.downloads || 386)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">Installs</div>
-                              </div>
-                              
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.watches || 215)}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">Stars</div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
-                    <div className="p-6">
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                          Available Tools
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          These tools are available for this server definition. Tools can be used after creating an instance.
-                        </p>
-                      </div>
-                      
-                      <ServerToolsList tools={selectedServer.tools} isDiscoveryView={true} />
-                    </div>
-                  </TabsContent>
-                </div>
-              </Tabs>
-              
-              <div className="flex justify-end p-5 border-t gap-3 bg-gray-50 dark:bg-gray-800/50">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                  size="sm"
-                >
-                  Close
-                </Button>
-                
-                {installedServers[selectedServer.id] ? (
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className={`
-                      ${installedButtonHover[selectedServer.id] ?
-                        "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" :
-                        "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
-                      }
-                    `}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleNavigateToServers();
-                    }}
-                    onMouseEnter={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: true }))}
-                    onMouseLeave={() => setInstalledButtonHover(prev => ({ ...prev, [selectedServer.id]: false }))}
-                  >
-                    {installedButtonHover[selectedServer.id] ? (
-                      <>
-                        <Check className="h-3.5 w-3.5 mr-2" />
-                        Check
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="h-3.5 w-3.5 mr-2" />
-                        Installed
-                      </>
-                    )}
-                  </Button>
-                ) : isInstalling[selectedServer.id] ? (
-                  <Button 
-                    disabled
-                    size="sm"
-                    className="bg-blue-50 text-blue-600 border-blue-200"
-                  >
-                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                    Installing...
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleInstall(selectedServer.id);
-                    }}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Download className="h-3.5 w-3.5 mr-2" />
-                    Install Server
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <AddInstanceDialog
-        open={addInstanceOpen}
-        onOpenChange={setAddInstanceOpen}
-        serverDefinition={selectedDefinition}
-        onCreateInstance={handleCreateInstance}
-      />
-
-      <AddToProfileDialog
-        open={addToProfileOpen}
-        onOpenChange={setAddToProfileOpen}
-        onAddToProfile={handleAddToProfile}
-        serverDefinition={selectedDefinition}
-        profiles={allProfiles}
-      />
-    </div>
-  );
-};
-
-export default Discovery;
+                                <span className="text-sm text-gray
