@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -785,4 +786,128 @@ const Discovery = () => {
                               <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
                               <div className="flex items-center">
                                 <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                <span className="text-sm text-gray
+                                <span className="text-sm text-gray-800 dark:text-gray-200">
+                                  {selectedServer.updated ? getTimeAgo(selectedServer.updated) : 'Recently'}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Downloads</h3>
+                              <div className="flex items-center">
+                                <Download className="h-4 w-4 mr-2 text-gray-400" />
+                                <span className="text-sm text-gray-800 dark:text-gray-200">
+                                  {formatNumber(selectedServer.downloads || 0)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Type</h3>
+                              <div className="flex items-center">
+                                <Globe className="h-4 w-4 mr-2 text-gray-400" />
+                                <span className="text-sm capitalize text-gray-800 dark:text-gray-200">
+                                  {selectedServer.type} API
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {selectedServer.sourceUrl && (
+                              <div>
+                                <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Source</h3>
+                                <div className="flex items-center">
+                                  <Link2 className="h-4 w-4 mr-2 text-gray-400" />
+                                  <a 
+                                    href={selectedServer.sourceUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-blue-600 hover:text-blue-700 hover:underline flex items-center"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    View Source
+                                    <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col space-y-3 mt-4">
+                            {installedServers[selectedServer.id] ? (
+                              <Button 
+                                variant="outline" 
+                                className="w-full border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+                                onClick={handleNavigateToServers}
+                              >
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                                Installed
+                              </Button>
+                            ) : (
+                              <Button 
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                                onClick={() => handleInstall(selectedServer.id)}
+                                disabled={isInstalling[selectedServer.id]}
+                              >
+                                {isInstalling[selectedServer.id] ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Installing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Install
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
+                    <div className="p-6">
+                      {selectedServer.tools && selectedServer.tools.length > 0 ? (
+                        <ServerToolsList tools={selectedServer.tools} />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-64 text-center p-6">
+                          <Wrench className="h-10 w-10 text-gray-300 mb-4" />
+                          <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">No Tools Available</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+                            This server definition doesn't include any specialized tools or utilities.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      <AddInstanceDialog 
+        open={addInstanceOpen} 
+        onOpenChange={setAddInstanceOpen} 
+        serverId={selectedDefinition?.id || ""}
+        serverName={selectedDefinition?.name || ""}
+        serverDescription={selectedDefinition?.description || ""}
+        onSubmit={handleCreateInstance}
+      />
+      
+      <AddToProfileDialog 
+        open={addToProfileOpen}
+        onOpenChange={setAddToProfileOpen}
+        profiles={allProfiles}
+        onSelect={handleAddToProfile}
+        server={selectedDefinition}
+      />
+    </div>
+  );
+};
+
+export default Discovery;
+
