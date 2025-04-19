@@ -1,3 +1,4 @@
+
 import { Tool, ToolParameter } from "@/data/mockData";
 import { 
   Accordion, 
@@ -319,6 +320,7 @@ export function ServerToolsList({
     return true;
   };
 
+  // For Discovery view, we only show the tools without tabs
   if (isDiscoveryView) {
     return (
       <div className="flex flex-col h-full">
@@ -433,6 +435,7 @@ export function ServerToolsList({
     );
   }
 
+  // For normal view (Servers page), we show both Tools and Message History tabs
   return (
     <div className="flex flex-col h-full">
       <Tabs 
