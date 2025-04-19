@@ -172,7 +172,7 @@ function toast(opts: ToastOptions) {
       ...opts,
       id,
       type: opts.type,
-      variant, 
+      variant,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
