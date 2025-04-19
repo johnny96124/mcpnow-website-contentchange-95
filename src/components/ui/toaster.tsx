@@ -20,7 +20,7 @@ export function Toaster() {
         const bgColor = type === "success" 
           ? "bg-green-50 dark:bg-green-950" 
           : type === "error" 
-          ? "bg-red-50 dark:bg-red-950"
+          ? "bg-white dark:bg-gray-950"
           : "bg-gray-50 dark:bg-gray-950"
         
         const iconColor = type === "success"
