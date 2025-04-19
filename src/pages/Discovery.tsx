@@ -56,8 +56,9 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useHostProfiles } from "@/hooks/use-hostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
+import { ServerLogo } from '@/components/servers/ServerLogo';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -482,6 +483,7 @@ const Discovery = () => {
                   className="flex flex-col overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-800 cursor-pointer group relative"
                   onClick={() => handleViewDetails(server)}
                 >
+                  <ServerLogo server={server} />
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">

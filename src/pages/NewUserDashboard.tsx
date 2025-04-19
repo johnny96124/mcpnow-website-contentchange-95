@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor } from "lucide-react";
@@ -7,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 import { hasSeenOnboarding, markOnboardingAsSeen } from "@/utils/localStorage";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ServerLogo } from '@/components/servers/ServerLogo';
 
 const NewUserDashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -14,7 +14,6 @@ const NewUserDashboard = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if user has seen onboarding before
     if (hasSeenOnboarding()) {
       navigate('/');
     }
@@ -45,7 +44,15 @@ const NewUserDashboard = () => {
         </div>
         
         <Card className="bg-muted/30">
-          <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] text-center relative overflow-hidden">
+            <ServerLogo 
+              server={{
+                id: 'example',
+                name: 'API',
+                type: 'rest',
+                description: 'Example server'
+              }}
+            />
             <p className="text-muted-foreground">
               Discover trending server types in the Discovery section to get started.
             </p>
