@@ -20,14 +20,9 @@ const DefaultLayout = () => {
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   
   useEffect(() => {
-    // Redirect to new user dashboard if on landing page and no onboarding seen
-    if ((location.pathname === '/' || location.pathname === '/tray') && !hasSeenOnboarding()) {
-      navigate('/dashboard/new-user');
-    }
-    
     // Check main onboarding
     if (location.pathname === '/' && !hasSeenOnboarding()) {
-      navigate('/dashboard/new-user');
+      navigate('/new-user');
     }
     
     // Check hosts onboarding
@@ -80,4 +75,3 @@ const DefaultLayout = () => {
 };
 
 export default DefaultLayout;
-
