@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Users, Database, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
@@ -16,7 +15,7 @@ const NewUserDashboard = () => {
   useEffect(() => {
     // Check if user has seen onboarding before
     if (hasSeenOnboarding()) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -24,6 +23,36 @@ const NewUserDashboard = () => {
     setShowOnboarding(false);
     markOnboardingAsSeen();
   };
+
+  const statusCards = [
+    {
+      title: "Connected Hosts",
+      subtitle: "0 of 0 hosts connected",
+      icon: Users,
+      message: "No Hosts Connected",
+      description: "Add hosts to manage your infrastructure",
+      action: "Add Host",
+      link: "/hosts"
+    },
+    {
+      title: "Active Profiles",
+      subtitle: "0 of 0 profiles enabled",
+      icon: Database,
+      message: "No Profiles Created",
+      description: "Create profiles to manage your API connections",
+      action: "Create Profile",
+      link: "/profiles"
+    },
+    {
+      title: "Server Instances",
+      subtitle: "0 of 0 instances running",
+      icon: Server,
+      message: "No Server Instances",
+      description: "Add server instances to expand functionality",
+      action: "Add Server Instance",
+      link: "/servers"
+    }
+  ];
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -60,10 +89,26 @@ const NewUserDashboard = () => {
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-4">Status</h2>
         <div className="grid gap-6 md:grid-cols-3">
-          {["Hosts", "Profiles", "Server Instances"].map((item, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardContent className="p-6 flex flex-col items-center justify-center h-[180px] text-center">
-                <p className="text-muted-foreground">No {item.toLowerCase()} configured yet</p>
+          {statusCards.map((card, index) => (
+            <Card key={index} className="relative">
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <card.icon className="h-5 w-5 text-muted-foreground absolute top-6 right-6" />
+                  <h3 className="font-semibold text-lg">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground">{card.subtitle}</p>
+                </div>
+                
+                <div className="space-y-4 text-center mb-6">
+                  <card.icon className="h-12 w-12 mx-auto text-muted-foreground/50" />
+                  <div>
+                    <h4 className="font-medium mb-1">{card.message}</h4>
+                    <p className="text-sm text-muted-foreground">{card.description}</p>
+                  </div>
+                </div>
+
+                <Button className="w-full" asChild>
+                  <Link to={card.link}>{card.action}</Link>
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -92,7 +137,7 @@ const NewUserDashboard = () => {
             </CollapsibleTrigger>
           </div>
           
-          <CollapsibleContent className="animate-accordion-down">
+          <CollapsibleContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
               <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
                 <CardContent className="p-4 h-full flex flex-col">
