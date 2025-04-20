@@ -1,23 +1,50 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor, UsersRound, CheckCircle, Download, X, Info, Loader2 } from "lucide-react";
+import { 
+  Database,
+  ExternalLink,
+  Info,
+  Loader2,
+  Server, 
+  UsersRound,
+  CheckCircle,
+  Download,
+  X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { useState } from "react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { EmptyState } from "@/components/discovery/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
 const EmptyDashboard = () => {
-  const [isGuideOpen, setIsGuideOpen] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
-
+  
+  // Empty arrays for hosts, profiles, and server instances
+  const hosts = [];
+  const profiles = [];
+  const serverInstances = [];
+  const serverDefinitions = [];
+  
+  // Stats with zero values
+  const activeProfiles = 0;
+  const runningInstances = 0;
+  const connectedHosts = 0;
+  
   const trendingServers = [
     { 
       id: "trend1", 
@@ -246,13 +273,16 @@ const EmptyDashboard = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
-        <p className="text-muted-foreground">Welcome to MCP Now.</p>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Empty Dashboard</h1>
+          <p className="text-muted-foreground">
+            Empty state view for MCP profiles, servers, and host connections.
+          </p>
+        </div>
       </div>
-
-      {/* Status Overview - Empty States */}
+      
       <div className="grid gap-6 md:grid-cols-3">
         {/* Empty Connected Hosts Card */}
         <Card className="overflow-hidden flex flex-col">
@@ -262,7 +292,7 @@ const EmptyDashboard = () => {
                 Connected Hosts
               </CardTitle>
               <CardDescription>
-                0 hosts connected
+                {connectedHosts} of {hosts.length} hosts connected
               </CardDescription>
             </div>
             <UsersRound className="h-5 w-5 text-muted-foreground" />
@@ -286,7 +316,7 @@ const EmptyDashboard = () => {
             </Button>
           </CardFooter>
         </Card>
-
+        
         {/* Empty Active Profiles Card */}
         <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -295,7 +325,7 @@ const EmptyDashboard = () => {
                 Active Profiles
               </CardTitle>
               <CardDescription>
-                0 profiles enabled
+                {activeProfiles} of {profiles.length} profiles enabled
               </CardDescription>
             </div>
             <Database className="h-5 w-5 text-muted-foreground" />
@@ -319,7 +349,7 @@ const EmptyDashboard = () => {
             </Button>
           </CardFooter>
         </Card>
-
+        
         {/* Empty Server Instances Card */}
         <Card className="overflow-hidden flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -328,7 +358,7 @@ const EmptyDashboard = () => {
                 Server Instances
               </CardTitle>
               <CardDescription>
-                0 instances running
+                {runningInstances} of {serverInstances.length} instances running
               </CardDescription>
             </div>
             <Server className="h-5 w-5 text-muted-foreground" />
@@ -353,8 +383,7 @@ const EmptyDashboard = () => {
           </CardFooter>
         </Card>
       </div>
-
-      {/* Trending Servers Section */}
+      
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -417,107 +446,6 @@ const EmptyDashboard = () => {
         </div>
       </div>
       
-      {/* Getting Started Guide */}
-      <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-        <Collapsible open={isGuideOpen} onOpenChange={setIsGuideOpen} className="w-full">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-2">
-              <HelpCircle className="h-5 w-5 text-blue-500" />
-              <h2 className="text-2xl font-bold tracking-tight">Getting Started with MCP Now</h2>
-            </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-1">
-                {isGuideOpen ? (
-                  <ChevronUp className="h-5 w-5" />
-                ) : (
-                  <ChevronDown className="h-5 w-5" />
-                )}
-                <span className="sr-only">
-                  {isGuideOpen ? "Hide" : "Show"} getting started guide
-                </span>
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          
-          <CollapsibleContent className="animate-accordion-down">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
-                <CardContent className="p-4 h-full flex flex-col">
-                  <div className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                    <Server className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-medium mb-2">1. Install Servers</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
-                    Browse and install server definitions for your workflow.
-                  </p>
-                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
-                    <Link to="/discovery">
-                      Go to Discovery
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-purple-100 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/20">
-                <CardContent className="p-4 h-full flex flex-col">
-                  <div className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                    <Settings2 className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-medium mb-2">2. Create Instances</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
-                    Configure server instances with your specific settings.
-                  </p>
-                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
-                    <Link to="/servers">
-                      Manage Servers
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-green-100 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
-                <CardContent className="p-4 h-full flex flex-col">
-                  <div className="bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                    <Database className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-medium mb-2">3. Create Profiles</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
-                    Group server instances into functional profiles.
-                  </p>
-                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
-                    <Link to="/profiles">
-                      Manage Profiles
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-amber-100 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20">
-                <CardContent className="p-4 h-full flex flex-col">
-                  <div className="bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 rounded-full p-2 w-10 h-10 flex items-center justify-center mb-3">
-                    <Monitor className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-medium mb-2">4. Connect Hosts</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">
-                    Link your profiles to hosts for deployment.
-                  </p>
-                  <Button asChild size="sm" variant="outline" className="gap-1 mt-auto w-full">
-                    <Link to="/hosts">
-                      Manage Hosts
-                      <ExternalLink className="h-3.5 w-3.5 ml-1" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-
-      {/* Server Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
