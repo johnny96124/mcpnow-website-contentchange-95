@@ -1,6 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Users, Database, Server } from "lucide-react";
+import { 
+  ExternalLink, 
+  ChevronDown, 
+  ChevronUp, 
+  HelpCircle, 
+  Users, 
+  Database, 
+  Server, 
+  Settings2,
+  Monitor 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
