@@ -215,7 +215,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-16">
+    <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
@@ -245,17 +245,11 @@ const Dashboard = () => {
                   <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
                     <CardHeader className="space-y-0 p-4 pb-0">
                       <div className="flex items-start justify-start gap-3">
-                        <ServerLogo name={server.name} />
-                        <div>
+                        <ServerLogo name={server.name} size="large" />
+                        <div className="flex-1">
                           <CardTitle className="text-xl group-hover:text-primary transition-colors">
                             {server.name}
                           </CardTitle>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {server.type}
-                            </Badge>
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
                         </div>
                       </div>
                     </CardHeader>
@@ -268,7 +262,7 @@ const Dashboard = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm flex items-center gap-1.5 text-muted-foreground">
                           <Download className="h-4 w-4" />
-                          {(server.downloads / 1000).toFixed(1)}k
+                          {formatDownloadCount(server.downloads)}
                         </span>
                         
                         <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)} className="hover:bg-primary hover:text-primary-foreground">
