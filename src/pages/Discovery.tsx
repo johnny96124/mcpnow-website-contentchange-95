@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -487,15 +488,16 @@ const Discovery = () => {
                   <CardHeader className="pb-2 space-y-0 px-5 pt-5">
                     <div className="flex justify-between items-start gap-2 mb-1">
                       <div className="flex items-start gap-3">
-                        <ServerLogo name={server.name} />
+                        <ServerLogo name={server.name} className="w-12 h-12" />
                         <div className="flex flex-col">
                           <CardTitle 
                             className="text-lg font-semibold text-foreground group-hover:text-blue-600 transition-colors"
                           >
                             {server.name}
                           </CardTitle>
-                          <div className="text-sm text-gray-500">
-                            {server.type}
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <EndpointLabel type={server.type} />
+                            {server.isOfficial && <OfficialBadge />}
                           </div>
                         </div>
                       </div>

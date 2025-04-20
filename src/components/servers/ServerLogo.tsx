@@ -14,14 +14,14 @@ export const ServerLogo: React.FC<ServerLogoProps> = ({ name, className }) => {
     .map(word => word[0])
     .join('')
     .toUpperCase()
-    .slice(0, 1);
+    .slice(0, 2);
 
   return (
     <div className={cn(
-      "flex items-center justify-center w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-950/30",
+      "flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/20 border border-blue-100 dark:border-blue-900",
       className
     )}>
-      <span className="text-lg font-medium text-blue-600 dark:text-blue-400">
+      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
         {initials}
       </span>
     </div>
