@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ExternalLink, ChevronDown, ChevronUp, HelpCircle, Server, Settings2, Database, Monitor, UsersRound, CheckCircle, Download, X, Info, Loader2 } from "lucide-react";
@@ -10,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 import type { ServerDefinition, EndpointType } from "@/data/mockData";
 
 const EmptyDashboard = () => {
@@ -19,7 +17,6 @@ const EmptyDashboard = () => {
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
-  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const trendingServers = [
     { 
@@ -223,7 +220,7 @@ const EmptyDashboard = () => {
       repository: "https://github.com/chattech/chatbot"
     }
   ];
-
+  
   const handleViewDetails = (server: ServerDefinition) => {
     setSelectedServer(server);
     setIsDialogOpen(true);
@@ -244,7 +241,7 @@ const EmptyDashboard = () => {
   const formatDownloadCount = (count: number) => {
     return `${(count / 1000).toFixed(1)}K`;
   };
-
+  
   const handleNavigateToServers = () => {
   };
 
@@ -252,110 +249,112 @@ const EmptyDashboard = () => {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
-        <p className="text-muted-foreground">Welcome to MCP Now. Let's get you started.</p>
+        <p className="text-muted-foreground">Welcome to MCP Now.</p>
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Status</h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="overflow-hidden flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle className="text-lg font-medium">
-                  Connected Hosts
-                </CardTitle>
-                <CardDescription>
-                  0 hosts connected
-                </CardDescription>
+      {/* Status Overview - Empty States */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Empty Connected Hosts Card */}
+        <Card className="overflow-hidden flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Connected Hosts
+              </CardTitle>
+              <CardDescription>
+                0 hosts connected
+              </CardDescription>
+            </div>
+            <UsersRound className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4 flex-1 flex items-center justify-center">
+            <div className="text-center p-4">
+              <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <UsersRound className="h-8 w-8 text-muted-foreground" />
               </div>
-              <UsersRound className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex items-center justify-center">
-              <div className="text-center p-4">
-                <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <UsersRound className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-1">No Hosts Connected</h3>
-                <p className="text-sm text-muted-foreground">
-                  Add hosts to manage your infrastructure
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-2 mt-auto border-t">
-              <Button asChild className="w-full">
-                <Link to="/hosts">
-                  Add Host
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
+              <h3 className="text-lg font-medium mb-1">No Hosts Connected</h3>
+              <p className="text-sm text-muted-foreground">
+                Add hosts to manage your infrastructure
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/hosts">
+                Add Host
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
 
-          <Card className="overflow-hidden flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle className="text-lg font-medium">
-                  Active Profiles
-                </CardTitle>
-                <CardDescription>
-                  0 profiles enabled
-                </CardDescription>
+        {/* Empty Active Profiles Card */}
+        <Card className="overflow-hidden flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Active Profiles
+              </CardTitle>
+              <CardDescription>
+                0 profiles enabled
+              </CardDescription>
+            </div>
+            <Database className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4 flex-1 flex items-center justify-center">
+            <div className="text-center p-4">
+              <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Database className="h-8 w-8 text-muted-foreground" />
               </div>
-              <Database className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex items-center justify-center">
-              <div className="text-center p-4">
-                <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Database className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-1">No Profiles Created</h3>
-                <p className="text-sm text-muted-foreground">
-                  Create profiles to manage your API connections
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-2 mt-auto border-t">
-              <Button asChild className="w-full">
-                <Link to="/profiles">
-                  Create Profile
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
+              <h3 className="text-lg font-medium mb-1">No Profiles Created</h3>
+              <p className="text-sm text-muted-foreground">
+                Create profiles to manage your API connections
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/profiles">
+                Create Profile
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
 
-          <Card className="overflow-hidden flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle className="text-lg font-medium">
-                  Server Instances
-                </CardTitle>
-                <CardDescription>
-                  0 instances running
-                </CardDescription>
+        {/* Empty Server Instances Card */}
+        <Card className="overflow-hidden flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle className="text-lg font-medium">
+                Server Instances
+              </CardTitle>
+              <CardDescription>
+                0 instances running
+              </CardDescription>
+            </div>
+            <Server className="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="space-y-4 flex-1 flex items-center justify-center">
+            <div className="text-center p-4">
+              <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Server className="h-8 w-8 text-muted-foreground" />
               </div>
-              <Server className="h-5 w-5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="space-y-4 flex-1 flex items-center justify-center">
-              <div className="text-center p-4">
-                <div className="rounded-full bg-muted/50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Server className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-1">No Server Instances</h3>
-                <p className="text-sm text-muted-foreground">
-                  Add server instances to expand functionality
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-2 mt-auto border-t">
-              <Button asChild className="w-full">
-                <Link to="/servers">
-                  Add Server Instance
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+              <h3 className="text-lg font-medium mb-1">No Server Instances</h3>
+              <p className="text-sm text-muted-foreground">
+                Add server instances to expand functionality
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="pt-2 mt-auto border-t">
+            <Button asChild className="w-full">
+              <Link to="/servers">
+                Add Server Instance
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
 
+      {/* Trending Servers Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -417,7 +416,8 @@ const EmptyDashboard = () => {
           </Carousel>
         </div>
       </div>
-
+      
+      {/* Getting Started Guide */}
       <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
         <Collapsible open={isGuideOpen} onOpenChange={setIsGuideOpen} className="w-full">
           <div className="flex justify-between items-center mb-4">
@@ -517,6 +517,7 @@ const EmptyDashboard = () => {
         </Collapsible>
       </div>
 
+      {/* Server Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white dark:bg-gray-900">
           {selectedServer && (
@@ -629,11 +630,6 @@ const EmptyDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
-
-      <GettingStartedDialog 
-        open={showOnboarding}
-        onOpenChange={setShowOnboarding}
-      />
     </div>
   );
 };
