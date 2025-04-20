@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
-import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useHostProfiles } from "@/hooks/use-hostProfiles";
 import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
 
 const HostsNewUser = () => {
