@@ -9,7 +9,7 @@ import { HostCard } from "@/components/hosts/HostCard";
 import { HostSearch } from "@/components/hosts/HostSearch";
 import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
-import { useHostProfiles } from "@/hooks/use-hostProfiles";
+import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
