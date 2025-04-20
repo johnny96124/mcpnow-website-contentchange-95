@@ -144,13 +144,13 @@ interface ToastOptions {
   variant?: "default" | "destructive"
 }
 
-function toast(opts: ToastOptions) {
+export function toast(opts: ToastOptions) {
   const id = genId()
 
   // Convert type to variant for backwards compatibility
-  let variant: "default" | "destructive" | undefined = opts.variant;
+  let variant: "default" | "destructive" | undefined = opts.variant
   if (!variant && opts.type === "error") {
-    variant = "destructive";
+    variant = "destructive"
   }
 
   const update = (props: ToasterToast) =>

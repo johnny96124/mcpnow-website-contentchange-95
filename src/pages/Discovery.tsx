@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -57,7 +56,7 @@ import {
 } from "@/components/ui/select";
 import { AddInstanceDialog, InstanceFormValues } from "@/components/servers/AddInstanceDialog";
 import { AddToProfileDialog } from "@/components/discovery/AddToProfileDialog";
-import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useHostProfiles } from "@/hooks/use-hostProfiles";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 
@@ -541,7 +540,7 @@ const Discovery = () => {
                           variant="outline" 
                           size="sm" 
                           className={`
-                            h-8
+                            h-8 transition-all duration-200
                             ${installedButtonHover[server.id] ? 
                               "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" : 
                               "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"}
@@ -556,25 +555,14 @@ const Discovery = () => {
                           {installedButtonHover[server.id] ? (
                             <>
                               <Check className="h-3.5 w-3.5 mr-1" />
-                              Check
+                              Check Server
                             </>
                           ) : (
                             <>
                               <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                              Installed
+                              Server Installed
                             </>
                           )}
-                        </Button>
-                      ) : isInstalling[server.id] ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          disabled 
-                          className="bg-blue-50 text-blue-600 border-blue-200 h-8"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                          Installing...
                         </Button>
                       ) : (
                         <Button 
