@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
@@ -19,10 +20,9 @@ const DefaultLayout = () => {
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   
   useEffect(() => {
-    // Check if user is on main page or dashboard and hasn't seen onboarding
-    if ((location.pathname === '/' || location.pathname === '/dashboard') && !hasSeenOnboarding()) {
-      navigate('/dashboard/new-user');
-      return;
+    // Check main onboarding
+    if (location.pathname === '/' && !hasSeenOnboarding()) {
+      navigate('/new-user');
     }
     
     // Check hosts onboarding
