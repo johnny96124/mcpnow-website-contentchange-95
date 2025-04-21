@@ -38,10 +38,8 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/tray" element={<TrayPopup />} />
-                <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/" element={<DefaultLayout />}>
+                  <Route index element={<Dashboard />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="new-user" element={<NewUserDashboard />} />
                   <Route path="empty-dashboard" element={<EmptyDashboard />} />
@@ -55,6 +53,9 @@ const App = () => {
                   <Route path="discovery/no-network" element={<DiscoveryNoNetwork />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
+                <Route path="/tray" element={<TrayPopup />} />
+                <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
+                <Route path="/introduction" element={<LandingPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
