@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -111,26 +110,72 @@
   }
 }
 
-/* 新增左侧导航外框距离横线的间距以及暗黑模式颜色调整 */
-.sidebar-border-spacing {
-  border-radius: 0.5rem; /* 保持圆角一致 */
-  border: 1px solid hsl(var(--sidebar-border));
-  margin-bottom: 8px; /* 跟横线拉开距离 */
+@layer components {
+  .status-dot {
+    @apply h-2.5 w-2.5 rounded-full inline-block;
+  }
+  
+  .status-active {
+    @apply bg-[hsl(var(--status-active))];
+  }
+  
+  .status-warning {
+    @apply bg-[hsl(var(--status-warning))];
+  }
+  
+  .status-error {
+    @apply bg-[hsl(var(--status-error))];
+  }
+  
+  .status-inactive {
+    @apply bg-[hsl(var(--status-inactive))];
+  }
+  
+  .status-verified {
+    @apply bg-[hsl(var(--status-verified))];
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:bg-muted/50 hover:shadow-sm;
+  }
+  
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+  }
+  
+  .sidebar-item-active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground;
+  }
+  
+  .endpoint-tag {
+    @apply inline-flex items-center rounded-md px-2 py-1 text-xs font-medium;
+  }
+  
+  .endpoint-http {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300;
+  }
+  
+  .endpoint-stdio {
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300;
+  }
+  
+  .endpoint-official {
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300;
+  }
 
-  /* 在暗黑模式中调整颜色 */
-  @apply dark:border-[hsl(var(--sidebar-border))];
-}
+  /* Animation classes */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
 
-/* 针对左侧纵向边框与横线间距的调整，避免粘连 */
-.sidebar-border-bottom {
-  border-bottom: 1px solid hsl(var(--sidebar-border));
-  margin-top: 8px;
-  @apply dark:border-[hsl(var(--sidebar-border))];
-}
-
-/* 调整左侧导航横线下移，避免和圆角外框粘连 */
-.main-sidebar-border-t {
-  border-top: 1px solid hsl(var(--sidebar-border));
-  margin-top: 8px;
-  @apply dark:border-[hsl(var(--sidebar-border))];
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
