@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface ConfigFileDialogProps {
   open: boolean;
@@ -281,7 +282,8 @@ export function ConfigFileDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleCloseDialog}>
-      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh]">
+      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[90vh] relative">
+        <CloseIconButton onClick={() => onOpenChange(false)} />
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{dialogTitle}</DialogTitle>

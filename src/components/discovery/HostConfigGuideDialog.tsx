@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Dialog,
@@ -14,6 +13,7 @@ import { Check, ExternalLink, Info, Server } from "lucide-react";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Profile } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface Host {
   id: string;
@@ -43,7 +43,8 @@ export function HostConfigGuideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] relative">
+        <CloseIconButton onClick={() => onOpenChange(false)} />
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <Info className="h-5 w-5 text-blue-500" />

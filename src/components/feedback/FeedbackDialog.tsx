@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Dialog,
@@ -15,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -46,13 +46,13 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] relative">
+        <CloseIconButton onClick={() => onOpenChange(false)} />
         <DialogHeader>
           <DialogTitle>Send Feedback</DialogTitle>
           <DialogDescription>
             Share your thoughts to help us improve MCP Now.
           </DialogDescription>
-          {/* Remove the duplicate close button */}
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">

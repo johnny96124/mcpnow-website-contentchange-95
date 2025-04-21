@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConnectionStatus } from "@/data/mockData";
+import { CloseIconButton } from "@/components/ui/CloseIconButton";
+
 const hostSchema = z.object({
   name: z.string().min(1, {
     message: "Host name is required"
@@ -16,7 +18,9 @@ const hostSchema = z.object({
   configPath: z.string().optional(),
   icon: z.string().optional()
 });
+
 type HostFormValues = z.infer<typeof hostSchema>;
+
 interface AddHostDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,6 +32,7 @@ interface AddHostDialogProps {
     connectionStatus: ConnectionStatus;
   }) => void;
 }
+
 export function AddHostDialog({
   open,
   onOpenChange,
@@ -41,6 +46,7 @@ export function AddHostDialog({
       icon: "💻"
     }
   });
+
   const handleSubmit = (values: HostFormValues) => {
     onAddHost({
       name: values.name,
@@ -52,15 +58,16 @@ export function AddHostDialog({
     form.reset();
     onOpenChange(false);
   };
+
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] relative">
+        <CloseIconButton onClick={() => onOpenChange(false)} />
         <DialogHeader>
           <DialogTitle>Add Host Manually</DialogTitle>
           <DialogDescription>
             Add a new host connection to your MCP configuration.
           </DialogDescription>
         </DialogHeader>
-        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField control={form.control} name="name" render={({
