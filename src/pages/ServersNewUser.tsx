@@ -13,17 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { Separator } from "@/components/ui/separator";
 import { HelpCircle } from "lucide-react";
-import { Message } from "@/components/ui/Message";
 
 const ServersNewUser = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
-  const [message, setMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "info";
-    show: boolean;
-  }>({ text: "", type: "info", show: false });
 
   const serverTypes = [
     {
@@ -45,16 +39,12 @@ const ServersNewUser = () => {
     url?: string;
     commandArgs?: string;
   }) => {
-    setMessage({
-      text: `${serverData.name} has been created successfully.`,
-      type: "success",
-      show: true,
+    toast({
+      title: "Server Created",
+      description: `${serverData.name} has been created successfully.`,
     });
     setAddServerDialogOpen(false);
-    setTimeout(() => {
-      setMessage((msg) => ({ ...msg, show: false }));
-      navigate("/servers");
-    }, 1200);
+    navigate("/servers");
   };
   
   const handleSkip = () => {
@@ -63,15 +53,6 @@ const ServersNewUser = () => {
 
   return (
     <div className="container max-w-5xl mx-auto space-y-8 animate-fade-in">
-      {message.show && (
-        <Message
-          type={message.type}
-          className="mb-4"
-          onClose={() => setMessage((msg) => ({ ...msg, show: false }))}
-        >
-          {message.text}
-        </Message>
-      )}
       <div className="mb-8 py-10 px-8 rounded-lg bg-gradient-to-r from-blue-500/20 via-blue-400/15 to-blue-300/10 border border-blue-100 dark:border-blue-900/30">
         <div className="flex items-center mb-2">
           <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full flex items-center gap-1.5">

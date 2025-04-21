@@ -17,7 +17,6 @@ import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { NoSearchResults } from "@/components/hosts/NoSearchResults";
-import { Message } from "@/components/ui/Message";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>([]);
@@ -27,11 +26,6 @@ const Profiles = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [message, setMessage] = useState<{
-    text: string;
-    type: "success" | "error" | "info";
-    show: boolean;
-  }>({ text: "", type: "info", show: false });
   const { toast } = useToast();
 
   const clearSearch = () => {
@@ -81,15 +75,14 @@ const Profiles = () => {
   const handleConfirmDelete = () => {
     if (profileToDelete) {
       setLocalProfiles(prev => prev.filter(p => p.id !== profileToDelete.id));
-      setMessage({
-        text: "The profile has been permanently removed",
-        type: "success",
-        show: true,
+      
+      toast({
+        title: "Profile deleted",
+        description: "The profile has been permanently removed",
       });
 
       setIsDeleteDialogOpen(false);
       setProfileToDelete(null);
-      setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
     }
   };
 
@@ -113,12 +106,11 @@ const Profiles = () => {
           : p
       )
     );
-    setMessage({
-      text: `Updated ${editedProfile.name} profile`,
-      type: "success",
-      show: true,
+    
+    toast({
+      title: "Profile updated",
+      description: `Updated ${editedProfile.name} profile`,
     });
-    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
   };
 
   const handleCreateProfile = ({ 
@@ -136,13 +128,13 @@ const Profiles = () => {
       enabled: true,
       instances,
     };
+    
     setLocalProfiles(prev => [...prev, newProfile]);
-    setMessage({
-      text: `The profile "${name}" has been created with ${instances.length} server instance(s).`,
-      type: "success",
-      show: true,
+    
+    toast({
+      title: "Profile created successfully",
+      description: `The profile "${name}" has been created with ${instances.length} server instance(s).`,
     });
-    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
   };
 
   const ensureFirstProfileHasFiveInstances = () => {
@@ -181,17 +173,6 @@ const Profiles = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {message.show && (
-        <div className="fixed left-1/2 transform -translate-x-1/2 top-8 z-50 transition-all animate-fade-in">
-          <Message
-            type={message.type}
-            className="mb-3 min-w-[320px] text-base shadow-lg border-2"
-            onClose={() => setMessage(m => ({ ...m, show: false }))}
-          >
-            {message.text}
-          </Message>
-        </div>
-      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Profiles</h1>
@@ -201,12 +182,11 @@ const Profiles = () => {
         </div>
         <Button onClick={() => {
           if (serverInstances.length === 0) {
-            setMessage({
-              text: "Please create at least one server instance first.",
-              type: "error",
-              show: true,
+            toast({
+              title: "No instances available",
+              description: "Please create at least one server instance first.",
+              variant: "destructive",
             });
-            setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
             return;
           }
           setIsCreateProfileOpen(true);
@@ -307,12 +287,11 @@ const Profiles = () => {
                 className="mt-4" 
                 onClick={() => {
                   if (serverInstances.length === 0) {
-                    setMessage({
-                      text: "Please create at least one server instance first.",
-                      type: "error",
-                      show: true,
+                    toast({
+                      title: "No instances available",
+                      description: "Please create at least one server instance first.",
+                      variant: "destructive",
                     });
-                    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
                     return;
                   }
                   setIsCreateProfileOpen(true);
