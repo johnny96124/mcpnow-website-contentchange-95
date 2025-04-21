@@ -13,6 +13,7 @@ import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import { ServerLogo } from '@/components/servers/ServerLogo';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ServerDetailDialog } from "@/components/servers/ServerDetailDialog";
 
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
@@ -39,6 +40,9 @@ const Dashboard = () => {
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
+  // 新增用于详情弹窗的state
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [detailServer, setDetailServer] = useState<ServerDefinition | null>(null);
 
   const handleNavigateToServers = () => {
     navigate('/servers');
@@ -187,8 +191,8 @@ const Dashboard = () => {
   }];
 
   const handleViewDetails = (server: ServerDefinition) => {
-    setSelectedServer(server);
-    setIsDialogOpen(true);
+    setDetailServer(server);
+    setDetailDialogOpen(true);
   };
 
   const handleInstall = (serverId: string) => {
@@ -231,62 +235,42 @@ const Dashboard = () => {
             </Link>
           </Button>
         </div>
-        
-        <div className="w-full relative group" onMouseEnter={() => setShowCarouselControls(true)} onMouseLeave={() => setShowCarouselControls(false)}>
-          <Carousel opts={{
-            align: "start",
-            loop: true,
-            skipSnaps: true,
-            startIndex: 1
-          }} className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {trendingServers.map(server => (
-                <CarouselItem key={server.id} className="pl-2 md:pl-4 basis-full md:basis-1/3 lg:basis-1/4">
-                  <Card className="h-full border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg">
-                    <CardHeader className="space-y-0 p-4 pb-0">
-                      <div className="flex items-start justify-start gap-3">
-                        <ServerLogo name={server.name} />
-                        <div>
-                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
-                            {server.name}
-                          </CardTitle>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {server.type}
-                            </Badge>
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-4 p-4 pt-2">
-                      <p className="text-sm text-muted-foreground line-clamp-2 h-10">
-                        {server.description}
-                      </p>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm flex items-center gap-1.5 text-muted-foreground">
-                          <Download className="h-4 w-4" />
-                          {(server.downloads / 1000).toFixed(1)}k
-                        </span>
-                        
-                        <Button variant="outline" size="sm" onClick={() => handleViewDetails(server)} className="hover:bg-primary hover:text-primary-foreground">
-                          <Info className="h-4 w-4 mr-1" />
-                          Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            
-            <div className={`transition-opacity duration-300 ${showCarouselControls ? 'opacity-100' : 'opacity-0'}`}>
-              <CarouselPrevious className="absolute -left-4 hover:bg-primary hover:text-primary-foreground" />
-              <CarouselNext className="absolute -right-4 hover:bg-primary hover:text-primary-foreground" />
-            </div>
-          </Carousel>
+
+        <div className="w-full relative group">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {trendingServers.map(server => (
+              <div key={server.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 py-5 px-6 flex flex-col h-full">
+                <div className="flex items-center gap-3 mb-1">
+                  {/* Logo */}
+                  <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-lg font-bold select-none">
+                    {server.icon ? server.icon : (server.name?.slice(0,2) || "S")}
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold leading-tight">{server.name}</div>
+                    {/* 不展示type或official tag */}
+                  </div>
+                </div>
+                <div className="flex-grow">
+                  <p className="text-sm text-muted-foreground mt-2 mb-4 line-clamp-2">{server.description}</p>
+                </div>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                    <ExternalLink className="h-4 w-4" />
+                    {(server.downloads / 1000).toFixed(1)}k
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(server)}
+                    className="flex items-center gap-1 px-2 py-1"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Details
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -592,6 +576,16 @@ const Dashboard = () => {
           </CollapsibleContent>
         </Collapsible>
       </div>
+      {/* 详情弹窗：复用Discovery风格 */}
+      <React.Suspense fallback={null}>
+        {detailDialogOpen && detailServer && (
+          <ServerDetailDialog
+            open={detailDialogOpen}
+            onOpenChange={setDetailDialogOpen}
+            server={detailServer}
+          />
+        )}
+      </React.Suspense>
     </div>
   );
 };
