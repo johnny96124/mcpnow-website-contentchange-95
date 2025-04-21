@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { 
   ChevronDown, 
@@ -143,21 +142,10 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </NavLink>
         </nav>
       </ScrollArea>
-
-      {/* Container for SocialLinks with background and rounded corners and spacing below */}
-      <div 
-        className="mx-4 mb-3 mt-2 rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-1.5 flex justify-center"
-        aria-label="Social links container"
-      >
-        <SocialLinks />
-      </div>
-
-      {/* Dividing border line spaced down from above box */}
-      <div 
-        className="border-t border-gray-300 dark:border-gray-700 mx-4 mb-4"
-      />
-
-      <div className="border-t border-sidebar-border p-4">
+      
+      <SocialLinks />
+      
+      <div className="border-t p-4">
         <div className="flex justify-between items-center gap-2">
           <ThemeToggle />
           <Button 
