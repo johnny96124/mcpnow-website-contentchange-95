@@ -17,6 +17,7 @@ import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { NoSearchResults } from "@/components/hosts/NoSearchResults";
+import { Message } from "@/components/ui/Message";
 
 const Profiles = () => {
   const [localProfiles, setLocalProfiles] = useState<Profile[]>([]);
@@ -26,6 +27,11 @@ const Profiles = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info";
+    show: boolean;
+  }>({ text: "", type: "info", show: false });
   const { toast } = useToast();
 
   const clearSearch = () => {
@@ -75,10 +81,10 @@ const Profiles = () => {
   const handleConfirmDelete = () => {
     if (profileToDelete) {
       setLocalProfiles(prev => prev.filter(p => p.id !== profileToDelete.id));
-      
-      toast({
-        title: "Profile deleted",
-        description: "The profile has been permanently removed",
+      setMessage({
+        text: "The profile has been permanently removed",
+        type: "success",
+        show: true,
       });
 
       setIsDeleteDialogOpen(false);
@@ -106,10 +112,10 @@ const Profiles = () => {
           : p
       )
     );
-    
-    toast({
-      title: "Profile updated",
-      description: `Updated ${editedProfile.name} profile`,
+    setMessage({
+      text: `Updated ${editedProfile.name} profile`,
+      type: "success",
+      show: true,
     });
   };
 
@@ -128,12 +134,11 @@ const Profiles = () => {
       enabled: true,
       instances,
     };
-    
     setLocalProfiles(prev => [...prev, newProfile]);
-    
-    toast({
-      title: "Profile created successfully",
-      description: `The profile "${name}" has been created with ${instances.length} server instance(s).`,
+    setMessage({
+      text: `The profile "${name}" has been created with ${instances.length} server instance(s).`,
+      type: "success",
+      show: true,
     });
   };
 
@@ -173,6 +178,15 @@ const Profiles = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {message.show && (
+        <Message
+          type={message.type}
+          className="mb-4"
+          onClose={() => setMessage((msg) => ({ ...msg, show: false }))}
+        >
+          {message.text}
+        </Message>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Profiles</h1>

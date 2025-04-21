@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
+import { Message } from "@/components/ui/Message";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -38,6 +38,11 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info";
+    show: boolean;
+  }>({ text: "", type: "info", show: false });
 
   const { hostProfiles, handleProfileChange } = useHostProfiles();
   const { configDialog, openConfigDialog, setDialogOpen, resetConfigDialog } = useConfigDialog(mockJsonConfig);
@@ -62,10 +67,10 @@ const Hosts = () => {
       
       openConfigDialog(hostId, host.configPath, profileEndpoint, false, false, true);
     } else {
-      toast({
-        title: "No config file",
-        description: "This host doesn't have a configuration file yet. Please create a configuration first.",
-        variant: "destructive"
+      setMessage({
+        text: "This host doesn't have a configuration file yet. Please create a configuration first.",
+        type: "error",
+        show: true,
       });
     }
   };
@@ -144,23 +149,13 @@ const Hosts = () => {
         
         setHostsList(prevHosts => [...prevHosts, newHost]);
         
-        toast({
-          title: "Host discovered",
-          description: "A new local host has been found and added to your hosts list.",
-        });
+        setMessage({ text: "A new local host has been found and added to your hosts list.", type: "success", show: true });
         
         setTimeout(() => {
-          toast({
-            title: "Configure new host",
-            description: "Configure this host to connect it with your profiles.",
-          });
+          setMessage({ text: "Configure this host to connect it with your profiles.", type: "info", show: true });
         }, 500);
       } else {
-        toast({
-          title: "No hosts found",
-          description: "No new hosts were discovered on your network.",
-          variant: "destructive",
-        });
+        setMessage({ text: "No new hosts were discovered on your network.", type: "error", show: true });
       }
       
       setIsScanning(false);
@@ -183,16 +178,14 @@ const Hosts = () => {
     
     setHostsList([...hostsList, host]);
     
-    toast({
-      title: "Host Added",
-      description: `${newHost.name} has been added successfully`,
+    setMessage({
+      text: `${newHost.name} has been added successfully`,
+      type: "success",
+      show: true,
     });
     
     setTimeout(() => {
-      toast({
-        title: "Configure new host",
-        description: "Configure this host to connect it with your profiles.",
-      });
+      setMessage({ text: "Configure this host to connect it with your profiles.", type: "info", show: true });
     }, 500);
   };
 
@@ -209,9 +202,10 @@ const Hosts = () => {
           : host
       ));
       
-      toast({
-        title: "Configuration complete",
-        description: "Now you can select a profile for this host to connect to.",
+      setMessage({
+        text: "Now you can select a profile for this host to connect to.",
+        type: "success",
+        show: true,
       });
     }
     
@@ -220,6 +214,16 @@ const Hosts = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {message.show && (
+        <Message
+          type={message.type}
+          className="mb-4"
+          onClose={() => setMessage((msg) => ({ ...msg, show: false }))}
+        >
+          {message.text}
+        </Message>
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
@@ -267,7 +271,6 @@ const Hosts = () => {
             />
           ))}
           
-          {/* Add guidance card */}
           <Card className="border-2 border-dashed bg-muted/50 hover:bg-muted/80 transition-colors">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center space-y-5">
               <div className="rounded-full bg-primary/10 p-4">
