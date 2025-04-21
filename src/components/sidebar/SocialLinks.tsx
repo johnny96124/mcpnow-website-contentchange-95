@@ -34,9 +34,8 @@ export function SocialLinks() {
   ];
 
   return (
-    <div className="flex justify-center">
-      {/* Gray rounded rectangle container with padding and gap */}
-      <div className="flex gap-2 rounded-full bg-gray-100 p-2">
+    <div>
+      <div className="flex justify-center gap-2">
         {socialLinks.map((link, index) => (
           <Button
             key={index}
@@ -45,7 +44,7 @@ export function SocialLinks() {
             className={`h-8 w-8 rounded-full transition-colors ${link.hoverColor}`}
             asChild
           >
-            <a href={link.href} target="_blank" rel="noopener noreferrer" aria-label="Social Link">
+            <a href={link.href} target="_blank" rel="noopener noreferrer">
               <link.icon className="h-4 w-4" />
             </a>
           </Button>
@@ -54,4 +53,3 @@ export function SocialLinks() {
     </div>
   );
 }
-
