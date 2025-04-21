@@ -538,7 +538,16 @@ const Servers = () => {
       <EditServerDialog open={editServerOpen} onOpenChange={setEditServerOpen} serverDefinition={selectedDefinition} onUpdateServer={handleUpdateServer} />
       
       <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+        <DialogContent className="max-w-4xl h-[600px] flex flex-col relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Close"
+            className="absolute right-3 top-3 text-muted-foreground hover:bg-accent z-10"
+            onClick={() => setToolsDialogOpen(false)}
+          >
+            <X className="w-5 h-5" />
+          </Button>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wrench className="h-5 w-5 text-purple-500" />
