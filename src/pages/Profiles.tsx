@@ -89,6 +89,7 @@ const Profiles = () => {
 
       setIsDeleteDialogOpen(false);
       setProfileToDelete(null);
+      setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
     }
   };
 
@@ -117,6 +118,7 @@ const Profiles = () => {
       type: "success",
       show: true,
     });
+    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
   };
 
   const handleCreateProfile = ({ 
@@ -140,6 +142,7 @@ const Profiles = () => {
       type: "success",
       show: true,
     });
+    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
   };
 
   const ensureFirstProfileHasFiveInstances = () => {
@@ -179,13 +182,15 @@ const Profiles = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {message.show && (
-        <Message
-          type={message.type}
-          className="mb-4"
-          onClose={() => setMessage((msg) => ({ ...msg, show: false }))}
-        >
-          {message.text}
-        </Message>
+        <div className="fixed left-1/2 transform -translate-x-1/2 top-8 z-50 transition-all animate-fade-in">
+          <Message
+            type={message.type}
+            className="mb-3 min-w-[320px] text-base shadow-lg border-2"
+            onClose={() => setMessage(m => ({ ...m, show: false }))}
+          >
+            {message.text}
+          </Message>
+        </div>
       )}
       <div className="flex items-center justify-between">
         <div>
@@ -196,11 +201,12 @@ const Profiles = () => {
         </div>
         <Button onClick={() => {
           if (serverInstances.length === 0) {
-            toast({
-              title: "No instances available",
-              description: "Please create at least one server instance first.",
-              variant: "destructive",
+            setMessage({
+              text: "Please create at least one server instance first.",
+              type: "error",
+              show: true,
             });
+            setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
             return;
           }
           setIsCreateProfileOpen(true);
@@ -301,11 +307,12 @@ const Profiles = () => {
                 className="mt-4" 
                 onClick={() => {
                   if (serverInstances.length === 0) {
-                    toast({
-                      title: "No instances available",
-                      description: "Please create at least one server instance first.",
-                      variant: "destructive",
+                    setMessage({
+                      text: "Please create at least one server instance first.",
+                      type: "error",
+                      show: true,
                     });
+                    setTimeout(() => setMessage(m => ({ ...m, show: false })), 1800);
                     return;
                   }
                   setIsCreateProfileOpen(true);
