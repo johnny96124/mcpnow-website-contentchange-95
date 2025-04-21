@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown, ServerIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+// Ensure only one close mechanism is used
 import { 
   Command, 
   CommandEmpty, 
@@ -26,7 +28,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { Profile, ServerInstance } from "@/data/mockData";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface ManageInstancesModalProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export function ManageInstancesModal({
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>(profile.instances);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // Reset selections when modal opens
   useEffect(() => {
     if (isOpen) {
       setSelectedInstanceIds([...profile.instances]);
@@ -67,26 +69,30 @@ export function ManageInstancesModal({
     });
   };
 
+  // Filter out already selected instances for the dropdown
   const availableInstances = allInstances.filter(
     instance => !selectedInstanceIds.includes(instance.id)
   );
 
+  // Get the selected instances
   const selectedInstances = allInstances.filter(
     instance => selectedInstanceIds.includes(instance.id)
   );
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px] relative">
-        <CloseIconButton onClick={onClose} />
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Manage Instances for {profile.name}</DialogTitle>
           <DialogDescription>
             Add or remove server instances from this profile.
           </DialogDescription>
+          {/* DialogContent already includes a default close button, 
+              so we remove any additional close buttons */}
         </DialogHeader>
 
         <div className="py-4 space-y-4">
+          {/* Add new instance dropdown */}
           <div>
             <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
             <Popover open={searchOpen} onOpenChange={setSearchOpen}>
@@ -139,6 +145,7 @@ export function ManageInstancesModal({
             </Popover>
           </div>
 
+          {/* List of currently selected instances */}
           <div>
             <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
             <ScrollArea className="h-[200px] rounded-md border">

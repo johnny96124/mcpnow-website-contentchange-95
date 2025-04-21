@@ -9,8 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
-import React from "react";
 
 interface ProfileChangeConfirmDialogProps {
   open: boolean;
@@ -27,8 +25,7 @@ export function ProfileChangeConfirmDialog({
 }: ProfileChangeConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-[350px] relative">
-        <CloseIconButton onClick={() => onOpenChange(false)} />
+      <AlertDialogContent className="max-w-[350px]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-base">Change Profile Configuration</AlertDialogTitle>
           <AlertDialogDescription className="text-sm">

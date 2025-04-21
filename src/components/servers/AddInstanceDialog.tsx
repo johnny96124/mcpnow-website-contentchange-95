@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,6 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -52,8 +52,13 @@ export function AddInstanceDialog({
   initialValues,
   instanceId
 }: AddInstanceDialogProps) {
+  // For STDIO type
   const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([]);
+  
+  // For HTTP_SSE type
   const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([]);
+
+  // For info box visibility
   const [showInfoBox, setShowInfoBox] = useState<boolean>(true);
 
   const form = useForm<InstanceFormValues>({
@@ -68,8 +73,10 @@ export function AddInstanceDialog({
     },
   });
 
+  // Effect to reset form when dialog opens
   useEffect(() => {
     if (open && serverDefinition) {
+      // Initialize the form with proper defaults based on server definition
       form.reset({
         name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
         args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
@@ -81,13 +88,16 @@ export function AddInstanceDialog({
         instanceId: instanceId,
       });
       
+      // Initialize env fields based on initialValues if in edit mode
       if (editMode && initialValues?.env) {
         const envEntries = Object.entries(initialValues.env);
         setEnvFields(envEntries.map(([name, value]) => ({ name, value: value.toString() })));
       } else if (serverDefinition?.type === 'STDIO') {
+        // Set default env fields for new STDIO instance based on server definition
         if (serverDefinition.environment && Object.keys(serverDefinition.environment).length > 0) {
           setEnvFields(Object.entries(serverDefinition.environment).map(([name, value]) => ({ name, value: value.toString() })));
         } else {
+          // Default env fields if no server definition environment
           setEnvFields([
             { name: "API_KEY", value: "" },
             { name: "MODEL_NAME", value: "" },
@@ -96,13 +106,16 @@ export function AddInstanceDialog({
         }
       }
       
+      // Initialize header fields based on initialValues if in edit mode
       if (editMode && initialValues?.headers) {
         const headerEntries = Object.entries(initialValues.headers);
         setHeaderFields(headerEntries.map(([name, value]) => ({ name, value: value.toString() })));
       } else if (serverDefinition?.type === 'HTTP_SSE') {
+        // Set default header fields for new HTTP_SSE instance based on server definition
         if (serverDefinition.headers && Object.keys(serverDefinition.headers).length > 0) {
           setHeaderFields(Object.entries(serverDefinition.headers).map(([name, value]) => ({ name, value: value.toString() })));
         } else {
+          // Default header fields if no server definition headers
           setHeaderFields([
             { name: "Authorization", value: "" },
             { name: "Content-Type", value: "application/json" },
@@ -110,11 +123,13 @@ export function AddInstanceDialog({
         }
       }
       
+      // Reset info box visibility
       setShowInfoBox(true);
     }
   }, [open, initialValues, serverDefinition, form, editMode, instanceId]);
 
   const onSubmit = (data: InstanceFormValues) => {
+    // Process environment variables for STDIO type
     if (serverDefinition?.type === 'STDIO') {
       const envData: Record<string, string> = {};
       
@@ -127,6 +142,7 @@ export function AddInstanceDialog({
       data.env = envData;
     }
     
+    // Process HTTP headers for HTTP_SSE type
     if (serverDefinition?.type === 'HTTP_SSE') {
       const headerData: Record<string, string> = {};
       
@@ -153,12 +169,14 @@ export function AddInstanceDialog({
   };
   
   const removeEnvField = (index: number) => {
+    // Allow removing any field now
     const newFields = [...envFields];
     newFields.splice(index, 1);
     setEnvFields(newFields);
   };
 
   const removeHeaderField = (index: number) => {
+    // Allow removing any field now
     const newFields = [...headerFields];
     newFields.splice(index, 1);
     setHeaderFields(newFields);
@@ -171,8 +189,7 @@ export function AddInstanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] relative">
-        <CloseIconButton onClick={() => onOpenChange(false)} />
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>{editMode ? "Edit Instance" : serverDefinition.name}</span>
@@ -188,6 +205,7 @@ export function AddInstanceDialog({
           </DialogDescription>
         </DialogHeader>
         
+        {/* What is an Instance explanation box */}
         {!editMode && showInfoBox && (
           <Alert className="bg-blue-50 dark:bg-blue-950/30 rounded-md p-4 border border-blue-100 dark:border-blue-900 mb-4 relative">
             <div className="flex gap-2 items-center">
@@ -244,6 +262,7 @@ export function AddInstanceDialog({
             />
             
             {isStdio ? (
+              // STDIO specific fields
               <>
                 <FormField
                   control={form.control}
@@ -357,6 +376,7 @@ export function AddInstanceDialog({
                 </div>
               </>
             ) : (
+              // HTTP_SSE specific fields
               <>
                 <FormField
                   control={form.control}

@@ -19,7 +19,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DialogClose } from "@/components/ui/dialog";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -197,8 +196,7 @@ export function AddServerDialog({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[85vh] relative">
-        <CloseIconButton onClick={() => onOpenChange(false)} />
+      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Add New Server</DialogTitle>
           <DialogDescription>

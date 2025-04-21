@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PlusCircle, Trash2, Plus, AlertCircle, Info } from "lucide-react";
 import {
@@ -14,7 +15,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Profile, ServerInstance, serverDefinitions } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
 
 interface EditProfileDialogProps {
   open: boolean;
@@ -93,8 +93,10 @@ export function EditProfileDialog({
   };
 
   const removeSelection = (id: string) => {
+    // Allow removing all selections for the profile
     setSelections(selections.filter(selection => selection.id !== id));
     
+    // If we removed the last selection, add an empty one
     if (selections.length === 1 && selections[0].id === id) {
       setSelections([{ 
         id: `selection-${Date.now()}`, 
@@ -134,10 +136,12 @@ export function EditProfileDialog({
       .filter(selection => selection.instanceId)
       .map(selection => selection.instanceId);
 
+    // Allow saving with zero instances
     onSave(profile, profileName, selectedInstanceIds, profile.endpoint, profile.endpointType);
     onOpenChange(false);
   };
 
+  // Clear all selections
   const handleClearAll = () => {
     setSelections([{ 
       id: `selection-${Date.now()}`, 
@@ -153,8 +157,7 @@ export function EditProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onOpenChange(false)}>
-      <DialogContent className="sm:max-w-[500px] relative">
-        <CloseIconButton onClick={() => onOpenChange(false)} />
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>

@@ -9,8 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CloseIconButton } from "@/components/ui/CloseIconButton";
-import React from "react";
 
 interface DeleteProfileDialogProps {
   open: boolean;
@@ -27,8 +25,7 @@ export function DeleteProfileDialog({
 }: DeleteProfileDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="relative">
-        <CloseIconButton onClick={() => onOpenChange(false)} />
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Profile</AlertDialogTitle>
           <AlertDialogDescription>
