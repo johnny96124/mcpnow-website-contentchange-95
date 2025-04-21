@@ -71,7 +71,7 @@ const Dashboard = () => {
     categories: ["Development", "AI", "Code"],
     isOfficial: true,
     features: ["Multi-language support", "Context-aware completions", "Semantic code search", "Integration with popular IDEs"],
-    repository: "https://github.com/devtools/code-assistant"
+    repository: "https://github.devtools/code-assistant"
   }, {
     id: "trend3",
     name: "PromptWizard",
@@ -250,12 +250,7 @@ const Dashboard = () => {
                           <CardTitle className="text-xl group-hover:text-primary transition-colors">
                             {server.name}
                           </CardTitle>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {server.type}
-                            </Badge>
-                            {server.isOfficial && <OfficialBadge />}
-                          </div>
+                          
                         </div>
                       </div>
                     </CardHeader>
