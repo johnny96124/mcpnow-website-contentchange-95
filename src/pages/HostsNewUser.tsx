@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,12 +21,18 @@ import { useToast } from "@/hooks/use-toast";
 import { hosts } from "@/data/mockData";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { HostConfigGuideDialog } from "@/components/discovery/HostConfigGuideDialog";
+import { Message } from "@/components/ui/Message";
 
 const HostsNewUser = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info";
+    show: boolean;
+  }>({ text: "", type: "info", show: false });
   const { getAvailableHosts } = useHostProfiles();
   
   const mainHostTypes = [
@@ -61,20 +66,21 @@ const HostsNewUser = () => {
       const success = Math.random() > 0.3; // 70% chance of success
       
       if (success) {
-        toast({
-          title: "Host discovered!",
-          description: "We found a local host on your network.",
+        setMessage({
+          text: "We found a local host on your network.",
+          type: "success",
+          show: true,
         });
-        
-        // Redirect to main hosts page after successful scan
+        // Redirect to main hosts page after short delay
         setTimeout(() => {
+          setMessage({ ...message, show: false });
           navigate("/hosts");
         }, 1500);
       } else {
-        toast({
-          title: "No hosts found",
-          description: "We couldn't find any hosts automatically.",
-          variant: "destructive",
+        setMessage({
+          text: "We couldn't find any hosts automatically.",
+          type: "error",
+          show: true,
         });
         setDialogOpen(true);
       }
@@ -113,6 +119,23 @@ const HostsNewUser = () => {
           <h2 className="text-2xl font-semibold mb-4">What are hosts?</h2>
           <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
             <CardContent className="p-6">
+              {/* 消息栏（仅在 show 时渲染） */}
+              {message.show && (
+                <Message
+                  type={message.type}
+                  className="mb-4"
+                  onClose={() => setMessage({ ...message, show: false })}
+                >
+                  {message.type === "success" ? (
+                    <span>Host discovered! {message.text}</span>
+                  ) : message.type === "error" ? (
+                    <span>No hosts found. {message.text}</span>
+                  ) : (
+                    message.text
+                  )}
+                </Message>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-4">
                   <p className="text-muted-foreground">

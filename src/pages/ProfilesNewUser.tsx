@@ -16,23 +16,33 @@ import { markProfilesOnboardingAsSeen } from "@/utils/localStorage";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 import { Separator } from "@/components/ui/separator";
 import { HelpCircle } from "lucide-react";
+import { Message } from "@/components/ui/Message";
 
 const ProfilesNewUser = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [createProfileDialogOpen, setCreateProfileDialogOpen] = useState(false);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: "success" | "error" | "info";
+    show: boolean;
+  }>({ text: "", type: "info", show: false });
 
   const handleCreateProfile = ({ name, instances }: { name: string; instances: string[] }) => {
-    toast({
-      title: "Profile Created",
-      description: `${name} has been created successfully with ${instances.length} instance(s).`,
+    setMessage({
+      text: `${name} has been created successfully with ${instances.length} instance(s).`,
+      type: "success",
+      show: true,
     });
-    
     markProfilesOnboardingAsSeen();
     setCreateProfileDialogOpen(false);
-    navigate("/profiles");
+
+    setTimeout(() => {
+      setMessage((msg) => ({ ...msg, show: false }));
+      navigate("/profiles");
+    }, 1200);
   };
-  
+
   const handleSkip = () => {
     markProfilesOnboardingAsSeen();
     navigate("/profiles");
@@ -40,7 +50,6 @@ const ProfilesNewUser = () => {
 
   return (
     <div className="container max-w-5xl mx-auto space-y-8 animate-fade-in">
-      {/* Header with purple gradient background */}
       <div className="mb-8 py-10 px-8 rounded-lg bg-gradient-to-r from-purple-500/20 via-purple-400/15 to-purple-300/10 border border-purple-100 dark:border-purple-900/30">
         <div className="flex items-center mb-2">
           <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-3 py-1 rounded-full flex items-center gap-1.5">
@@ -55,12 +64,21 @@ const ProfilesNewUser = () => {
         </p>
       </div>
       
-      {/* Main content */}
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-semibold mb-4">What are profiles?</h2>
           <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
             <CardContent className="p-6">
+              {message.show && (
+                <Message
+                  type={message.type}
+                  className="mb-4"
+                  onClose={() => setMessage((msg) => ({ ...msg, show: false }))}
+                >
+                  <span>Profile Created: {message.text}</span>
+                </Message>
+              )}
+              
               <p className="text-muted-foreground mb-6">
                 Profiles allow you to group server instances together, making it easier to manage 
                 and deploy related services. A profile can include multiple server instances 
@@ -139,7 +157,6 @@ const ProfilesNewUser = () => {
         </div>
       </div>
 
-      {/* Add Help Section */}
       <Separator />
       
       <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
