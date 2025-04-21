@@ -353,23 +353,29 @@ const Servers = () => {
         const filteredDefInstances = definitionInstances.filter(instance => filteredInstances.some(fi => fi.id === instance.id));
         const isCustom = !definition.isOfficial;
         return <Card key={definition.id} className="overflow-hidden flex flex-col">
-                <CardHeader className="pb-2 bg-secondary/30">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <CardTitle className="flex items-center gap-2">
-                        {truncateText(definition.name)}
-                        <div className="flex items-center gap-1">
-                          <EndpointLabel type={definition.type} />
-                          {isCustom && <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
-                              Custom
-                            </Badge>}
-                        </div>
-                      </CardTitle>
-                      <CardDescription>
-                        {truncateText(definition.description, 60)}
-                      </CardDescription>
-                    </div>
+                <CardHeader className="pb-2 bg-secondary/30 flex-row flex items-center justify-between gap-2">
+                  <div className="flex flex-col space-y-1.5">
+                    <CardTitle className="flex items-center gap-2">
+                      {truncateText(definition.name)}
+                      <div className="flex items-center gap-1">
+                        <EndpointLabel type={definition.type} />
+                        {isCustom && <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
+                            Custom
+                          </Badge>}
+                      </div>
+                    </CardTitle>
+                    <CardDescription>
+                      {truncateText(definition.description, 60)}
+                    </CardDescription>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border border-blue-500 text-blue-600 hover:bg-blue-50 ml-auto"
+                    onClick={() => handleEditServer(definition)}
+                  >
+                    Details
+                  </Button>
                 </CardHeader>
                 
                 <CardContent className="pt-4 flex-grow">                  
@@ -473,7 +479,7 @@ const Servers = () => {
                   <div className="flex space-x-2">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Button variant="outline" size="sm" className="border border-red-400 text-red-600 hover:bg-red-50 flex items-center gap-1">
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
@@ -496,13 +502,23 @@ const Servers = () => {
                       </AlertDialogContent>
                     </AlertDialog>
 
-                    <Button variant="ghost" size="sm" onClick={() => handleEditServer(definition)} className="text-blue-600 hover:bg-blue-600/10">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border border-blue-500 text-blue-600 hover:bg-blue-50 flex items-center gap-1"
+                      onClick={() => handleEditServer(definition)}
+                    >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
                   </div>
 
-                  <Button variant="default" size="sm" onClick={() => handleOpenAddInstance(definition)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border border-blue-500 text-white bg-blue-500 hover:bg-blue-600 flex items-center gap-1 font-medium"
+                    onClick={() => handleOpenAddInstance(definition)}
+                  >
                     <CirclePlus className="h-4 w-4 mr-1" />
                     Add Instance
                   </Button>
