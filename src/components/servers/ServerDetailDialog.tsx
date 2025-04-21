@@ -99,7 +99,7 @@ export function ServerDetailDialog({ open, onOpenChange, server }: ServerDetailD
                   <div>
                     <h4 className="font-semibold mb-2">Last Updated</h4>
                     <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4" /><span>{server.lastUpdated || "2025/4/3"}</span>
+                      <Calendar className="w-4 h-4" /><span>2025/4/3</span>
                     </div>
                   </div>
                   <div>
