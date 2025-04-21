@@ -20,7 +20,7 @@ export function SocialLinks() {
     href: "https://discord.gg/mcpnow",
     hoverColor: "hover:text-[#5865F2]"
   }];
-  return <div className="bg-gray-100 rounded-full my-[23px] py-0 px-0 mx-0">
+  return <div className="rounded-full my-[23px] py-0 px-0 mx-0 bg-transparent">
       <div className="flex justify-center gap-2 mx-0 my-[17px] py-0 px-0 bg-transparent rounded-none">
         {socialLinks.map((link, index) => <Button key={index} variant="ghost" size="icon" className={`h-8 w-8 rounded-full transition-colors ${link.hoverColor}`} asChild>
             <a href={link.href} target="_blank" rel="noopener noreferrer">
