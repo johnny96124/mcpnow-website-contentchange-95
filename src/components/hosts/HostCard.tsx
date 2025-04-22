@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Bell } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -58,8 +58,6 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [needsProfileApplication, setNeedsProfileApplication] = useState(false);
-  const [showProfileAlert, setShowProfileAlert] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -92,25 +90,6 @@ export function HostCard({
       total: enabledInstances.length
     };
   };
-  
-  useEffect(() => {
-    let timeoutId: number;
-    
-    if (profileId) {
-      setNeedsProfileApplication(true);
-      setShowProfileAlert(true);
-      
-      timeoutId = window.setTimeout(() => {
-        setShowProfileAlert(false);
-      }, 5000);
-    }
-    
-    return () => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [profileId]);
   
   useEffect(() => {
     if (profileId) {
@@ -178,25 +157,7 @@ export function HostCard({
       navigate("/profiles");
     } else {
       onProfileChange(host.id, newProfileId);
-      setNeedsProfileApplication(true);
-      setShowProfileAlert(true);
     }
-  };
-  
-  const handleApplyProfile = () => {
-    setNeedsProfileApplication(false);
-    setShowProfileAlert(false);
-    
-    setIsConnecting(true);
-    
-    setTimeout(() => {
-      setIsConnecting(false);
-      toast({
-        title: "Profile Applied",
-        description: `Profile changes have been successfully applied to ${host.name}`,
-        type: "success"
-      });
-    }, 1500);
   };
   
   const toggleInstanceEnabled = (instanceId: string) => {
@@ -295,12 +256,6 @@ export function HostCard({
             <div className="flex items-center gap-2">
               {host.icon && <span className="text-xl">{host.icon}</span>}
               <h3 className="font-medium text-lg">{host.name}</h3>
-              {needsProfileApplication && (
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <StatusIndicator 
@@ -379,12 +334,6 @@ export function HostCard({
           <div className="flex items-center gap-2">
             {host.icon && <span className="text-xl">{host.icon}</span>}
             <h3 className="font-medium text-lg">{host.name}</h3>
-            {needsProfileApplication && (
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-2">
             <StatusIndicator 
@@ -408,27 +357,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
-        {showProfileAlert && needsProfileApplication && (
-          <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 mb-2 py-3">
-            <Bell className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
-            <AlertTitle className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-              Profile Change Detected
-            </AlertTitle>
-            <AlertDescription className="text-xs text-yellow-700 dark:text-yellow-400">
-              Click "Apply Profile" to update this host with the new profile settings.
-            </AlertDescription>
-          </Alert>
-        )}
-        
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
-            {needsProfileApplication && !showProfileAlert && (
-              <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100">
-                <Bell className="h-3 w-3 mr-1" />
-                Changes pending
-              </Badge>
-            )}
           </div>
           <Select
             value={profileId}
@@ -470,19 +401,6 @@ export function HostCard({
             </SelectContent>
           </Select>
         </div>
-        
-        {profileId && needsProfileApplication && (
-          <div className="flex justify-end">
-            <Button 
-              size="sm" 
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onClick={handleApplyProfile}
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Apply Profile
-            </Button>
-          </div>
-        )}
         
         {profileId && (
           <>
@@ -639,28 +557,15 @@ export function HostCard({
           Delete Host
         </Button>
         
-        <div className="flex gap-2">
-          {needsProfileApplication && (
-            <Button 
-              size="sm"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white"
-              onClick={handleApplyProfile}
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Apply Profile
-            </Button>
-          )}
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenConfigDialog(host.id)}
-            disabled={!host.configPath}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            View Config
-          </Button>
-        </div>
+        <Button 
+          variant="outline"
+          onClick={() => onOpenConfigDialog(host.id)}
+          disabled={!host.configPath}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          View Config
+        </Button>
       </CardFooter>
 
       <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
