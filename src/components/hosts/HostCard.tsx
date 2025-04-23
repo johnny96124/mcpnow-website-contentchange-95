@@ -404,6 +404,9 @@ export function HostCard({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
+              <div className="px-3 pt-2 pb-1">
+                <ProfileChangeHint className="my-0" />
+              </div>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
                   <div className="flex items-center gap-2">
