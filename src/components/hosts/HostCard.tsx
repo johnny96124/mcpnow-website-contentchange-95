@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -372,9 +373,10 @@ export function HostCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4 space-y-4 flex-1">
+      <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
+        <ProfileChangeHint className="mb-4" />
+        
         <div className="space-y-2">
-          <ProfileChangeHint />
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Associated Profile</label>
