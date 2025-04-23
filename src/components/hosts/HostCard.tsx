@@ -269,32 +269,15 @@ export function HostCard({
       <Card className="overflow-hidden flex flex-col h-[400px]">
         <CardHeader className="bg-muted/50 pb-2">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-1 min-w-0 flex-1">
-              <div className="flex items-center gap-2 min-w-0">
-                {host.icon && <span className="text-xl">{host.icon}</span>}
-                <h3 className="font-medium text-lg truncate">{host.name}</h3>
-              </div>
-              {profileChangedRecently && isExternalHost && (
-                <ProfileChangeHint className="mt-1 mb-0 py-1" />
-              )}
+            <div className="flex items-center gap-2">
+              {host.icon && <span className="text-xl">{host.icon}</span>}
+              <h3 className="font-medium text-lg">{host.name}</h3>
             </div>
-            <div className="flex items-center gap-2 pl-3">
+            <div className="flex items-center gap-2">
               <StatusIndicator 
-                status={
-                  !profileId ? 'inactive' :
-                  isConnecting ? 'warning' :
-                  host.connectionStatus === 'connected' ? 'active' : 
-                  host.connectionStatus === 'disconnected' ? 'inactive' : 
-                  host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'inactive' : 
-                  host.configStatus === 'unknown' ? 'warning' : 'inactive'
-                } 
-                label={
-                  !profileId ? 'Disconnected' :
-                  isConnecting ? 'Connecting' :
-                  host.connectionStatus === 'connected' ? 'Connected' : 
-                  host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                  host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
-                }
+                status="inactive" 
+                label="No Config"
+                useIcon={true}
               />
             </div>
           </div>
@@ -364,16 +347,11 @@ export function HostCard({
     <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1 min-w-0 flex-1">
-            <div className="flex items-center gap-2 min-w-0">
-              {host.icon && <span className="text-xl">{host.icon}</span>}
-              <h3 className="font-medium text-lg truncate">{host.name}</h3>
-            </div>
-            {profileChangedRecently && isExternalHost && (
-              <ProfileChangeHint className="mt-1 mb-0 py-1" />
-            )}
+          <div className="flex items-center gap-2">
+            {host.icon && <span className="text-xl">{host.icon}</span>}
+            <h3 className="font-medium text-lg">{host.name}</h3>
           </div>
-          <div className="flex items-center gap-2 pl-3">
+          <div className="flex items-center gap-2">
             <StatusIndicator 
               status={
                 !profileId ? 'inactive' :
@@ -395,6 +373,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
+        {profileChangedRecently && isExternalHost && (
+          <ProfileChangeHint />
+        )}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
