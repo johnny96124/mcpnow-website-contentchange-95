@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { NoSearchResults } from "@/components/servers/NoSearchResults";
+import { HostRefreshHint } from "@/components/hosts/HostRefreshHint";
 
 interface InstanceStatus {
   id: string;
@@ -377,6 +378,12 @@ const TrayPopup = () => {
                           message="Select a profile to connect mcp server to host"
                           icon={<User className="h-12 w-12 text-muted-foreground mb-4" />}
                         />
+                      </div>
+                    )}
+                    
+                    {profileId && (
+                      <div className="mt-2">
+                        <HostRefreshHint />
                       </div>
                     )}
                   </div>
