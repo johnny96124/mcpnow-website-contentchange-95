@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ProfileChangeHint } from "./ProfileChangeHint";
 
 interface InstanceStatus {
   id: string;
@@ -58,6 +59,8 @@ export function HostCard({
   const [selectedErrorInstance, setSelectedErrorInstance] = useState<InstanceStatus | null>(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [profileChangedRecently, setProfileChangedRecently] = useState(false);
+  const [prevProfileId, setPrevProfileId] = useState(profileId);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -152,6 +155,19 @@ export function HostCard({
     }
   }, [profileId]);
   
+  useEffect(() => {
+    if (prevProfileId && profileId && prevProfileId !== profileId) {
+      setProfileChangedRecently(true);
+      const timer = setTimeout(() => setProfileChangedRecently(false), 6000);
+      return () => clearTimeout(timer);
+    }
+    setPrevProfileId(profileId);
+  }, [profileId]);
+
+  const isExternalHost =
+    !!host.configPath &&
+    (host.icon !== "💻" && !/local|本地/i.test(host.name));
+
   const handleProfileChange = (newProfileId: string) => {
     if (newProfileId === "add-new-profile") {
       navigate("/profiles");
@@ -357,6 +373,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
+        {profileChangedRecently && isExternalHost && (
+          <ProfileChangeHint />
+        )}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
