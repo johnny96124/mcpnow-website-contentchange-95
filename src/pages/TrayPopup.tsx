@@ -292,6 +292,8 @@ const TrayPopup = () => {
                       </Select>
                     </div>
                     
+                    {profileId && <HostRefreshHint className="my-3" />}
+                    
                     {profileId && instanceGroups.length > 0 && (
                       <div className="mt-3">
                         <div className="flex items-center justify-between mb-2">
@@ -378,12 +380,6 @@ const TrayPopup = () => {
                           message="Select a profile to connect mcp server to host"
                           icon={<User className="h-12 w-12 text-muted-foreground mb-4" />}
                         />
-                      </div>
-                    )}
-                    
-                    {profileId && (
-                      <div className="mt-2">
-                        <HostRefreshHint />
                       </div>
                     )}
                   </div>
