@@ -373,194 +373,194 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
-        {profileChangedRecently && isExternalHost && (
+        <div className="space-y-2">
           <ProfileChangeHint />
-        )}
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Associated Profile</label>
-          </div>
-          <Select
-            value={profileId}
-            onValueChange={handleProfileChange}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a profile">
-                {selectedProfile && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Associated Profile</label>
+            </div>
+            <Select
+              value={profileId}
+              onValueChange={handleProfileChange}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a profile">
+                  {selectedProfile && (
+                    <div className="flex items-center gap-2">
+                      {!isHostDisconnected && (
+                        <StatusIndicator 
+                          status={
+                            isConnecting ? 'warning' :
+                            profileConnectionStatus === 'connected' ? 'active' : 
+                            profileConnectionStatus === 'warning' ? 'warning' : 
+                            'error'
+                          } 
+                        />
+                      )}
+                      <span>{selectedProfile.name}</span>
+                    </div>
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {profiles.map(profile => (
+                  <SelectItem key={profile.id} value={profile.id}>
+                    <div className="flex items-center gap-2">
+                      <span>{profile.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+                <SelectItem value="add-new-profile" className="text-primary font-medium">
                   <div className="flex items-center gap-2">
-                    {!isHostDisconnected && (
-                      <StatusIndicator 
-                        status={
-                          isConnecting ? 'warning' :
-                          profileConnectionStatus === 'connected' ? 'active' : 
-                          profileConnectionStatus === 'warning' ? 'warning' : 
-                          'error'
-                        } 
-                      />
-                    )}
-                    <span>{selectedProfile.name}</span>
-                  </div>
-                )}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {profiles.map(profile => (
-                <SelectItem key={profile.id} value={profile.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{profile.name}</span>
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Add New Profile</span>
                   </div>
                 </SelectItem>
-              ))}
-              <SelectItem value="add-new-profile" className="text-primary font-medium">
-                <div className="flex items-center gap-2">
-                  <PlusCircle className="h-4 w-4" />
-                  <span>Add New Profile</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        {profileId && (
-          <>
-            {instanceStatuses.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Server Instances</label>
-                  <div className="flex items-center gap-2 text-xs">
-                    {statusCounts.connected > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                        <span>{statusCounts.connected} active</span>
-                      </div>
-                    )}
-                    {statusCounts.connecting > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
-                        <span>{statusCounts.connecting} connecting</span>
-                      </div>
-                    )}
-                    {statusCounts.error > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                        <span>{statusCounts.error} error</span>
-                      </div>
-                    )}
-                    {statusCounts.total === 0 && (
-                      <span className="text-muted-foreground">No active instances</span>
-                    )}
-                  </div>
-                </div>
-                <ScrollArea className="h-[140px] border rounded-md p-1">
-                  <div className="space-y-1">
-                    {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
-                      const displayInstance = instances[0];
-                      const hasError = displayInstance.enabled && displayInstance.status === 'error';
-                      
-                      return (
-                        <div 
-                          key={definitionId} 
-                          className={cn(
-                            "flex items-center justify-between p-2 rounded",
-                            hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <StatusIndicator 
-                              status={
-                                isHostDisconnected ? 'none' :
-                                !displayInstance.enabled ? 'inactive' :
-                                displayInstance.status === 'connected' ? 'active' :
-                                displayInstance.status === 'connecting' ? 'warning' :
-                                displayInstance.status === 'error' ? 'error' : 'inactive'
-                              }
-                            />
-                            <div className="text-sm flex items-center">
-                              <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
-                                {displayInstance.definitionName}
-                              </span>
-                              
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-6 px-1 py-0 ml-1"
-                                  >
-                                    <span className="text-xs text-muted-foreground hidden md:block">
-                                      {displayInstance.name}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
-                                      {displayInstance.name.split('-').pop()}
-                                    </span>
-                                    <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent 
-                                  align="start"
-                                  className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
-                                >
-                                  {instances.map(instance => (
-                                    <DropdownMenuItem
-                                      key={instance.id}
-                                      className={cn(
-                                        "w-full text-xs cursor-pointer",
-                                        displayInstance.id === instance.id && "bg-accent font-medium"
-                                      )}
-                                      onClick={() => handleSelectInstance(instance.id, definitionId)}
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        {displayInstance.id === instance.id && (
-                                          <CircleCheck className="h-3 w-3 text-primary shrink-0" />
-                                        )}
-                                        <span>{instance.name}</span>
-                                      </div>
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                            {!isHostDisconnected && displayInstance.status === 'connecting' && (
-                              <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {hasError && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="h-6 px-1 py-0 text-red-600 hover:text-red-700 hover:bg-red-100"
-                                onClick={() => handleShowError(displayInstance)}
-                              >
-                                <AlertCircle className="h-3.5 w-3.5" />
-                                <span className="ml-1 text-xs">View Error</span>
-                              </Button>
-                            )}
-                            {!isHostDisconnected && (
-                              <Switch 
-                                checked={displayInstance.enabled} 
-                                onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
-                                className="shrink-0"
-                              />
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-              </div>
-            )}
-          </>
-        )}
-        
-        {!profileId && (
-          <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
-            <p className="text-muted-foreground text-center">
-              Select a profile to connect mcp server to host
-            </p>
+              </SelectContent>
+            </Select>
           </div>
-        )}
+          
+          {profileId && (
+            <>
+              {instanceStatuses.length > 0 && (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Server Instances</label>
+                    <div className="flex items-center gap-2 text-xs">
+                      {statusCounts.connected > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                          <span>{statusCounts.connected} active</span>
+                        </div>
+                      )}
+                      {statusCounts.connecting > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+                          <span>{statusCounts.connecting} connecting</span>
+                        </div>
+                      )}
+                      {statusCounts.error > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                          <span>{statusCounts.error} error</span>
+                        </div>
+                      )}
+                      {statusCounts.total === 0 && (
+                        <span className="text-muted-foreground">No active instances</span>
+                      )}
+                    </div>
+                  </div>
+                  <ScrollArea className="h-[140px] border rounded-md p-1">
+                    <div className="space-y-1">
+                      {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
+                        const displayInstance = instances[0];
+                        const hasError = displayInstance.enabled && displayInstance.status === 'error';
+                        
+                        return (
+                          <div 
+                            key={definitionId} 
+                            className={cn(
+                              "flex items-center justify-between p-2 rounded",
+                              hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
+                            )}
+                          >
+                            <div className="flex items-center gap-2">
+                              <StatusIndicator 
+                                status={
+                                  isHostDisconnected ? 'none' :
+                                  !displayInstance.enabled ? 'inactive' :
+                                  displayInstance.status === 'connected' ? 'active' :
+                                  displayInstance.status === 'connecting' ? 'warning' :
+                                  displayInstance.status === 'error' ? 'error' : 'inactive'
+                                }
+                              />
+                              <div className="text-sm flex items-center">
+                                <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
+                                  {displayInstance.definitionName}
+                                </span>
+                                
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 px-1 py-0 ml-1"
+                                    >
+                                      <span className="text-xs text-muted-foreground hidden md:block">
+                                        {displayInstance.name}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
+                                        {displayInstance.name.split('-').pop()}
+                                      </span>
+                                      <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent 
+                                    align="start"
+                                    className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
+                                  >
+                                    {instances.map(instance => (
+                                      <DropdownMenuItem
+                                        key={instance.id}
+                                        className={cn(
+                                          "w-full text-xs cursor-pointer",
+                                          displayInstance.id === instance.id && "bg-accent font-medium"
+                                        )}
+                                        onClick={() => handleSelectInstance(instance.id, definitionId)}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          {displayInstance.id === instance.id && (
+                                            <CircleCheck className="h-3 w-3 text-primary shrink-0" />
+                                          )}
+                                          <span>{instance.name}</span>
+                                        </div>
+                                      </DropdownMenuItem>
+                                    ))}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                              {!isHostDisconnected && displayInstance.status === 'connecting' && (
+                                <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {hasError && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="h-6 px-1 py-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                  onClick={() => handleShowError(displayInstance)}
+                                >
+                                  <AlertCircle className="h-3.5 w-3.5" />
+                                  <span className="ml-1 text-xs">View Error</span>
+                                </Button>
+                              )}
+                              {!isHostDisconnected && (
+                                <Switch 
+                                  checked={displayInstance.enabled} 
+                                  onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                                  className="shrink-0"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </>
+          )}
+          
+          {!profileId && (
+            <div className="flex items-center justify-center p-4 border-2 border-dashed rounded-md">
+              <p className="text-muted-foreground text-center">
+                Select a profile to connect mcp server to host
+              </p>
+            </div>
+          )}
+        </div>
       </CardContent>
       
       <Separator className="mt-auto" />
