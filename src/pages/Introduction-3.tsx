@@ -158,7 +158,7 @@ const Introduction3: React.FC = () => {
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
               <img
-                src="/lovable-uploads/12d690f5-eccb-4d2a-bd53-89b67a5f847a.png"
+                src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
                 alt="MCP Now Logo"
                 className="h-8 w-8 rounded-lg shadow"
               />
@@ -581,7 +581,7 @@ const Introduction3: React.FC = () => {
             <div>
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <img
-                  src="/lovable-uploads/12d690f5-eccb-4d2a-bd53-89b67a5f847a.png"
+                  src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
                   alt="MCP Now Logo"
                   className="h-8 w-8 rounded-lg shadow"
                 />
