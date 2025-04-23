@@ -1,10 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Download, ChevronRight, ArrowRight, ServerIcon, Cpu, Database, Star, MessageSquareQuoteIcon, DiscIcon, MessageCircleQuestionIcon, Twitter } from "lucide-react";
+import { Download, ChevronRight, ArrowRight, ServerIcon, Cpu, Database, Star, MessageCircleQuestionIcon, DiscIcon, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+
 const fadeInUp = {
   initial: {
     opacity: 0,
@@ -49,161 +56,189 @@ const cardHover = {
     }
   }
 };
-const Introduction3: React.FC = () => {
-  const mcpServers = [{
-    name: "OpenAI Server",
-    description: "Access GPT-4 and DALL-E models",
-    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-  }, {
-    name: "Anthropic Claude",
-    description: "High-performance Claude models",
-    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-  }, {
-    name: "Adobe Firefly",
-    description: "Creative image generation APIs",
-    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-  }, {
-    name: "Atlassian Server",
-    description: "Multi-protocol connectivity",
-    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-  }, {
-    name: "Airbnb Custom",
-    description: "Custom model deployment tools",
-    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-  }, {
-    name: "Amazon Bedrock",
-    description: "Managed foundation model access",
-    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
-  }, {
-    name: "Amplitude AI",
-    description: "Analytics-focused AI models",
-    icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
-  }, {
-    name: "Discord AI",
-    description: "Social-first AI integrations",
-    icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
-  }, {
-    name: "1Password AI",
-    description: "Secure credential handling",
-    icon: "/lovable-uploads/2edef556-b3cc-440b-90c0-af33a7a3730f.png"
-  }, {
-    name: "Google Vertex",
-    description: "Advanced ML API integrations",
-    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-  }, {
-    name: "Hugging Face",
-    description: "Open-source model hub",
-    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-  }, {
-    name: "Midjourney",
-    description: "Image generation services",
-    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-  }, {
-    name: "Cohere",
-    description: "Enterprise language solutions",
-    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-  }, {
-    name: "Stability AI",
-    description: "Customizable generation APIs",
-    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-  }, {
-    name: "Mistral AI",
-    description: "Powerful open-weight models",
-    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
-  }, {
-    name: "Pinecone",
-    description: "Vector database integration",
-    icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
-  }];
-  const hosts = [{
-    name: "Cursor",
-    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-  }, {
-    name: "Windurf",
-    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-  }, {
-    name: "VSCode",
-    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-  }, {
-    name: "JetBrains",
-    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-  }, {
-    name: "Local Host",
-    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-  }, {
-    name: "Cloud Host",
-    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
-  }];
-  const testimonials = [{
-    author: "Sarah Chen",
-    role: "Full-stack Developer",
-    company: "TechForward",
-    text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
-    avatar: "/placeholder.svg"
-  }, {
-    author: "Michael Rodriguez",
-    role: "ML Engineer",
-    company: "DataVision",
-    text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
-    avatar: "/placeholder.svg"
-  }, {
-    author: "Aisha Johnson",
-    role: "CTO",
-    company: "NextGen AI",
-    text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
-    avatar: "/placeholder.svg"
-  }, {
-    author: "David Park",
-    role: "AI Researcher",
-    company: "Innovation Labs",
-    text: "The profile management system in MCP Now makes it incredibly easy to maintain different configurations for development and production.",
-    avatar: "/placeholder.svg"
-  }];
-  const faqs = [{
+const mcpServers = [{
+  name: "OpenAI Server",
+  description: "Access GPT-4 and DALL-E models",
+  icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+}, {
+  name: "Anthropic Claude",
+  description: "High-performance Claude models",
+  icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+}, {
+  name: "Adobe Firefly",
+  description: "Creative image generation APIs",
+  icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+}, {
+  name: "Atlassian Server",
+  description: "Multi-protocol connectivity",
+  icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+}, {
+  name: "Airbnb Custom",
+  description: "Custom model deployment tools",
+  icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+}, {
+  name: "Amazon Bedrock",
+  description: "Managed foundation model access",
+  icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+}, {
+  name: "Amplitude AI",
+  description: "Analytics-focused AI models",
+  icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+}, {
+  name: "Discord AI",
+  description: "Social-first AI integrations",
+  icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
+}, {
+  name: "1Password AI",
+  description: "Secure credential handling",
+  icon: "/lovable-uploads/2edef556-b3cc-440b-90c0-af33a7a3730f.png"
+}, {
+  name: "Google Vertex",
+  description: "Advanced ML API integrations",
+  icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+}, {
+  name: "Hugging Face",
+  description: "Open-source model hub",
+  icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+}, {
+  name: "Midjourney",
+  description: "Image generation services",
+  icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+}, {
+  name: "Cohere",
+  description: "Enterprise language solutions",
+  icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+}, {
+  name: "Stability AI",
+  description: "Customizable generation APIs",
+  icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+}, {
+  name: "Mistral AI",
+  description: "Powerful open-weight models",
+  icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+}, {
+  name: "Pinecone",
+  description: "Vector database integration",
+  icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+}];
+const hosts = [{
+  name: "Cursor",
+  icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+}, {
+  name: "Windurf",
+  icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+}, {
+  name: "VSCode",
+  icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+}, {
+  name: "JetBrains",
+  icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+}, {
+  name: "Local Host",
+  icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+}, {
+  name: "Cloud Host",
+  icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+}];
+const testimonials = [{
+  author: "Sarah Chen",
+  role: "Full-stack Developer",
+  company: "TechForward",
+  text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
+  avatar: "/placeholder.svg"
+}, {
+  author: "Michael Rodriguez",
+  role: "ML Engineer",
+  company: "DataVision",
+  text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
+  avatar: "/placeholder.svg"
+}, {
+  author: "Aisha Johnson",
+  role: "CTO",
+  company: "NextGen AI",
+  text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
+  avatar: "/placeholder.svg"
+}, {
+  author: "David Park",
+  role: "AI Researcher",
+  company: "Innovation Labs",
+  text: "The profile management system in MCP Now makes it incredibly easy to maintain different configurations for development and production.",
+  avatar: "/placeholder.svg"
+}];
+const faqs = [{
+  question: "What is MCP Now?",
+  answer: "MCP Now is a desktop application that simplifies the management of Model Context Protocol (MCP) servers. It provides a unified interface for discovering, configuring, and connecting to multiple AI model providers through a single client."
+}, {
+  question: "How does MCP Now improve my AI development workflow?",
+  answer: "MCP Now eliminates the need to manage multiple configurations for different AI services. You can quickly switch between providers, create reusable profiles, and connect various host applications to these profiles with minimal configuration."
+}, {
+  question: "Is MCP Now compatible with my existing AI tools?",
+  answer: "Yes, MCP Now supports integration with many popular AI development tools like Cursor, VSCode, JetBrains IDEs, and more. It's designed to seamlessly fit into your existing workflow."
+}, {
+  question: "Can I use MCP Now with my own local AI models?",
+  answer: "Absolutely! MCP Now fully supports local host configurations, allowing you to integrate your own custom models and servers into the same management interface."
+}, {
+  question: "Is MCP Now secure for enterprise use?",
+  answer: "MCP Now prioritizes security with encrypted connections, credential management, and doesn't store your API keys centrally. It's designed from the ground up with enterprise security considerations."
+}, {
+  question: "How much does MCP Now cost?",
+  answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details."
+}];
+const quickStartSteps = [{
+  title: "Download Client",
+  description: "Install the MCP Now desktop client for your operating system.",
+  icon: Download
+}, {
+  title: "Discover Servers",
+  description: "Browse the Discovery page to find and install MCP servers.",
+  icon: ServerIcon
+}, {
+  title: "Create Profiles",
+  description: "Configure profiles with your preferred servers and settings.",
+  icon: Database
+}, {
+  title: "Bind to Hosts",
+  description: "Connect your profiles to development environments and tools.",
+  icon: Cpu
+}];
+const chunkedServers = Array.from({
+  length: Math.ceil(mcpServers.length / 4)
+}, (_, i) => mcpServers.slice(i * 4, i * 4 + 4));
+
+const faqAccordionItems = [
+  {
     question: "What is MCP Now?",
-    answer: "MCP Now is a desktop application that simplifies the management of Model Context Protocol (MCP) servers. It provides a unified interface for discovering, configuring, and connecting to multiple AI model providers through a single client."
-  }, {
+    answer: "MCP Now is a desktop application that simplifies the management of Model Context Protocol (MCP) servers. It provides a unified interface for discovering, configuring, and connecting to multiple AI model providers through a single client.",
+  },
+  {
     question: "How does MCP Now improve my AI development workflow?",
-    answer: "MCP Now eliminates the need to manage multiple configurations for different AI services. You can quickly switch between providers, create reusable profiles, and connect various host applications to these profiles with minimal configuration."
-  }, {
+    answer: "MCP Now eliminates the need to manage multiple configurations for different AI services. You can quickly switch between providers, create reusable profiles, and connect various host applications to these profiles with minimal configuration.",
+  },
+  {
     question: "Is MCP Now compatible with my existing AI tools?",
-    answer: "Yes, MCP Now supports integration with many popular AI development tools like Cursor, VSCode, JetBrains IDEs, and more. It's designed to seamlessly fit into your existing workflow."
-  }, {
+    answer: "Yes, MCP Now supports integration with many popular AI development tools like Cursor, VSCode, JetBrains IDEs, and more. It's designed to seamlessly fit into your existing workflow.",
+  },
+  {
     question: "Can I use MCP Now with my own local AI models?",
-    answer: "Absolutely! MCP Now fully supports local host configurations, allowing you to integrate your own custom models and servers into the same management interface."
-  }, {
+    answer: "Absolutely! MCP Now fully supports local host configurations, allowing you to integrate your own custom models and servers into the same management interface.",
+  },
+  {
     question: "Is MCP Now secure for enterprise use?",
-    answer: "MCP Now prioritizes security with encrypted connections, credential management, and doesn't store your API keys centrally. It's designed from the ground up with enterprise security considerations."
-  }, {
+    answer: "MCP Now prioritizes security with encrypted connections, credential management, and doesn't store your API keys centrally. It's designed from the ground up with enterprise security considerations.",
+  },
+  {
     question: "How much does MCP Now cost?",
-    answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details."
-  }];
-  const quickStartSteps = [{
-    title: "Download Client",
-    description: "Install the MCP Now desktop client for your operating system.",
-    icon: Download
-  }, {
-    title: "Discover Servers",
-    description: "Browse the Discovery page to find and install MCP servers.",
-    icon: ServerIcon
-  }, {
-    title: "Create Profiles",
-    description: "Configure profiles with your preferred servers and settings.",
-    icon: Database
-  }, {
-    title: "Bind to Hosts",
-    description: "Connect your profiles to development environments and tools.",
-    icon: Cpu
-  }];
-  const chunkedServers = Array.from({
-    length: Math.ceil(mcpServers.length / 4)
-  }, (_, i) => mcpServers.slice(i * 4, i * 4 + 4));
+    answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details.",
+  },
+];
+
+const Introduction3: React.FC = () => {
   return <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
       <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/90 dark:border-gray-800">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
+              <img src="/lovable-uploads/387ac538-f4f3-47e6-9aeb-7d7be4f143e9.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
               <span className="text-xl font-bold tracking-tight">MCP Now</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
@@ -288,7 +323,7 @@ const Introduction3: React.FC = () => {
             duration: 0.7,
             delay: 0.3
           }}>
-              <img src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
+              <img src="/lovable-uploads/e1068fc7-0685-4fab-9e37-7643f3a44605.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
             </motion.div>
           </motion.div>
         </div>
@@ -471,23 +506,20 @@ const Introduction3: React.FC = () => {
               了解更多关于 MCP Now 的常见疑问解答。
             </p>
           </motion.div>
-          
-          <div className="max-w-3xl mx-auto divide-y divide-gray-200 dark:divide-gray-700">
-            {faqs.map((faq, idx) => <motion.div key={idx} className="py-6" initial={{
-            opacity: 0
-          }} whileInView={{
-            opacity: 1
-          }} viewport={{
-            once: true
-          }} transition={{
-            delay: idx * 0.1
-          }}>
-                <h3 className="text-xl font-semibold mb-2 flex items-center">
-                  <MessageCircleQuestionIcon className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 pl-7">{faq.answer}</p>
-              </motion.div>)}
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="w-full">
+              {faqAccordionItems.map((faq, idx) => (
+                <AccordionItem key={idx} value={`item-${idx}`}>
+                  <AccordionTrigger className="text-lg flex items-center gap-2 font-semibold py-4 pl-1 pr-3 hover:underline data-[state=open]:text-blue-600 transition-all">
+                    <MessageCircleQuestionIcon className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="pl-9 pb-4 text-gray-600 dark:text-gray-300 text-base">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </div>
       </section>
@@ -544,80 +576,4 @@ const Introduction3: React.FC = () => {
                 <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
                   <DiscIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </a>
-                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
-                  <Twitter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </a>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="py-12 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <Link to="/" className="flex items-center gap-2 mb-4">
-                <img src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
-                <span className="text-xl font-bold tracking-tight">MCP Now</span>
-              </Link>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                简化 AI 模型管理与部署的现代解决方案
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">产品</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">特性</Link></li>
-                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">下载</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">价格</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">更新日志</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">资源</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">文档</Link></li>
-                <li><Link to="#guide" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">入门指南</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">API 参考</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">示例</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">关于我们</h4>
-              <ul className="space-y-2 text-sm">
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">公司</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">博客</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">联系我们</Link></li>
-                <li>
-                  <div className="flex gap-4 mt-2">
-                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                      <DiscIcon className="h-5 w-5" />
-                    </a>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                      <Twitter className="h-5 w-5" />
-                    </a>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              © 2025 MCP Now. 保留所有权利。
-            </p>
-            <div className="flex gap-4 mt-4 sm:mt-0">
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">隐私政策</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">服务条款</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">法律信息</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>;
-};
-export default Introduction3;
+                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-
