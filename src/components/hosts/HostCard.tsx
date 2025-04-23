@@ -373,6 +373,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1">
+        {profileChangedRecently && isExternalHost && (
+          <ProfileChangeHint />
+        )}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium">Associated Profile</label>
@@ -401,9 +404,6 @@ export function HostCard({
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <div className="mb-2 pointer-events-none">
-                <ProfileChangeHint className="rounded-none border-0 border-b border-blue-100 mb-2 shadow-none bg-blue-50" />
-              </div>
               {profiles.map(profile => (
                 <SelectItem key={profile.id} value={profile.id}>
                   <div className="flex items-center gap-2">
