@@ -1,167 +1,209 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  Download, 
-  ChevronRight, 
-  ArrowRight, 
-  ServerIcon, 
-  Cpu, 
-  Database, 
-  Star, 
-  MessageSquareQuoteIcon, 
-  DiscIcon,
-  MessageCircleQuestionIcon,
-  Twitter
-} from "lucide-react";
+import { Download, ChevronRight, ArrowRight, ServerIcon, Cpu, Database, Star, MessageSquareQuoteIcon, DiscIcon, MessageCircleQuestionIcon, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
 const fadeInUp = {
-  initial: { opacity: 0, y: 40 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.7 },
+  initial: {
+    opacity: 0,
+    y: 40
+  },
+  whileInView: {
+    opacity: 1,
+    y: 0
+  },
+  viewport: {
+    once: true
+  },
+  transition: {
+    duration: 0.7
+  }
 };
-
 const staggerChildren = {
-  initial: { opacity: 0 },
-  whileInView: { opacity: 1 },
-  viewport: { once: true },
-  transition: { staggerChildren: 0.2 },
+  initial: {
+    opacity: 0
+  },
+  whileInView: {
+    opacity: 1
+  },
+  viewport: {
+    once: true
+  },
+  transition: {
+    staggerChildren: 0.2
+  }
 };
-
 const cardHover = {
-  rest: { scale: 1, transition: { duration: 0.2 } },
-  hover: { scale: 1.03, transition: { duration: 0.2 } }
-};
-
-const Introduction3: React.FC = () => {
-  const mcpServers = [
-    { name: "OpenAI Server", description: "Access GPT-4 and DALL-E models", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
-    { name: "Anthropic Claude", description: "High-performance Claude models", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
-    { name: "Adobe Firefly", description: "Creative image generation APIs", icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png" },
-    { name: "Atlassian Server", description: "Multi-protocol connectivity", icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png" },
-    { name: "Airbnb Custom", description: "Custom model deployment tools", icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png" },
-    { name: "Amazon Bedrock", description: "Managed foundation model access", icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png" },
-    { name: "Amplitude AI", description: "Analytics-focused AI models", icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png" },
-    { name: "Discord AI", description: "Social-first AI integrations", icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png" },
-    { name: "1Password AI", description: "Secure credential handling", icon: "/lovable-uploads/2edef556-b3cc-440b-90c0-af33a7a3730f.png" },
-    { name: "Google Vertex", description: "Advanced ML API integrations", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
-    { name: "Hugging Face", description: "Open-source model hub", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
-    { name: "Midjourney", description: "Image generation services", icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png" },
-    { name: "Cohere", description: "Enterprise language solutions", icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png" },
-    { name: "Stability AI", description: "Customizable generation APIs", icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png" },
-    { name: "Mistral AI", description: "Powerful open-weight models", icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png" },
-    { name: "Pinecone", description: "Vector database integration", icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png" },
-  ];
-
-  const hosts = [
-    { name: "Cursor", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
-    { name: "Windurf", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
-    { name: "VSCode", icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png" },
-    { name: "JetBrains", icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png" },
-    { name: "Local Host", icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png" },
-    { name: "Cloud Host", icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png" },
-  ];
-
-  const testimonials = [
-    {
-      author: "Sarah Chen",
-      role: "Full-stack Developer",
-      company: "TechForward",
-      text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
-      avatar: "/placeholder.svg",
-    },
-    {
-      author: "Michael Rodriguez",
-      role: "ML Engineer",
-      company: "DataVision",
-      text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
-      avatar: "/placeholder.svg",
-    },
-    {
-      author: "Aisha Johnson",
-      role: "CTO",
-      company: "NextGen AI",
-      text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
-      avatar: "/placeholder.svg",
-    },
-    {
-      author: "David Park",
-      role: "AI Researcher",
-      company: "Innovation Labs",
-      text: "The profile management system in MCP Now makes it incredibly easy to maintain different configurations for development and production.",
-      avatar: "/placeholder.svg",
-    },
-  ];
-
-  const faqs = [
-    {
-      question: "What is MCP Now?",
-      answer: "MCP Now is a desktop application that simplifies the management of Model Context Protocol (MCP) servers. It provides a unified interface for discovering, configuring, and connecting to multiple AI model providers through a single client."
-    },
-    {
-      question: "How does MCP Now improve my AI development workflow?",
-      answer: "MCP Now eliminates the need to manage multiple configurations for different AI services. You can quickly switch between providers, create reusable profiles, and connect various host applications to these profiles with minimal configuration."
-    },
-    {
-      question: "Is MCP Now compatible with my existing AI tools?",
-      answer: "Yes, MCP Now supports integration with many popular AI development tools like Cursor, VSCode, JetBrains IDEs, and more. It's designed to seamlessly fit into your existing workflow."
-    },
-    {
-      question: "Can I use MCP Now with my own local AI models?",
-      answer: "Absolutely! MCP Now fully supports local host configurations, allowing you to integrate your own custom models and servers into the same management interface."
-    },
-    {
-      question: "Is MCP Now secure for enterprise use?",
-      answer: "MCP Now prioritizes security with encrypted connections, credential management, and doesn't store your API keys centrally. It's designed from the ground up with enterprise security considerations."
-    },
-    {
-      question: "How much does MCP Now cost?",
-      answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details."
+  rest: {
+    scale: 1,
+    transition: {
+      duration: 0.2
     }
-  ];
-
-  const quickStartSteps = [
-    {
-      title: "Download Client",
-      description: "Install the MCP Now desktop client for your operating system.",
-      icon: Download,
-    },
-    {
-      title: "Discover Servers",
-      description: "Browse the Discovery page to find and install MCP servers.",
-      icon: ServerIcon,
-    },
-    {
-      title: "Create Profiles",
-      description: "Configure profiles with your preferred servers and settings.",
-      icon: Database,
-    },
-    {
-      title: "Bind to Hosts",
-      description: "Connect your profiles to development environments and tools.",
-      icon: Cpu,
-    },
-  ];
-
-  const chunkedServers = Array.from({ length: Math.ceil(mcpServers.length / 4) }, (_, i) =>
-    mcpServers.slice(i * 4, i * 4 + 4)
-  );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
+  },
+  hover: {
+    scale: 1.03,
+    transition: {
+      duration: 0.2
+    }
+  }
+};
+const Introduction3: React.FC = () => {
+  const mcpServers = [{
+    name: "OpenAI Server",
+    description: "Access GPT-4 and DALL-E models",
+    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+  }, {
+    name: "Anthropic Claude",
+    description: "High-performance Claude models",
+    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+  }, {
+    name: "Adobe Firefly",
+    description: "Creative image generation APIs",
+    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+  }, {
+    name: "Atlassian Server",
+    description: "Multi-protocol connectivity",
+    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+  }, {
+    name: "Airbnb Custom",
+    description: "Custom model deployment tools",
+    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+  }, {
+    name: "Amazon Bedrock",
+    description: "Managed foundation model access",
+    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+  }, {
+    name: "Amplitude AI",
+    description: "Analytics-focused AI models",
+    icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+  }, {
+    name: "Discord AI",
+    description: "Social-first AI integrations",
+    icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
+  }, {
+    name: "1Password AI",
+    description: "Secure credential handling",
+    icon: "/lovable-uploads/2edef556-b3cc-440b-90c0-af33a7a3730f.png"
+  }, {
+    name: "Google Vertex",
+    description: "Advanced ML API integrations",
+    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+  }, {
+    name: "Hugging Face",
+    description: "Open-source model hub",
+    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+  }, {
+    name: "Midjourney",
+    description: "Image generation services",
+    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+  }, {
+    name: "Cohere",
+    description: "Enterprise language solutions",
+    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+  }, {
+    name: "Stability AI",
+    description: "Customizable generation APIs",
+    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+  }, {
+    name: "Mistral AI",
+    description: "Powerful open-weight models",
+    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+  }, {
+    name: "Pinecone",
+    description: "Vector database integration",
+    icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+  }];
+  const hosts = [{
+    name: "Cursor",
+    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+  }, {
+    name: "Windurf",
+    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+  }, {
+    name: "VSCode",
+    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+  }, {
+    name: "JetBrains",
+    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+  }, {
+    name: "Local Host",
+    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+  }, {
+    name: "Cloud Host",
+    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+  }];
+  const testimonials = [{
+    author: "Sarah Chen",
+    role: "Full-stack Developer",
+    company: "TechForward",
+    text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
+    avatar: "/placeholder.svg"
+  }, {
+    author: "Michael Rodriguez",
+    role: "ML Engineer",
+    company: "DataVision",
+    text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
+    avatar: "/placeholder.svg"
+  }, {
+    author: "Aisha Johnson",
+    role: "CTO",
+    company: "NextGen AI",
+    text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
+    avatar: "/placeholder.svg"
+  }, {
+    author: "David Park",
+    role: "AI Researcher",
+    company: "Innovation Labs",
+    text: "The profile management system in MCP Now makes it incredibly easy to maintain different configurations for development and production.",
+    avatar: "/placeholder.svg"
+  }];
+  const faqs = [{
+    question: "What is MCP Now?",
+    answer: "MCP Now is a desktop application that simplifies the management of Model Context Protocol (MCP) servers. It provides a unified interface for discovering, configuring, and connecting to multiple AI model providers through a single client."
+  }, {
+    question: "How does MCP Now improve my AI development workflow?",
+    answer: "MCP Now eliminates the need to manage multiple configurations for different AI services. You can quickly switch between providers, create reusable profiles, and connect various host applications to these profiles with minimal configuration."
+  }, {
+    question: "Is MCP Now compatible with my existing AI tools?",
+    answer: "Yes, MCP Now supports integration with many popular AI development tools like Cursor, VSCode, JetBrains IDEs, and more. It's designed to seamlessly fit into your existing workflow."
+  }, {
+    question: "Can I use MCP Now with my own local AI models?",
+    answer: "Absolutely! MCP Now fully supports local host configurations, allowing you to integrate your own custom models and servers into the same management interface."
+  }, {
+    question: "Is MCP Now secure for enterprise use?",
+    answer: "MCP Now prioritizes security with encrypted connections, credential management, and doesn't store your API keys centrally. It's designed from the ground up with enterprise security considerations."
+  }, {
+    question: "How much does MCP Now cost?",
+    answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details."
+  }];
+  const quickStartSteps = [{
+    title: "Download Client",
+    description: "Install the MCP Now desktop client for your operating system.",
+    icon: Download
+  }, {
+    title: "Discover Servers",
+    description: "Browse the Discovery page to find and install MCP servers.",
+    icon: ServerIcon
+  }, {
+    title: "Create Profiles",
+    description: "Configure profiles with your preferred servers and settings.",
+    icon: Database
+  }, {
+    title: "Bind to Hosts",
+    description: "Connect your profiles to development environments and tools.",
+    icon: Cpu
+  }];
+  const chunkedServers = Array.from({
+    length: Math.ceil(mcpServers.length / 4)
+  }, (_, i) => mcpServers.slice(i * 4, i * 4 + 4));
+  return <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
       <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/90 dark:border-gray-800">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
-              <img
-                src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
-                alt="MCP Now Logo"
-                className="h-8 w-8 rounded-lg shadow"
-              />
+              <img src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
               <span className="text-xl font-bold tracking-tight">MCP Now</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
@@ -198,12 +240,15 @@ const Introduction3: React.FC = () => {
         </div>
         
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="flex flex-col items-center text-center space-y-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
+          <motion.div className="flex flex-col items-center text-center space-y-8" initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.7
+        }}>
             <Badge variant="outline" className="px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400">
               <span className="text-blue-600 font-bold mr-1.5">New</span>
               <span className="text-gray-600 dark:text-gray-300">|</span>
@@ -233,17 +278,17 @@ const Introduction3: React.FC = () => {
               </Button>
             </div>
             
-            <motion.div 
-              className="w-full max-w-4xl mt-12 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-            >
-              <img 
-                src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png"
-                alt="MCP Now Dashboard" 
-                className="w-full h-auto object-cover"
-              />
+            <motion.div className="w-full max-w-4xl mt-12 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800" initial={{
+            opacity: 0,
+            y: 40
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.7,
+            delay: 0.3
+          }}>
+              <img src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
             </motion.div>
           </motion.div>
         </div>
@@ -251,56 +296,31 @@ const Introduction3: React.FC = () => {
 
       <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">MCP 服务广场</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               探索并连接到各种流行的 AI 模型服务商，通过统一的接口简化您的开发流程。
             </p>
           </motion.div>
           
-          <motion.div
-            className="space-y-8"
-            variants={staggerChildren}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
-          >
-            {chunkedServers.map((row, rowIndex) => (
-              <motion.div 
-                key={`row-${rowIndex}`} 
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-                variants={fadeInUp}
-              >
-                {row.map((server, idx) => (
-                  <motion.div
-                    key={`${server.name}-${idx}`}
-                    whileHover="hover"
-                    initial="rest"
-                    animate="rest"
-                    variants={cardHover}
-                  >
+          <motion.div className="space-y-8" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
+          once: true
+        }}>
+            {chunkedServers.map((row, rowIndex) => <motion.div key={`row-${rowIndex}`} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" variants={fadeInUp}>
+                {row.map((server, idx) => <motion.div key={`${server.name}-${idx}`} whileHover="hover" initial="rest" animate="rest" variants={cardHover}>
                     <Card className="h-full overflow-hidden transition-all hover:shadow-md border-gray-200 dark:border-gray-800">
                       <CardContent className="p-6">
                         <div className="flex flex-col items-center text-center">
                           <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                            <img 
-                              src={server.icon}
-                              alt={server.name}
-                              className="w-12 h-12 object-contain"
-                            />
+                            <img src={server.icon} alt={server.name} className="w-12 h-12 object-contain" />
                           </div>
                           <h3 className="text-lg font-semibold mb-2">{server.name}</h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">{server.description}</p>
                         </div>
                       </CardContent>
                     </Card>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ))}
+                  </motion.div>)}
+              </motion.div>)}
           </motion.div>
           
           <div className="mt-12 text-center">
@@ -314,49 +334,29 @@ const Introduction3: React.FC = () => {
 
       <section id="hosts" className="py-20">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              MCP Now 内置众多主流 Hosts
-            </h2>
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">MCP Now 支持众多主流应用</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               同时也兼容本地 Hosts 配置，满足您的各类开发需求。
             </p>
           </motion.div>
           
-          <motion.div 
-            className="flex flex-wrap justify-center gap-8 md:gap-12"
-            variants={staggerChildren}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
-          >
-            {hosts.map((host, idx) => (
-              <motion.div
-                key={`${host.name}-${idx}`}
-                className="flex flex-col items-center"
-                variants={fadeInUp}
-                transition={{ delay: idx * 0.1 }}
-              >
+          <motion.div className="flex flex-wrap justify-center gap-8 md:gap-12" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
+          once: true
+        }}>
+            {hosts.map((host, idx) => <motion.div key={`${host.name}-${idx}`} className="flex flex-col items-center" variants={fadeInUp} transition={{
+            delay: idx * 0.1
+          }}>
                 <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
-                  <img
-                    src={host.icon}
-                    alt={host.name}
-                    className="w-16 h-16 object-contain"
-                  />
+                  <img src={host.icon} alt={host.name} className="w-16 h-16 object-contain" />
                 </div>
                 <span className="font-medium">{host.name}</span>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </motion.div>
           
-          <motion.div
-            className="mt-16 p-6 md:p-8 rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 max-w-4xl mx-auto"
-            {...fadeInUp}
-            transition={{ delay: 0.4 }}
-          >
+          <motion.div className="mt-16 p-6 md:p-8 rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 max-w-4xl mx-auto" {...fadeInUp} transition={{
+          delay: 0.4
+        }}>
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <h3 className="text-xl md:text-2xl font-bold mb-2">轻松集成您的开发环境</h3>
@@ -374,10 +374,7 @@ const Introduction3: React.FC = () => {
 
       <section id="guide" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">入门指南</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               只需几个简单步骤，即可开始使用 MCP Now 提升您的开发体验。
@@ -385,15 +382,17 @@ const Introduction3: React.FC = () => {
           </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {quickStartSteps.map((step, idx) => (
-              <motion.div
-                key={idx}
-                className="relative"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
+            {quickStartSteps.map((step, idx) => <motion.div key={idx} className="relative" initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: idx * 0.1
+          }}>
                 <Card className="h-full border-gray-200 dark:border-gray-800">
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
@@ -411,49 +410,34 @@ const Introduction3: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {idx < quickStartSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                {idx < quickStartSteps.length - 1 && <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
                     <ChevronRight className="w-6 h-6 text-gray-400" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
+                  </div>}
+              </motion.div>)}
           </div>
         </div>
       </section>
 
       <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">全球优秀开发者必备的 MCP 工具</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               来自专业开发者的真实反馈，了解 MCP Now 如何改变他们的工作流程。
             </p>
           </motion.div>
           
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-            variants={staggerChildren}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
-          >
-            {testimonials.map((testimonial, idx) => (
-              <motion.div
-                key={idx}
-                variants={fadeInUp}
-                transition={{ delay: idx * 0.1 }}
-              >
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-8" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
+          once: true
+        }}>
+            {testimonials.map((testimonial, idx) => <motion.div key={idx} variants={fadeInUp} transition={{
+            delay: idx * 0.1
+          }}>
                 <Card className="h-full border-gray-200 dark:border-gray-800">
                   <CardContent className="p-6">
                     <div className="flex flex-col space-y-4">
                       <div className="flex items-center space-x-1">
-                        {Array(5).fill(null).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        ))}
+                        {Array(5).fill(null).map((_, i) => <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />)}
                       </div>
                       
                       <p className="italic text-gray-700 dark:text-gray-300">"{testimonial.text}"</p>
@@ -461,11 +445,7 @@ const Introduction3: React.FC = () => {
                       <div className="flex items-center pt-4">
                         <div className="mr-4">
                           <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                            <img
-                              src={testimonial.avatar}
-                              alt={testimonial.author}
-                              className="h-full w-full object-cover"
-                            />
+                            <img src={testimonial.avatar} alt={testimonial.author} className="h-full w-full object-cover" />
                           </div>
                         </div>
                         <div>
@@ -478,18 +458,14 @@ const Introduction3: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </motion.div>
         </div>
       </section>
 
       <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-800/50">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">常见问题</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               了解更多关于 MCP Now 的常见疑问解答。
@@ -497,32 +473,28 @@ const Introduction3: React.FC = () => {
           </motion.div>
           
           <div className="max-w-3xl mx-auto divide-y divide-gray-200 dark:divide-gray-700">
-            {faqs.map((faq, idx) => (
-              <motion.div
-                key={idx}
-                className="py-6"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
+            {faqs.map((faq, idx) => <motion.div key={idx} className="py-6" initial={{
+            opacity: 0
+          }} whileInView={{
+            opacity: 1
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: idx * 0.1
+          }}>
                 <h3 className="text-xl font-semibold mb-2 flex items-center">
                   <MessageCircleQuestionIcon className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
                   {faq.question}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 pl-7">{faq.answer}</p>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </div>
         </div>
       </section>
 
       <section id="download" className="py-20 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
         <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            {...fadeInUp}
-          >
+          <motion.div className="text-center max-w-3xl mx-auto mb-16" {...fadeInUp}>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">开始体验 MCP Now</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               下载客户端，或加入我们的社区获取更多支持与交流。
@@ -530,12 +502,15 @@ const Introduction3: React.FC = () => {
           </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            <motion.div
-              className="flex flex-col items-center text-center"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div className="flex flex-col items-center text-center" initial={{
+            opacity: 0,
+            x: -20
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
               <h3 className="text-2xl font-bold mb-4">下载客户端</h3>
               <div className="space-y-4 w-full">
                 <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
@@ -552,12 +527,15 @@ const Introduction3: React.FC = () => {
               </p>
             </motion.div>
             
-            <motion.div
-              className="flex flex-col items-center text-center"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
+            <motion.div className="flex flex-col items-center text-center" initial={{
+            opacity: 0,
+            x: 20
+          }} whileInView={{
+            opacity: 1,
+            x: 0
+          }} viewport={{
+            once: true
+          }}>
               <h3 className="text-2xl font-bold mb-4">加入社区</h3>
               <p className="mb-6 text-gray-600 dark:text-gray-300">
                 与其他 MCP Now 用户交流，获取最新更新，分享您的经验。
@@ -580,11 +558,7 @@ const Introduction3: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <Link to="/" className="flex items-center gap-2 mb-4">
-                <img
-                  src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
-                  alt="MCP Now Logo"
-                  className="h-8 w-8 rounded-lg shadow"
-                />
+                <img src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
                 <span className="text-xl font-bold tracking-tight">MCP Now</span>
               </Link>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -644,8 +618,6 @@ const Introduction3: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Introduction3;
