@@ -240,8 +240,8 @@ const Introduction3: React.FC = () => {
               transition={{ duration: 0.7, delay: 0.3 }}
             >
               <img 
-                src="/placeholder.svg"
-                alt="MCP Now Client Screenshot" 
+                src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png"
+                alt="MCP Now Dashboard" 
                 className="w-full h-auto object-cover"
               />
             </motion.div>
