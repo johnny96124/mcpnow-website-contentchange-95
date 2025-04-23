@@ -31,6 +31,9 @@ const Navbar: React.FC = () => {
             <Link to="#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               FAQ
             </Link>
+            <Link to="/introduction-3" className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700">
+              New Design
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -79,6 +82,13 @@ const Navbar: React.FC = () => {
           >
             FAQ
           </Link>
+          <Link 
+            to="/introduction-3" 
+            className="block py-2 text-base font-medium text-blue-600"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            New Design
+          </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
             <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
@@ -92,4 +102,3 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
-

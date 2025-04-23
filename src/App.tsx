@@ -24,7 +24,8 @@ import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import NotFound from "./pages/NotFound";
 import NewUserDashboard from "./pages/NewUserDashboard";
 import LandingPage from "./pages/LandingPage";
-import Introduction2 from "./pages/Introduction-2"; // 新增引入
+import Introduction2 from "./pages/Introduction-2";
+import Introduction3 from "./pages/Introduction-3"; // Add import for the new page
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -57,7 +58,8 @@ const App = () => {
                 <Route path="/tray" element={<TrayPopup />} />
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/introduction" element={<LandingPage />} />
-                <Route path="/introduction-2" element={<Introduction2 />} /> {/* 新增 */}
+                <Route path="/introduction-2" element={<Introduction2 />} />
+                <Route path="/introduction-3" element={<Introduction3 />} /> {/* Add route for new page */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
@@ -69,4 +71,3 @@ const App = () => {
 };
 
 export default App;
-
