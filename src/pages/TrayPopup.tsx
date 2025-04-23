@@ -259,6 +259,8 @@ const TrayPopup = () => {
                   </div>
                   
                   <div className="p-3 pt-2">
+                    {profileId && <HostRefreshHint className="mb-3" />}
+                    
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Profile:</span>
                       <Select
@@ -291,8 +293,6 @@ const TrayPopup = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    
-                    {profileId && <HostRefreshHint className="my-3" />}
                     
                     {profileId && instanceGroups.length > 0 && (
                       <div className="mt-3">
