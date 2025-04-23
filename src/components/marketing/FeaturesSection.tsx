@@ -1,8 +1,9 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Server, Cpu, MousePointer, CloudCog, Bot, BarChart3, Zap, Lock } from "lucide-react";
+import { ArrowRight, Server, Cpu, MousePointer, CloudCog, BarChart3, Zap, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -50,18 +51,26 @@ const FeaturesSection: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className={cn(
-              "border bg-background/60 overflow-hidden",
-              "hover:shadow-md hover:border-primary/20 transition-all duration-300",
-              "relative",
-            )}>
-              <CardContent className="pt-6">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-                <div className="absolute top-0 right-0 -mt-6 -mr-6 bg-gradient-to-bl from-background via-muted/10 to-muted/5 p-12 rounded-full blur-2xl opacity-30"></div>
-              </CardContent>
-            </Card>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <Card className={cn(
+                "border bg-background/60 overflow-hidden",
+                "hover:shadow-md hover:border-primary/20 transition-all duration-300",
+                "relative",
+              )}>
+                <CardContent className="pt-6">
+                  <div className="mb-4">{feature.icon}</div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                  <div className="absolute top-0 right-0 -mt-6 -mr-6 bg-gradient-to-bl from-background via-muted/10 to-muted/5 p-12 rounded-full blur-2xl opacity-30"></div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
         
