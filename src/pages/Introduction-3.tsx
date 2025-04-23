@@ -10,9 +10,9 @@ import {
   Cpu, 
   Database, 
   Star, 
-  MessageSquareQuestion, 
-  Twitter, 
-  Discord
+  MessageSquareQuoteIcon, 
+  DiscordIcon, 
+  Twitter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
