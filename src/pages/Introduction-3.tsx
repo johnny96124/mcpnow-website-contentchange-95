@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -11,7 +10,8 @@ import {
   Database, 
   Star, 
   MessageSquareQuoteIcon, 
-  DiscordIcon, 
+  DiscIcon,
+  MessageCircleQuestionIcon,
   Twitter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,6 @@ const cardHover = {
 };
 
 const Introduction3: React.FC = () => {
-  // Sample MCP Server cards for the showcase
   const mcpServers = [
     { name: "OpenAI Server", description: "Access GPT-4 and DALL-E models", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
     { name: "Anthropic Claude", description: "High-performance Claude models", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
@@ -57,7 +56,7 @@ const Introduction3: React.FC = () => {
     { name: "Mistral AI", description: "Powerful open-weight models", icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png" },
     { name: "Pinecone", description: "Vector database integration", icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png" },
   ];
-  
+
   const hosts = [
     { name: "Cursor", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
     { name: "Windurf", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
@@ -66,7 +65,7 @@ const Introduction3: React.FC = () => {
     { name: "Local Host", icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png" },
     { name: "Cloud Host", icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png" },
   ];
-  
+
   const testimonials = [
     {
       author: "Sarah Chen",
@@ -97,7 +96,7 @@ const Introduction3: React.FC = () => {
       avatar: "/placeholder.svg",
     },
   ];
-  
+
   const faqs = [
     {
       question: "What is MCP Now?",
@@ -124,7 +123,7 @@ const Introduction3: React.FC = () => {
       answer: "MCP Now offers a free version with core functionality, with premium features available through subscription plans. Check our website for current pricing details."
     }
   ];
-  
+
   const quickStartSteps = [
     {
       title: "Download Client",
@@ -147,15 +146,13 @@ const Introduction3: React.FC = () => {
       icon: Cpu,
     },
   ];
-  
-  // Chunk servers into rows of 4
+
   const chunkedServers = Array.from({ length: Math.ceil(mcpServers.length / 4) }, (_, i) =>
     mcpServers.slice(i * 4, i * 4 + 4)
   );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
-      {/* Navigation Bar */}
       <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/90 dark:border-gray-800">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
@@ -194,7 +191,6 @@ const Introduction3: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -253,7 +249,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* MCP Servers Showcase */}
       <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -317,7 +312,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* Compatible Hosts Section */}
       <section id="hosts" className="py-20">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -378,7 +372,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* Quick Start Guide Section */}
       <section id="guide" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -429,7 +422,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
       <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -492,7 +484,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-800/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -516,7 +507,7 @@ const Introduction3: React.FC = () => {
                 transition={{ delay: idx * 0.1 }}
               >
                 <h3 className="text-xl font-semibold mb-2 flex items-center">
-                  <MessageSquareQuestion className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <MessageCircleQuestionIcon className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
                   {faq.question}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 pl-7">{faq.answer}</p>
@@ -526,7 +517,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* Download & Community Section */}
       <section id="download" className="py-20 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -574,7 +564,7 @@ const Introduction3: React.FC = () => {
               </p>
               <div className="flex gap-4">
                 <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
-                  <Discord className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <DiscIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </a>
                 <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
                   <Twitter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -585,7 +575,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-12 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
@@ -632,7 +621,7 @@ const Introduction3: React.FC = () => {
                 <li>
                   <div className="flex gap-4 mt-2">
                     <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                      <Discord className="h-5 w-5" />
+                      <DiscIcon className="h-5 w-5" />
                     </a>
                     <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
                       <Twitter className="h-5 w-5" />
