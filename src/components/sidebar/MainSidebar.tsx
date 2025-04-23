@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+
+import { NavLink, useNavigate } from "react-router-dom";
 import { 
   ChevronDown, 
   Grid, 
@@ -32,11 +33,16 @@ interface MainSidebarProps {
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [showGettingStarted, setShowGettingStarted] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleLogoClick = () => {
+    navigate('/introduction-3');
+  };
   
   return (
     <div className="border-r bg-sidebar h-full flex flex-col">
       <div className="p-4 border-b">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={handleLogoClick}>
           <img 
             src="/lovable-uploads/0ad4c791-4d08-4e94-bbeb-3ac78aae67ef.png" 
             alt="MCP Now Logo" 
