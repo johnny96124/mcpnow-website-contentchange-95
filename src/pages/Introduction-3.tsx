@@ -576,4 +576,29 @@ const Introduction3: React.FC = () => {
                 <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
                   <DiscIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </a>
-                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-
+                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
+                  <Twitter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-10 bg-gray-50 dark:bg-gray-900">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center gap-2">
+              <img src="/lovable-uploads/387ac538-f4f3-47e6-9aeb-7d7be4f143e9.png" alt="MCP Now Logo" className="h-8 w-8 rounded-lg shadow" />
+              <span className="text-xl font-bold tracking-tight">MCP Now</span>
+            </div>
+            <div className="mt-4 md:mt-0 text-sm text-gray-500 dark:text-gray-400">
+              © 2025 MCP Now. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>;
+};
+
+export default Introduction3;
