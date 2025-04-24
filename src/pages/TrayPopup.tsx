@@ -50,6 +50,8 @@ const TrayPopup = () => {
   
   const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
 
+  const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
+
   const handleProfileChange = (hostId: string, profileId: string) => {
     setSelectedProfileIds(prev => ({
       ...prev,
@@ -60,6 +62,13 @@ const TrayPopup = () => {
     
     const profile = profiles.find(p => p.id === profileId);
     toast.success(`Profile changed to ${profile?.name}`);
+
+    setShowHostRefreshHint(true);
+    const timer = setTimeout(() => {
+      setShowHostRefreshHint(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   };
 
   const initializeProfileInstances = (hostId: string, profileId: string) => {
@@ -259,7 +268,9 @@ const TrayPopup = () => {
                   </div>
                   
                   <div className="p-3 pt-2">
-                    {profileId && <HostRefreshHint className="mb-3" />}
+                    {showHostRefreshHint && profileId && (
+                      <HostRefreshHint className="mb-3" />
+                    )}
                     
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Profile:</span>
