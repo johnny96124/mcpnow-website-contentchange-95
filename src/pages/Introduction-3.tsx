@@ -81,7 +81,7 @@ const Introduction3: React.FC = () => {
       author: "王晓",
       role: "独立开发者",
       company: "自由职业者",
-      text: "作为个人开发者，MCP Now 帮我解决了 AI 服务管理的痛点。统一的界面管理多个模型，再也不用在不同平台间切换了。",
+      text: "作为个人开发者，MCP Now 帮我解决了 AI 服务管理的痛点。统一的界面管理��个模型，再也不用在不同平台间切换了。",
       avatar: "/placeholder.svg",
     },
   ];
@@ -214,7 +214,7 @@ const Introduction3: React.FC = () => {
             <Badge variant="outline" className="px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400">
               <span className="text-blue-600 font-bold mr-1.5">New</span>
               <span className="text-gray-600 dark:text-gray-300">|</span>
-              <span className="ml-1.5">Introducing MCP Now</span>
+              <span className="ml-1.5">率先支持 MCP 协议</span>
             </Badge>
             
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight max-w-3xl">
@@ -225,19 +225,18 @@ const Introduction3: React.FC = () => {
             </h1>
             
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-              MCP Now 让您通过统一接口访问所有 AI 服务，消除平台差异，
-              <span className="font-semibold">简化开发流程，提升工作效率</span>
+              MCP Now 作为本地代理服务，让你通过统一界面轻松管理所有 AI 服务，
+              <span className="font-semibold">无需复杂配置，即刻连接使用</span>
             </p>
             
-            {/* 嵌入 FAQ：什么是 MCP？ */}
+            {/* 核心价值说明 */}
             <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
               <div className="flex items-start gap-3">
                 <MessageCircleQuestion className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-medium text-left">什么是 MCP (Model Context Protocol)?</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
-                    MCP 是一种统一不同 AI 服务接口的协议，让开发者可以用相同的代码调用不同的 AI 模型服务。
-                    MCP Now 是这一协议的桌面管理工具，让您可视化管理所有 AI 服务连接。
+                    MCP 是由 Anthropic 推出的开放 AI 服务标准，旨在统一不同 AI 服务的接入方式。MCP Now 基于这一协议，为您提供从发现到使用的一站式 AI 服务管理体验。
                   </p>
                 </div>
               </div>
@@ -270,7 +269,7 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 新增：为什么选择 MCP Now - 痛点对比 */}
+      {/* 更新：痛点对比和价值主张 */}
       <section id="why-mcp-now" className="py-20 bg-white/70 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -279,11 +278,10 @@ const Introduction3: React.FC = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">为什么选择 MCP Now?</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              告别繁琐的多平台管理，一站式解决 AI 开发中的常见痛点
+              突破传统 AI 服务管理的局限，让每个开发者都能轻松驾驭 AI 能力
             </p>
           </motion.div>
 
-          {/* 痛点对比卡片 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {painPoints.map((point, idx) => (
               <motion.div
@@ -322,43 +320,18 @@ const Introduction3: React.FC = () => {
             ))}
           </div>
 
-          {/* 核心价值点 */}
-          <div className="mt-16 max-w-5xl mx-auto">
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
-              variants={staggerChildren}
-              initial="initial"
-              whileInView="whileInView"
-              viewport={{ once: true }}
-            >
-              {valueBenefits.map((benefit, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={fadeInUp}
-                  className="text-center"
-                >
-                  <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center">
-                    {benefit.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{benefit.description}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* 嵌入常见问题 */}
+          {/* 更新：核心特色 - 聚合模式说明 */}
           <motion.div
             className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
           >
             <div className="flex items-start gap-3">
-              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+              <Zap className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-medium">MCP Now 与直接使用各服务商 SDK 有什么区别？</h3>
+                <h3 className="font-medium">创新的聚合模式</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  MCP Now 提供统一接口，消除各平台间差异，同时保留每个服务商的特色功能。使用 MCP Now 不需要为每个服务商学习不同的 API，节省开发时间，同时提高代码复用率。
+                  MCP Now 独特的聚合模式让您能通过单一端点访问多个 AI 服务。无需为每个服务单独配置，系统自动整合所有可用能力，让您的应用随时切换不同 AI 模型，充分发挥 MCP 协议的优势。
                 </p>
               </div>
             </div>
@@ -656,7 +629,7 @@ const Introduction3: React.FC = () => {
                       
                       <div className="flex items-center pt-4">
                         <div className="mr-4">
-                          <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                          <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
                             <img
                               src={testimonial.avatar}
                               alt={testimonial.author}
