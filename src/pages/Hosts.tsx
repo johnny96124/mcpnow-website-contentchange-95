@@ -14,7 +14,6 @@ import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
-
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -23,43 +22,33 @@ const mockJsonConfig = {
     }
   }
 };
-
 const Hosts = () => {
   useEffect(() => {
     markHostsOnboardingAsSeen();
   }, []);
-
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
-
   const {
     hostProfiles,
     handleProfileChange
   } = useHostProfiles();
-
   const {
     configDialog,
     openConfigDialog,
     setDialogOpen,
     resetConfigDialog
   } = useConfigDialog(mockJsonConfig);
-
   const {
     toast
   } = useToast();
-
   const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
   const clearSearch = () => setSearchQuery("");
-
   const getProfileEndpoint = (profileId: string) => {
     const profile = profiles.find(p => p.id === profileId);
     return profile ? profile.endpoint : null;
   };
-
   const handleOpenConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host && host.configPath) {
@@ -74,7 +63,6 @@ const Hosts = () => {
       });
     }
   };
-
   const handleCreateConfigDialog = (hostId: string, profileId?: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -84,7 +72,6 @@ const Hosts = () => {
       openConfigDialog(hostId, defaultConfigPath, profileEndpoint, true, true, false, false, true, true);
     }
   };
-
   const handleUpdateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -98,7 +85,6 @@ const Hosts = () => {
       }
     }
   };
-
   const handleScanForHosts = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -133,7 +119,6 @@ const Hosts = () => {
       setIsScanning(false);
     }, 2500);
   };
-
   const handleAddHost = (newHost: {
     name: string;
     configPath?: string;
@@ -159,7 +144,6 @@ const Hosts = () => {
       });
     }, 500);
   };
-
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
@@ -175,9 +159,7 @@ const Hosts = () => {
     }
     resetConfigDialog();
   };
-
-  return (
-    <div className="space-y-6 animate-fade-in pb-10">
+  return <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
@@ -204,21 +186,10 @@ const Hosts = () => {
       
       <HostSearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       
-      {filteredHosts.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2">
-          {filteredHosts.map(host => (
-            <HostCard 
-              key={host.id} 
-              host={host} 
-              profileId={hostProfiles[host.id] || ''} 
-              onProfileChange={handleProfileChange}
-              onOpenConfigDialog={handleOpenConfigDialog}
-              onCreateConfig={handleCreateConfigDialog}
-              onFixConfig={handleUpdateConfigDialog}
-              showHostRefreshHint={showHostRefreshHint}
-            />
-          ))}
+      {filteredHosts.length > 0 ? <div className="grid gap-6 md:grid-cols-2">
+          {filteredHosts.map(host => <HostCard key={host.id} host={host} profileId={hostProfiles[host.id] || ''} onProfileChange={handleProfileChange} onOpenConfigDialog={handleOpenConfigDialog} onCreateConfig={handleCreateConfigDialog} onFixConfig={handleUpdateConfigDialog} />)}
           
+          {/* Add guidance card */}
           <Card className="border-2 border-dashed bg-muted/50 hover:bg-muted/80 transition-colors">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center space-y-5">
               <div className="rounded-full bg-primary/10 p-4">
@@ -279,16 +250,11 @@ const Hosts = () => {
                 </div>
               </div>
             </div>}
-        </div>
-      ) : (
-        searchQuery && <NoSearchResults query={searchQuery} onClear={clearSearch} />
-      )}
+        </div> : <NoSearchResults query={searchQuery} onClear={clearSearch} />}
       
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
-    </div>
-  );
+    </div>;
 };
-
 export default Hosts;
