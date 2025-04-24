@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -9,16 +10,14 @@ import {
   Cpu, 
   Database, 
   Star, 
-  MessageCircleQuestion,
-  DiscIcon,
-  MessageCircleQuestionIcon,
-  Twitter,
+  Zap,
   CheckCircle2,
   XCircle,
-  Zap
+  Twitter,
+  DiscIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -90,50 +89,20 @@ const Introduction3: React.FC = () => {
     {
       before: "多账号切换，多平台登录",
       after: "一次登录，统一管理所有 AI 服务",
-      icon: Cpu
+      icon: Cpu,
+      benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
     },
     {
       before: "反复配置不同环境参数",
       after: "统一配置文件，跨环境复用",
-      icon: ServerIcon
+      icon: ServerIcon,
+      benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
     },
     {
       before: "API Key 分散管理不安全",
       after: "安全加密，集中授权管理",
-      icon: Database
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "MCP Now 与直接使用各服务商 SDK 有什么区别？",
-      answer: "MCP Now 提供统一接口，消除各平台间差异，同时保留每个服务商的特色功能。使用 MCP Now 不需要为每个服务商学习不同的 API，节省开发时间，同时提高代码复用率。"
-    },
-    {
-      question: "如何让 MCP Now 与我现有的开发工具配合使用？",
-      answer: "MCP Now 支持与多种流行开发工具集成，包括 Cursor、VSCode、JetBrains 等 IDE，甚至可以无缝集成到您的命令行工作流程中。您只需要简单配置一次，就能在所有开发环境中使用相同的 AI 服务。"
-    },
-    {
-      question: "我可以用 MCP Now 连接自己的本地模型吗？",
-      answer: "当然可以！MCP Now 不仅支持主流云端服务，还完全兼容本地部署的模型。您可以通过 MCP Now 的统一接口同时管理云端和本地资源，无需修改应用代码即可灵活切换。"
-    },
-  ];
-
-  const valueBenefits = [
-    {
-      title: "统一接口适配",
-      description: "使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用",
-      icon: <Zap className="h-8 w-8 text-blue-500" />
-    },
-    {
-      title: "跨平台兼容",
-      description: "在任何开发环境中无缝使用，从本地到云端无需重新配置",
-      icon: <ServerIcon className="h-8 w-8 text-purple-500" />
-    },
-    {
-      title: "安全管理",
-      description: "集中管理所有账号和密钥，更高级别的安全保障",
-      icon: <Database className="h-8 w-8 text-teal-500" />
+      icon: Database,
+      benefit: "安全管理：集中管理所有账号和密钥，更高级别的安全保障"
     }
   ];
 
@@ -158,6 +127,36 @@ const Introduction3: React.FC = () => {
       description: "将配置绑定到您喜爱的开发工具和环境",
       icon: Cpu,
     },
+  ];
+
+  const impactMetrics = [
+    { value: "50,000+", label: "活跃开发者" },
+    { value: "120,000+", label: "AI 项目部署" },
+    { value: "75%", label: "开发效率提升" },
+    { value: "98.7%", label: "服务可靠性" }
+  ];
+
+  const keyFeatures = [
+    {
+      title: "Host 自动扫描与配置",
+      description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
+      icon: <ServerIcon className="h-8 w-8 text-blue-500" />
+    },
+    {
+      title: "Server 一键安装部署",
+      description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
+      icon: <Database className="h-8 w-8 text-purple-500" />
+    },
+    {
+      title: "配置解耦与灵活组合",
+      description: "Host 与 Server 配置完全解耦，消除重复配置，提高复用效率",
+      icon: <Cpu className="h-8 w-8 text-teal-500" />
+    },
+    {
+      title: "Profile 智能管理",
+      description: "通过 Profile 灵活组合 Server，支持热插拔能力，无需重启即可切换",
+      icon: <Zap className="h-8 w-8 text-amber-500" />
+    }
   ];
 
   return (
@@ -232,7 +231,19 @@ const Introduction3: React.FC = () => {
             
             <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
               <div className="flex items-start gap-3">
-                <MessageCircleQuestion className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
+                <div className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path>
+                    <path d="M4 6h.01"></path>
+                    <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path>
+                    <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"></path>
+                    <path d="M12 18h.01"></path>
+                    <path d="M17.99 11.12A6 6 0 0 1 15.01 16.89"></path>
+                    <path d="M15.01 16.89A6 6 0 0 1 8.72 11.12"></path>
+                    <path d="M17.99 11.12A6 6 0 0 0 8.72 11.12"></path>
+                    <path d="M turbo 2.29 19.99"></path>
+                  </svg>
+                </div>
                 <div>
                   <h3 className="font-medium text-left">MCP与MCP Now是什么关系？</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
@@ -314,6 +325,10 @@ const Introduction3: React.FC = () => {
                           <p className="text-sm text-gray-600 dark:text-gray-400">{point.after}</p>
                         </div>
                       </div>
+                      
+                      <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <p className="font-medium text-blue-600 dark:text-blue-400">{point.benefit}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -323,43 +338,27 @@ const Introduction3: React.FC = () => {
 
           <div className="mt-16 max-w-5xl mx-auto">
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
               variants={staggerChildren}
               initial="initial"
               whileInView="whileInView"
               viewport={{ once: true }}
             >
-              {valueBenefits.map((benefit, idx) => (
+              {keyFeatures.map((feature, idx) => (
                 <motion.div
                   key={idx}
                   variants={fadeInUp}
                   className="text-center"
                 >
                   <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center">
-                    {benefit.icon}
+                    {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{benefit.description}</p>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
                 </motion.div>
               ))}
             </motion.div>
           </div>
-
-          <motion.div
-            className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
-            {...fadeInUp}
-            transition={{ delay: 0.3 }}
-          >
-            <div className="flex items-start gap-3">
-              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-medium">MCP Now 与直接使用各服务商 SDK 有什么区别？</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  MCP Now 提供统一接口，消除各平台间差异，同时保留每个服务商的特色功能。使用 MCP Now 不需要为每个服务商学习不同的 API，节省开发时间，同时提高代码复用率。
-                </p>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 
@@ -409,22 +408,6 @@ const Introduction3: React.FC = () => {
             ))}
           </motion.div>
           
-          <motion.div
-            className="mt-8 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
-            {...fadeInUp}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-start gap-3">
-              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-medium">我可以用 MCP Now 连接自己的本地模型吗？</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  当然可以！MCP Now 不仅支持主流云端服务，还完全兼容本地部署的模型。您可以通过 MCP Now 的统一接口同时管理云端和本地资源，无需修改应用代码即可灵活切换。
-                </p>
-              </div>
-            </div>
-          </motion.div>
-          
           <div className="mt-8 text-center">
             <Button variant="outline" className="text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/discovery'}>
               探索更多 MCP Servers
@@ -440,7 +423,7 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">无缝集成您的工作环境</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">多场景灵活适配</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               一次配置，多处使用，适配您喜爱的所有开发工具
             </p>
@@ -538,74 +521,16 @@ const Introduction3: React.FC = () => {
             </Tabs>
           </motion.div>
           
-          <motion.div
-            className="mt-10 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
+          <motion.div 
+            className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
-            transition={{ delay: 0.2 }}
           >
-            <div className="flex items-start gap-3">
-              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-medium">如何让 MCP Now 与我现有的开发工具配合使用？</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  MCP Now 支持与多种流行开发工具集成，包括 Cursor、VSCode、JetBrains 等 IDE，甚至可以无缝集成到您的命令行工作流程中。您只需要简单配置一次，就能在所有开发环境中使用相同的 AI 服务。
-                </p>
-              </div>
+            <div className="text-center">
+              <h3 className="font-semibold mb-2">不止于灵活，更有热插拔能力</h3>
+              <p className="text-gray-600 dark:text-gray-400">无需重启应用，一键切换 AI 服务，实时响应您的业务需求变化</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* 部分高性能模型可能需要额外预热时间</p>
             </div>
           </motion.div>
-        </div>
-      </section>
-
-      <section id="guide" className="py-20 bg-blue-50/70 dark:bg-gray-950/80">
-        <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
-            {...fadeInUp}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">四步开始使用</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              简单几步配置，即可开始享受统一 AI 服务管理的便利
-            </p>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {quickStartSteps.map((step, idx) => (
-              <motion.div
-                key={idx}
-                className="relative"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <Card className="h-full border-gray-200 dark:border-gray-800">
-                  <CardContent className="p-6 flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-                      <step.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
-                      {idx + 1}
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
-                  </CardContent>
-                </Card>
-                
-                {idx < quickStartSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ChevronRight className="w-6 h-6 text-gray-400" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              <Download className="mr-2 h-5 w-5" />
-              立即开始
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -615,11 +540,31 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">用户反馈</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">用户反馈与影响</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
               看看开发者们如何通过 MCP Now 提升他们的工作效率
             </p>
           </motion.div>
+
+          <div className="flex justify-center mb-16">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+              {impactMetrics.map((metric, idx) => (
+                <motion.div 
+                  key={idx}
+                  className="text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <div className="mb-2">
+                    <span className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400">{metric.value}</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400">{metric.label}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
           
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
@@ -671,39 +616,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-800/50">
-        <div className="container px-4 md:px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
-            {...fadeInUp}
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">更多常见问题</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              了解更多关于 MCP Now 的详细信息
-            </p>
-          </motion.div>
-          
-          <div className="max-w-3xl mx-auto divide-y divide-gray-200 dark:divide-gray-700">
-            {faqs.map((faq, idx) => (
-              <motion.div
-                key={idx}
-                className="py-6"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <h3 className="text-xl font-semibold mb-2 flex items-center">
-                  <MessageCircleQuestion className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
-                  {faq.question}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 pl-7">{faq.answer}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section id="download" className="py-20 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -712,9 +624,41 @@ const Introduction3: React.FC = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">开始使用 MCP Now</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              下载客户端，简化您的 AI 开发流程
+              四步上手，简化您的 AI 开发流程
             </p>
           </motion.div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
+            {quickStartSteps.map((step, idx) => (
+              <motion.div
+                key={idx}
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+              >
+                <Card className="h-full border-gray-200 dark:border-gray-800">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+                      <step.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                      {idx + 1}
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                  </CardContent>
+                </Card>
+                
+                {idx < quickStartSteps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                    <ChevronRight className="w-6 h-6 text-gray-400" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             <motion.div
@@ -793,7 +737,7 @@ const Introduction3: React.FC = () => {
               <h4 className="font-semibold mb-4">资源</h4>
               <ul className="space-y-2 text-sm">
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">文档</Link></li>
-                <li><Link to="#guide" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">入门指南</Link></li>
+                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">入门指南</Link></li>
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">API 参考</Link></li>
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">示例</Link></li>
               </ul>
