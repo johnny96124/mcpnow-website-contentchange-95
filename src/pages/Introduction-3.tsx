@@ -104,7 +104,6 @@ const Introduction3: React.FC = () => {
     }
   ];
 
-  // Simplified FAQ with the most important items first
   const faqs = [
     {
       question: "MCP Now 与直接使用各服务商 SDK 有什么区别？",
@@ -198,7 +197,6 @@ const Introduction3: React.FC = () => {
         </div>
       </nav>
 
-      {/* 首屏：清晰阐述价值主张 */}
       <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -218,27 +216,29 @@ const Introduction3: React.FC = () => {
               <span className="ml-1.5">Introducing MCP Now</span>
             </Badge>
             
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight max-w-3xl">
-              一站式管理所有
-              <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent block mt-1">
-                AI 模型服务
-              </span>
-            </h1>
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+                告别繁琐配置
+              </h1>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600">
+                一站式统一管理 MCP 生态
+              </h2>
+            </div>
             
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl">
-              MCP Now 让您通过统一接口访问所有 AI 服务，消除平台差异，
-              <span className="font-semibold">简化开发流程，提升工作效率</span>
+            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl">
+              MCP Now 是连接AI应用与模型服务的桥梁，通过创新的聚合模式让您轻松调用多服务能力，
+              无需编辑配置文件，一键接入所有MCP服务。
             </p>
             
-            {/* 嵌入 FAQ：什么是 MCP？ */}
             <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
               <div className="flex items-start gap-3">
                 <MessageCircleQuestion className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="font-medium text-left">什么是 MCP (Model Context Protocol)?</h3>
+                  <h3 className="font-medium text-left">MCP与MCP Now是什么关系？</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
-                    MCP 是一种统一不同 AI 服务接口的协议，让开发者可以用相同的代码调用不同的 AI 模型服务。
-                    MCP Now 是这一协议的桌面管理工具，让您可视化管理所有 AI 服务连接。
+                    MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
+                    而MCP Now则是这个协议的桌面管理工具，它让用户可以通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
+                    无需手动处理复杂的配置过程。
                   </p>
                 </div>
               </div>
@@ -271,7 +271,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 新增：为什么选择 MCP Now - 痛点对比 */}
       <section id="why-mcp-now" className="py-20 bg-white/70 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -284,7 +283,6 @@ const Introduction3: React.FC = () => {
             </p>
           </motion.div>
 
-          {/* 痛点对比卡片 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {painPoints.map((point, idx) => (
               <motion.div
@@ -323,7 +321,6 @@ const Introduction3: React.FC = () => {
             ))}
           </div>
 
-          {/* 核心价值点 */}
           <div className="mt-16 max-w-5xl mx-auto">
             <motion.div 
               className="grid grid-cols-1 md:grid-cols-3 gap-8"
@@ -348,7 +345,6 @@ const Introduction3: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* 嵌入常见问题 */}
           <motion.div
             className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
@@ -367,7 +363,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 服务广场：精简，更加突出核心价值 */}
       <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -414,7 +409,6 @@ const Introduction3: React.FC = () => {
             ))}
           </motion.div>
           
-          {/* 嵌入的 FAQ */}
           <motion.div
             className="mt-8 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
@@ -440,7 +434,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 多平台兼容 + 用例场景：tabs 形式展示 */}
       <section id="compatibility" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -545,7 +538,6 @@ const Introduction3: React.FC = () => {
             </Tabs>
           </motion.div>
           
-          {/* 嵌入 FAQ */}
           <motion.div
             className="mt-10 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
@@ -564,7 +556,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 简化的入门指南 */}
       <section id="guide" className="py-20 bg-blue-50/70 dark:bg-gray-950/80">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -618,7 +609,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 真实用户反馈 */}
       <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -681,7 +671,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 简化的常见问题，关键问题已提前展示到各节 */}
       <section id="faq" className="py-20 bg-gray-50 dark:bg-gray-800/50">
         <div className="container px-4 md:px-6">
           <motion.div
@@ -715,7 +704,6 @@ const Introduction3: React.FC = () => {
         </div>
       </section>
 
-      {/* 下载部分：更加突出 */}
       <section id="download" className="py-20 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
