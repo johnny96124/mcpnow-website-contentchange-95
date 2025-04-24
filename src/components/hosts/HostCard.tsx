@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -41,6 +40,7 @@ interface HostCardProps {
     profileId?: string;
   };
   profileId: string;
+  showHostRefreshHint?: boolean;
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId?: string) => void;
@@ -50,6 +50,7 @@ interface HostCardProps {
 export function HostCard({ 
   host, 
   profileId, 
+  showHostRefreshHint,
   onProfileChange, 
   onOpenConfigDialog,
   onCreateConfig,
@@ -374,7 +375,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
-        <ProfileChangeHint className="mb-4" />
+        {showHostRefreshHint && (
+          <ProfileChangeHint className="mb-4" />
+        )}
         
         <div className="space-y-2">
           <div className="flex flex-col gap-1">
