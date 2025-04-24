@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -10,7 +9,7 @@ import {
   Cpu, 
   Database, 
   Star, 
-  MessageCircleQuoteIcon, 
+  MessageCircleQuestion,
   DiscIcon,
   MessageCircleQuestionIcon,
   Twitter,
@@ -234,7 +233,7 @@ const Introduction3: React.FC = () => {
             {/* 嵌入 FAQ：什么是 MCP？ */}
             <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
               <div className="flex items-start gap-3">
-                <MessageCircleQuestionIcon className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
+                <MessageCircleQuestion className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="font-medium text-left">什么是 MCP (Model Context Protocol)?</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
@@ -356,7 +355,7 @@ const Introduction3: React.FC = () => {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-start gap-3">
-              <MessageCircleQuestionIcon className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
                 <h3 className="font-medium">MCP Now 与直接使用各服务商 SDK 有什么区别？</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -422,7 +421,7 @@ const Introduction3: React.FC = () => {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-start gap-3">
-              <MessageCircleQuestionIcon className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
                 <h3 className="font-medium">我可以用 MCP Now 连接自己的本地模型吗？</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -553,7 +552,7 @@ const Introduction3: React.FC = () => {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-start gap-3">
-              <MessageCircleQuestionIcon className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
+              <MessageCircleQuestion className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
                 <h3 className="font-medium">如何让 MCP Now 与我现有的开发工具配合使用？</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -706,7 +705,7 @@ const Introduction3: React.FC = () => {
                 transition={{ delay: idx * 0.1 }}
               >
                 <h3 className="text-xl font-semibold mb-2 flex items-center">
-                  <MessageCircleQuestionIcon className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
+                  <MessageCircleQuestion className="mr-2 h-5 w-5 text-blue-600 flex-shrink-0" />
                   {faq.question}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 pl-7">{faq.answer}</p>
