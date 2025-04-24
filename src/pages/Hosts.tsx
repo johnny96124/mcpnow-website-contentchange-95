@@ -33,11 +33,11 @@ const Hosts = () => {
   const [hostsList, setHostsList] = useState<Host[]>(hosts);
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [hostsWithRecentProfileChange, setHostsWithRecentProfileChange] = useState<Record<string, boolean>>({});
+  const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
 
   const {
     hostProfiles,
-    handleProfileChange: originalHandleProfileChange
+    handleProfileChange
   } = useHostProfiles();
 
   const {
@@ -47,23 +47,9 @@ const Hosts = () => {
     resetConfigDialog
   } = useConfigDialog(mockJsonConfig);
 
-  const { toast } = useToast();
-
-  const handleProfileChange = (hostId: string, newProfileId: string) => {
-    originalHandleProfileChange(hostId, newProfileId);
-
-    setHostsWithRecentProfileChange(prev => ({
-      ...prev,
-      [hostId]: true
-    }));
-
-    setTimeout(() => {
-      setHostsWithRecentProfileChange(prev => ({
-        ...prev,
-        [hostId]: false
-      }));
-    }, 3000);
-  };
+  const {
+    toast
+  } = useToast();
 
   const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -190,7 +176,8 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
-  return <div className="space-y-6 animate-fade-in">
+  return (
+    <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
@@ -217,17 +204,20 @@ const Hosts = () => {
       
       <HostSearch searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       
-      {filteredHosts.length > 0 ? <div className="grid gap-6 md:grid-cols-2">
-          {filteredHosts.map(host => <HostCard 
-            key={host.id} 
-            host={host} 
-            profileId={hostProfiles[host.id] || ''} 
-            onProfileChange={handleProfileChange} 
-            onOpenConfigDialog={handleOpenConfigDialog} 
-            onCreateConfig={handleCreateConfigDialog} 
-            onFixConfig={handleUpdateConfigDialog}
-            showHostRefreshHint={hostsWithRecentProfileChange[host.id] || false}
-          />)}
+      {filteredHosts.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2">
+          {filteredHosts.map(host => (
+            <HostCard 
+              key={host.id} 
+              host={host} 
+              profileId={hostProfiles[host.id] || ''} 
+              onProfileChange={handleProfileChange}
+              onOpenConfigDialog={handleOpenConfigDialog}
+              onCreateConfig={handleCreateConfigDialog}
+              onFixConfig={handleUpdateConfigDialog}
+              showHostRefreshHint={showHostRefreshHint}
+            />
+          ))}
           
           <Card className="border-2 border-dashed bg-muted/50 hover:bg-muted/80 transition-colors">
             <CardContent className="p-6 h-full flex flex-col items-center justify-center text-center space-y-5">
@@ -289,12 +279,16 @@ const Hosts = () => {
                 </div>
               </div>
             </div>}
-        </div> : <NoSearchResults query={searchQuery} onClear={clearSearch} />}
+        </div>
+      ) : (
+        searchQuery && <NoSearchResults query={searchQuery} onClear={clearSearch} />
+      )}
       
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
-    </div>;
+    </div>
+  );
 };
 
 export default Hosts;

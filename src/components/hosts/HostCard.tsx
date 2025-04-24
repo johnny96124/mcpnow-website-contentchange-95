@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Info } from "lucide-react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileChangeHint } from "./ProfileChangeHint";
-import { HostRefreshHint } from "./HostRefreshHint";
 
 interface InstanceStatus {
   id: string;
@@ -42,21 +40,21 @@ interface HostCardProps {
     profileId?: string;
   };
   profileId: string;
+  showHostRefreshHint?: boolean;
   onProfileChange: (hostId: string, profileId: string) => void;
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId?: string) => void;
   onFixConfig: (hostId: string) => void;
-  showHostRefreshHint?: boolean;
 }
 
 export function HostCard({ 
   host, 
   profileId, 
+  showHostRefreshHint,
   onProfileChange, 
   onOpenConfigDialog,
   onCreateConfig,
-  onFixConfig,
-  showHostRefreshHint = false
+  onFixConfig
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
@@ -377,9 +375,9 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
-        <HostRefreshHint show={showHostRefreshHint} className="mb-4" />
-        
-        <ProfileChangeHint className="mb-4" />
+        {showHostRefreshHint && (
+          <ProfileChangeHint className="mb-4" />
+        )}
         
         <div className="space-y-2">
           <div className="flex flex-col gap-1">
