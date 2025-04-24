@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from "react";
+import { Info } from "lucide-react";
 import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ interface HostCardProps {
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId?: string) => void;
   onFixConfig: (hostId: string) => void;
+  showHostRefreshHint?: boolean;
 }
 
 export function HostCard({ 
@@ -53,7 +54,8 @@ export function HostCard({
   onProfileChange, 
   onOpenConfigDialog,
   onCreateConfig,
-  onFixConfig
+  onFixConfig,
+  showHostRefreshHint = false
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
@@ -374,6 +376,15 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
+        {showHostRefreshHint && (
+          <div 
+            className="flex items-center gap-2 px-3 py-2 rounded border border-blue-100 bg-blue-50 text-blue-700 text-xs animate-fade-in-out"
+          >
+            <Info className="w-4 h-4 text-blue-400 shrink-0" aria-hidden />
+            Please refresh in host to activate the change.
+          </div>
+        )}
+        
         <ProfileChangeHint className="mb-4" />
         
         <div className="space-y-2">
