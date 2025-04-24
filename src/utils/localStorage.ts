@@ -1,4 +1,3 @@
-
 export const ONBOARDING_KEY = 'mcp-now-onboarding-shown';
 export const HOSTS_ONBOARDING_KEY = 'mcp-now-hosts-onboarding-shown';
 export const SERVERS_ONBOARDING_KEY = 'mcp-now-servers-onboarding-shown';
@@ -21,11 +20,11 @@ export const markHostsOnboardingAsSeen = (): void => {
 };
 
 export const hasSeenServersOnboarding = (): boolean => {
-  return localStorage.getItem(SERVERS_ONBOARDING_KEY) === 'true';
+  return localStorage.getItem('serversOnboardingComplete') === 'true';
 };
 
 export const markServersOnboardingAsSeen = (): void => {
-  localStorage.setItem(SERVERS_ONBOARDING_KEY, 'true');
+  localStorage.setItem('serversOnboardingComplete', 'true');
 };
 
 export const hasSeenProfilesOnboarding = (): boolean => {

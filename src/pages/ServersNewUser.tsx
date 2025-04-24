@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { Separator } from "@/components/ui/separator";
 import { HelpCircle } from "lucide-react";
+import { markServersOnboardingAsSeen } from "@/utils/localStorage";
 
 const ServersNewUser = () => {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ const ServersNewUser = () => {
   };
   
   const handleSkip = () => {
+    markServersOnboardingAsSeen(); // Mark onboarding as seen
     navigate("/servers");
   };
 
