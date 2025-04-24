@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileChangeHint } from "./ProfileChangeHint";
+import { HostRefreshHint } from "./HostRefreshHint";
 
 interface InstanceStatus {
   id: string;
@@ -376,14 +377,7 @@ export function HostCard({
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
-        {showHostRefreshHint && (
-          <div 
-            className="flex items-center gap-2 px-3 py-2 rounded border border-blue-100 bg-blue-50 text-blue-700 text-xs animate-fade-in-out"
-          >
-            <Info className="w-4 h-4 text-blue-400 shrink-0" aria-hidden />
-            Please refresh in host to activate the change.
-          </div>
-        )}
+        <HostRefreshHint show={showHostRefreshHint} className="mb-4" />
         
         <ProfileChangeHint className="mb-4" />
         
