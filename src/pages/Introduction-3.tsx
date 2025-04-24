@@ -64,76 +64,75 @@ const Introduction3: React.FC = () => {
 
   const testimonials = [
     {
-      author: "Sarah Chen",
-      role: "Full-stack Developer",
-      company: "TechForward",
-      text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
+      author: "张工",
+      role: "技术负责人",
+      company: "某头部互联网公司",
+      text: "MCP Now 让我们团队能够轻松管理所有 AI 模型接入，显著提升了研发效率。特别是它的聚合模式，让不同团队能够按需配置和使用 AI 服务。",
       avatar: "/placeholder.svg",
     },
     {
-      author: "Michael Rodriguez",
-      role: "ML Engineer",
-      company: "DataVision",
-      text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
+      author: "李明",
+      role: "AI 产品经理",
+      company: "创业公司 CTO",
+      text: "对于初创团队来说，MCP Now 是理想选择。一键接入各类 AI 服务，无需繁琐配置，让我们能够快速验证产品想法。",
       avatar: "/placeholder.svg",
     },
     {
-      author: "Aisha Johnson",
-      role: "CTO",
-      company: "NextGen AI",
-      text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
+      author: "王晓",
+      role: "独立开发者",
+      company: "自由职业者",
+      text: "作为个人开发者，MCP Now 帮我解决了 AI 服务管理的痛点。统一的界面管理多个模型，再也不用在不同平台间切换了。",
       avatar: "/placeholder.svg",
     },
   ];
 
   const painPoints = [
     {
-      before: "多账号切换，多平台登录",
-      after: "一次登录，统一管理所有 AI 服务",
+      before: "在多个平台间频繁切换，API Keys 分散管理",
+      after: "统一界面管理所有 AI 服务，安全加密存储",
       icon: Cpu
     },
     {
-      before: "反复配置不同环境参数",
-      after: "统一配置文件，跨环境复用",
+      before: "手动配置每个 AI 服务，流程繁琐容易出错",
+      after: "一键配置，自动发现可用服务",
       icon: ServerIcon
     },
     {
-      before: "API Key 分散管理不安全",
-      after: "安全加密，集中授权管理",
+      before: "缺乏权限管理，难以控制访问范围",
+      after: "精细化的权限控制，安全可靠",
       icon: Database
     }
   ];
 
-  // Simplified FAQ with the most important items first
   const faqs = [
     {
-      question: "MCP Now 与直接使用各服务商 SDK 有什么区别？",
-      answer: "MCP Now 提供统一接口，消除各平台间差异，同时保留每个服务商的特色功能。使用 MCP Now 不需要为每个服务商学习不同的 API，节省开发时间，同时提高代码复用率。"
+      question: "什么是 MCP 协议？为什么它很重要？",
+      answer: "MCP (Model Context Protocol) 是由 Anthropic 提出的开放 AI 服务标准，旨在统一不同 AI 服务的接入方式。MCP Now 基于这一协议，让您能够轻松接入和管理所有支持 MCP 的 AI 服务。"
     },
     {
-      question: "如何让 MCP Now 与我现有的开发工具配合使用？",
-      answer: "MCP Now 支持与多种流行开发工具集成，包括 Cursor、VSCode、JetBrains 等 IDE，甚至可以无缝集成到您的命令行工作流程中。您只需要简单配置一次，就能在所有开发环境中使用相同的 AI 服务。"
+      question: "MCP Now 如何简��� AI 服务的使用？",
+      answer: "通过创新的聚合模式，MCP Now 在 AI 应用和服务器之间提供统一代理，自动处理服务发现、配置管理和权限控制，让您专注于使用 AI 服务而不是配置它们。"
     },
     {
-      question: "我可以用 MCP Now 连接自己的本地模型吗？",
-      answer: "当然可以！MCP Now 不仅支持主流云端服务，还完全兼容本地部署的模型。您可以通过 MCP Now 的统一接口同时管理云端和本地资源，无需修改应用代码即可灵活切换。"
-    },
+      question: "我的数据安全吗？",
+      answer: "是的，MCP Now 采用本地代理模式运行，您的所有配置信息都安全加密存储在本地。API Keys 等敏感数据从不会发送到云端。"
+    }
   ];
 
   const valueBenefits = [
     {
-      title: "统一接口适配",
-      description: "使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用",
+      title: "智能聚合",
+      description: "独特的聚合模式，让多个 AI 服务表现为统一接口，轻松切换和组合使用",
       icon: <Zap className="h-8 w-8 text-blue-500" />
     },
     {
-      title: "跨平台兼容",
-      description: "在任何开发环境中无缝使用，从本地到云端无需重新配置",
+      title: "一键发现",
+      description: "内置 MCP 服务市场，即刻发现并连接新的 AI 服务",
       icon: <ServerIcon className="h-8 w-8 text-purple-500" />
     },
     {
-      title: "安全管理",
-      description: "集中管理所有账号和密钥，更高级别的安全保障",
+      title: "安全可控",
+      description: "本地化运行，端到端加密，细粒度的权限管理",
       icon: <Database className="h-8 w-8 text-teal-500" />
     }
   ];
@@ -141,24 +140,24 @@ const Introduction3: React.FC = () => {
   const quickStartSteps = [
     {
       title: "下载安装",
-      description: "为您的操作系统下载 MCP Now 客户端并安装",
+      description: "下载 MCP Now 客户端，一键安装完成",
       icon: Download,
     },
     {
-      title: "服务配置",
-      description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
+      title: "选择服务",
+      description: "从内置市场中选择您需要的 AI 服务",
       icon: ServerIcon,
     },
     {
-      title: "创建配置文件",
-      description: "设置您偏好的服务器组合和参数配置",
+      title: "创建配置",
+      description: "设置聚合模式，统一管理多个服务",
       icon: Database,
     },
     {
-      title: "连接工具",
-      description: "将配置绑定到您喜爱的开发工具和环境",
+      title: "开始使用",
+      description: "立即在您的应用中享受 AI 能力",
       icon: Cpu,
-    },
+    }
   ];
 
   return (
