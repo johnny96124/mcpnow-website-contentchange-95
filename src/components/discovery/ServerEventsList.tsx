@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Clock, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -118,6 +118,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
             const methodDetails = formatMethodDetails(event.method || '', event.params);
             const isSuccess = !event.isError && event.type === 'response';
             const isDebugTool = event.method === 'tools/call';
+            const isNotification = event.type === 'notification';
             
             return (
               <div 
@@ -138,20 +139,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                       <span className="font-semibold">{time}</span>
                     </div>
 
-                    {event.category && event.category !== 'Tools' && !isDebugTool && (
-                      <Badge 
-                        variant="outline" 
-                        className={cn(
-                          "text-[10px] py-0 h-5",
-                          CATEGORY_COLORS[event.category].text,
-                          CATEGORY_COLORS[event.category].border
-                        )}
-                      >
-                        {event.category}
-                      </Badge>
-                    )}
-
-                    {event.isError ? (
+                    {isNotification ? (
+                      <Bell className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                    ) : event.isError ? (
                       <AlertTriangle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
                     ) : (
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
@@ -170,7 +160,18 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    {!isDebugTool && (
+                    {isDebugTool ? (
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "text-[10px] py-0 h-5",
+                          "bg-purple-100 text-purple-800 border-purple-200",
+                          "dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800"
+                        )}
+                      >
+                        Debug Tool
+                      </Badge>
+                    ) : !isNotification && (
                       <>
                         {event.profileName && (
                           <Badge variant="secondary" className="text-xs">
@@ -185,19 +186,6 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                       </>
                     )}
                     
-                    {isDebugTool && (
-                      <Badge 
-                        variant="outline" 
-                        className={cn(
-                          "text-[10px] py-0 h-5",
-                          "bg-purple-100 text-purple-800 border-purple-200",
-                          "dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800"
-                        )}
-                      >
-                        Debug Tool
-                      </Badge>
-                    )}
-                    
                     {expandedEvents[event.id] ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
@@ -208,47 +196,63 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                 
                 {expandedEvents[event.id] && (
                   <div className="flex flex-col">
-                    <div className="p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-                      <div className="flex items-center mb-2">
-                        <span className="font-bold mr-2 uppercase text-blue-600 dark:text-blue-400">Request</span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                          {formatTimestamp(event.timestamp).time}
-                        </span>
+                    {isNotification ? (
+                      <div className="p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+                        <div className="flex items-center mb-2">
+                          <span className="font-bold mr-2 uppercase text-purple-600 dark:text-purple-400">Notification</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                            {formatTimestamp(event.timestamp).time}
+                          </span>
+                        </div>
+                        <div className="whitespace-pre-wrap break-all">
+                          {formatJsonContent(event.content)}
+                        </div>
                       </div>
-                      <div className="whitespace-pre-wrap break-all">
-                        {formatJsonContent(SAMPLE_REQUEST)}
-                      </div>
-                    </div>
-                    
-                    <div 
-                      className={cn(
-                        "p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t",
-                        isSuccess
-                          ? "border-green-200 dark:border-green-800"
-                          : event.isError 
-                            ? "border-red-200 dark:border-red-800" 
-                            : "border-gray-200 dark:border-gray-800"
-                      )}
-                    >
-                      <div className="flex items-center mb-2">
-                        <span className={cn(
-                          "font-bold mr-2 uppercase text-green-600 dark:text-green-400",
-                          isSuccess 
-                            ? "text-green-600 dark:text-green-400" 
-                            : event.isError 
-                              ? "text-red-600 dark:text-red-400" 
-                              : "text-gray-600 dark:text-gray-400"
-                        )}>
-                          {event.isError ? 'Error' : 'Response'}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                          {formatTimestamp(event.timestamp).time}
-                        </span>
-                      </div>
-                      <div className="whitespace-pre-wrap break-all">
-                        {formatJsonContent(event.content)}
-                      </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div className="p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+                          <div className="flex items-center mb-2">
+                            <span className="font-bold mr-2 uppercase text-blue-600 dark:text-blue-400">Request</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                              {formatTimestamp(event.timestamp).time}
+                            </span>
+                          </div>
+                          <div className="whitespace-pre-wrap break-all">
+                            {formatJsonContent(SAMPLE_REQUEST)}
+                          </div>
+                        </div>
+                        
+                        <div 
+                          className={cn(
+                            "p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t",
+                            isSuccess
+                              ? "border-green-200 dark:border-green-800"
+                              : event.isError 
+                                ? "border-red-200 dark:border-red-800" 
+                                : "border-gray-200 dark:border-gray-800"
+                          )}
+                        >
+                          <div className="flex items-center mb-2">
+                            <span className={cn(
+                              "font-bold mr-2 uppercase text-green-600 dark:text-green-400",
+                              isSuccess 
+                                ? "text-green-600 dark:text-green-400" 
+                                : event.isError 
+                                  ? "text-red-600 dark:text-red-400" 
+                                  : "text-gray-600 dark:text-gray-400"
+                            )}>
+                              {event.isError ? 'Error' : 'Response'}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                              {formatTimestamp(event.timestamp).time}
+                            </span>
+                          </div>
+                          <div className="whitespace-pre-wrap break-all">
+                            {formatJsonContent(event.content)}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
