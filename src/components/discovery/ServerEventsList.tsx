@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -181,6 +180,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     >
                       <div className="flex items-center mb-2">
                         <span className="font-bold mr-2 uppercase text-blue-600 dark:text-blue-400">Request</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                          {formatTimestamp(event.timestamp).time}
+                        </span>
                       </div>
                       <div className="whitespace-pre-wrap break-all">
                         {formatJsonContent(event.params || event.content)}
