@@ -51,16 +51,18 @@ const formatJsonContent = (content: any): JSX.Element => {
       {Object.entries(content).map(([key, value], index) => (
         <div key={key} style={{ marginLeft: '20px' }}>
           <span className="text-black font-semibold dark:text-gray-200">{JSON.stringify(key)}</span>
-          <span className="text-gray-600 dark:text-gray-400">: </span>
+          <span className="text-black dark:text-gray-200">: </span>
           <span className="text-green-600 dark:text-green-400">
             {typeof value === 'object' 
               ? formatJsonContent(value)
               : JSON.stringify(value)}
           </span>
-          {index < Object.keys(content).length - 1 && ','}
+          {index < Object.keys(content).length - 1 && (
+            <span className="text-black dark:text-gray-200">,</span>
+          )}
         </div>
       ))}
-      {'}'}
+      <span className="text-black dark:text-gray-200">{'}'}</span>
     </>
   );
 };
@@ -187,11 +189,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                 
                 {expandedEvents[event.id] && (
                   <div className="flex flex-col">
-                    <div 
-                      className={cn(
-                        "p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
-                      )}
-                    >
+                    <div className="p-3 font-mono text-xs overflow-auto bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
                       <div className="flex items-center mb-2">
                         <span className="font-bold mr-2 uppercase text-blue-600 dark:text-blue-400">Request</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
@@ -223,6 +221,9 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                               : "text-gray-600 dark:text-gray-400"
                         )}>
                           {event.isError ? 'Error' : 'Response'}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                          {formatTimestamp(event.timestamp).time}
                         </span>
                       </div>
                       <div className="whitespace-pre-wrap break-all">
