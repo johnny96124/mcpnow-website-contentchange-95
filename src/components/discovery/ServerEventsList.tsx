@@ -37,15 +37,21 @@ const SAMPLE_REQUEST = {
   }
 };
 
-const SAMPLE_NOTIFICATION = {
+const SAMPLE_NOTIFICATION: ServerEvent = {
   id: "notification-1",
   timestamp: new Date().toISOString(),
   type: "notification" as EventType,
+  category: "Prompts" as EventCategory,
   method: "notification/system",
   content: {
     message: "System is running normally",
     status: "success"
-  }
+  },
+  isError: false,
+  params: {},
+  profileName: "",
+  hostName: "",
+  jsonrpc: "2.0"
 };
 
 interface ServerEventsListProps {
