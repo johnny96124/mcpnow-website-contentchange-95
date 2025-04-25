@@ -46,24 +46,22 @@ const formatJsonContent = (content: any): JSX.Element => {
   if (typeof content !== 'object') return <>{JSON.stringify(content, null, 2)}</>;
   
   return (
-    <>
-      {'{'}
-      {Object.entries(content).map(([key, value], index) => (
-        <div key={key} style={{ marginLeft: '20px' }}>
-          <span className="text-black font-semibold dark:text-gray-200">{JSON.stringify(key)}</span>
-          <span className="text-black dark:text-gray-200">: </span>
-          <span className="text-green-600 dark:text-green-400">
-            {typeof value === 'object' 
-              ? formatJsonContent(value)
-              : JSON.stringify(value)}
-          </span>
-          {index < Object.keys(content).length - 1 && (
-            <span className="text-black dark:text-gray-200">,</span>
-          )}
-        </div>
-      ))}
-      <span className="text-black dark:text-gray-200">{'}'}</span>
-    </>
+    <span className="text-black dark:text-white">{'{'}</span>
+    {Object.entries(content).map(([key, value], index) => (
+      <div key={key} style={{ marginLeft: '20px' }}>
+        <span className="text-black font-semibold dark:text-gray-200">{JSON.stringify(key)}</span>
+        <span className="text-black dark:text-gray-200">: </span>
+        <span className="text-green-600 dark:text-green-400">
+          {typeof value === 'object' 
+            ? formatJsonContent(value)
+            : JSON.stringify(value)}
+        </span>
+        {index < Object.keys(content).length - 1 && (
+          <span className="text-black dark:text-gray-200">,</span>
+        )}
+      </div>
+    ))}
+    <span className="text-black dark:text-white">{'}'}</span>
   );
 };
 
