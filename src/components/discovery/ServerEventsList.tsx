@@ -139,30 +139,17 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                       <span className="font-semibold">{time}</span>
                     </div>
 
-                    {isDebugTool ? (
+                    {event.category && event.category !== 'Tools' && !isDebugTool && (
                       <Badge 
                         variant="outline" 
                         className={cn(
                           "text-[10px] py-0 h-5",
-                          "bg-purple-100 text-purple-800 border-purple-200",
-                          "dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800"
+                          CATEGORY_COLORS[event.category].text,
+                          CATEGORY_COLORS[event.category].border
                         )}
                       >
-                        Debug Tool
+                        {event.category}
                       </Badge>
-                    ) : (
-                      event.category && event.category !== 'Tools' && (
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            "text-[10px] py-0 h-5",
-                            CATEGORY_COLORS[event.category].text,
-                            CATEGORY_COLORS[event.category].border
-                          )}
-                        >
-                          {event.category}
-                        </Badge>
-                      )
                     )}
 
                     {event.isError ? (
@@ -198,6 +185,20 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                         )}
                       </>
                     )}
+                    
+                    {isDebugTool && (
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          "text-[10px] py-0 h-5",
+                          "bg-purple-100 text-purple-800 border-purple-200",
+                          "dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800"
+                        )}
+                      >
+                        Debug Tool
+                      </Badge>
+                    )}
+                    
                     {expandedEvents[event.id] ? (
                       <ChevronUp className="h-4 w-4" />
                     ) : (
