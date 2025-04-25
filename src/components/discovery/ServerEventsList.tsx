@@ -37,6 +37,17 @@ const SAMPLE_REQUEST = {
   }
 };
 
+const SAMPLE_NOTIFICATION = {
+  id: "notification-1",
+  timestamp: new Date().toISOString(),
+  type: "notification" as EventType,
+  method: "notification/system",
+  content: {
+    message: "System is running normally",
+    status: "success"
+  }
+};
+
 interface ServerEventsListProps {
   events: ServerEvent[];
   instanceName?: string;
@@ -113,7 +124,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
             </p>
           </div>
         ) : (
-          events.map((event) => {
+          [SAMPLE_NOTIFICATION, ...events].map((event) => {
             const { date, time } = formatTimestamp(event.timestamp);
             const methodDetails = formatMethodDetails(event.method || '', event.params);
             const isSuccess = !event.isError && event.type === 'response';
