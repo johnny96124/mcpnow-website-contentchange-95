@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -36,7 +37,7 @@ const formatJsonContent = (content: any): JSX.Element => {
       {'{'}
       {Object.entries(content).map(([key, value], index) => (
         <div key={key} style={{ marginLeft: '20px' }}>
-          <span className="text-blue-600 dark:text-blue-400">{JSON.stringify(key)}</span>
+          <span className="text-black font-semibold dark:text-gray-200">{JSON.stringify(key)}</span>
           <span className="text-gray-600 dark:text-gray-400">: </span>
           <span className="text-green-600 dark:text-green-400">
             {typeof value === 'object' 
