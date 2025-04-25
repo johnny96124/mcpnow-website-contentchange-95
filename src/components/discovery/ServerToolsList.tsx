@@ -677,7 +677,7 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
       <div className="mt-2">
         {parameter.type === 'string' && (
           <Textarea
-            placeholder={`Enter ${parameter.name} value...`}
+            placeholder={`Enter ${parameter.name}...`}
             className="h-20 text-sm"
             value={value || ''}
             onChange={(e) => onChange && onChange(e.target.value)}
@@ -686,7 +686,7 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
         {parameter.type === 'number' && (
           <Input
             type="number"
-            placeholder={`Enter ${parameter.name} value...`}
+            placeholder={`Enter ${parameter.name}...`}
             className="text-sm"
             value={value || ''}
             onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
