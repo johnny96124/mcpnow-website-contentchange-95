@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Clock, Bell } from "lucide-react";
@@ -191,12 +191,18 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     ) : !isNotification && (
                       <>
                         {event.profileName && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] py-0 h-5"
+                          >
                             {event.profileName}
                           </Badge>
                         )}
                         {event.hostName && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge 
+                            variant="secondary" 
+                            className="text-[10px] py-0 h-5"
+                          >
                             {event.hostName}
                           </Badge>
                         )}
