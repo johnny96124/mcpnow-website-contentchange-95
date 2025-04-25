@@ -182,7 +182,7 @@ const Hosts = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
           <p className="text-muted-foreground">
-            Manage host connections, server configurations, and profile associations
+            Manage host connections and profile associations
           </p>
         </div>
         <div className="flex gap-2">

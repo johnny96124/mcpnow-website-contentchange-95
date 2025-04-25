@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Info, WrenchIcon } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -18,7 +18,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileChangeHint } from "./ProfileChangeHint";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface InstanceStatus {
   id: string;
@@ -64,7 +63,6 @@ export function HostCard({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileChangedRecently, setProfileChangedRecently] = useState(false);
   const [prevProfileId, setPrevProfileId] = useState(profileId);
-  const [expandedInstancesInfo, setExpandedInstancesInfo] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -246,13 +244,6 @@ export function HostCard({
     return definitionMap;
   };
 
-  const toggleInstanceInfo = (instanceId: string) => {
-    setExpandedInstancesInfo(prev => ({
-      ...prev,
-      [instanceId]: !prev[instanceId]
-    }));
-  };
-
   const handleShowError = (instance: InstanceStatus) => {
     setSelectedErrorInstance(instance);
     setIsErrorDialogOpen(true);
@@ -355,7 +346,7 @@ export function HostCard({
   }
   
   return (
-    <Card className="overflow-hidden flex flex-col h-[480px]">
+    <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -383,7 +374,7 @@ export function HostCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-4 space-y-3 flex-1 overflow-y-auto">
+      <CardContent className="pt-4 space-y-4 flex-1 overflow-y-auto">
         {showHostRefreshHint && (
           <ProfileChangeHint className="mb-4" />
         )}
@@ -464,226 +455,99 @@ export function HostCard({
                       )}
                     </div>
                   </div>
-                  <ScrollArea className="h-[250px] border rounded-md p-1">
+                  <ScrollArea className="h-[140px] border rounded-md p-1">
                     <div className="space-y-1">
                       {Array.from(instancesByDefinition.entries()).map(([definitionId, instances]) => {
                         const displayInstance = instances[0];
                         const hasError = displayInstance.enabled && displayInstance.status === 'error';
-                        const serverDefinition = serverDefinitions.find(def => def.id === definitionId);
-                        const instanceDetails = serverInstances.find(inst => inst.id === displayInstance.id);
-                        const isExpanded = expandedInstancesInfo[displayInstance.id] || false;
                         
                         return (
                           <div 
                             key={definitionId} 
                             className={cn(
-                              "flex flex-col p-2 rounded",
+                              "flex items-center justify-between p-2 rounded",
                               hasError ? "bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800" : "bg-muted/50"
                             )}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={
-                                    isHostDisconnected ? 'none' :
-                                    !displayInstance.enabled ? 'inactive' :
-                                    displayInstance.status === 'connected' ? 'active' :
-                                    displayInstance.status === 'connecting' ? 'warning' :
-                                    displayInstance.status === 'error' ? 'error' : 'inactive'
-                                  }
-                                />
-                                <div className="text-sm flex items-center">
-                                  <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
-                                    {displayInstance.definitionName}
-                                  </span>
-                                  
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="h-6 px-1 py-0 ml-1"
-                                      >
-                                        <span className="text-xs text-muted-foreground hidden md:block">
-                                          {displayInstance.name}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
-                                          {displayInstance.name.split('-').pop()}
-                                        </span>
-                                        <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent 
-                                      align="start"
-                                      className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
-                                    >
-                                      {instances.map(instance => (
-                                        <DropdownMenuItem
-                                          key={instance.id}
-                                          className={cn(
-                                            "w-full text-xs cursor-pointer",
-                                            displayInstance.id === instance.id && "bg-accent font-medium"
-                                          )}
-                                          onClick={() => handleSelectInstance(instance.id, definitionId)}
-                                        >
-                                          <div className="flex items-center gap-2">
-                                            {displayInstance.id === instance.id && (
-                                              <CircleCheck className="h-3 w-3 text-primary shrink-0" />
-                                            )}
-                                            <span>{instance.name}</span>
-                                          </div>
-                                        </DropdownMenuItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                                {!isHostDisconnected && displayInstance.status === 'connecting' && (
-                                  <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="xs"
-                                  className="h-6 px-1.5 py-0.5"
-                                  onClick={() => toggleInstanceInfo(displayInstance.id)}
-                                >
-                                  <Info className="h-3.5 w-3.5 mr-1 text-blue-500" />
-                                  <span className="text-xs">{isExpanded ? 'Hide' : 'Details'}</span>
-                                </Button>
+                            <div className="flex items-center gap-2">
+                              <StatusIndicator 
+                                status={
+                                  isHostDisconnected ? 'none' :
+                                  !displayInstance.enabled ? 'inactive' :
+                                  displayInstance.status === 'connected' ? 'active' :
+                                  displayInstance.status === 'connecting' ? 'warning' :
+                                  displayInstance.status === 'error' ? 'error' : 'inactive'
+                                }
+                              />
+                              <div className="text-sm flex items-center">
+                                <span className="font-medium truncate max-w-[100px] md:max-w-[150px] lg:max-w-[180px]">
+                                  {displayInstance.definitionName}
+                                </span>
                                 
-                                {hasError && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    className="h-6 px-1 py-0 text-red-600 hover:text-red-700 hover:bg-red-100"
-                                    onClick={() => handleShowError(displayInstance)}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 px-1 py-0 ml-1"
+                                    >
+                                      <span className="text-xs text-muted-foreground hidden md:block">
+                                        {displayInstance.name}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground block md:hidden truncate max-w-[60px]">
+                                        {displayInstance.name.split('-').pop()}
+                                      </span>
+                                      <ChevronDown className="h-3 w-3 ml-1 shrink-0" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent 
+                                    align="start"
+                                    className="w-auto min-w-[180px] p-1 max-h-[200px] overflow-y-auto"
                                   >
-                                    <AlertCircle className="h-3.5 w-3.5" />
-                                    <span className="ml-1 text-xs">View Error</span>
-                                  </Button>
-                                )}
-                                {!isHostDisconnected && (
-                                  <Switch 
-                                    checked={displayInstance.enabled} 
-                                    onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
-                                    className="shrink-0"
-                                  />
-                                )}
+                                    {instances.map(instance => (
+                                      <DropdownMenuItem
+                                        key={instance.id}
+                                        className={cn(
+                                          "w-full text-xs cursor-pointer",
+                                          displayInstance.id === instance.id && "bg-accent font-medium"
+                                        )}
+                                        onClick={() => handleSelectInstance(instance.id, definitionId)}
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          {displayInstance.id === instance.id && (
+                                            <CircleCheck className="h-3 w-3 text-primary shrink-0" />
+                                          )}
+                                          <span>{instance.name}</span>
+                                        </div>
+                                      </DropdownMenuItem>
+                                    ))}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
+                              {!isHostDisconnected && displayInstance.status === 'connecting' && (
+                                <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />
+                              )}
                             </div>
-                            
-                            {isExpanded && serverDefinition && instanceDetails && (
-                              <div className="mt-2 pl-4 text-xs border-t pt-2">
-                                <Accordion type="single" collapsible className="w-full">
-                                  <AccordionItem value="description" className="border-b-0">
-                                    <AccordionTrigger className="py-1.5 text-xs">Server Description</AccordionTrigger>
-                                    <AccordionContent className="text-xs pt-1">
-                                      <p className="text-muted-foreground mb-1">{serverDefinition.description}</p>
-                                      <div className="flex flex-wrap gap-1 mt-1">
-                                        {serverDefinition.categories?.map(category => (
-                                          <Badge 
-                                            key={category} 
-                                            variant="secondary" 
-                                            className="text-[10px] py-0 h-4"
-                                          >
-                                            {category}
-                                          </Badge>
-                                        ))}
-                                      </div>
-                                    </AccordionContent>
-                                  </AccordionItem>
-                                  
-                                  {serverDefinition.tools && serverDefinition.tools.length > 0 && (
-                                    <AccordionItem value="tools" className="border-b-0">
-                                      <AccordionTrigger className="py-1.5 text-xs">
-                                        Available Tools
-                                        <Badge variant="outline" className="ml-2 text-[10px] py-0 h-4">
-                                          {serverDefinition.tools.length}
-                                        </Badge>
-                                      </AccordionTrigger>
-                                      <AccordionContent className="text-xs pt-1">
-                                        <div className="space-y-2">
-                                          {serverDefinition.tools.map(tool => (
-                                            <div key={tool.id} className="bg-muted/50 p-1.5 rounded border">
-                                              <div className="flex gap-1.5 items-center">
-                                                <WrenchIcon className="h-3 w-3 text-primary" />
-                                                <span className="font-medium">{tool.name}</span>
-                                              </div>
-                                              <p className="text-muted-foreground text-[10px] mt-1">{tool.description}</p>
-                                              {tool.parameters && tool.parameters.length > 0 && (
-                                                <div className="mt-1">
-                                                  <p className="text-[10px] font-medium">Parameters:</p>
-                                                  <div className="pl-2 mt-0.5 space-y-1">
-                                                    {tool.parameters.slice(0, 2).map(param => (
-                                                      <div key={param.name} className="flex items-center gap-1">
-                                                        <span className="text-[10px] font-medium">{param.name}:</span>
-                                                        <span className="text-[10px] text-muted-foreground">{param.type}</span>
-                                                        {param.required && (
-                                                          <Badge variant="outline" className="h-3.5 text-[8px]">Required</Badge>
-                                                        )}
-                                                      </div>
-                                                    ))}
-                                                    {tool.parameters.length > 2 && (
-                                                      <p className="text-[10px] text-muted-foreground italic">
-                                                        +{tool.parameters.length - 2} more parameters
-                                                      </p>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </AccordionContent>
-                                    </AccordionItem>
-                                  )}
-                                  
-                                  <AccordionItem value="instanceDetails" className="border-b-0">
-                                    <AccordionTrigger className="py-1.5 text-xs">Instance Configuration</AccordionTrigger>
-                                    <AccordionContent className="text-xs pt-1">
-                                      <div className="space-y-2">
-                                        <div>
-                                          <p className="font-medium">Connection Details:</p>
-                                          <p className="text-muted-foreground break-all">{instanceDetails.connectionDetails}</p>
-                                        </div>
-                                        
-                                        {instanceDetails.environment && Object.keys(instanceDetails.environment).length > 0 && (
-                                          <div>
-                                            <p className="font-medium">Environment:</p>
-                                            <div className="bg-muted p-1.5 rounded text-[10px] mt-1">
-                                              {Object.entries(instanceDetails.environment).map(([key, value], index) => (
-                                                <div key={key} className="flex items-center justify-between">
-                                                  <span className="font-mono">{key}:</span> 
-                                                  <span className="text-green-600">{value.includes('token') || key.includes('TOKEN') ? 
-                                                    value.substring(0, 6) + "..." : value}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        )}
-                                        
-                                        {instanceDetails.arguments && instanceDetails.arguments.length > 0 && (
-                                          <div>
-                                            <p className="font-medium">Arguments:</p>
-                                            <div className="bg-muted p-1.5 rounded text-[10px] mt-1 font-mono">
-                                              {instanceDetails.arguments.join(' ')}
-                                            </div>
-                                          </div>
-                                        )}
-                                        
-                                        {instanceDetails.requestCount !== undefined && (
-                                          <div className="flex items-center justify-between">
-                                            <span className="font-medium">Requests:</span>
-                                            <span className="font-mono">{instanceDetails.requestCount}</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </AccordionContent>
-                                  </AccordionItem>
-                                </Accordion>
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {hasError && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="h-6 px-1 py-0 text-red-600 hover:text-red-700 hover:bg-red-100"
+                                  onClick={() => handleShowError(displayInstance)}
+                                >
+                                  <AlertCircle className="h-3.5 w-3.5" />
+                                  <span className="ml-1 text-xs">View Error</span>
+                                </Button>
+                              )}
+                              {!isHostDisconnected && (
+                                <Switch 
+                                  checked={displayInstance.enabled} 
+                                  onCheckedChange={() => toggleInstanceEnabled(displayInstance.id)}
+                                  className="shrink-0"
+                                />
+                              )}
+                            </div>
                           </div>
                         );
                       })}
