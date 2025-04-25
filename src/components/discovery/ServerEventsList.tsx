@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -138,7 +137,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                       <span className="font-semibold">{time}</span>
                     </div>
 
-                    {event.category && (
+                    {event.category && event.category !== 'Tools' && (
                       <Badge 
                         variant="outline" 
                         className={cn(
