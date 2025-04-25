@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Info, Tool } from "lucide-react";
+import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X, Info, WrenchIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -608,7 +607,7 @@ export function HostCard({
                                           {serverDefinition.tools.map(tool => (
                                             <div key={tool.id} className="bg-muted/50 p-1.5 rounded border">
                                               <div className="flex gap-1.5 items-center">
-                                                <Tool className="h-3 w-3 text-primary" />
+                                                <WrenchIcon className="h-3 w-3 text-primary" />
                                                 <span className="font-medium">{tool.name}</span>
                                               </div>
                                               <p className="text-muted-foreground text-[10px] mt-1">{tool.description}</p>
