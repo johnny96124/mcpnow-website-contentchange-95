@@ -23,6 +23,20 @@ const EVENT_TYPE_COLORS: Record<EventType, { bg: string; text: string; border: s
   notification: { bg: "bg-yellow-50", text: "text-yellow-800", border: "border-yellow-200" }
 };
 
+const SAMPLE_REQUEST = {
+  method: "tools/call",
+  params: {
+    name: "longRunningOperation",
+    arguments: {
+      duration: 5,
+      steps: 10
+    },
+    _meta: {
+      progressToken: 1
+    }
+  }
+};
+
 interface ServerEventsListProps {
   events: ServerEvent[];
   instanceName?: string;
@@ -185,7 +199,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                         </span>
                       </div>
                       <div className="whitespace-pre-wrap break-all">
-                        {formatJsonContent(event.params || event.content)}
+                        {formatJsonContent(SAMPLE_REQUEST)}
                       </div>
                     </div>
                     
