@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, Clock, Bell } from "lucide-react";
