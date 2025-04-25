@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -233,7 +232,7 @@ export function ServerEventsList({ events, instanceName }: ServerEventsListProps
                     >
                       <div className="flex items-center mb-2">
                         <span className={cn(
-                          "font-bold mr-2 uppercase",
+                          "font-bold mr-2 uppercase text-green-600 dark:text-green-400",
                           isSuccess 
                             ? "text-green-600 dark:text-green-400" 
                             : event.isError 
