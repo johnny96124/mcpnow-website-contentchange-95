@@ -1,4 +1,3 @@
-
 import { Tool, ToolParameter } from "@/data/mockData";
 import { 
   Accordion, 
@@ -675,37 +674,35 @@ function ParameterItem({ parameter, debugMode = false, value, onChange }: Parame
         </div>
       )}
       
-      {debugMode && (
-        <div className="mt-2">
-          {parameter.type === 'string' && (
-            <Textarea
-              placeholder={`Enter ${parameter.name} value...`}
-              className="h-20 text-sm"
-              value={value || ''}
-              onChange={(e) => onChange && onChange(e.target.value)}
-            />
-          )}
-          {parameter.type === 'number' && (
-            <Input
-              type="number"
-              placeholder={`Enter ${parameter.name} value...`}
-              className="text-sm"
-              value={value || ''}
-              onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
-            />
-          )}
-          {parameter.type === 'boolean' && (
-            <select
-              className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
-              value={value?.toString() || "false"}
-              onChange={(e) => onChange && onChange(e.target.value === "true")}
-            >
-              <option value="true">True</option>
-              <option value="false">False</option>
-            </select>
-          )}
-        </div>
-      )}
+      <div className="mt-2">
+        {parameter.type === 'string' && (
+          <Textarea
+            placeholder={`Enter ${parameter.name} value...`}
+            className="h-20 text-sm"
+            value={value || ''}
+            onChange={(e) => onChange && onChange(e.target.value)}
+          />
+        )}
+        {parameter.type === 'number' && (
+          <Input
+            type="number"
+            placeholder={`Enter ${parameter.name} value...`}
+            className="text-sm"
+            value={value || ''}
+            onChange={(e) => onChange && onChange(parseFloat(e.target.value) || 0)}
+          />
+        )}
+        {parameter.type === 'boolean' && (
+          <select
+            className="w-full p-2 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
+            value={value?.toString() || "false"}
+            onChange={(e) => onChange && onChange(e.target.value === "true")}
+          >
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        )}
+      </div>
     </div>
   );
 }
