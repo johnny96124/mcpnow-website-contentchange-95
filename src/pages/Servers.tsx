@@ -324,35 +324,42 @@ const Servers = () => {
 
   const hasSearchResults = filteredDefinitions.length > 0;
 
-  return <div className="space-y-6 animate-fade-in pb-10">
-      <div className="flex items-center justify-between">
+  return <div className="space-y-8 animate-fade-in pb-10">
+      <div className="flex items-center justify-between border-b pb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Servers</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             Manage server definitions and their instances
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleAddNewServer}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Server
-          </Button>
-        </div>
+        <Button onClick={handleAddNewServer} className="shadow-sm hover:shadow-md transition-all">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add New Server
+        </Button>
       </div>
       
-      <div className="flex justify-between items-center">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input type="search" placeholder="Search servers..." className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-        </div>
+      <div className="relative max-w-md w-full">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <input 
+          type="search" 
+          placeholder="Search servers..." 
+          className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" 
+          value={searchQuery} 
+          onChange={e => setSearchQuery(e.target.value)} 
+        />
       </div>
       
-      {hasSearchResults ? <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      {hasSearchResults ? (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {filteredDefinitions.map(definition => {
-        const definitionInstances = instancesByDefinition[definition.id] || [];
-        const filteredDefInstances = definitionInstances.filter(instance => filteredInstances.some(fi => fi.id === instance.id));
-        const isCustom = !definition.isOfficial;
-        return <Card key={definition.id} className="overflow-hidden flex flex-col">
+            const definitionInstances = instancesByDefinition[definition.id] || [];
+            const filteredDefInstances = definitionInstances.filter(instance => 
+              filteredInstances.some(fi => fi.id === instance.id)
+            );
+            const isCustom = !definition.isOfficial;
+
+            return (
+              <Card key={definition.id} className="overflow-hidden flex flex-col group hover:shadow-md transition-all duration-200">
                 <CardHeader className="pb-2 bg-secondary/30">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -361,119 +368,167 @@ const Servers = () => {
                         <div className="flex items-center gap-1">
                           <EndpointLabel type={definition.type} />
                           {isCustom && <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
-                              Custom
-                            </Badge>}
+                            Custom
+                          </Badge>}
                         </div>
                       </CardTitle>
-                      <CardDescription>
-                        {truncateText(definition.description, 60)}
-                      </CardDescription>
+                      <CardDescription>{truncateText(definition.description, 60)}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                
-                <CardContent className="pt-4 flex-grow">                  
-                  {filteredDefInstances.length > 0 && <div className="border rounded-md overflow-hidden mt-2">
+
+                <CardContent className="pt-4 flex-grow">
+                  {filteredDefInstances.length > 0 ? (
+                    <div className="border rounded-md overflow-hidden mt-2">
                       <Table>
                         <TableHeader>
                           <TableRow>
                             <TableHead>Instance Name</TableHead>
                             <TableHead className="w-[40%] pr-2">Profile</TableHead>
-                            <TableHead className="text-left">Actions</TableHead>
+                            <TableHead className="w-[180px]">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {filteredDefInstances.map(instance => <TableRow key={instance.id}>
+                          {filteredDefInstances.map(instance => (
+                            <TableRow key={instance.id}>
                               <TableCell className="font-medium">
                                 {truncateText(instance.name)}
                               </TableCell>
                               <TableCell className="pr-2">
                                 {renderProfileBadges(instance.id)}
                               </TableCell>
-                              <TableCell className="space-x-1 flex">
-                                <Button variant="outline" size="sm" className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors" onClick={() => handleConnect(instance.id)} disabled={instanceStatuses[instance.id] === 'connecting'}>
-                                  {instanceStatuses[instance.id] === 'connecting' ? <span className="h-4 w-4 mr-1 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" /> : <Terminal className="h-4 w-4 mr-1" />}
-                                  Connect
-                                </Button>
-                                
-                                {definition.tools && definition.tools.length > 0 && <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button variant="outline" size="icon" className="text-purple-500 hover:text-purple-600 hover:border-purple-500 transition-colors h-9 w-9" onClick={() => handleOpenToolsDialog(instance.id, definition.id)}>
-                                          <Wrench className="h-4 w-4" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Debug Tools</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>}
-                                
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button variant="outline" size="icon" className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9" onClick={() => handleViewDetails(instance)}>
-                                        <Info className="h-4 w-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>View details</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                                
-                                <AlertDialog>
+                              <TableCell>
+                                <div className="flex gap-1.5">
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <AlertDialogTrigger asChild>
-                                          <Button variant="outline" size="icon" className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9">
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </AlertDialogTrigger>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="text-green-600 hover:text-green-700 hover:border-green-600 transition-colors"
+                                          onClick={() => handleConnect(instance.id)}
+                                          disabled={instanceStatuses[instance.id] === 'connecting'}
+                                        >
+                                          {instanceStatuses[instance.id] === 'connecting' ? 
+                                            <span className="h-4 w-4 animate-spin border-2 border-current border-t-transparent rounded-full inline-block" /> : 
+                                            <Terminal className="h-4 w-4" />
+                                          }
+                                        </Button>
                                       </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>Delete instance</p>
-                                      </TooltipContent>
+                                      <TooltipContent>Connect</TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This will permanently delete the instance "{instance.name}". 
-                                        This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteInstance(instance.id)}>
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+
+                                  {definition.tools && definition.tools.length > 0 && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button 
+                                            variant="outline" 
+                                            size="icon"
+                                            className="text-purple-500 hover:text-purple-600 hover:border-purple-500 transition-colors h-9 w-9"
+                                            onClick={() => handleOpenToolsDialog(instance.id, definition.id)}
+                                          >
+                                            <Wrench className="h-4 w-4" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Debug Tools</TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Button 
+                                          variant="outline"
+                                          size="icon"
+                                          className="text-blue-500 hover:text-blue-600 hover:border-blue-500 transition-colors h-9 w-9"
+                                          onClick={() => handleViewDetails(instance)}
+                                        >
+                                          <Info className="h-4 w-4" />
+                                        </Button>
+                                      </TooltipTrigger>
+                                      <TooltipContent>View details</TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+
+                                  <AlertDialog>
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <AlertDialogTrigger asChild>
+                                            <Button 
+                                              variant="outline"
+                                              size="icon"
+                                              className="text-destructive hover:text-destructive hover:border-destructive transition-colors h-9 w-9"
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Delete instance</TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently delete the instance "{instance.name}". 
+                                          This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteInstance(instance.id)}>
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </div>
                               </TableCell>
-                            </TableRow>)}
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
-                    </div>}
-                  
-                  {filteredDefInstances.length === 0 && <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
+                    </div>
+                  ) : (
+                    <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
                       <div className="h-8 w-8 text-muted-foreground/50 mb-2" />
                       <p className="text-muted-foreground mb-4">No instances created for this server definition</p>
-                      <Button variant="outline" size="sm" className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105" onClick={() => handleOpenAddInstance(definition)}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="hover:bg-secondary/50 transition-all duration-300 hover:scale-105"
+                        onClick={() => handleOpenAddInstance(definition)}
+                      >
                         <CirclePlus className="h-4 w-4 mr-1" />
                         Create First Instance
                       </Button>
-                    </div>}
+                    </div>
+                  )}
                 </CardContent>
-                
+
                 <CardFooter className="flex justify-between pt-4 pb-4 border-t mt-2 bg-secondary/10">
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditServer(definition)}
+                      className="text-blue-600 hover:bg-blue-600/10"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10"
+                        >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </Button>
@@ -495,34 +550,39 @@ const Servers = () => {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-
-                    <Button variant="ghost" size="sm" onClick={() => handleEditServer(definition)} className="text-blue-600 hover:bg-blue-600/10">
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
                   </div>
 
-                  <Button variant="default" size="sm" onClick={() => handleOpenAddInstance(definition)}>
+                  <Button 
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleOpenAddInstance(definition)}
+                    className="shadow-sm hover:shadow-md transition-all"
+                  >
                     <CirclePlus className="h-4 w-4 mr-1" />
                     Add Instance
                   </Button>
                 </CardFooter>
-              </Card>;
-      })}
-          
-          <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px]">
+              </Card>
+            );
+          })}
+
+          <Card className="border-dashed border-2 flex flex-col items-center justify-center h-[300px] hover:bg-secondary/5 transition-colors group">
             <CardContent className="flex flex-col items-center justify-center p-6">
-              <PlusCircle className="h-8 w-8 text-muted-foreground mb-4" />
+              <PlusCircle className="h-8 w-8 text-muted-foreground mb-4 group-hover:scale-110 transition-transform duration-200" />
               <p className="text-muted-foreground text-center">
                 Add a new server definition
               </p>
-              <Button className="mt-4 hover:scale-105 transition-all duration-300" onClick={handleAddNewServer}>
+              <Button 
+                className="mt-4 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105" 
+                onClick={handleAddNewServer}
+              >
                 Add
               </Button>
             </CardContent>
           </Card>
-        </div> : searchQuery && <NoSearchResults query={searchQuery} onClear={clearSearch} entityName="servers" />}
-      
+        </div>
+      ) : searchQuery && <NoSearchResults query={searchQuery} onClear={clearSearch} entityName="servers" />}
+
       <AddInstanceDialog open={addInstanceOpen} onOpenChange={setAddInstanceOpen} serverDefinition={selectedDefinition} onCreateInstance={handleCreateInstance} />
 
       <AddInstanceDialog open={editInstanceOpen} onOpenChange={setEditInstanceOpen} serverDefinition={selectedDefinition} onCreateInstance={handleCreateInstance} editMode={true} initialValues={selectedInstance ? {
