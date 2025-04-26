@@ -1,24 +1,5 @@
 import { useState, useEffect } from "react";
-import { 
-  Plus, 
-  PlusCircle,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  Filter,
-  Settings2,
-  RefreshCw,
-  ArrowRight,
-  Server,
-  FileText,
-  ScanLine,
-  Edit,
-  Trash2,
-  Wrench,
-  MessageSquare,
-  Circle,
-  CircleDot
-} from "lucide-react";
+import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -32,17 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
-import { Progress } from "@/components/ui/progress"; 
+import { Progress } from "@/components/ui/progress";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { 
-  serverInstances, 
-  serverDefinitions, 
-  profiles, 
-  hosts, 
-  Profile, 
-  ServerInstance,
-  Host
-} from "@/data/mockData";
+import { serverInstances, serverDefinitions, profiles, hosts, Profile, ServerInstance, Host } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
 import { AddHostDialog } from "@/components/new-layout/AddHostDialog";
@@ -50,7 +23,6 @@ import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
-
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -59,7 +31,6 @@ const mockJsonConfig = {
     }
   }
 };
-
 const NewLayout = () => {
   const [currentTab, setCurrentTab] = useState<"servers" | "hosts">("servers");
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,35 +58,29 @@ const NewLayout = () => {
   const [addServerToHostOpen, setAddServerToHostOpen] = useState(false);
   const [selectedHostForAddServer, setSelectedHostForAddServer] = useState<Host | null>(null);
   const [importByProfileOpen, setImportByProfileOpen] = useState(false);
-
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const {
     configDialog,
     openConfigDialog,
     setDialogOpen,
     resetConfigDialog
   } = useConfigDialog(mockJsonConfig);
-
   const {
     hostProfiles,
     allProfiles,
     handleProfileChange,
     getProfileById
   } = useHostProfiles();
-
   useEffect(() => {
     // Filter servers based on search query and selected profile
     let filtered = [...serversList];
-    
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
-      filtered = filtered.filter(server => 
-        server.name.toLowerCase().includes(searchLower) ||
-        serverDefinitions.find(def => def.id === server.definitionId)?.name.toLowerCase().includes(searchLower)
-      );
+      filtered = filtered.filter(server => server.name.toLowerCase().includes(searchLower) || serverDefinitions.find(def => def.id === server.definitionId)?.name.toLowerCase().includes(searchLower));
     }
-    
+
     // Filter by profile if a specific profile is selected (not "all")
     if (selectedProfileId !== "all") {
       const profile = profilesList.find(p => p.id === selectedProfileId);
@@ -123,26 +88,20 @@ const NewLayout = () => {
         filtered = filtered.filter(server => profile.instances.includes(server.id));
       }
     }
-    
     setFilteredServers(filtered);
-    
+
     // Filter hosts based on search query
-    const filteredHostsResult = hostsList.filter(host => 
-      host.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredHostsResult = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
     setFilteredHosts(filteredHostsResult);
   }, [searchQuery, serversList, hostsList, selectedProfileId, profilesList]);
-
   const getDefinitionName = (definitionId: string): string => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : "Unknown";
   };
-
   const getDefinitionType = (definitionId: string): string => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.type : "Unknown";
   };
-
   const handleAddServerSuccess = (newServer: ServerInstance) => {
     setServersList(prev => [...prev, newServer]);
     toast({
@@ -150,7 +109,6 @@ const NewLayout = () => {
       description: `${newServer.name} has been added successfully`
     });
   };
-
   const handleAddHostSuccess = (newHost: Host) => {
     setHostsList(prev => [...prev, newHost]);
     setSelectedHostId(newHost.id);
@@ -159,43 +117,36 @@ const NewLayout = () => {
       description: `${newHost.name} has been added successfully`
     });
   };
-
   const handleOpenServerDetails = (server: ServerInstance) => {
     setSelectedServerDetails(server);
     setServerDetailOpen(true);
   };
-
   const handleDeleteServer = (serverId: string) => {
     setServersList(prev => prev.filter(s => s.id !== serverId));
-    
+
     // Also remove from profiles
     setProfilesList(prev => prev.map(profile => ({
       ...profile,
       instances: profile.instances.filter(id => id !== serverId)
     })));
-    
     toast({
       title: "Server Removed",
       description: `Server has been removed successfully`
     });
   };
-
   const handleDeleteHost = (hostId: string) => {
     setHostsList(prev => prev.filter(h => h.id !== hostId));
-    
     if (selectedHostId === hostId) {
       setSelectedHostId(prev => {
         const remainingHosts = hostsList.filter(h => h.id !== hostId);
         return remainingHosts.length > 0 ? remainingHosts[0].id : null;
       });
     }
-    
     toast({
       title: "Host Deleted",
       description: "The host has been removed successfully"
     });
   };
-
   const handleAddToProfile = (serverId: string) => {
     const server = serversList.find(s => s.id === serverId);
     if (server) {
@@ -203,10 +154,9 @@ const NewLayout = () => {
       setIsAddToProfileDialogOpen(true);
     }
   };
-
   const confirmAddToProfile = (profileId: string) => {
     if (!selectedServerForProfile || !profileId) return;
-    
+
     // Check if server is already in this profile
     const profile = profilesList.find(p => p.id === profileId);
     if (profile && profile.instances.includes(selectedServerForProfile.id)) {
@@ -217,22 +167,18 @@ const NewLayout = () => {
       });
       return;
     }
-    
+
     // Add server to profile
-    setProfilesList(prev => prev.map(profile => 
-      profile.id === profileId ? 
-        { ...profile, instances: [...profile.instances, selectedServerForProfile.id] } : 
-        profile
-    ));
-    
+    setProfilesList(prev => prev.map(profile => profile.id === profileId ? {
+      ...profile,
+      instances: [...profile.instances, selectedServerForProfile.id]
+    } : profile));
     toast({
       title: "Added to Profile",
       description: `${selectedServerForProfile.name} has been added to the profile`
     });
-    
     setIsAddToProfileDialogOpen(false);
   };
-
   const handleCreateNewProfile = () => {
     if (!newProfileName.trim()) {
       toast({
@@ -242,10 +188,9 @@ const NewLayout = () => {
       });
       return;
     }
-    
+
     // Create a new profile with selected server if any
     const instances = selectedServerForProfile ? [selectedServerForProfile.id] : [];
-    
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
       name: newProfileName,
@@ -254,46 +199,43 @@ const NewLayout = () => {
       enabled: true,
       instances
     };
-    
     setProfilesList(prev => [...prev, newProfile]);
     setSelectedProfileId(newProfile.id);
-    
     toast({
       title: "Profile Created",
       description: `New profile "${newProfileName}" has been created`
     });
-    
     setCreateProfileDialogOpen(false);
     setIsAddToProfileDialogOpen(false);
     setNewProfileName("");
   };
-
   const getProfilesForServer = (serverId: string): Profile[] => {
     return profilesList.filter(profile => profile.instances.includes(serverId));
   };
-
   const handleServerStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServerInstanceStatuses(prev => ({
       ...prev,
       [serverId]: status
     }));
-    
+
     // If status is 'running', also update the server in the list
     if (status === 'running') {
-      setServersList(prev => prev.map(server => 
-        server.id === serverId ? { ...server, status: 'running' } : server
-      ));
+      setServersList(prev => prev.map(server => server.id === serverId ? {
+        ...server,
+        status: 'running'
+      } : server));
     } else if (status === 'stopped') {
-      setServersList(prev => prev.map(server => 
-        server.id === serverId ? { ...server, status: 'stopped' } : server
-      ));
+      setServersList(prev => prev.map(server => server.id === serverId ? {
+        ...server,
+        status: 'stopped'
+      } : server));
     } else if (status === 'error') {
-      setServersList(prev => prev.map(server => 
-        server.id === serverId ? { ...server, status: 'error' } : server
-      ));
+      setServersList(prev => prev.map(server => server.id === serverId ? {
+        ...server,
+        status: 'error'
+      } : server));
     }
   };
-
   const handleCreateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -301,7 +243,6 @@ const NewLayout = () => {
       openConfigDialog(hostId, defaultConfigPath, 'http://localhost:8008/mcp', true, true, false, false, true, true);
     }
   };
-
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
@@ -310,7 +251,6 @@ const NewLayout = () => {
         configStatus: 'configured',
         connectionStatus: 'connected'
       } : host));
-      
       toast({
         title: "Configuration complete",
         description: "Host configuration has been updated successfully."
@@ -318,7 +258,6 @@ const NewLayout = () => {
     }
     resetConfigDialog();
   };
-
   const handleScanForHosts = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -332,10 +271,8 @@ const NewLayout = () => {
           connectionStatus: "disconnected",
           configStatus: "unknown"
         };
-        
         setHostsList(prevHosts => [...prevHosts, newHost]);
         setSelectedHostId(newId);
-        
         toast({
           title: "Host discovered",
           description: "A new local host has been found and added to your hosts list."
@@ -350,85 +287,60 @@ const NewLayout = () => {
       setIsScanning(false);
     }, 2000);
   };
-
   const handleOpenDebugTools = (server: ServerInstance) => {
     setSelectedDebugServer(server);
     setIsDebuggingServer(true);
   };
-
   const handleOpenMessageHistory = (server: ServerInstance) => {
     setSelectedDebugServer(server);
     setMessageHistoryOpen(true);
   };
-
   const handleAddServerToHost = (host: Host) => {
     setSelectedHostForAddServer(host);
     setAddServerToHostOpen(true);
   };
-
   const confirmAddServerToHost = (serverId: string) => {
     if (!selectedHostForAddServer) return;
-    
     toast({
       title: "Server Added to Host",
       description: `Server has been successfully added to ${selectedHostForAddServer.name}`
     });
-    
+
     // Update the host to show it has servers
-    setHostsList(prev => prev.map(h => 
-      h.id === selectedHostForAddServer.id ? 
-      { 
-        ...h, 
-        configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
-        connectionStatus: "connected"
-      } : h
-    ));
-    
+    setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
+      ...h,
+      configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
+      connectionStatus: "connected"
+    } : h));
     setAddServerToHostOpen(false);
   };
-  
   const handleImportByProfile = (host: Host) => {
     setSelectedHostForAddServer(host);
     setImportByProfileOpen(true);
   };
-  
   const confirmImportProfileToHost = (profileId: string) => {
     if (!selectedHostForAddServer) return;
-    
     const profile = profilesList.find(p => p.id === profileId);
     if (!profile) return;
-    
     toast({
       title: "Profile Imported",
       description: `${profile.name} has been imported to ${selectedHostForAddServer.name} with ${profile.instances.length} servers`
     });
-    
+
     // Update the host to show it has servers
-    setHostsList(prev => prev.map(h => 
-      h.id === selectedHostForAddServer.id ? 
-      { 
-        ...h, 
-        configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
-        connectionStatus: "connected",
-        profileId: profileId
-      } : h
-    ));
-    
+    setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
+      ...h,
+      configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
+      connectionStatus: "connected",
+      profileId: profileId
+    } : h));
     handleProfileChange(selectedHostForAddServer.id, profileId);
-    
     setImportByProfileOpen(false);
   };
-
   const selectedHost = hostsList.find(h => h.id === selectedHostId);
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       {/* Main Tabs - This is at the top level for clear feature hierarchy */}
-      <Tabs 
-        value={currentTab} 
-        onValueChange={(value) => setCurrentTab(value as "servers" | "hosts")}
-        className="w-full"
-      >
+      <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">MCP Now</h1>
@@ -442,46 +354,33 @@ const NewLayout = () => {
               <TabsTrigger value="hosts">Hosts</TabsTrigger>
             </TabsList>
             
-            {currentTab === "servers" && (
-              <Button onClick={() => setAddServerDialogOpen(true)}>
+            {currentTab === "servers" && <Button onClick={() => setAddServerDialogOpen(true)}>
                 <PlusCircle className="h-4 w-4 mr-2" />
                 Add Server
-              </Button>
-            )}
+              </Button>}
             
-            {currentTab === "hosts" && (
-              <div className="flex gap-2">
+            {currentTab === "hosts" && <div className="flex gap-2">
                 <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
-                  {isScanning ? (
-                    <>
+                  {isScanning ? <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                       Scanning...
-                    </>
-                  ) : (
-                    <>
+                    </> : <>
                       <ScanLine className="h-4 w-4 mr-2" />
                       Scan for Hosts
-                    </>
-                  )}
+                    </>}
                 </Button>
                 <Button onClick={() => setAddHostDialogOpen(true)}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add Host
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
 
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={`Search ${currentTab}...`}
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <Input placeholder={`Search ${currentTab}...`} className="pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           </div>
         </div>
         
@@ -489,49 +388,30 @@ const NewLayout = () => {
           {/* Profile Selection Section */}
           <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
             <div className="flex items-center gap-2 overflow-x-auto">
-              <Button 
-                variant={selectedProfileId === "all" ? "default" : "outline"}
-                size="sm"
-                className="whitespace-nowrap"
-                onClick={() => setSelectedProfileId("all")}
-              >
+              <Button variant={selectedProfileId === "all" ? "default" : "outline"} size="sm" className="whitespace-nowrap" onClick={() => setSelectedProfileId("all")}>
                 All Servers
               </Button>
               
-              {profilesList.map(profile => (
-                <Button 
-                  key={profile.id} 
-                  variant={selectedProfileId === profile.id ? "default" : "outline"}
-                  size="sm"
-                  className="whitespace-nowrap"
-                  onClick={() => setSelectedProfileId(profile.id)}
-                >
+              {profilesList.map(profile => <Button key={profile.id} variant={selectedProfileId === profile.id ? "default" : "outline"} size="sm" className="whitespace-nowrap" onClick={() => setSelectedProfileId(profile.id)}>
                   {profile.name}
-                </Button>
-              ))}
+                </Button>)}
             </div>
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setSelectedServerForProfile(null);
-                setCreateProfileDialogOpen(true);
-              }}
-              className="whitespace-nowrap"
-            >
+            <Button variant="outline" size="sm" onClick={() => {
+            setSelectedServerForProfile(null);
+            setCreateProfileDialogOpen(true);
+          }} className="whitespace-nowrap">
               <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
               New Profile
             </Button>
           </div>
           
-          {filteredServers.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
+          {filteredServers.length > 0 ? <div className="rounded-md border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[220px]">Name</TableHead>
-                    <TableHead>Status</TableHead>
+                    
                     <TableHead>Type</TableHead>
                     <TableHead>Profiles</TableHead>
                     <TableHead>Connection</TableHead>
@@ -539,148 +419,84 @@ const NewLayout = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredServers.map((server) => {
-                    const serverProfiles = getProfilesForServer(server.id);
-                    const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
-                    
-                    return (
-                      <TableRow key={server.id}>
+                  {filteredServers.map(server => {
+                const serverProfiles = getProfilesForServer(server.id);
+                const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
+                return <TableRow key={server.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            <span 
-                              className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2"
-                              onClick={() => handleOpenServerDetails(server)}
-                            >
+                            <span className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2" onClick={() => handleOpenServerDetails(server)}>
                               <Server className="h-4 w-4" />
                               {server.name}
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <StatusIndicator
-                            status={
-                              status === "running" ? "active" : 
-                              status === "error" ? "error" : 
-                              status === "connecting" ? "warning" : "inactive"
-                            }
-                            label={status.charAt(0).toUpperCase() + status.slice(1)}
-                          />
-                        </TableCell>
+                        
                         <TableCell>
                           <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
                         </TableCell>
                         <TableCell>
-                          {serverProfiles.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 max-w-[200px]">
-                              {serverProfiles.map((profile, index) => (
-                                <Badge key={index} variant="secondary" className="whitespace-nowrap">
+                          {serverProfiles.length > 0 ? <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {serverProfiles.map((profile, index) => <Badge key={index} variant="secondary" className="whitespace-nowrap">
                                   {profile.name}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">No profiles</span>
-                          )}
+                                </Badge>)}
+                            </div> : <span className="text-muted-foreground text-sm">No profiles</span>}
                         </TableCell>
                         <TableCell className="max-w-[160px] truncate">
                           <span className="text-sm font-mono">{server.connectionDetails}</span>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleAddToProfile(server.id)}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => handleAddToProfile(server.id)}>
                               <Plus className="h-3.5 w-3.5 mr-1.5" />
                               Profile
                             </Button>
                             
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-purple-600 hover:text-purple-700 hover:border-purple-600"
-                              onClick={() => handleOpenDebugTools(server)}
-                            >
+                            <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:border-purple-600" onClick={() => handleOpenDebugTools(server)}>
                               <Wrench className="h-3.5 w-3.5 mr-1.5" />
                               Debug
                             </Button>
                             
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:border-blue-600"
-                              onClick={() => handleOpenMessageHistory(server)}
-                            >
+                            <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700 hover:border-blue-600" onClick={() => handleOpenMessageHistory(server)}>
                               <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
                               History
                             </Button>
                             
-                            <Button 
-                              variant="outline"
-                              size="sm" 
-                              className="text-destructive"
-                              onClick={() => handleDeleteServer(server.id)}
-                            >
+                            <Button variant="outline" size="sm" className="text-destructive" onClick={() => handleDeleteServer(server.id)}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                      </TableRow>;
+              })}
                 </TableBody>
               </Table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+            </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
               <Server className="h-10 w-10 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No Servers Found</h3>
               <p className="text-muted-foreground text-center mb-4">
                 {searchQuery ? `No results for "${searchQuery}"` : "Add your first server to get started."}
               </p>
-              {searchQuery ? (
-                <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
-              ) : (
-                <Button onClick={() => setAddServerDialogOpen(true)}>
+              {searchQuery ? <Button onClick={() => setSearchQuery("")}>Clear Search</Button> : <Button onClick={() => setAddServerDialogOpen(true)}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add Server
-                </Button>
-              )}
-            </div>
-          )}
+                </Button>}
+            </div>}
         </TabsContent>
 
         <TabsContent value="hosts" className="mt-0 space-y-6">
           {/* Host Selection Section */}
           <div className="bg-muted/20 p-3 rounded-lg">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {hostsList.map(host => (
-                <Button 
-                  key={host.id} 
-                  variant={selectedHostId === host.id ? "default" : "outline"}
-                  size="sm"
-                  className="whitespace-nowrap flex items-center gap-1.5"
-                  onClick={() => setSelectedHostId(host.id)}
-                >
+              {hostsList.map(host => <Button key={host.id} variant={selectedHostId === host.id ? "default" : "outline"} size="sm" className="whitespace-nowrap flex items-center gap-1.5" onClick={() => setSelectedHostId(host.id)}>
                   {host.icon && <span className="text-sm">{host.icon}</span>}
                   {host.name}
-                  <StatusIndicator 
-                    status={
-                      host.connectionStatus === "connected" ? "active" : 
-                      host.connectionStatus === "misconfigured" ? "error" : 
-                      host.configStatus === "misconfigured" ? "error" : "inactive"
-                    } 
-                    iconOnly
-                    size="sm"
-                  />
-                </Button>
-              ))}
+                  <StatusIndicator status={host.connectionStatus === "connected" ? "active" : host.connectionStatus === "misconfigured" ? "error" : host.configStatus === "misconfigured" ? "error" : "inactive"} iconOnly size="sm" />
+                </Button>)}
             </div>
           </div>
           
-          {selectedHost ? (
-            <div className="space-y-6">
+          {selectedHost ? <div className="space-y-6">
               {/* Host Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -690,54 +506,30 @@ const NewLayout = () => {
                   <div>
                     <h2 className="text-xl font-semibold">{selectedHost.name}</h2>
                     <div className="flex items-center gap-2">
-                      <StatusIndicator 
-                        status={
-                          selectedHost.connectionStatus === "connected" ? "active" : 
-                          selectedHost.connectionStatus === "misconfigured" ? "error" : 
-                          selectedHost.configStatus === "misconfigured" ? "error" : "inactive"
-                        } 
-                        label={
-                          selectedHost.connectionStatus === "connected" ? "Connected" : 
-                          selectedHost.connectionStatus === "misconfigured" ? "Misconfigured" : 
-                          selectedHost.configStatus === "misconfigured" ? "Configuration Error" : "Disconnected"
-                        }
-                      />
+                      <StatusIndicator status={selectedHost.connectionStatus === "connected" ? "active" : selectedHost.connectionStatus === "misconfigured" ? "error" : selectedHost.configStatus === "misconfigured" ? "error" : "inactive"} label={selectedHost.connectionStatus === "connected" ? "Connected" : selectedHost.connectionStatus === "misconfigured" ? "Misconfigured" : selectedHost.configStatus === "misconfigured" ? "Configuration Error" : "Disconnected"} />
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex gap-2">
-                  {selectedHost.configStatus === "unknown" ? (
-                    <Button 
-                      onClick={() => handleCreateConfigDialog(selectedHost.id)}
-                      className="bg-blue-500 hover:bg-blue-600"
-                    >
+                  {selectedHost.configStatus === "unknown" ? <Button onClick={() => handleCreateConfigDialog(selectedHost.id)} className="bg-blue-500 hover:bg-blue-600">
                       <FileText className="h-4 w-4 mr-2" />
                       Create Configuration
-                    </Button>
-                  ) : (
-                    <>
-                      <Button 
-                        variant="outline"
-                        onClick={() => handleImportByProfile(selectedHost)}
-                      >
+                    </Button> : <>
+                      <Button variant="outline" onClick={() => handleImportByProfile(selectedHost)}>
                         <Plus className="h-4 w-4 mr-1.5" />
                         Import by Profile
                       </Button>
-                      <Button 
-                        onClick={() => handleAddServerToHost(selectedHost)}
-                      >
+                      <Button onClick={() => handleAddServerToHost(selectedHost)}>
                         <Plus className="h-4 w-4 mr-1.5" />
                         Add Server
                       </Button>
-                    </>
-                  )}
+                    </>}
                 </div>
               </div>
               
               {/* Host Content */}
-              {selectedHost.configStatus === "unknown" ? (
-                <Card>
+              {selectedHost.configStatus === "unknown" ? <Card>
                   <CardContent className="p-6">
                     <div className="text-center space-y-4 py-6">
                       <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
@@ -749,17 +541,12 @@ const NewLayout = () => {
                           Configure this host to connect servers to it
                         </p>
                       </div>
-                      <Button 
-                        onClick={() => handleCreateConfigDialog(selectedHost.id)}
-                        className="bg-blue-500 hover:bg-blue-600"
-                      >
+                      <Button onClick={() => handleCreateConfigDialog(selectedHost.id)} className="bg-blue-500 hover:bg-blue-600">
                         Create Configuration
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
+                </Card> : <div className="space-y-4">
                   {/* Display config info */}
                   <div className="bg-muted/10 p-3 rounded-md flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -775,8 +562,7 @@ const NewLayout = () => {
                   </div>
                   
                   {/* Associated profile if any */}
-                  {hostProfiles[selectedHost.id] && (
-                    <div className="bg-muted/10 p-3 rounded-md">
+                  {hostProfiles[selectedHost.id] && <div className="bg-muted/10 p-3 rounded-md">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">Profile</Badge>
@@ -789,8 +575,7 @@ const NewLayout = () => {
                           Change
                         </Button>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   
                   {/* Servers Table */}
                   <Card>
@@ -801,8 +586,7 @@ const NewLayout = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      {selectedHost.connectionStatus === "connected" ? (
-                        <Table>
+                      {selectedHost.connectionStatus === "connected" ? <Table>
                           <TableHeader>
                             <TableRow>
                               <TableHead className="w-[180px]">Name</TableHead>
@@ -814,23 +598,15 @@ const NewLayout = () => {
                           </TableHeader>
                           <TableBody>
                             {serversList.slice(0, 3).map(server => {
-                              const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
-                              const load = Math.floor(Math.random() * 90) + 10; // Simulate random load
-                              
-                              return (
-                                <TableRow key={server.id}>
+                      const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
+                      const load = Math.floor(Math.random() * 90) + 10; // Simulate random load
+
+                      return <TableRow key={server.id}>
                                   <TableCell className="font-medium">
                                     {server.name}
                                   </TableCell>
                                   <TableCell>
-                                    <StatusIndicator
-                                      status={
-                                        status === "running" ? "active" : 
-                                        status === "error" ? "error" : 
-                                        status === "connecting" ? "warning" : "inactive"
-                                      }
-                                      label={status.charAt(0).toUpperCase() + status.slice(1)}
-                                    />
+                                    <StatusIndicator status={status === "running" ? "active" : status === "error" ? "error" : status === "connecting" ? "warning" : "inactive"} label={status.charAt(0).toUpperCase() + status.slice(1)} />
                                   </TableCell>
                                   <TableCell>
                                     <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
@@ -843,23 +619,15 @@ const NewLayout = () => {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-1.5">
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        className="text-purple-600 hover:text-purple-700 hover:border-purple-600"
-                                        onClick={() => handleOpenDebugTools(server)}
-                                      >
+                                      <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:border-purple-600" onClick={() => handleOpenDebugTools(server)}>
                                         <Wrench className="h-3.5 w-3.5" />
                                       </Button>
                                     </div>
                                   </TableCell>
-                                </TableRow>
-                              );
-                            })}
+                                </TableRow>;
+                    })}
                           </TableBody>
-                        </Table>
-                      ) : (
-                        <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
+                        </Table> : <div className="text-center p-6 border rounded-md bg-secondary/10 flex flex-col items-center">
                           <p className="text-muted-foreground mb-4">No servers are connected to this host</p>
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleImportByProfile(selectedHost)}>
@@ -869,60 +637,32 @@ const NewLayout = () => {
                               Add Server
                             </Button>
                           </div>
-                        </div>
-                      )}
+                        </div>}
                     </CardContent>
                   </Card>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+                </div>}
+            </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
               <Server className="h-10 w-10 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No Hosts Found</h3>
               <p className="text-muted-foreground text-center mb-4">
                 {searchQuery ? `No results for "${searchQuery}"` : "Add your first host to get started."}
               </p>
-              {searchQuery ? (
-                <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
-              ) : (
-                <Button onClick={() => setAddHostDialogOpen(true)}>
+              {searchQuery ? <Button onClick={() => setSearchQuery("")}>Clear Search</Button> : <Button onClick={() => setAddHostDialogOpen(true)}>
                   <PlusCircle className="h-4 w-4 mr-2" />
                   Add Host
-                </Button>
-              )}
-            </div>
-          )}
+                </Button>}
+            </div>}
         </TabsContent>
       </Tabs>
 
       {/* Dialogs */}
-      <AddServerDialog 
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onAddServer={handleAddServerSuccess}
-      />
+      <AddServerDialog open={addServerDialogOpen} onOpenChange={setAddServerDialogOpen} onAddServer={handleAddServerSuccess} />
 
-      <AddHostDialog
-        open={addHostDialogOpen}
-        onOpenChange={setAddHostDialogOpen}
-        onAddHost={handleAddHostSuccess}
-      />
+      <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHostSuccess} />
 
-      <ServerDetails
-        open={serverDetailOpen}
-        onOpenChange={setServerDetailOpen}
-        server={selectedServerDetails}
-        onDelete={handleDeleteServer}
-      />
+      <ServerDetails open={serverDetailOpen} onOpenChange={setServerDetailOpen} server={selectedServerDetails} onDelete={handleDeleteServer} />
 
-      <ConfigFileDialog 
-        open={configDialog.isOpen}
-        onOpenChange={setDialogOpen}
-        initialConfig={JSON.stringify(mockJsonConfig, null, 2)}
-        configPath={configDialog.configPath}
-        onSave={handleUpdateConfig}
-      />
+      <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} initialConfig={JSON.stringify(mockJsonConfig, null, 2)} configPath={configDialog.configPath} onSave={handleUpdateConfig} />
 
       {/* Add to Profile Dialog */}
       <Dialog open={isAddToProfileDialogOpen} onOpenChange={setIsAddToProfileDialogOpen}>
@@ -940,9 +680,7 @@ const NewLayout = () => {
                   <SelectValue placeholder="Select a profile" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profilesList.map(profile => (
-                    <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>
-                  ))}
+                  {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -970,12 +708,7 @@ const NewLayout = () => {
               <label htmlFor="name" className="text-right col-span-1">
                 Name
               </label>
-              <Input
-                id="name"
-                value={newProfileName}
-                onChange={(e) => setNewProfileName(e.target.value)}
-                className="col-span-3"
-              />
+              <Input id="name" value={newProfileName} onChange={e => setNewProfileName(e.target.value)} className="col-span-3" />
             </div>
           </div>
           <DialogFooter>
@@ -1003,9 +736,7 @@ const NewLayout = () => {
                   <SelectValue placeholder="Select a server" />
                 </SelectTrigger>
                 <SelectContent>
-                  {serversList.map(server => (
-                    <SelectItem key={server.id} value={server.id}>{server.name}</SelectItem>
-                  ))}
+                  {serversList.map(server => <SelectItem key={server.id} value={server.id}>{server.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1037,9 +768,7 @@ const NewLayout = () => {
                   <SelectValue placeholder="Select a profile" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profilesList.map(profile => (
-                    <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>
-                  ))}
+                  {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1054,8 +783,6 @@ const NewLayout = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 };
-
 export default NewLayout;
