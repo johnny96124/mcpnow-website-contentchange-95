@@ -25,7 +25,7 @@ const SAMPLE_EVENTS: ServerEvent[] = [
     jsonrpc: "2.0"
   },
   {
-    id: "2",
+    id: "2", 
     timestamp: "2024-04-18T12:59:47Z",
     type: "error",
     category: "Tools",
@@ -43,7 +43,7 @@ const SAMPLE_EVENTS: ServerEvent[] = [
   },
   {
     id: "3",
-    timestamp: "2024-04-18T12:59:47Z",
+    timestamp: "2024-04-18T12:59:47Z", 
     type: "response",
     category: "Tools",
     method: "tools/call",
@@ -52,22 +52,7 @@ const SAMPLE_EVENTS: ServerEvent[] = [
     },
     params: {
       name: "get_transcript",
-      arguments: { abc: true }
-    },
-    jsonrpc: "2.0"
-  },
-  {
-    id: "4",
-    timestamp: "2024-04-18T12:58:32Z",
-    type: "response",
-    category: "Tools",
-    method: "tools/call",
-    content: {
-      result: "Web search completed"
-    },
-    params: {
-      name: "search_web",
-      arguments: { latest: true }
+      arguments: { abc: true }  
     },
     jsonrpc: "2.0"
   }
@@ -85,7 +70,7 @@ export function ServerHistoryDialog({
       <DialogContent className="sm:max-w-[800px] p-0 gap-0">
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl">
-            Server History - {server.name}
+            Message History - {server.name}
           </DialogTitle>
         </DialogHeader>
         <div className="px-6 pb-6">
