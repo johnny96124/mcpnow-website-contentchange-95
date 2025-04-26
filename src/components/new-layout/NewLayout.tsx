@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,14 @@ import { AddHostDialog } from "@/components/new-layout/AddHostDialog";
 import { ServerListItem } from "@/components/new-layout/ServerListItem";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 import { type ServerInstance } from "@/data/mockData";
+import { useNavigate } from "react-router-dom";
 
 export default function NewLayout() {
   const [activeTab, setActiveTab] = useState<"servers" | "hosts">("servers");
   const [showAddServerDialog, setShowAddServerDialog] = useState(false);
   const [showAddHostDialog, setShowAddHostDialog] = useState(false);
   const [servers, setServers] = useState<ServerInstance[]>([]);
+  const navigate = useNavigate();
 
   const handleAddServer = (server: ServerInstance) => {
     setServers((prev) => [...prev, server]);
@@ -25,6 +26,10 @@ export default function NewLayout() {
         server.id === updatedServer.id ? updatedServer : server
       )
     );
+  };
+
+  const handleNavigateToDiscovery = () => {
+    navigate('/discovery');
   };
 
   return (
@@ -70,7 +75,6 @@ export default function NewLayout() {
         </TabsContent>
         
         <TabsContent value="hosts">
-          {/* Implement host listing and management here */}
           <div className="text-center py-8 text-muted-foreground">
             No hosts added yet. Click the "Add Host" button to get started.
           </div>
@@ -81,13 +85,13 @@ export default function NewLayout() {
         open={showAddServerDialog}
         onOpenChange={setShowAddServerDialog}
         onCreateServer={handleAddServer}
+        onNavigateToDiscovery={handleNavigateToDiscovery}
       />
       
       <AddHostDialog
         open={showAddHostDialog}
         onOpenChange={setShowAddHostDialog}
         onAddHost={(host) => {
-          // Handle adding host
           setShowAddHostDialog(false);
         }}
       />
