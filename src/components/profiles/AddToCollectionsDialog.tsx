@@ -16,93 +16,89 @@ import { Separator } from "@/components/ui/separator";
 import { Profile, ServerInstance } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 
-interface AddToProfilesDialogProps {
+interface AddToCollectionsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddToProfiles: (profileIds: string[]) => void;
-  onCreateProfile: () => void;
+  onAddToCollections: (collectionIds: string[]) => void;
+  onCreateCollection: () => void;
   server: ServerInstance | null;
-  profiles: Profile[];
-  serverProfiles: Profile[];
+  collections: Profile[];
+  serverCollections: Profile[];
 }
 
-export function AddToProfilesDialog({
+export function AddToCollectionsDialog({
   open,
   onOpenChange,
-  onAddToProfiles,
-  onCreateProfile,
+  onAddToCollections,
+  onCreateCollection,
   server,
-  profiles,
-  serverProfiles,
-}: AddToProfilesDialogProps) {
-  const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
+  collections: profiles,
+  serverCollections,
+}: AddToCollectionsDialogProps) {
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Reset selections when dialog opens
   useEffect(() => {
     if (open) {
-      // Pre-select profiles that already contain this server
-      setSelectedProfiles(serverProfiles.map(profile => profile.id));
+      setSelectedCollections(serverCollections.map(profile => profile.id));
     }
-  }, [open, serverProfiles]);
+  }, [open, serverCollections]);
 
-  const handleToggleProfile = (profileId: string) => {
-    setSelectedProfiles(prev => 
-      prev.includes(profileId)
-        ? prev.filter(id => id !== profileId)
-        : [...prev, profileId]
+  const handleToggleCollection = (collectionId: string) => {
+    setSelectedCollections(prev => 
+      prev.includes(collectionId)
+        ? prev.filter(id => id !== collectionId)
+        : [...prev, collectionId]
     );
   };
 
   const handleSave = () => {
-    if (selectedProfiles.length === 0) {
+    if (selectedCollections.length === 0) {
       toast({
-        title: "No profiles selected",
-        description: "Please select at least one profile or create a new one.",
+        title: "No collections selected",
+        description: "Please select at least one collection or create a new one.",
         variant: "destructive"
       });
       return;
     }
 
-    onAddToProfiles(selectedProfiles);
+    onAddToCollections(selectedCollections);
     onOpenChange(false);
   };
 
-  // Check if profile is already selected
-  const isProfileSelected = (profileId: string) => {
-    return selectedProfiles.includes(profileId);
+  const isCollectionSelected = (collectionId: string) => {
+    return selectedCollections.includes(collectionId);
   };
 
-  // Check if all available profiles are already selected
-  const allProfilesSelected = profiles.length > 0 && selectedProfiles.length === profiles.length;
+  const allCollectionsSelected = profiles.length > 0 && selectedCollections.length === profiles.length;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add to Profiles</DialogTitle>
+          <DialogTitle>Add to Collections</DialogTitle>
           <DialogDescription>
-            {server ? `Add ${server.name} to one or more profiles` : "Select profiles to add the server to"}
+            {server ? `Add ${server.name} to one or more collections` : "Select collections to add the server to"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="py-4 space-y-4">
           {profiles.length === 0 ? (
             <div className="text-center py-8 space-y-4 border rounded-md bg-muted/20 p-4">
-              <h3 className="font-medium text-lg">No profiles yet</h3>
+              <h3 className="font-medium text-lg">No collections yet</h3>
               <p className="text-muted-foreground">
-                Create your first profile to start organizing your servers.
+                Create your first collection to start organizing your servers.
               </p>
-              <Button onClick={onCreateProfile}>
+              <Button onClick={onCreateCollection}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create Profile
+                Create Collection
               </Button>
             </div>
           ) : (
             <>
               <div className="space-y-3">
                 <label className="text-sm font-medium leading-none">
-                  Select profiles ({selectedProfiles.length} of {profiles.length} selected)
+                  Select collections ({selectedCollections.length} of {profiles.length} selected)
                 </label>
                 <ScrollArea className="h-[200px] rounded-md border">
                   <div className="p-4 space-y-2">
@@ -110,18 +106,18 @@ export function AddToProfilesDialog({
                       <div key={profile.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
                         <div className="flex items-center space-x-2">
                           <Checkbox 
-                            checked={isProfileSelected(profile.id)}
-                            onCheckedChange={() => handleToggleProfile(profile.id)}
-                            id={`profile-${profile.id}`}
+                            checked={isCollectionSelected(profile.id)}
+                            onCheckedChange={() => handleToggleCollection(profile.id)}
+                            id={`collection-${profile.id}`}
                           />
                           <label 
-                            htmlFor={`profile-${profile.id}`}
+                            htmlFor={`collection-${profile.id}`}
                             className="font-medium cursor-pointer flex-1"
                           >
                             {profile.name}
                           </label>
                         </div>
-                        {serverProfiles.some(p => p.id === profile.id) && (
+                        {serverCollections.some(p => p.id === profile.id) && (
                           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                             Already added
                           </span>
@@ -136,16 +132,16 @@ export function AddToProfilesDialog({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setSelectedProfiles(profiles.map(p => p.id))}
-                  disabled={allProfilesSelected}
+                  onClick={() => setSelectedCollections(profiles.map(p => p.id))}
+                  disabled={allCollectionsSelected}
                 >
                   Select All
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => setSelectedProfiles([])}
-                  disabled={selectedProfiles.length === 0}
+                  onClick={() => setSelectedCollections([])}
+                  disabled={selectedCollections.length === 0}
                 >
                   Clear Selection
                 </Button>
@@ -156,9 +152,9 @@ export function AddToProfilesDialog({
           <Separator />
           
           <div className="pt-2">
-            <Button variant="outline" className="w-full" onClick={onCreateProfile}>
+            <Button variant="outline" className="w-full" onClick={onCreateCollection}>
               <Plus className="mr-2 h-4 w-4" />
-              Create New Profile
+              Create New Collection
             </Button>
           </div>
         </div>
@@ -171,12 +167,12 @@ export function AddToProfilesDialog({
           {profiles.length > 0 && (
             <Button 
               onClick={handleSave}
-              disabled={selectedProfiles.length === 0}
+              disabled={selectedCollections.length === 0}
             >
               <Check className="mr-2 h-4 w-4" />
-              {selectedProfiles.length === 1 
-                ? "Add to 1 Profile" 
-                : `Add to ${selectedProfiles.length} Profiles`}
+              {selectedCollections.length === 1 
+                ? "Add to 1 Collection" 
+                : `Add to ${selectedCollections.length} Collections`}
             </Button>
           )}
         </DialogFooter>

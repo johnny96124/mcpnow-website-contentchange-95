@@ -26,7 +26,7 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
 import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
-import { AddToProfilesDialog } from "@/components/profiles/AddToProfilesDialog";
+import { AddToCollectionsDialog } from "@/components/profiles/AddToCollectionsDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -163,7 +163,7 @@ const NewLayout = () => {
     });
   };
 
-  const handleAddToProfiles = (serverId: string) => {
+  const handleAddToCollections = (serverId: string) => {
     const server = serversList.find(s => s.id === serverId);
     if (server) {
       setSelectedServerForProfile(server);
@@ -205,18 +205,18 @@ const NewLayout = () => {
 
     if (profilesToAdd.length > 0 && profilesToRemove.length === 0) {
       toast({
-        title: "Added to Profiles",
-        description: `${selectedServerForProfile.name} has been added to ${profilesToAdd.length} ${profilesToAdd.length === 1 ? 'profile' : 'profiles'}`
+        title: "Added to Collections",
+        description: `${selectedServerForProfile.name} has been added to ${profilesToAdd.length} ${profilesToAdd.length === 1 ? 'collection' : 'collections'}`
       });
     } else if (profilesToRemove.length > 0 && profilesToAdd.length === 0) {
       toast({
-        title: "Removed from Profiles",
-        description: `${selectedServerForProfile.name} has been removed from ${profilesToRemove.length} ${profilesToRemove.length === 1 ? 'profile' : 'profiles'}`
+        title: "Removed from Collections",
+        description: `${selectedServerForProfile.name} has been removed from ${profilesToRemove.length} ${profilesToRemove.length === 1 ? 'collection' : 'collections'}`
       });
     } else {
       toast({
-        title: "Profiles Updated",
-        description: `${selectedServerForProfile.name} profile associations have been updated`
+        title: "Collections Updated",
+        description: `${selectedServerForProfile.name} collection associations have been updated`
       });
     }
   };
@@ -606,9 +606,9 @@ const NewLayout = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
-                            <Button variant="outline" size="sm" onClick={() => handleAddToProfiles(server.id)}>
+                            <Button variant="outline" size="sm" onClick={() => handleAddToCollections(server.id)}>
                               <Plus className="h-3.5 w-3.5 mr-1.5" />
-                              Profiles
+                              Collections
                             </Button>
                             
                             <Button 
@@ -932,14 +932,14 @@ const NewLayout = () => {
         onConfirmDelete={confirmDeleteProfile}
       />
 
-      <AddToProfilesDialog
+      <AddToCollectionsDialog
         open={addToProfilesDialogOpen}
         onOpenChange={setAddToProfilesDialogOpen}
-        onAddToProfiles={confirmAddToProfiles}
-        onCreateProfile={() => setCreateProfileDialogOpen(true)}
+        onAddToCollections={confirmAddToProfiles}
+        onCreateCollection={() => setCreateProfileDialogOpen(true)}
         server={selectedServerForProfile}
-        profiles={profilesList}
-        serverProfiles={selectedServerForProfile ? getProfilesForServer(selectedServerForProfile.id) : []}
+        collections={profilesList}
+        serverCollections={selectedServerForProfile ? getProfilesForServer(selectedServerForProfile.id) : []}
       />
 
       <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
