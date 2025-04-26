@@ -63,15 +63,6 @@ export function AddToCollectionsDialog({
   };
 
   const handleSave = () => {
-    if (selectedCollections.length === 0) {
-      toast({
-        title: "No collections selected",
-        description: "Please select at least one collection or create a new one.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     onAddToCollections(selectedCollections);
     onOpenChange(false);
   };
