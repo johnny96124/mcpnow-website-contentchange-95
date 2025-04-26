@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ServerDefinition } from "@/data/mockData";
+import { ServerDefinition, serverDefinitions } from "@/data/mockData";
 import { Separator } from "@/components/ui/separator";
 
 interface AddServerToHostDialogProps {
