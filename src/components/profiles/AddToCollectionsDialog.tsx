@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle } from "lucide-react";
 import { 
@@ -77,6 +78,8 @@ export function AddToCollectionsDialog({
     return selectedCollections.includes(collectionId);
   };
 
+  const allCollectionsSelected = profiles.length > 0 && selectedCollections.length === profiles.length;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -138,7 +141,7 @@ export function AddToCollectionsDialog({
                   variant="outline" 
                   size="sm" 
                   onClick={() => setSelectedCollections(profiles.map(p => p.id))}
-                  disabled={profiles.length === selectedCollections.length}
+                  disabled={allCollectionsSelected}
                 >
                   Select All
                 </Button>
