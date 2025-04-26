@@ -37,7 +37,198 @@ const mockJsonConfig = {
 };
 
 const NewLayout = () => {
-  // ... keep existing code
+  const [isAddServerDialogOpen, setIsAddServerDialogOpen] = useState(false);
+  const [isAddHostDialogOpen, setIsAddHostDialogOpen] = useState(false);
+  const [selectedServer, setSelectedServer] = useState<ServerInstance | null>(null);
+  const [isServerDetailsOpen, setIsServerDetailsOpen] = useState(false);
+  const [isServerDebugDialogOpen, setIsServerDebugDialogOpen] = useState(false);
+  const [isServerHistoryDialogOpen, setIsServerHistoryDialogOpen] = useState(false);
+  const [isDeleteProfileDialogOpen, setIsDeleteProfileDialogOpen] = useState(false);
+  const [selectedProfileToDelete, setSelectedProfileToDelete] = useState<Profile | null>(null);
+  const { toast } = useToast();
+  const { isOpen: isConfigDialogOpen, openConfigDialog, closeConfigDialog, configContent, setConfigContent } = useConfigDialog();
+  const { profilesWithHosts, addProfileToHost, removeProfileFromHost } = useHostProfiles();
+
+  const [servers, setServers] = useState(serverInstances);
+  const [hostsList, setHosts] = useState(hosts);
+  const [profilesList, setProfiles] = useState(profiles);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("servers");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredServers = servers.filter(server =>
+    server.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredHosts = hostsList.filter(host =>
+    host.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredProfiles = profilesList.filter(profile =>
+    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleAddServer = (server: ServerInstance) => {
+    setServers([...servers, server]);
+    toast({
+      title: "Server Added",
+      description: `${server.name} has been added successfully.`,
+    });
+    setIsAddServerDialogOpen(false);
+  };
+
+  const handleAddHost = (host: Host) => {
+    setHosts([...hostsList, host]);
+    toast({
+      title: "Host Added",
+      description: `${host.name} has been added successfully.`,
+    });
+    setIsAddHostDialogOpen(false);
+  };
+
+  const handleEditServer = (server: ServerInstance) => {
+    setSelectedServer(server);
+    setIsServerDetailsOpen(true);
+  };
+
+  const handleDeleteServer = (serverToDelete: ServerInstance) => {
+    setServers(servers.filter(server => server.id !== serverToDelete.id));
+    toast({
+      title: "Server Deleted",
+      description: `${serverToDelete.name} has been deleted successfully.`,
+    });
+  };
+
+  const handleOpenServerDetails = (server: ServerInstance) => {
+    setSelectedServer(server);
+    setIsServerDetailsOpen(true);
+  };
+
+  const handleCloseServerDetails = () => {
+    setIsServerDetailsOpen(false);
+    setSelectedServer(null);
+  };
+
+  const handleOpenServerDebugDialog = (server: ServerInstance) => {
+    setSelectedServer(server);
+    setIsServerDebugDialogOpen(true);
+  };
+
+  const handleCloseServerDebugDialog = () => {
+    setIsServerDebugDialogOpen(false);
+    setSelectedServer(null);
+  };
+
+  const handleOpenServerHistoryDialog = (server: ServerInstance) => {
+    setSelectedServer(server);
+    setIsServerHistoryDialogOpen(true);
+  };
+
+  const handleCloseServerHistoryDialog = () => {
+    setIsServerHistoryDialogOpen(false);
+    setSelectedServer(null);
+  };
+
+  const handleConfigEdit = (config: string) => {
+    setConfigContent(config);
+    openConfigDialog();
+  };
+
+  const handleProfileAddToHost = (hostId: string, profileId: string) => {
+    addProfileToHost(hostId, profileId);
+    setHosts(prevHosts =>
+      prevHosts.map(host =>
+        host.id === hostId ? { ...host, profiles: [...(host.profiles || []), profileId] } : host
+      )
+    );
+  };
+
+  const handleProfileRemoveFromHost = (hostId: string, profileId: string) => {
+    removeProfileFromHost(hostId, profileId);
+    setHosts(prevHosts =>
+      prevHosts.map(host => ({
+        ...host,
+        profiles: host.profiles ? host.profiles.filter(id => id !== profileId) : [],
+      }))
+    );
+  };
+
+  const handleOpenDeleteProfileDialog = (profile: Profile) => {
+    setSelectedProfileToDelete(profile);
+    setIsDeleteProfileDialogOpen(true);
+  };
+
+  const handleCloseDeleteProfileDialog = () => {
+    setIsDeleteProfileDialogOpen(false);
+    setSelectedProfileToDelete(null);
+  };
+
+  const handleDeleteProfile = (profileToDelete: Profile) => {
+    setProfiles(profiles.filter(profile => profile.id !== profileToDelete.id));
+    setHosts(prevHosts =>
+      prevHosts.map(host => ({
+        ...host,
+        profiles: host.profiles ? host.profiles.filter(id => id !== profileToDelete.id) : [],
+      }))
+    );
+    toast({
+      title: "Profile Deleted",
+      description: `${profileToDelete.name} has been deleted successfully.`,
+    });
+    setIsDeleteProfileDialogOpen(false);
+    setSelectedProfileToDelete(null);
+  };
+
+  // Ensure we return JSX 
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">MCP Servers</h1>
+          <p className="text-muted-foreground">
+            Manage your Model Context Protocol server instances.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => {}}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => setIsAddServerDialogOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            Add Server
+          </Button>
+        </div>
+      </div>
+
+      <div>
+        {/* Return some basic placeholder content if the full component isn't implemented yet */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Server Management</CardTitle>
+            <CardDescription>
+              View and manage your MCP server instances
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Server management content will be displayed here.</p>
+          </CardContent>
+        </Card>
+      </div>
+      <AddServerDialog open={isAddServerDialogOpen} onOpenChange={setIsAddServerDialogOpen} onAddServer={handleAddServer} />
+    </div>
+  );
 };
 
 export default NewLayout;
