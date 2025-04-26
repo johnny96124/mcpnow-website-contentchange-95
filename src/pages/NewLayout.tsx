@@ -456,7 +456,7 @@ const NewLayout = () => {
         
         <TabsContent value="servers" className="mt-0 space-y-6">
           <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
-            <div className="flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1.5">
               <Button 
                 variant={selectedProfileId === "all" ? "default" : "outline"} 
                 size="sm" 
@@ -467,18 +467,18 @@ const NewLayout = () => {
               </Button>
               
               {profilesList.map(profile => (
-                <div key={profile.id} className="relative">
+                <div key={profile.id} className="relative flex items-center">
                   <Button 
                     variant={selectedProfileId === profile.id ? "default" : "outline"} 
                     size="sm" 
-                    className="whitespace-nowrap" 
+                    className="whitespace-nowrap pr-6" 
                     onClick={() => setSelectedProfileId(profile.id)}
                   >
                     {profile.name}
                   </Button>
                   {selectedProfileId === profile.id && (
                     <div 
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-10"
+                      className="absolute -top-2 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-20"
                       onClick={(e) => handleDeleteProfile(profile, e)}
                     >
                       <X className="h-3 w-3 text-white" />
