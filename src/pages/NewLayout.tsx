@@ -368,6 +368,13 @@ const NewLayout = () => {
 
   const selectedHost = hostsList.find(h => h.id === selectedHostId);
 
+  const formatStatusLabel = (status: any): string => {
+    if (typeof status !== 'string') {
+      return 'Unknown';
+    }
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
   return <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
         <div className="flex items-center justify-between mb-6">
@@ -638,7 +645,10 @@ const NewLayout = () => {
                                     {server.name}
                                   </TableCell>
                                   <TableCell>
-                                    <StatusIndicator status={status === "running" ? "active" : status === "error" ? "error" : status === "connecting" ? "warning" : "inactive"} label={status.charAt(0).toUpperCase() + status.slice(1)} />
+                                    <StatusIndicator 
+                                      status={status === "running" ? "active" : status === "error" ? "error" : status === "connecting" ? "warning" : "inactive"} 
+                                      label={formatStatusLabel(status)} 
+                                    />
                                   </TableCell>
                                   <TableCell>
                                     <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
