@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
+import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -420,7 +420,7 @@ const NewLayout = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div>
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -501,7 +501,7 @@ const NewLayout = () => {
                       onClick={(e) => handleDeleteProfile(profile, e)}
                       style={{ transform: "translate(0, 0)" }}
                     >
-                      <Trash2 className="h-3 w-3 text-white" />
+                      <Trash2 className="h-3.5 w-3.5 text-white" />
                     </div>
                   )}
                 </div>
@@ -579,9 +579,9 @@ const NewLayout = () => {
                                 variant="outline" 
                                 size="sm" 
                                 onClick={() => handleRemoveFromProfile(server.id)}
-                                className="text-destructive hover:text-destructive"
+                                className="hover:bg-muted/50"
                               >
-                                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                                <Minus className="h-3.5 w-3.5 mr-1.5 text-black" />
                                 Remove
                               </Button>
                             )}
