@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -467,19 +468,20 @@ const NewLayout = () => {
               </Button>
               
               {profilesList.map(profile => (
-                <div key={profile.id} className="relative flex items-center">
+                <div key={profile.id} className="relative inline-block">
                   <Button 
                     variant={selectedProfileId === profile.id ? "default" : "outline"} 
                     size="sm" 
-                    className="whitespace-nowrap pr-6" 
+                    className="whitespace-nowrap pr-8" 
                     onClick={() => setSelectedProfileId(profile.id)}
                   >
                     {profile.name}
                   </Button>
                   {selectedProfileId === profile.id && (
                     <div 
-                      className="absolute -top-2 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-20"
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-50"
                       onClick={(e) => handleDeleteProfile(profile, e)}
+                      style={{ transform: "translate(0, 0)" }}
                     >
                       <X className="h-3 w-3 text-white" />
                     </div>
