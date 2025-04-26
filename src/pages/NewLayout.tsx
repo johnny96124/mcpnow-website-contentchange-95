@@ -482,7 +482,7 @@ const NewLayout = () => {
                       onClick={(e) => handleDeleteProfile(profile, e)}
                       style={{ transform: "translate(0, 0)" }}
                     >
-                      <X className="h-3 w-3 text-white" />
+                      <Trash2 className="h-3 w-3 text-white" />
                     </div>
                   )}
                 </div>
