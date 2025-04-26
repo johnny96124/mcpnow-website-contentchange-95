@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot } from "lucide-react";
+import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -57,7 +57,7 @@ const NewLayout = () => {
   const [isDebuggingServer, setIsDebuggingServer] = useState(false);
   const [selectedDebugServer, setSelectedDebugServer] = useState<ServerInstance | null>(null);
   const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
-  const [serverInstanceStatuses, setServerInstanceStatuses] = useState<Record<string, 'running' | 'stopped' | 'error' | 'connecting'>>({});
+  const [serverInstanceStatuses, setServerInstanceStatuses] = useState<Record<string, any>>({});
   const [addServerToHostOpen, setAddServerToHostOpen] = useState(false);
   const [selectedHostForAddServer, setSelectedHostForAddServer] = useState<Host | null>(null);
   const [importByProfileOpen, setImportByProfileOpen] = useState(false);
@@ -301,8 +301,22 @@ const NewLayout = () => {
   };
 
   const handleOpenDebugTools = (server: ServerInstance) => {
-    setSelectedDebugServer(server);
-    setIsDebugDialogOpen(true);
+    // Set loading state for this server
+    setServerInstanceStatuses(prev => ({
+      ...prev,
+      [server.id]: { ...prev[server.id], isLoading: true }
+    }));
+    
+    // Simulate API check
+    setTimeout(() => {
+      setServerInstanceStatuses(prev => ({
+        ...prev,
+        [server.id]: { ...prev[server.id], isLoading: false }
+      }));
+      
+      setSelectedDebugServer(server);
+      setIsDebugDialogOpen(true);
+    }, 1000);
   };
 
   const handleOpenMessageHistory = (server: ServerInstance) => {
@@ -468,8 +482,18 @@ const NewLayout = () => {
                               Profile
                             </Button>
                             
-                            <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:border-purple-600" onClick={() => handleOpenDebugTools(server)}>
-                              <Wrench className="h-3.5 w-3.5 mr-1.5" />
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-purple-600 hover:text-purple-700 hover:border-purple-600" 
+                              onClick={() => handleOpenDebugTools(server)}
+                              disabled={serverInstanceStatuses[server.id]?.isLoading}
+                            >
+                              {serverInstanceStatuses[server.id]?.isLoading ? (
+                                <Loader className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                              ) : (
+                                <Wrench className="h-3.5 w-3.5 mr-1.5" />
+                              )}
                               Debug
                             </Button>
                             
@@ -695,106 +719,4 @@ const NewLayout = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateProfileDialogOpen(true)}>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Create New Profile
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Profile</DialogTitle>
-            <DialogDescription>
-              Create a new profile to organize your servers.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="name" className="text-right col-span-1">
-                Name
-              </label>
-              <Input id="name" value={newProfileName} onChange={e => setNewProfileName(e.target.value)} className="col-span-3" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateProfileDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateNewProfile}>Create Profile</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={addServerToHostOpen} onOpenChange={setAddServerToHostOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add Server to Host</DialogTitle>
-            <DialogDescription>
-              Select a server to add to {selectedHostForAddServer?.name}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Select onValueChange={confirmAddServerToHost}>
-                <SelectTrigger className="w-full col-span-4">
-                  <SelectValue placeholder="Select a server" />
-                </SelectTrigger>
-                <SelectContent>
-                  {serversList.map(server => <SelectItem key={server.id} value={server.id}>{server.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddServerToHostOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => confirmAddServerToHost(serversList[0]?.id)}>
-              Add Server
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={importByProfileOpen} onOpenChange={setImportByProfileOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Import Profile</DialogTitle>
-            <DialogDescription>
-              Select a profile to import to {selectedHostForAddServer?.name}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Select onValueChange={confirmImportProfileToHost}>
-                <SelectTrigger className="w-full col-span-4">
-                  <SelectValue placeholder="Select a profile" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setImportByProfileOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => confirmImportProfileToHost(profilesList[0]?.id)}>
-              Import Profile
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>;
-};
-
-export default NewLayout;
+                </
