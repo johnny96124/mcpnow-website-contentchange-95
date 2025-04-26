@@ -14,10 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Check, Info, Settings2, Trash2, X } from "lucide-react";
+import { Check, Info, RefreshCw, Trash2, X, Plus, ExternalLink } from "lucide-react";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServerDetailsProps {
   open: boolean;
@@ -34,6 +34,15 @@ export function ServerDetails({
 }: ServerDetailsProps) {
   const [activeTab, setActiveTab] = useState("general");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isRefreshingTools, setIsRefreshingTools] = useState(false);
+  const { toast } = useToast();
+  
+  // Local state for environment variables
+  const [envVars, setEnvVars] = useState<Record<string, string>>(
+    server?.environment || {}
+  );
+  const [newEnvKey, setNewEnvKey] = useState("");
+  const [newEnvValue, setNewEnvValue] = useState("");
   
   // Safely find the definition with null checking for server
   const definition = server && serverDefinitions.find(def => def.id === server.definitionId);
@@ -46,6 +55,50 @@ export function ServerDetails({
     } else {
       setConfirmDelete(true);
     }
+  };
+
+  const handleAddEnvVar = () => {
+    if (!newEnvKey.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Key cannot be empty"
+      });
+      return;
+    }
+
+    setEnvVars(prev => ({
+      ...prev,
+      [newEnvKey]: newEnvValue
+    }));
+    setNewEnvKey("");
+    setNewEnvValue("");
+  };
+
+  const handleDeleteEnvVar = (key: string) => {
+    const newEnvVars = { ...envVars };
+    delete newEnvVars[key];
+    setEnvVars(newEnvVars);
+  };
+
+  const handleRefreshTools = () => {
+    setIsRefreshingTools(true);
+    // Simulate tool refresh
+    setTimeout(() => {
+      setIsRefreshingTools(false);
+      toast({
+        title: "Tools Refreshed",
+        description: "Available tools list has been updated"
+      });
+    }, 1000);
+  };
+
+  const handleViewResourceDetails = () => {
+    // TODO: Implement resource details view
+    toast({
+      title: "View Resource Details",
+      description: "Resource details view will be implemented soon"
+    });
   };
   
   // If server is null, don't render the dialog content
@@ -82,6 +135,7 @@ export function ServerDetails({
           <DialogTitle className="flex items-center gap-2">
             <span>Server Details</span>
             <Badge variant="outline">{definition?.name || "Unknown"}</Badge>
+            <EndpointLabel type={definition?.type || "STDIO"} />
           </DialogTitle>
           <DialogDescription>
             View and manage server instance settings
@@ -96,7 +150,7 @@ export function ServerDetails({
         >
           <TabsList className="grid grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="environment">Environment</TabsTrigger>
+            <TabsTrigger value="environment">Configuration</TabsTrigger>
             <TabsTrigger value="tools">Tools</TabsTrigger>
           </TabsList>
           
@@ -125,14 +179,28 @@ export function ServerDetails({
             </div>
             
             <div className="space-y-2">
-              <Label>Server Definition</Label>
+              <div className="flex items-center justify-between">
+                <Label>Server Resource</Label>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-blue-600 hover:text-blue-700"
+                  onClick={handleViewResourceDetails}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+              </div>
               <div className="border rounded-md p-4 bg-muted/30">
                 <div className="flex items-start gap-4">
                   {definition?.icon && (
                     <div className="text-2xl">{definition.icon}</div>
                   )}
                   <div className="space-y-1 flex-1">
-                    <h4 className="font-medium">{definition?.name || "Unknown"}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{definition?.name || "Unknown"}</h4>
+                      <EndpointLabel type={definition?.type || "STDIO"} />
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       {definition?.description || "No description available"}
                     </p>
@@ -149,32 +217,38 @@ export function ServerDetails({
                 </div>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Enabled</Label>
-                <Switch checked={server.enabled} />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                When enabled, this server will be active and respond to requests
-              </p>
-            </div>
           </TabsContent>
           
           <TabsContent value="environment" className="pt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">Environment Variables</h4>
-                <Button variant="outline" size="sm">
-                  Add Variable
-                </Button>
               </div>
               
-              {server.environment && Object.keys(server.environment).length > 0 ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-[1fr,auto,1fr] gap-2 items-center">
+                  <Input 
+                    placeholder="Enter key"
+                    value={newEnvKey}
+                    onChange={(e) => setNewEnvKey(e.target.value)}
+                  />
+                  <span className="text-muted-foreground">=</span>
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Enter value"
+                      value={newEnvValue}
+                      onChange={(e) => setNewEnvValue(e.target.value)}
+                    />
+                    <Button onClick={handleAddEnvVar} size="icon">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
                 <ScrollArea className="h-[250px] border rounded-md p-2">
                   <div className="space-y-2">
-                    {Object.entries(server.environment).map(([key, value]) => (
-                      <div key={key} className="grid grid-cols-[1fr,auto,1fr] items-center gap-2">
+                    {Object.entries(envVars).map(([key, value]) => (
+                      <div key={key} className="grid grid-cols-[1fr,auto,1fr,auto] items-center gap-2">
                         <div className="font-mono text-sm bg-muted p-2 rounded-md">
                           {key}
                         </div>
@@ -182,24 +256,42 @@ export function ServerDetails({
                         <div className="font-mono text-sm bg-muted p-2 rounded-md truncate">
                           {value}
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteEnvVar(key)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))}
+                    {Object.keys(envVars).length === 0 && (
+                      <div className="text-center text-muted-foreground p-4">
+                        <Info className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                        <p>No environment variables set</p>
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
-              ) : (
-                <div className="border-2 border-dashed rounded-md h-[200px] flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <Info className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                    <p>No environment variables set</p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           </TabsContent>
           
           <TabsContent value="tools" className="pt-4">
             <div className="space-y-4">
-              <h4 className="font-medium">Available Tools</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Available Tools</h4>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshTools}
+                  disabled={isRefreshingTools}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingTools ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
               
               {definition?.tools && definition.tools.length > 0 ? (
                 <ScrollArea className="h-[250px] border rounded-md">
