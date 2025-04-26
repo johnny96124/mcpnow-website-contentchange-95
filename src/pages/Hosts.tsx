@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog, List, Database } from "lucide-react";
+import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -10,11 +10,10 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { ConnectionStatus, Host, profiles, ServerDefinition, serverDefinitions } from "@/data/mockData";
+import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
-import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -35,21 +34,6 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
-  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
-  const [selectedHost, setSelectedHost] = useState<Host | null>(null);
-
-  const mockCollections = [
-    {
-      id: "collection-1",
-      name: "Core Services",
-      servers: serverDefinitions.slice(0, 3)
-    },
-    {
-      id: "collection-2",
-      name: "Data Services",
-      servers: serverDefinitions.slice(3, 4)
-    }
-  ];
 
   const {
     hostProfiles,
@@ -192,27 +176,13 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
-  const openAddServerDialog = (host: Host) => {
-    setSelectedHost(host);
-    setAddServerDialogOpen(true);
-  };
-
-  const handleAddServersToHost = (servers: ServerDefinition[]) => {
-    if (selectedHost) {
-      toast({
-        title: "Servers Added",
-        description: `${servers.length} servers have been added to ${selectedHost.name}`
-      });
-    }
-  };
-
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
           <p className="text-muted-foreground">
-            Manage host connections and server configurations
+            Manage host connections and profile associations
           </p>
         </div>
         <div className="flex gap-2">
@@ -246,7 +216,6 @@ const Hosts = () => {
               onCreateConfig={handleCreateConfigDialog}
               onFixConfig={handleUpdateConfigDialog}
               showHostRefreshHint={showHostRefreshHint}
-              onAddServer={() => openAddServerDialog(host)}
             />
           ))}
           
@@ -315,34 +284,9 @@ const Hosts = () => {
         searchQuery && <NoSearchResults query={searchQuery} onClear={clearSearch} />
       )}
       
-      <ConfigFileDialog 
-        open={configDialog.isOpen} 
-        onOpenChange={setDialogOpen} 
-        configPath={configDialog.configPath} 
-        initialConfig={configDialog.configContent} 
-        onSave={handleUpdateConfig} 
-        profileEndpoint={configDialog.profileEndpoint} 
-        needsUpdate={configDialog.needsUpdate} 
-        allowPathEdit={configDialog.allowPathEdit} 
-        isViewOnly={configDialog.isViewOnly} 
-        isFixMode={configDialog.isFixMode} 
-        isUpdateMode={configDialog.isUpdateMode} 
-        isCreateMode={configDialog.isCreateMode} 
-      />
+      <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
-      <AddHostDialog 
-        open={addHostDialogOpen} 
-        onOpenChange={setAddHostDialogOpen} 
-        onAddHost={handleAddHost} 
-      />
-
-      <AddServerToHostDialog
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onAddServers={handleAddServersToHost}
-        availableServers={serverDefinitions}
-        collections={mockCollections}
-      />
+      <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
     </div>
   );
 };

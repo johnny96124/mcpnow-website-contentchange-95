@@ -68,7 +68,6 @@ export interface Host {
   configPath?: string;
   icon?: string;
   needsUpdate?: boolean;
-  servers?: { id: string; name: string }[];
 }
 
 export const serverDefinitions: ServerDefinition[] = [
