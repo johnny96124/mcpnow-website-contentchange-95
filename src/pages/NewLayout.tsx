@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Plus, 
@@ -901,19 +900,20 @@ const NewLayout = () => {
       <AddServerDialog 
         open={addServerDialogOpen}
         onOpenChange={setAddServerDialogOpen}
-        onCreateServer={handleAddServerSuccess}
+        onAddServer={handleAddServerSuccess}
       />
 
       <AddHostDialog
         open={addHostDialogOpen}
         onOpenChange={setAddHostDialogOpen}
-        onSuccess={handleAddHostSuccess}
+        onAddHost={handleAddHostSuccess}
       />
 
       <ServerDetails
         open={serverDetailOpen}
         onOpenChange={setServerDetailOpen}
         server={selectedServerDetails}
+        onDelete={handleDeleteServer}
       />
 
       <ConfigFileDialog 
@@ -921,7 +921,6 @@ const NewLayout = () => {
         onOpenChange={setDialogOpen}
         initialConfig={JSON.stringify(mockJsonConfig, null, 2)}
         configPath={configDialog.configPath}
-        title="Host Configuration"
         onSave={handleUpdateConfig}
       />
 
