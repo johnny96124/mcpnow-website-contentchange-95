@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -163,6 +162,10 @@ const NewLayout = () => {
   const handleAddToProfile = (serverId: string) => {
     const server = serversList.find(s => s.id === serverId);
     if (server) {
+      const existingProfileIds = profilesList
+        .filter(p => p.instances.includes(server.id))
+        .map(p => p.id);
+      
       setSelectedServerForProfile(server);
       setIsAddToProfileDialogOpen(true);
     }
@@ -401,6 +404,29 @@ const NewLayout = () => {
     setProfileToDelete(null);
   };
 
+  const handleRemoveFromProfile = (serverId: string, profileId: string) => {
+    // Get profile and server info for better messaging
+    const profile = profilesList.find(p => p.id === profileId);
+    const server = serversList.find(s => s.id === serverId);
+    
+    if (profile && server) {
+      setProfilesList(prev => prev.map(p => {
+        if (p.id === profileId) {
+          return {
+            ...p,
+            instances: p.instances.filter(id => id !== serverId)
+          };
+        }
+        return p;
+      }));
+      
+      toast({
+        title: "Removed from Profile",
+        description: `${server.name} has been removed from ${profile.name}`
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
@@ -456,52 +482,64 @@ const NewLayout = () => {
         </div>
         
         <TabsContent value="servers" className="mt-0 space-y-6">
-          <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1.5">
-              <Button 
-                variant={selectedProfileId === "all" ? "default" : "outline"} 
-                size="sm" 
-                className="whitespace-nowrap relative" 
-                onClick={() => setSelectedProfileId("all")}
-              >
-                All Servers
-              </Button>
-              
-              {profilesList.map(profile => (
-                <div key={profile.id} className="relative inline-block">
+          <div className="bg-muted/20 p-3 rounded-lg">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <Button 
-                    variant={selectedProfileId === profile.id ? "default" : "outline"} 
+                    variant={selectedProfileId === "all" ? "default" : "outline"} 
                     size="sm" 
-                    className="whitespace-nowrap pr-8" 
-                    onClick={() => setSelectedProfileId(profile.id)}
+                    className="whitespace-nowrap relative" 
+                    onClick={() => setSelectedProfileId("all")}
                   >
-                    {profile.name}
+                    All Servers
                   </Button>
-                  {selectedProfileId === profile.id && (
-                    <div 
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-50"
-                      onClick={(e) => handleDeleteProfile(profile, e)}
-                      style={{ transform: "translate(0, 0)" }}
-                    >
-                      <X className="h-3 w-3 text-white" />
-                    </div>
-                  )}
+                  <span className="text-muted-foreground mx-1">|</span>
+                  <p className="text-sm font-medium mr-2">Filter by Profile:</p>
                 </div>
-              ))}
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setSelectedServerForProfile(null);
+                    setCreateProfileDialogOpen(true);
+                  }} 
+                  className="whitespace-nowrap"
+                >
+                  <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                  New Profile
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                {profilesList.map(profile => (
+                  <div key={profile.id} className="relative inline-block">
+                    <Button 
+                      variant={selectedProfileId === profile.id ? "default" : "outline"} 
+                      size="sm" 
+                      className={`whitespace-nowrap ${selectedProfileId === profile.id ? 'pr-8' : ''} flex items-center gap-1.5`}
+                      onClick={() => setSelectedProfileId(profile.id)}
+                    >
+                      <Layers className="h-3.5 w-3.5 mr-1" />
+                      {profile.name}
+                      <span className="bg-muted/70 text-foreground/80 px-1.5 py-0.5 rounded-full text-xs">
+                        {profile.instances.length}
+                      </span>
+                    </Button>
+                    {selectedProfileId === profile.id && (
+                      <div 
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-50"
+                        onClick={(e) => handleDeleteProfile(profile, e)}
+                        style={{ transform: "translate(0, 0)" }}
+                      >
+                        <X className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => {
-                setSelectedServerForProfile(null);
-                setCreateProfileDialogOpen(true);
-              }} 
-              className="whitespace-nowrap"
-            >
-              <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
-              New Profile
-            </Button>
           </div>
           
           {filteredServers.length > 0 ? <div className="rounded-md border overflow-hidden">
@@ -509,7 +547,6 @@ const NewLayout = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[220px]">Name</TableHead>
-                    
                     <TableHead>Type</TableHead>
                     <TableHead>Profiles</TableHead>
                     <TableHead>Connection</TableHead>
@@ -518,9 +555,16 @@ const NewLayout = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredServers.map(server => {
-                const serverProfiles = getProfilesForServer(server.id);
-                const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
-                return <TableRow key={server.id}>
+                    const serverProfiles = getProfilesForServer(server.id);
+                    const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
+                    const isInCurrentProfile = selectedProfileId !== "all" && 
+                      serverProfiles.some(p => p.id === selectedProfileId);
+                    
+                    return (
+                      <TableRow 
+                        key={server.id} 
+                        className={isInCurrentProfile ? "bg-primary/5 border-l-4 border-l-primary" : ""}
+                      >
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <span className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2" onClick={() => handleOpenServerDetails(server)}>
@@ -534,11 +578,29 @@ const NewLayout = () => {
                           <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
                         </TableCell>
                         <TableCell>
-                          {serverProfiles.length > 0 ? <div className="flex flex-wrap gap-1 max-w-[200px]">
-                              {serverProfiles.map((profile, index) => <Badge key={index} variant="secondary" className="whitespace-nowrap">
-                                  {profile.name}
-                                </Badge>)}
-                            </div> : <span className="text-muted-foreground text-sm">No profiles</span>}
+                          {serverProfiles.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {serverProfiles.map((profile, index) => (
+                                <div key={index} className="relative group">
+                                  <Badge 
+                                    variant="secondary" 
+                                    className="whitespace-nowrap pr-7 group-hover:pr-7 transition-all"
+                                  >
+                                    <Layers className="h-3 w-3 mr-1" />
+                                    {profile.name}
+                                    <button 
+                                      className="absolute right-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => handleRemoveFromProfile(server.id, profile.id)}
+                                    >
+                                      <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                                    </button>
+                                  </Badge>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">No profiles</span>
+                          )}
                         </TableCell>
                         <TableCell className="max-w-[160px] truncate">
                           <span className="text-sm font-mono">{server.connectionDetails}</span>
@@ -575,8 +637,9 @@ const NewLayout = () => {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>;
-              })}
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
@@ -815,17 +878,52 @@ const NewLayout = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {selectedServerForProfile && (
+              <div className="mb-2">
+                <p className="text-sm font-medium mb-1">Server</p>
+                <div className="flex items-center gap-2 p-2 border rounded-md bg-muted/30">
+                  <Server className="h-4 w-4 text-muted-foreground" />
+                  <span>{selectedServerForProfile.name}</span>
+                </div>
+                
+                {(() => {
+                  const existingProfiles = profilesList.filter(profile => 
+                    profile.instances.includes(selectedServerForProfile.id)
+                  );
+                  
+                  if (existingProfiles.length > 0) {
+                    return (
+                      <div className="mt-3">
+                        <p className="text-sm font-medium mb-1">Already in these profiles:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {existingProfiles.map((profile) => (
+                            <Badge key={profile.id} variant="outline">
+                              {profile.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            )}
+            
             <div className="grid grid-cols-4 items-center gap-4">
               <Select onValueChange={confirmAddToProfile}>
                 <SelectTrigger className="w-full col-span-4">
                   <SelectValue placeholder="Select a profile" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profilesList.map(profile => (
-                    <SelectItem key={profile.id} value={profile.id}>
-                      {profile.name}
-                    </SelectItem>
-                  ))}
+                  {profilesList
+                    .filter(profile => !selectedServerForProfile || 
+                      !profile.instances.includes(selectedServerForProfile.id))
+                    .map(profile => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
