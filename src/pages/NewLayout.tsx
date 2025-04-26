@@ -844,27 +844,36 @@ const NewLayout = () => {
       </Dialog>
 
       <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Profile</DialogTitle>
             <DialogDescription>
-              Enter a name for the new profile.
+              Create a new profile to group and manage your servers together.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="profile-name" className="text-right col-span-1">
-                Name
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profile-name" className="text-sm font-medium">
+                Profile Name
               </label>
               <Input
                 id="profile-name"
-                className="col-span-3"
+                placeholder="Enter profile name (e.g. Development Servers)"
                 value={newProfileName}
                 onChange={(e) => setNewProfileName(e.target.value)}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setNewProfileName("");
+                setCreateProfileDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
             <Button onClick={handleCreateNewProfile}>
               Create Profile
             </Button>
