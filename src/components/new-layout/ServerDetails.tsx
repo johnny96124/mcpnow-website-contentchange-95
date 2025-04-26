@@ -22,7 +22,7 @@ import { Check, Info, Settings2, Trash2, X } from "lucide-react";
 interface ServerDetailsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  server: ServerInstance;
+  server: ServerInstance | null;
   onDelete: (id: string) => void;
 }
 
@@ -35,10 +35,11 @@ export function ServerDetails({
   const [activeTab, setActiveTab] = useState("general");
   const [confirmDelete, setConfirmDelete] = useState(false);
   
-  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+  // Safely find the definition with null checking for server
+  const definition = server && serverDefinitions.find(def => def.id === server.definitionId);
   
   const handleDelete = () => {
-    if (confirmDelete) {
+    if (confirmDelete && server) {
       onDelete(server.id);
       onOpenChange(false);
       setConfirmDelete(false);
@@ -46,6 +47,30 @@ export function ServerDetails({
       setConfirmDelete(true);
     }
   };
+  
+  // If server is null, don't render the dialog content
+  if (!server) {
+    return (
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) setConfirmDelete(false);
+        onOpenChange(isOpen);
+      }}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Server Details</DialogTitle>
+            <DialogDescription>
+              No server selected
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
   
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
