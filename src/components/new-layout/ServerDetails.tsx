@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Check, Info, RefreshCw, Trash2, X, Plus, ExternalLink } from "lucide-react";
+import { Check, Info, RefreshCw, Trash2, X, Plus, ExternalLink, Edit } from "lucide-react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
@@ -41,8 +41,10 @@ export function ServerDetails({
   const [envVars, setEnvVars] = useState<Record<string, string>>(
     server?.environment || {}
   );
+  const [isAddingVar, setIsAddingVar] = useState(false);
   const [newEnvKey, setNewEnvKey] = useState("");
   const [newEnvValue, setNewEnvValue] = useState("");
+  const [editingVar, setEditingVar] = useState<string | null>(null);
   
   // Find the definition with null checking for server
   const definition = server && serverDefinitions.find(def => def.id === server.definitionId);
@@ -58,27 +60,38 @@ export function ServerDetails({
   };
 
   const handleAddEnvVar = () => {
-    if (!newEnvKey.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Variable name cannot be empty"
-      });
-      return;
-    }
+    if (isAddingVar) {
+      if (!newEnvKey.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Variable name cannot be empty"
+        });
+        return;
+      }
 
-    setEnvVars(prev => ({
-      ...prev,
-      [newEnvKey]: newEnvValue
-    }));
-    setNewEnvKey("");
-    setNewEnvValue("");
+      setEnvVars(prev => ({
+        ...prev,
+        [newEnvKey]: newEnvValue
+      }));
+      setNewEnvKey("");
+      setNewEnvValue("");
+      setIsAddingVar(false);
+    } else {
+      setIsAddingVar(true);
+    }
   };
 
   const handleDeleteEnvVar = (key: string) => {
     const newEnvVars = { ...envVars };
     delete newEnvVars[key];
     setEnvVars(newEnvVars);
+  };
+
+  const handleCancelAdd = () => {
+    setIsAddingVar(false);
+    setNewEnvKey("");
+    setNewEnvValue("");
   };
 
   const handleRefreshTools = () => {
@@ -227,11 +240,8 @@ export function ServerDetails({
                 </div>
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setNewEnvKey("");
-                    setNewEnvValue("");
-                    handleAddEnvVar();
-                  }}
+                  onClick={handleAddEnvVar}
+                  disabled={isAddingVar}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Variable
@@ -239,7 +249,7 @@ export function ServerDetails({
               </div>
               
               <Card className="p-4">
-                {Object.keys(envVars).length === 0 ? (
+                {Object.keys(envVars).length === 0 && !isAddingVar ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Info className="h-8 w-8 text-muted-foreground/50 mb-2" />
                     <p className="text-muted-foreground">
@@ -249,29 +259,123 @@ export function ServerDetails({
                 ) : (
                   <div className="space-y-3">
                     {Object.entries(envVars).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-4">
+                      {editingVar === key ? (
+                        <>
+                          <Input 
+                            value={newEnvKey} 
+                            onChange={(e) => setNewEnvKey(e.target.value)}
+                            placeholder="Variable Name"
+                            className="flex-1"
+                          />
+                          <Input 
+                            value={newEnvValue}
+                            onChange={(e) => setNewEnvValue(e.target.value)}
+                            placeholder="Value"
+                            className="flex-1"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => {
+                                if (newEnvKey.trim()) {
+                                  const updatedEnvVars = { ...envVars };
+                                  delete updatedEnvVars[key];
+                                  updatedEnvVars[newEnvKey] = newEnvValue;
+                                  setEnvVars(updatedEnvVars);
+                                  setEditingVar(null);
+                                }
+                              }}
+                              className="h-9 w-9"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingVar(null);
+                                setNewEnvKey("");
+                                setNewEnvValue("");
+                              }}
+                              className="h-9 w-9"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <Input 
+                            value={key} 
+                            readOnly
+                            className="flex-1 bg-muted/50"
+                          />
+                          <Input 
+                            value={value} 
+                            readOnly
+                            className="flex-1 bg-muted/50"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingVar(key);
+                                setNewEnvKey(key);
+                                setNewEnvValue(value);
+                              }}
+                              className="h-9 w-9 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteEnvVar(key)}
+                              className="h-9 w-9 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    ))}
+                    
+                    {isAddingVar && (
+                      <div className="flex items-center gap-4">
                         <Input 
-                          value={key} 
+                          value={newEnvKey}
+                          onChange={(e) => setNewEnvKey(e.target.value)}
                           placeholder="Variable Name"
                           className="flex-1"
-                          readOnly
                         />
                         <Input 
-                          value={value} 
+                          value={newEnvValue}
+                          onChange={(e) => setNewEnvValue(e.target.value)}
                           placeholder="Value"
                           className="flex-1"
-                          readOnly
                         />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteEnvVar(key)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleAddEnvVar}
+                            className="h-9 w-9"
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleCancelAdd}
+                            className="h-9 w-9"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </Card>
