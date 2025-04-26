@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ServerInstance, serverDefinitions } from "@/data/mockData";
 import {
@@ -18,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Info, RefreshCw, Trash2, X, Plus, ExternalLink } from "lucide-react";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 interface ServerDetailsProps {
   open: boolean;
@@ -37,14 +37,14 @@ export function ServerDetails({
   const [isRefreshingTools, setIsRefreshingTools] = useState(false);
   const { toast } = useToast();
   
-  // Local state for environment variables
+  // Environment variables state
   const [envVars, setEnvVars] = useState<Record<string, string>>(
     server?.environment || {}
   );
   const [newEnvKey, setNewEnvKey] = useState("");
   const [newEnvValue, setNewEnvValue] = useState("");
   
-  // Safely find the definition with null checking for server
+  // Find the definition with null checking for server
   const definition = server && serverDefinitions.find(def => def.id === server.definitionId);
   
   const handleDelete = () => {
@@ -62,7 +62,7 @@ export function ServerDetails({
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Key cannot be empty"
+        description: "Variable name cannot be empty"
       });
       return;
     }
@@ -94,7 +94,6 @@ export function ServerDetails({
   };
 
   const handleViewResourceDetails = () => {
-    // TODO: Implement resource details view
     toast({
       title: "View Resource Details",
       description: "Resource details view will be implemented soon"
@@ -150,7 +149,7 @@ export function ServerDetails({
         >
           <TabsList className="grid grid-cols-3">
             <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="environment">Configuration</TabsTrigger>
+            <TabsTrigger value="configuration">Configuration</TabsTrigger>
             <TabsTrigger value="tools">Tools</TabsTrigger>
           </TabsList>
           
@@ -219,62 +218,63 @@ export function ServerDetails({
             </div>
           </TabsContent>
           
-          <TabsContent value="environment" className="pt-4">
+          <TabsContent value="configuration" className="pt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">Environment Variables</h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium">Environment Variables</h4>
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setNewEnvKey("");
+                    setNewEnvValue("");
+                    handleAddEnvVar();
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Variable
+                </Button>
               </div>
               
-              <div className="space-y-4">
-                <div className="grid grid-cols-[1fr,auto,1fr] gap-2 items-center">
-                  <Input 
-                    placeholder="Enter key"
-                    value={newEnvKey}
-                    onChange={(e) => setNewEnvKey(e.target.value)}
-                  />
-                  <span className="text-muted-foreground">=</span>
-                  <div className="flex gap-2">
-                    <Input 
-                      placeholder="Enter value"
-                      value={newEnvValue}
-                      onChange={(e) => setNewEnvValue(e.target.value)}
-                    />
-                    <Button onClick={handleAddEnvVar} size="icon">
-                      <Plus className="h-4 w-4" />
-                    </Button>
+              <Card className="p-4">
+                {Object.keys(envVars).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Info className="h-8 w-8 text-muted-foreground/50 mb-2" />
+                    <p className="text-muted-foreground">
+                      No environment variables defined. Click 'Add Variable' to add one.
+                    </p>
                   </div>
-                </div>
-
-                <ScrollArea className="h-[250px] border rounded-md p-2">
-                  <div className="space-y-2">
+                ) : (
+                  <div className="space-y-3">
                     {Object.entries(envVars).map(([key, value]) => (
-                      <div key={key} className="grid grid-cols-[1fr,auto,1fr,auto] items-center gap-2">
-                        <div className="font-mono text-sm bg-muted p-2 rounded-md">
-                          {key}
-                        </div>
-                        <span className="text-muted-foreground">=</span>
-                        <div className="font-mono text-sm bg-muted p-2 rounded-md truncate">
-                          {value}
-                        </div>
+                      <div key={key} className="flex items-center gap-4">
+                        <Input 
+                          value={key} 
+                          placeholder="Variable Name"
+                          className="flex-1"
+                          readOnly
+                        />
+                        <Input 
+                          value={value} 
+                          placeholder="Value"
+                          className="flex-1"
+                          readOnly
+                        />
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-red-500 hover:text-red-700"
                           onClick={() => handleDeleteEnvVar(key)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     ))}
-                    {Object.keys(envVars).length === 0 && (
-                      <div className="text-center text-muted-foreground p-4">
-                        <Info className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                        <p>No environment variables set</p>
-                      </div>
-                    )}
                   </div>
-                </ScrollArea>
-              </div>
+                )}
+              </Card>
             </div>
           </TabsContent>
           
