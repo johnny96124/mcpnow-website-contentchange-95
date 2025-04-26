@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -115,7 +116,7 @@ export function ServerDebugDialog({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20">
+      <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20" hideClose>
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="text-xl">
             Debug Tools - {server?.name}
@@ -125,7 +126,7 @@ export function ServerDebugDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[600px] px-6 pb-6">
+        <ScrollArea className="h-[600px] px-6">
           <div className="space-y-4">
             {definition?.tools?.map((tool) => (
               <div 
@@ -229,6 +230,12 @@ export function ServerDebugDialog({
             ))}
           </div>
         </ScrollArea>
+        
+        <DialogFooter className="p-6 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

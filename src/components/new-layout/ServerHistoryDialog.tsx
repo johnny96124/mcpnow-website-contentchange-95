@@ -1,7 +1,14 @@
 
 import { ServerInstance } from "@/data/mockData";
 import { ServerEvent } from "@/types/events";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { ServerEventsList } from "@/components/discovery/ServerEventsList";
 
 interface ServerHistoryDialogProps {
@@ -67,15 +74,20 @@ export function ServerHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] p-0 gap-0">
+      <DialogContent className="sm:max-w-[800px] p-0 gap-0" hideClose>
         <DialogHeader className="p-6 pb-4">
           <DialogTitle className="flex items-center gap-2 text-xl">
             Message History - {server.name}
           </DialogTitle>
         </DialogHeader>
-        <div className="px-6 pb-6">
+        <div className="px-6">
           <ServerEventsList events={SAMPLE_EVENTS} />
         </div>
+        <DialogFooter className="p-6 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
