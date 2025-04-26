@@ -208,7 +208,13 @@ export function ServerToolsList({
           [tool.id]: mockResponse
         }));
         
-        // Create request event first
+        // Only show toast for successful result
+        toast({
+          title: `Tool Executed: ${tool.name}`,
+          description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
+        });
+        
+        // Create and add events
         const requestEvent: ServerEvent = {
           id: `event-req-${Date.now()}`,
           timestamp: new Date().toISOString(),
@@ -224,7 +230,6 @@ export function ServerToolsList({
           params: toolInputs[tool.id] || {}
         };
         
-        // Then add response event
         const responseEvent: ServerEvent = {
           id: `event-res-${Date.now()}`,
           timestamp: new Date().toISOString(),
@@ -236,13 +241,7 @@ export function ServerToolsList({
           method: tool.name
         };
         
-        // Add both events to the list
         setEvents(prev => [responseEvent, requestEvent, ...prev]);
-        
-        toast({
-          title: `Tool Executed: ${tool.name}`,
-          description: `Successfully executed tool on server instance ${serverName || 'Unknown'}.`,
-        });
       } else {
         // Mock error response
         const mockError = {
@@ -255,7 +254,14 @@ export function ServerToolsList({
           [tool.id]: mockError
         }));
         
-        // Create request event first
+        // Only show toast for error result
+        toast({
+          title: `Tool Execution Failed: ${tool.name}`,
+          description: `Failed to execute tool on server instance ${serverName || 'Unknown'}.`,
+          variant: "destructive"
+        });
+        
+        // Create and add events
         const requestEvent: ServerEvent = {
           id: `event-req-${Date.now()}`,
           timestamp: new Date().toISOString(),
@@ -271,7 +277,6 @@ export function ServerToolsList({
           params: toolInputs[tool.id] || {}
         };
         
-        // Then add error event
         const errorEvent: ServerEvent = {
           id: `event-err-${Date.now()}`,
           timestamp: new Date().toISOString(),
@@ -288,14 +293,7 @@ export function ServerToolsList({
           hostName: "Active Host"
         };
         
-        // Add both events to the list
         setEvents(prev => [errorEvent, requestEvent, ...prev]);
-        
-        toast({
-          title: `Tool Execution Failed: ${tool.name}`,
-          description: `Failed to execute tool on server instance ${serverName || 'Unknown'}.`,
-          variant: "destructive"
-        });
       }
     }, 1500);
   };
@@ -319,7 +317,6 @@ export function ServerToolsList({
     return true;
   };
 
-  // For Discovery view, we only show the tools without tabs
   if (isDiscoveryView) {
     return (
       <div className="flex flex-col h-full">
@@ -345,8 +342,8 @@ export function ServerToolsList({
                 </div>
                 <AccordionContent className="pb-0">
                   <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                      {tool.description}
+                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 italic">
+                      {tool.description || "No description available for this tool."}
                     </p>
                     
                     {tool.parameters && tool.parameters.length > 0 && (
@@ -368,7 +365,6 @@ export function ServerToolsList({
                       </div>
                     )}
                     
-                    {/* Tool execution results */}
                     {toolResults[tool.id] && (
                       <div className="mt-4">
                         <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
@@ -434,7 +430,6 @@ export function ServerToolsList({
     );
   }
 
-  // For normal view (Servers page), we show both Tools and Message History tabs
   return (
     <div className="flex flex-col h-full">
       <Tabs 
@@ -485,8 +480,8 @@ export function ServerToolsList({
                   </div>
                   <AccordionContent className="pb-0">
                     <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                        {tool.description}
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 italic">
+                        {tool.description || "No description available for this tool."}
                       </p>
                       
                       {tool.parameters && tool.parameters.length > 0 && (
@@ -562,7 +557,6 @@ export function ServerToolsList({
                         </div>
                       )}
                       
-                      {/* Tool execution results */}
                       {toolResults[tool.id] && (
                         <div className="mt-4">
                           <h4 className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-2">
