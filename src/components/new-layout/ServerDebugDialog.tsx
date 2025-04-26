@@ -15,6 +15,8 @@ import { ChevronDown, ChevronUp, AlertTriangle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { History } from "lucide-react";
+import { ServerHistoryDialog } from "./ServerHistoryDialog";
 
 interface ServerDebugDialogProps {
   open: boolean;
@@ -34,6 +36,7 @@ export function ServerDebugDialog({
   const [expandedTools, setExpandedTools] = useState<Record<string, boolean>>({});
   const [toolsResults, setToolsResults] = useState<Record<string, { success: boolean; message: string; isLoading: boolean }>>({});
   const [paramValues, setParamValues] = useState<Record<string, ToolParameterValue>>({});
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { toast } = useToast();
   
   const definition = server ? serverDefinitions.find(def => def.id === server.definitionId) : null;
@@ -113,122 +116,139 @@ export function ServerDebugDialog({
   }
   
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            Debug Tools - {server?.name}
-          </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Execute and test server tools
-          </DialogDescription>
-        </DialogHeader>
-
-        <ScrollArea className="h-[600px] px-6 pb-6">
-          <div className="space-y-4">
-            {definition?.tools?.map((tool) => (
-              <div 
-                key={tool.id} 
-                className="group rounded-lg border bg-card transition-all duration-200 hover:shadow-md"
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              Debug Tools - {server?.name}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                onClick={() => setHistoryOpen(true)}
               >
+                <History className="w-4 h-4 mr-2" />
+                History
+              </Button>
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Execute and test server tools
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="h-[600px] px-6 pb-6">
+            <div className="space-y-4">
+              {definition?.tools?.map((tool) => (
                 <div 
-                  className="flex items-center justify-between p-4 cursor-pointer"
-                  onClick={() => toggleTool(tool.id)}
+                  key={tool.id} 
+                  className="group rounded-lg border bg-card transition-all duration-200 hover:shadow-md"
                 >
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-base tracking-tight">{tool.name}</h3>
-                      <Badge variant="secondary" className="font-mono text-xs">
-                        Tool
-                      </Badge>
+                  <div 
+                    className="flex items-center justify-between p-4 cursor-pointer"
+                    onClick={() => toggleTool(tool.id)}
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-base tracking-tight">{tool.name}</h3>
+                        <Badge variant="secondary" className="font-mono text-xs">
+                          Tool
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {tool.description || "No description available"}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {tool.description || "No description available"}
-                    </p>
+                    {expandedTools[tool.id] ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                    )}
                   </div>
-                  {expandedTools[tool.id] ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                  
+                  {expandedTools[tool.id] && (
+                    <div className="border-t bg-muted/50 p-4 space-y-4">
+                      {tool.parameters && tool.parameters.length > 0 && (
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-medium text-foreground/80 mb-3">
+                            Parameters
+                          </h4>
+                          <div className="grid gap-4">
+                            {tool.parameters.map((param) => (
+                              <div
+                                key={param.name}
+                                className="bg-background rounded-lg p-4 border shadow-sm"
+                              >
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Label htmlFor={`${tool.id}-${param.name}`} className="font-mono text-xs bg-primary/5 px-2 py-1 rounded text-primary/90">
+                                    {param.name}
+                                  </Label>
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {param.type}
+                                  </Badge>
+                                  {param.required && (
+                                    <Badge variant="destructive" className="text-[10px]">
+                                      required
+                                    </Badge>
+                                  )}
+                                </div>
+                                {param.description && (
+                                  <p className="text-sm text-muted-foreground mb-3">
+                                    {param.description}
+                                  </p>
+                                )}
+                                <div className="mt-2">
+                                  <Input
+                                    id={`${tool.id}-${param.name}`}
+                                    value={paramValues[tool.id]?.[param.name] || ''}
+                                    onChange={(e) => handleParamChange(tool.id, param.name, e.target.value)}
+                                    placeholder={`Enter ${param.name}...`}
+                                    className="bg-background"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {toolsResults[tool.id] && !toolsResults[tool.id].isLoading && (
+                        <Alert variant={toolsResults[tool.id].success ? "default" : "destructive"} 
+                              className={`mt-4 ${toolsResults[tool.id].success ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : ''}`}>
+                          {toolsResults[tool.id].success ? (
+                            <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <AlertTriangle className="h-4 w-4" />
+                          )}
+                          <AlertDescription className="ml-2">
+                            {toolsResults[tool.id].message}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      
+                      <div className="flex justify-end pt-2">
+                        <Button 
+                          onClick={() => handleExecuteTool(tool)}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          disabled={toolsResults[tool.id]?.isLoading}
+                        >
+                          Execute
+                        </Button>
+                      </div>
+                    </div>
                   )}
                 </div>
-                
-                {expandedTools[tool.id] && (
-                  <div className="border-t bg-muted/50 p-4 space-y-4">
-                    {tool.parameters && tool.parameters.length > 0 && (
-                      <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-foreground/80 mb-3">
-                          Parameters
-                        </h4>
-                        <div className="grid gap-4">
-                          {tool.parameters.map((param) => (
-                            <div
-                              key={param.name}
-                              className="bg-background rounded-lg p-4 border shadow-sm"
-                            >
-                              <div className="flex items-center gap-2 mb-2">
-                                <Label htmlFor={`${tool.id}-${param.name}`} className="font-mono text-xs bg-primary/5 px-2 py-1 rounded text-primary/90">
-                                  {param.name}
-                                </Label>
-                                <Badge variant="outline" className="text-[10px]">
-                                  {param.type}
-                                </Badge>
-                                {param.required && (
-                                  <Badge variant="destructive" className="text-[10px]">
-                                    required
-                                  </Badge>
-                                )}
-                              </div>
-                              {param.description && (
-                                <p className="text-sm text-muted-foreground mb-3">
-                                  {param.description}
-                                </p>
-                              )}
-                              <div className="mt-2">
-                                <Input
-                                  id={`${tool.id}-${param.name}`}
-                                  value={paramValues[tool.id]?.[param.name] || ''}
-                                  onChange={(e) => handleParamChange(tool.id, param.name, e.target.value)}
-                                  placeholder={`Enter ${param.name}...`}
-                                  className="bg-background"
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {toolsResults[tool.id] && !toolsResults[tool.id].isLoading && (
-                      <Alert variant={toolsResults[tool.id].success ? "default" : "destructive"} 
-                            className={`mt-4 ${toolsResults[tool.id].success ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : ''}`}>
-                        {toolsResults[tool.id].success ? (
-                          <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        ) : (
-                          <AlertTriangle className="h-4 w-4" />
-                        )}
-                        <AlertDescription className="ml-2">
-                          {toolsResults[tool.id].message}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    
-                    <div className="flex justify-end pt-2">
-                      <Button 
-                        onClick={() => handleExecuteTool(tool)}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        disabled={toolsResults[tool.id]?.isLoading}
-                      >
-                        Execute
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <ServerHistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        server={server}
+      />
+    </>
   );
 }
