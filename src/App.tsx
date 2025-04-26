@@ -26,6 +26,7 @@ import NewUserDashboard from "./pages/NewUserDashboard";
 import LandingPage from "./pages/LandingPage";
 import Introduction2 from "./pages/Introduction-2";
 import Introduction3 from "./pages/Introduction-3"; 
+import NewLayout from "./pages/NewLayout"; // Added the new layout
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -54,7 +55,8 @@ const App = () => {
                   <Route path="discovery" element={<Discovery />} />
                   <Route path="discovery/no-network" element={<DiscoveryNoNetwork />} />
                   <Route path="settings" element={<Settings />} />
-                  <Route path="introduction-3" element={<Introduction3 />} /> {/* Add new route */}
+                  <Route path="introduction-3" element={<Introduction3 />} />
+                  <Route path="new-layout" element={<NewLayout />} /> {/* Added the new route */}
                 </Route>
                 <Route path="/tray" element={<TrayPopup />} />
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
