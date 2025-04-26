@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -458,7 +457,12 @@ const NewLayout = () => {
         <TabsContent value="servers" className="mt-0 space-y-6">
           <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
             <div className="flex items-center gap-2 overflow-x-auto">
-              <Button variant={selectedProfileId === "all" ? "default" : "outline"} size="sm" className="whitespace-nowrap" onClick={() => setSelectedProfileId("all")}>
+              <Button 
+                variant={selectedProfileId === "all" ? "default" : "outline"} 
+                size="sm" 
+                className="whitespace-nowrap relative" 
+                onClick={() => setSelectedProfileId("all")}
+              >
                 All Servers
               </Button>
               
@@ -471,23 +475,28 @@ const NewLayout = () => {
                     onClick={() => setSelectedProfileId(profile.id)}
                   >
                     {profile.name}
-                    {selectedProfileId === profile.id && (
-                      <div 
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors"
-                        onClick={(e) => handleDeleteProfile(profile, e)}
-                      >
-                        <X className="h-3 w-3 text-white" />
-                      </div>
-                    )}
                   </Button>
+                  {selectedProfileId === profile.id && (
+                    <div 
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors z-10"
+                      onClick={(e) => handleDeleteProfile(profile, e)}
+                    >
+                      <X className="h-3 w-3 text-white" />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
             
-            <Button variant="outline" size="sm" onClick={() => {
-            setSelectedServerForProfile(null);
-            setCreateProfileDialogOpen(true);
-          }} className="whitespace-nowrap">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setSelectedServerForProfile(null);
+                setCreateProfileDialogOpen(true);
+              }} 
+              className="whitespace-nowrap"
+            >
               <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
               New Profile
             </Button>
