@@ -637,22 +637,22 @@ interface ParameterItemProps {
 
 function ParameterItem({ parameter, debugMode = false, value, onChange }: ParameterItemProps) {
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
-      <div className="flex items-center mb-2">
-        <span className="font-mono text-xs text-blue-600 dark:text-blue-400 mr-2">
+    <div className="bg-background border border-border/50 rounded-lg p-4 shadow-sm transition-all hover:shadow-md">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="font-mono text-xs text-primary/90 bg-primary/5 px-2 py-1 rounded-md">
           {parameter.name}
         </span>
-        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
           {parameter.type}
         </Badge>
         {parameter.required && (
-          <Badge className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">
+          <Badge className="ml-1 text-[10px] px-1.5 py-0 h-4 bg-red-100/50 text-red-600 border-red-200">
             required
           </Badge>
         )}
       </div>
       
-      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+      <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
         {parameter.description}
       </p>
 

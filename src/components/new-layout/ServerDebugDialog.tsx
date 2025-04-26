@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ServerInstance, serverDefinitions, Tool } from "@/data/mockData";
 import {
@@ -39,7 +38,6 @@ export function ServerDebugDialog({
   
   const definition = server ? serverDefinitions.find(def => def.id === server.definitionId) : null;
   
-  // Initialize parameter values for each tool
   useEffect(() => {
     if (definition?.tools) {
       const initialValues: Record<string, ToolParameterValue> = {};
@@ -57,7 +55,6 @@ export function ServerDebugDialog({
     }
   }, [definition]);
   
-  // Handle parameter value changes
   const handleParamChange = (toolId: string, paramName: string, value: string) => {
     setParamValues(prev => ({
       ...prev,
@@ -68,7 +65,6 @@ export function ServerDebugDialog({
     }));
   };
   
-  // Execute a tool with its parameters
   const handleExecuteTool = (tool: Tool) => {
     setToolsResults(prev => ({
       ...prev,
@@ -80,7 +76,6 @@ export function ServerDebugDialog({
       description: `正在执行 ${tool.name}...`,
     });
     
-    // Simulate API call
     setTimeout(() => {
       const success = Math.random() > 0.3;
       const resultMessage = success 
@@ -106,7 +101,6 @@ export function ServerDebugDialog({
     }, 2000);
   };
   
-  // Toggle tool expansion
   const toggleTool = (toolId: string) => {
     setExpandedTools(prev => ({
       ...prev,
@@ -120,64 +114,85 @@ export function ServerDebugDialog({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            Debug Tools - {server.name}
+      <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20">
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            Debug Tools - {server?.name}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Execute and test server tools
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="h-[500px] rounded-md border p-4">
-          <div className="space-y-6">
-            {definition.tools?.map((tool) => (
-              <div key={tool.id} className="rounded-lg border p-4">
+        <ScrollArea className="h-[600px] px-6 pb-6">
+          <div className="space-y-4">
+            {definition?.tools?.map((tool) => (
+              <div 
+                key={tool.id} 
+                className="group rounded-lg border bg-card transition-all duration-200 hover:shadow-md"
+              >
                 <div 
-                  className="flex items-center justify-between mb-2 cursor-pointer"
+                  className="flex items-center justify-between p-4 cursor-pointer"
                   onClick={() => toggleTool(tool.id)}
                 >
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-lg">{tool.name}</h3>
-                    <Badge variant="outline">Tool</Badge>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-base tracking-tight">{tool.name}</h3>
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        Tool
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {tool.description || "No description available"}
+                    </p>
                   </div>
                   {expandedTools[tool.id] ? (
-                    <ChevronUp className="h-4 w-4" />
+                    <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform" />
                   ) : (
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
                   )}
                 </div>
                 
                 {expandedTools[tool.id] && (
-                  <div className="space-y-4 mt-4">
-                    <p className="text-sm text-muted-foreground">
-                      {tool.description}
-                    </p>
-                    
+                  <div className="border-t bg-muted/50 p-4 space-y-4">
                     {tool.parameters && tool.parameters.length > 0 && (
                       <div className="space-y-4">
-                        <h4 className="text-sm font-medium">Parameters:</h4>
-                        <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-foreground/80 mb-3">
+                          Parameters
+                        </h4>
+                        <div className="grid gap-4">
                           {tool.parameters.map((param) => (
                             <div
                               key={param.name}
-                              className="space-y-1"
+                              className="bg-background rounded-lg p-4 border shadow-sm"
                             >
-                              <Label htmlFor={`${tool.id}-${param.name}`} className="font-mono text-xs">
-                                {param.name} <span className="text-muted-foreground">({param.type})</span>
-                              </Label>
-                              <Input 
-                                id={`${tool.id}-${param.name}`}
-                                value={paramValues[tool.id]?.[param.name] || ''}
-                                onChange={(e) => handleParamChange(tool.id, param.name, e.target.value)}
-                                placeholder={`Enter ${param.name} value`}
-                              />
+                              <div className="flex items-center gap-2 mb-2">
+                                <Label htmlFor={`${tool.id}-${param.name}`} className="font-mono text-xs bg-primary/5 px-2 py-1 rounded text-primary/90">
+                                  {param.name}
+                                </Label>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {param.type}
+                                </Badge>
+                                {param.required && (
+                                  <Badge variant="destructive" className="text-[10px]">
+                                    required
+                                  </Badge>
+                                )}
+                              </div>
                               {param.description && (
-                                <p className="text-[11px] text-muted-foreground px-1">
+                                <p className="text-sm text-muted-foreground mb-3">
                                   {param.description}
                                 </p>
                               )}
+                              <div className="mt-2">
+                                <Input
+                                  id={`${tool.id}-${param.name}`}
+                                  value={paramValues[tool.id]?.[param.name] || ''}
+                                  onChange={(e) => handleParamChange(tool.id, param.name, e.target.value)}
+                                  placeholder={`Enter ${param.name}...`}
+                                  className="bg-background"
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -185,22 +200,23 @@ export function ServerDebugDialog({
                     )}
                     
                     {toolsResults[tool.id] && !toolsResults[tool.id].isLoading && (
-                      <Alert variant={toolsResults[tool.id].success ? "default" : "destructive"} className="mt-3">
+                      <Alert variant={toolsResults[tool.id].success ? "default" : "destructive"} 
+                            className={`mt-4 ${toolsResults[tool.id].success ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : ''}`}>
                         {toolsResults[tool.id].success ? (
-                          <Check className="h-4 w-4" />
+                          <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                         ) : (
                           <AlertTriangle className="h-4 w-4" />
                         )}
-                        <AlertDescription>
+                        <AlertDescription className="ml-2">
                           {toolsResults[tool.id].message}
                         </AlertDescription>
                       </Alert>
                     )}
                     
-                    <div className="mt-4 flex justify-end">
+                    <div className="flex justify-end pt-2">
                       <Button 
                         onClick={() => handleExecuteTool(tool)}
-                        size="sm"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                         disabled={toolsResults[tool.id]?.isLoading}
                       >
                         Execute
@@ -216,4 +232,3 @@ export function ServerDebugDialog({
     </Dialog>
   );
 }
-
