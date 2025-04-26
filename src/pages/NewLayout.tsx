@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -235,3 +236,6 @@ const NewLayout = () => {
     </div>
   );
 };
+
+// Add default export
+export default NewLayout;
