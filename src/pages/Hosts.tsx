@@ -14,6 +14,16 @@ import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -34,6 +44,7 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
+  const [hostToDelete, setHostToDelete] = useState<Host | null>(null);
 
   const {
     hostProfiles,
@@ -176,6 +187,28 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
+  const handleDeleteHost = (hostId: string) => {
+    const host = hostsList.find(h => h.id === hostId);
+    if (host) {
+      setHostToDelete(host);
+    }
+  };
+
+  const confirmDeleteHost = () => {
+    if (hostToDelete) {
+      setHostsList(prev => prev.filter(host => host.id !== hostToDelete.id));
+      toast({
+        title: "Host deleted",
+        description: `${hostToDelete.name} has been removed successfully`
+      });
+      setHostToDelete(null);
+    }
+  };
+
+  const cancelDeleteHost = () => {
+    setHostToDelete(null);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -216,6 +249,7 @@ const Hosts = () => {
               onCreateConfig={handleCreateConfigDialog}
               onFixConfig={handleUpdateConfigDialog}
               showHostRefreshHint={showHostRefreshHint}
+              onDelete={handleDeleteHost}
             />
           ))}
           
@@ -287,6 +321,23 @@ const Hosts = () => {
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
+      
+      <AlertDialog open={!!hostToDelete} onOpenChange={() => setHostToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Host</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {hostToDelete?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDeleteHost}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteHost} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
