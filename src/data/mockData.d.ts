@@ -1,3 +1,4 @@
+
 export interface ServerDefinition {
   id: string;
   name: string;
@@ -64,13 +65,3 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
-
-export interface Host {
-  id: string;
-  name: string;
-  icon?: string;
-  connectionStatus: 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
-  configStatus: 'configured' | 'misconfigured' | 'unknown';
-  configPath?: string;
-  servers?: string[];
-}
