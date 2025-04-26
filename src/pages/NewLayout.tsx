@@ -231,20 +231,18 @@ const NewLayout = () => {
       return;
     }
 
-    const instances = selectedServerForProfile ? [selectedServerForProfile.id] : [];
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
       name: newProfileName,
-      endpointType: "HTTP_SSE",
       endpoint: "http://localhost:8008/mcp",
+      endpointType: "HTTP_SSE",
       enabled: true,
-      instances
+      instances: []
     };
+    
     setProfilesList(prev => [...prev, newProfile]);
     
-    if (selectedServerForProfile && addToProfilesDialogOpen) {
-      confirmAddToProfiles([...getProfilesForServer(selectedServerForProfile.id).map(p => p.id), newProfile.id]);
-    } else {
+    if (!addToProfilesDialogOpen) {
       setSelectedProfileId(newProfile.id);
     }
     

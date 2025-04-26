@@ -39,6 +39,7 @@ export function AddToCollectionsDialog({
   const [initialCollections, setInitialCollections] = useState<string[]>([]);
   const { toast } = useToast();
 
+  // Reset selected collections when dialog opens
   useEffect(() => {
     if (open) {
       const initial = serverCollections.map(profile => profile.id);
@@ -55,6 +56,7 @@ export function AddToCollectionsDialog({
     );
   };
 
+  // Check if the selection has changed from the initial state
   const hasSelectionChanged = () => {
     if (selectedCollections.length !== initialCollections.length) return true;
     return !selectedCollections.every(id => initialCollections.includes(id));
