@@ -1,11 +1,11 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, X, List, Folder } from "lucide-react";
+import { Search, X, List, Folder, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { serverDefinitions } from "@/data/mockData";
 import { Card } from "@/components/ui/card";
@@ -159,13 +159,20 @@ export function AddServerToHostDialog({
         )}
 
         <DialogFooter className="mt-6">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={selectedServers.length === 0}>
-            {selectedServers.length === 0 ? "No Servers Selected" : `Add ${selectedServers.length} Server${selectedServers.length > 1 ? 's' : ''}`}
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button 
+            onClick={handleSave} 
+            disabled={selectedServers.length === 0}
+          >
+            {selectedServers.length === 0 
+              ? "No Servers Selected" 
+              : `Add ${selectedServers.length} Server${selectedServers.length > 1 ? 's' : ''}`
+            }
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  </DialogContent>
+  );
+}
