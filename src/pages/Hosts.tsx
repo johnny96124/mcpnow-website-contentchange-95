@@ -51,9 +51,11 @@ const Hosts = () => {
 
     setHostsList(prev => prev.map(host => {
       if (host.id === selectedHost) {
+        // Create a servers property if it doesn't exist
+        const currentServers = host.servers || [];
         return {
           ...host,
-          servers: [...(host.servers || []), ...serverIds]
+          servers: [...currentServers, ...serverIds]
         };
       }
       return host;
@@ -159,7 +161,20 @@ const Hosts = () => {
                   h.id === hostId ? { ...h, profileId } : h
                 ));
               }}
-              onOpenConfigDialog={openConfigDialog}
+              onOpenConfigDialog={(hostId) => {
+                // Adjust the call to openConfigDialog to only pass the required argument
+                openConfigDialog(
+                  hostId, 
+                  hostsList.find(h => h.id === hostId)?.configPath || "",
+                  undefined, // profileEndpoint
+                  false, // needsUpdate
+                  false, // allowPathEdit
+                  true, // isViewOnly
+                  false, // isFixMode
+                  false, // isUpdateMode
+                  false // isCreateMode
+                );
+              }}
               onCreateConfig={(hostId, profileId) => {
                 // Simulation of creating config
                 setHostsList(prev => prev.map(h => 
