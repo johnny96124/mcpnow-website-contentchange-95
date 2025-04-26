@@ -23,6 +23,8 @@ import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
+
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -31,6 +33,7 @@ const mockJsonConfig = {
     }
   }
 };
+
 const NewLayout = () => {
   const [currentTab, setCurrentTab] = useState<"servers" | "hosts">("servers");
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,6 +61,7 @@ const NewLayout = () => {
   const [addServerToHostOpen, setAddServerToHostOpen] = useState(false);
   const [selectedHostForAddServer, setSelectedHostForAddServer] = useState<Host | null>(null);
   const [importByProfileOpen, setImportByProfileOpen] = useState(false);
+  const [isDebugDialogOpen, setIsDebugDialogOpen] = useState(false);
   const {
     toast
   } = useToast();
@@ -73,15 +77,14 @@ const NewLayout = () => {
     handleProfileChange,
     getProfileById
   } = useHostProfiles();
+
   useEffect(() => {
-    // Filter servers based on search query and selected profile
     let filtered = [...serversList];
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
       filtered = filtered.filter(server => server.name.toLowerCase().includes(searchLower) || serverDefinitions.find(def => def.id === server.definitionId)?.name.toLowerCase().includes(searchLower));
     }
 
-    // Filter by profile if a specific profile is selected (not "all")
     if (selectedProfileId !== "all") {
       const profile = profilesList.find(p => p.id === selectedProfileId);
       if (profile) {
@@ -90,18 +93,20 @@ const NewLayout = () => {
     }
     setFilteredServers(filtered);
 
-    // Filter hosts based on search query
     const filteredHostsResult = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
     setFilteredHosts(filteredHostsResult);
   }, [searchQuery, serversList, hostsList, selectedProfileId, profilesList]);
+
   const getDefinitionName = (definitionId: string): string => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.name : "Unknown";
   };
+
   const getDefinitionType = (definitionId: string): string => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.type : "Unknown";
   };
+
   const handleAddServerSuccess = (newServer: ServerInstance) => {
     setServersList(prev => [...prev, newServer]);
     toast({
@@ -109,6 +114,7 @@ const NewLayout = () => {
       description: `${newServer.name} has been added successfully`
     });
   };
+
   const handleAddHostSuccess = (newHost: Host) => {
     setHostsList(prev => [...prev, newHost]);
     setSelectedHostId(newHost.id);
@@ -117,14 +123,15 @@ const NewLayout = () => {
       description: `${newHost.name} has been added successfully`
     });
   };
+
   const handleOpenServerDetails = (server: ServerInstance) => {
     setSelectedServerDetails(server);
     setServerDetailOpen(true);
   };
+
   const handleDeleteServer = (serverId: string) => {
     setServersList(prev => prev.filter(s => s.id !== serverId));
 
-    // Also remove from profiles
     setProfilesList(prev => prev.map(profile => ({
       ...profile,
       instances: profile.instances.filter(id => id !== serverId)
@@ -134,6 +141,7 @@ const NewLayout = () => {
       description: `Server has been removed successfully`
     });
   };
+
   const handleDeleteHost = (hostId: string) => {
     setHostsList(prev => prev.filter(h => h.id !== hostId));
     if (selectedHostId === hostId) {
@@ -147,6 +155,7 @@ const NewLayout = () => {
       description: "The host has been removed successfully"
     });
   };
+
   const handleAddToProfile = (serverId: string) => {
     const server = serversList.find(s => s.id === serverId);
     if (server) {
@@ -154,10 +163,10 @@ const NewLayout = () => {
       setIsAddToProfileDialogOpen(true);
     }
   };
+
   const confirmAddToProfile = (profileId: string) => {
     if (!selectedServerForProfile || !profileId) return;
 
-    // Check if server is already in this profile
     const profile = profilesList.find(p => p.id === profileId);
     if (profile && profile.instances.includes(selectedServerForProfile.id)) {
       toast({
@@ -168,7 +177,6 @@ const NewLayout = () => {
       return;
     }
 
-    // Add server to profile
     setProfilesList(prev => prev.map(profile => profile.id === profileId ? {
       ...profile,
       instances: [...profile.instances, selectedServerForProfile.id]
@@ -179,6 +187,7 @@ const NewLayout = () => {
     });
     setIsAddToProfileDialogOpen(false);
   };
+
   const handleCreateNewProfile = () => {
     if (!newProfileName.trim()) {
       toast({
@@ -189,7 +198,6 @@ const NewLayout = () => {
       return;
     }
 
-    // Create a new profile with selected server if any
     const instances = selectedServerForProfile ? [selectedServerForProfile.id] : [];
     const newProfile: Profile = {
       id: `profile-${Date.now()}`,
@@ -209,16 +217,17 @@ const NewLayout = () => {
     setIsAddToProfileDialogOpen(false);
     setNewProfileName("");
   };
+
   const getProfilesForServer = (serverId: string): Profile[] => {
     return profilesList.filter(profile => profile.instances.includes(serverId));
   };
+
   const handleServerStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServerInstanceStatuses(prev => ({
       ...prev,
       [serverId]: status
     }));
 
-    // If status is 'running', also update the server in the list
     if (status === 'running') {
       setServersList(prev => prev.map(server => server.id === serverId ? {
         ...server,
@@ -236,6 +245,7 @@ const NewLayout = () => {
       } : server));
     }
   };
+
   const handleCreateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
@@ -243,6 +253,7 @@ const NewLayout = () => {
       openConfigDialog(hostId, defaultConfigPath, 'http://localhost:8008/mcp', true, true, false, false, true, true);
     }
   };
+
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
@@ -258,6 +269,7 @@ const NewLayout = () => {
     }
     resetConfigDialog();
   };
+
   const handleScanForHosts = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -287,18 +299,22 @@ const NewLayout = () => {
       setIsScanning(false);
     }, 2000);
   };
+
   const handleOpenDebugTools = (server: ServerInstance) => {
     setSelectedDebugServer(server);
-    setIsDebuggingServer(true);
+    setIsDebugDialogOpen(true);
   };
+
   const handleOpenMessageHistory = (server: ServerInstance) => {
     setSelectedDebugServer(server);
     setMessageHistoryOpen(true);
   };
+
   const handleAddServerToHost = (host: Host) => {
     setSelectedHostForAddServer(host);
     setAddServerToHostOpen(true);
   };
+
   const confirmAddServerToHost = (serverId: string) => {
     if (!selectedHostForAddServer) return;
     toast({
@@ -306,7 +322,6 @@ const NewLayout = () => {
       description: `Server has been successfully added to ${selectedHostForAddServer.name}`
     });
 
-    // Update the host to show it has servers
     setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
       ...h,
       configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
@@ -314,10 +329,12 @@ const NewLayout = () => {
     } : h));
     setAddServerToHostOpen(false);
   };
+
   const handleImportByProfile = (host: Host) => {
     setSelectedHostForAddServer(host);
     setImportByProfileOpen(true);
   };
+
   const confirmImportProfileToHost = (profileId: string) => {
     if (!selectedHostForAddServer) return;
     const profile = profilesList.find(p => p.id === profileId);
@@ -327,7 +344,6 @@ const NewLayout = () => {
       description: `${profile.name} has been imported to ${selectedHostForAddServer.name} with ${profile.instances.length} servers`
     });
 
-    // Update the host to show it has servers
     setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
       ...h,
       configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
@@ -337,9 +353,10 @@ const NewLayout = () => {
     handleProfileChange(selectedHostForAddServer.id, profileId);
     setImportByProfileOpen(false);
   };
+
   const selectedHost = hostsList.find(h => h.id === selectedHostId);
+
   return <div className="space-y-6 animate-fade-in">
-      {/* Main Tabs - This is at the top level for clear feature hierarchy */}
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -385,7 +402,6 @@ const NewLayout = () => {
         </div>
         
         <TabsContent value="servers" className="mt-0 space-y-6">
-          {/* Profile Selection Section */}
           <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
             <div className="flex items-center gap-2 overflow-x-auto">
               <Button variant={selectedProfileId === "all" ? "default" : "outline"} size="sm" className="whitespace-nowrap" onClick={() => setSelectedProfileId("all")}>
@@ -485,7 +501,6 @@ const NewLayout = () => {
         </TabsContent>
 
         <TabsContent value="hosts" className="mt-0 space-y-6">
-          {/* Host Selection Section */}
           <div className="bg-muted/20 p-3 rounded-lg">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               {hostsList.map(host => <Button key={host.id} variant={selectedHostId === host.id ? "default" : "outline"} size="sm" className="whitespace-nowrap flex items-center gap-1.5" onClick={() => setSelectedHostId(host.id)}>
@@ -497,7 +512,6 @@ const NewLayout = () => {
           </div>
           
           {selectedHost ? <div className="space-y-6">
-              {/* Host Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-muted/30 p-3 rounded-full">
@@ -528,7 +542,6 @@ const NewLayout = () => {
                 </div>
               </div>
               
-              {/* Host Content */}
               {selectedHost.configStatus === "unknown" ? <Card>
                   <CardContent className="p-6">
                     <div className="text-center space-y-4 py-6">
@@ -547,7 +560,6 @@ const NewLayout = () => {
                     </div>
                   </CardContent>
                 </Card> : <div className="space-y-4">
-                  {/* Display config info */}
                   <div className="bg-muted/10 p-3 rounded-md flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />
@@ -561,7 +573,6 @@ const NewLayout = () => {
                     </Button>
                   </div>
                   
-                  {/* Associated profile if any */}
                   {hostProfiles[selectedHost.id] && <div className="bg-muted/10 p-3 rounded-md">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -577,7 +588,6 @@ const NewLayout = () => {
                       </div>
                     </div>}
                   
-                  {/* Servers Table */}
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-lg">Connected Servers</CardTitle>
@@ -655,7 +665,6 @@ const NewLayout = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Dialogs */}
       <AddServerDialog open={addServerDialogOpen} onOpenChange={setAddServerDialogOpen} onAddServer={handleAddServerSuccess} />
 
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHostSuccess} />
@@ -664,7 +673,12 @@ const NewLayout = () => {
 
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} initialConfig={JSON.stringify(mockJsonConfig, null, 2)} configPath={configDialog.configPath} onSave={handleUpdateConfig} />
 
-      {/* Add to Profile Dialog */}
+      <ServerDebugDialog
+        open={isDebugDialogOpen}
+        onOpenChange={setIsDebugDialogOpen}
+        server={selectedDebugServer}
+      />
+
       <Dialog open={isAddToProfileDialogOpen} onOpenChange={setIsAddToProfileDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -694,7 +708,6 @@ const NewLayout = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Create Profile Dialog */}
       <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -720,7 +733,6 @@ const NewLayout = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Server to Host Dialog */}
       <Dialog open={addServerToHostOpen} onOpenChange={setAddServerToHostOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -752,7 +764,6 @@ const NewLayout = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Import Profile to Host Dialog */}
       <Dialog open={importByProfileOpen} onOpenChange={setImportByProfileOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -785,4 +796,5 @@ const NewLayout = () => {
       </Dialog>
     </div>;
 };
+
 export default NewLayout;
