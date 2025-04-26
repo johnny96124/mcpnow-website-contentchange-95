@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { hosts } from "@/data/mockData";
+import { hosts, Host } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { HostCard } from "@/components/hosts/HostCard";
@@ -150,8 +151,43 @@ const Hosts = () => {
             <HostCard 
               key={host.id} 
               host={host}
+              profileId={host.profileId || ""}
               onAddServer={() => handleOpenServerDialog(host.id)}
               showHostRefreshHint={showHostRefreshHint}
+              onProfileChange={(hostId, profileId) => {
+                setHostsList(prev => prev.map(h => 
+                  h.id === hostId ? { ...h, profileId } : h
+                ));
+              }}
+              onOpenConfigDialog={openConfigDialog}
+              onCreateConfig={(hostId, profileId) => {
+                // Simulation of creating config
+                setHostsList(prev => prev.map(h => 
+                  h.id === hostId ? { 
+                    ...h, 
+                    configStatus: 'configured',
+                    configPath: `/path/to/${h.name.toLowerCase()}/config.json` 
+                  } : h
+                ));
+                toast({
+                  title: "Configuration created",
+                  description: "New configuration file has been created"
+                });
+              }}
+              onFixConfig={(hostId) => {
+                // Simulation of fixing config
+                setHostsList(prev => prev.map(h => 
+                  h.id === hostId ? { 
+                    ...h, 
+                    configStatus: 'configured',
+                    connectionStatus: 'connected'
+                  } : h
+                ));
+                toast({
+                  title: "Configuration fixed",
+                  description: "Host configuration has been fixed"
+                });
+              }}
             />
           ))}
         </div>
