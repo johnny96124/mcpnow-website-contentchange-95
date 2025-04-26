@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Plus, PlusCircle, Check } from "lucide-react";
+import { Plus, PlusCircle } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -36,11 +36,14 @@ export function AddToCollectionsDialog({
   serverCollections,
 }: AddToCollectionsDialogProps) {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [initialCollections, setInitialCollections] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
-      setSelectedCollections(serverCollections.map(profile => profile.id));
+      const initial = serverCollections.map(profile => profile.id);
+      setSelectedCollections(initial);
+      setInitialCollections(initial);
     }
   }, [open, serverCollections]);
 
@@ -50,6 +53,11 @@ export function AddToCollectionsDialog({
         ? prev.filter(id => id !== collectionId)
         : [...prev, collectionId]
     );
+  };
+
+  const hasSelectionChanged = () => {
+    if (selectedCollections.length !== initialCollections.length) return true;
+    return !selectedCollections.every(id => initialCollections.includes(id));
   };
 
   const handleSave = () => {
@@ -167,12 +175,9 @@ export function AddToCollectionsDialog({
           {profiles.length > 0 && (
             <Button 
               onClick={handleSave}
-              disabled={selectedCollections.length === 0}
+              disabled={!hasSelectionChanged()}
             >
-              <Check className="mr-2 h-4 w-4" />
-              {selectedCollections.length === 1 
-                ? "Add to 1 Collection" 
-                : `Add to ${selectedCollections.length} Collections`}
+              Save
             </Button>
           )}
         </DialogFooter>
