@@ -533,10 +533,7 @@ const NewLayout = () => {
                           <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
                         </TableCell>
                         <TableCell className="max-w-[160px] truncate">
-                          <span className="text-sm font-mono">{server.connectionDetails.length > 20 
-                            ? `${server.connectionDetails.slice(0, 20)}...` 
-                            : server.connectionDetails}
-                          </span>
+                          <span className="text-sm font-mono">{server.connectionDetails}</span>
                         </TableCell>
                         <TableCell>
                           {serverProfiles.length > 0 ? (
