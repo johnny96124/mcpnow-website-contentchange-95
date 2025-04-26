@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
+import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -64,6 +64,7 @@ const NewLayout = () => {
   const [selectedHostForAddServer, setSelectedHostForAddServer] = useState<Host | null>(null);
   const [importByProfileOpen, setImportByProfileOpen] = useState(false);
   const [isDebugDialogOpen, setIsDebugDialogOpen] = useState(false);
+  const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const {
     toast
   } = useToast();
@@ -377,6 +378,28 @@ const NewLayout = () => {
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
+  const handleDeleteProfile = (profile: Profile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setProfileToDelete(profile);
+  };
+
+  const confirmDeleteProfile = () => {
+    if (!profileToDelete) return;
+
+    setProfilesList(prev => prev.filter(p => p.id !== profileToDelete.id));
+    
+    if (selectedProfileId === profileToDelete.id) {
+      setSelectedProfileId("all");
+    }
+    
+    toast({
+      title: "Profile Deleted",
+      description: `${profileToDelete.name} has been deleted successfully`
+    });
+    
+    setProfileToDelete(null);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
@@ -438,9 +461,26 @@ const NewLayout = () => {
                 All Servers
               </Button>
               
-              {profilesList.map(profile => <Button key={profile.id} variant={selectedProfileId === profile.id ? "default" : "outline"} size="sm" className="whitespace-nowrap" onClick={() => setSelectedProfileId(profile.id)}>
-                  {profile.name}
-                </Button>)}
+              {profilesList.map(profile => (
+                <div key={profile.id} className="relative">
+                  <Button 
+                    variant={selectedProfileId === profile.id ? "default" : "outline"} 
+                    size="sm" 
+                    className="whitespace-nowrap" 
+                    onClick={() => setSelectedProfileId(profile.id)}
+                  >
+                    {profile.name}
+                    {selectedProfileId === profile.id && (
+                      <div 
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-destructive rounded-full flex items-center justify-center cursor-pointer hover:bg-destructive/90 transition-colors"
+                        onClick={(e) => handleDeleteProfile(profile, e)}
+                      >
+                        <X className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                  </Button>
+                </div>
+              ))}
             </div>
             
             <Button variant="outline" size="sm" onClick={() => {
@@ -745,6 +785,13 @@ const NewLayout = () => {
         open={messageHistoryOpen}
         onOpenChange={setMessageHistoryOpen}
         server={selectedDebugServer}
+      />
+
+      <DeleteProfileDialog
+        open={!!profileToDelete}
+        onOpenChange={(open) => !open && setProfileToDelete(null)}
+        profileName={profileToDelete?.name || ""}
+        onConfirmDelete={confirmDeleteProfile}
       />
 
       <Dialog open={isAddToProfileDialogOpen} onOpenChange={setIsAddToProfileDialogOpen}>
