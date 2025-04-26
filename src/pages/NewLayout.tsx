@@ -400,6 +400,23 @@ const NewLayout = () => {
     setProfileToDelete(null);
   };
 
+  const handleRemoveFromProfile = (serverId: string, profileId: string) => {
+    setProfilesList(prev => prev.map(profile => {
+      if (profile.id === profileId) {
+        return {
+          ...profile,
+          instances: profile.instances.filter(id => id !== serverId)
+        };
+      }
+      return profile;
+    }));
+    
+    toast({
+      title: "Server Removed",
+      description: "Server has been removed from the profile"
+    });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
@@ -541,6 +558,17 @@ const NewLayout = () => {
                               {serverProfiles.map((profile, index) => (
                                 <Badge key={index} variant="secondary" className="whitespace-nowrap">
                                   {profile.name}
+                                  {selectedProfileId === profile.id && (
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveFromProfile(server.id, profile.id);
+                                      }}
+                                      className="ml-1 hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-3 w-3 inline-block" />
+                                    </button>
+                                  )}
                                 </Badge>
                               ))}
                             </div>
