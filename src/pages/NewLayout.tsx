@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Plus, 
@@ -313,264 +312,266 @@ const NewLayout = () => {
       </div>
 
       <div className="min-h-[500px]">
-        <TabsContent value="servers" className="mt-0">
-          {filteredServers.length > 0 ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[300px]">Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Profiles</TableHead>
-                    <TableHead className="w-[250px]">Connection</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredServers.map((server) => {
-                    const serverProfiles = getServerProfileNames(server.id);
-                    
-                    return (
-                      <TableRow key={server.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <span 
-                              className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2"
-                              onClick={() => handleOpenServerDetails(server)}
-                            >
-                              <Server className="h-4 w-4" />
-                              {server.name}
-                            </span>
-                            <Badge variant="outline" className="ml-2">
-                              {getDefinitionName(server.definitionId)}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <StatusIndicator
-                            status={server.status === "running" ? "active" : 
-                                    server.status === "error" ? "error" : 
-                                    server.status === "connecting" ? "warning" : "inactive"}
-                            label={server.status.charAt(0).toUpperCase() + server.status.slice(1)}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {serverProfiles.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {serverProfiles.map((profileName, index) => (
-                                <Badge key={index} variant="secondary" className="mr-1">
-                                  {profileName}
-                                </Badge>
-                              ))}
+        <Tabs value={currentTab} className="w-full">
+          <TabsContent value="servers" className="mt-0">
+            {filteredServers.length > 0 ? (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[300px]">Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Profiles</TableHead>
+                      <TableHead className="w-[250px]">Connection</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredServers.map((server) => {
+                      const serverProfiles = getServerProfileNames(server.id);
+                      
+                      return (
+                        <TableRow key={server.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <span 
+                                className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2"
+                                onClick={() => handleOpenServerDetails(server)}
+                              >
+                                <Server className="h-4 w-4" />
+                                {server.name}
+                              </span>
+                              <Badge variant="outline" className="ml-2">
+                                {getDefinitionName(server.definitionId)}
+                              </Badge>
                             </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">No profiles</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="truncate max-w-[200px]">
-                          <span className="text-sm">{server.connectionDetails}</span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleAddToProfile(server.id)}
-                            >
-                              Add to Profile
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleOpenServerDetails(server)}
-                            >
-                              <Settings2 className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="outline"
-                              size="sm" 
-                              className="text-destructive"
-                              onClick={() => handleDeleteServer(server.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
-              <Server className="h-10 w-10 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Servers Found</h3>
-              <p className="text-muted-foreground text-center mb-4">
-                {searchQuery ? `No results for "${searchQuery}"` : "Add your first server to get started."}
-              </p>
-              {searchQuery ? (
-                <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
-              ) : (
-                <Button onClick={() => setAddServerDialogOpen(true)}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Server
-                </Button>
-              )}
-            </div>
-          )}
-        </TabsContent>
+                          </TableCell>
+                          <TableCell>
+                            <StatusIndicator
+                              status={server.status === "running" ? "active" : 
+                                      server.status === "error" ? "error" : 
+                                      server.status === "connecting" ? "warning" : "inactive"}
+                              label={server.status.charAt(0).toUpperCase() + server.status.slice(1)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {serverProfiles.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {serverProfiles.map((profileName, index) => (
+                                  <Badge key={index} variant="secondary" className="mr-1">
+                                    {profileName}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">No profiles</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="truncate max-w-[200px]">
+                            <span className="text-sm">{server.connectionDetails}</span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleAddToProfile(server.id)}
+                              >
+                                Add to Profile
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleOpenServerDetails(server)}
+                              >
+                                <Settings2 className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                size="sm" 
+                                className="text-destructive"
+                                onClick={() => handleDeleteServer(server.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+                <Server className="h-10 w-10 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Servers Found</h3>
+                <p className="text-muted-foreground text-center mb-4">
+                  {searchQuery ? `No results for "${searchQuery}"` : "Add your first server to get started."}
+                </p>
+                {searchQuery ? (
+                  <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
+                ) : (
+                  <Button onClick={() => setAddServerDialogOpen(true)}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Server
+                  </Button>
+                )}
+              </div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="hosts" className="mt-0 grid gap-6 md:grid-cols-2">
-          {filteredHosts.length > 0 ? (
-            filteredHosts.map(host => (
-              <Card key={host.id} className="overflow-hidden flex flex-col">
-                <CardHeader className="bg-muted/50 pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {host.icon && <span className="text-xl">{host.icon}</span>}
-                      <CardTitle className="font-medium">{host.name}</CardTitle>
+          <TabsContent value="hosts" className="mt-0 grid gap-6 md:grid-cols-2">
+            {filteredHosts.length > 0 ? (
+              filteredHosts.map(host => (
+                <Card key={host.id} className="overflow-hidden flex flex-col">
+                  <CardHeader className="bg-muted/50 pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {host.icon && <span className="text-xl">{host.icon}</span>}
+                        <CardTitle className="font-medium">{host.name}</CardTitle>
+                      </div>
+                      <StatusIndicator 
+                        status={
+                          host.connectionStatus === "connected" ? "active" : 
+                          host.connectionStatus === "misconfigured" ? "error" : 
+                          host.configStatus === "misconfigured" ? "error" : "inactive"
+                        } 
+                        label={
+                          host.connectionStatus === "connected" ? "Connected" : 
+                          host.connectionStatus === "misconfigured" ? "Misconfigured" : 
+                          host.configStatus === "misconfigured" ? "Configuration Error" : "Disconnected"
+                        }
+                      />
                     </div>
-                    <StatusIndicator 
-                      status={
-                        host.connectionStatus === "connected" ? "active" : 
-                        host.connectionStatus === "misconfigured" ? "error" : 
-                        host.configStatus === "misconfigured" ? "error" : "inactive"
-                      } 
-                      label={
-                        host.connectionStatus === "connected" ? "Connected" : 
-                        host.connectionStatus === "misconfigured" ? "Misconfigured" : 
-                        host.configStatus === "misconfigured" ? "Configuration Error" : "Disconnected"
-                      }
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 space-y-4 flex-1">
-                  {host.configStatus === "unknown" ? (
-                    <div className="text-center space-y-4 py-6">
-                      <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                        <FileText className="h-6 w-6 text-blue-500" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="font-medium">Configuration Required</h3>
-                        <p className="text-muted-foreground text-sm">
-                          Configure this host to connect servers to it
-                        </p>
-                      </div>
-                      <Button 
-                        onClick={() => handleCreateConfigDialog(host.id)}
-                        className="bg-blue-500 hover:bg-blue-600"
-                      >
-                        Create Configuration
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Servers</label>
-                        {serversList.length > 0 ? (
-                          <ScrollArea className="h-[180px] border rounded-md p-2">
-                            <div className="space-y-2">
-                              {serversList.map(server => (
-                                <div 
-                                  key={server.id}
-                                  className="flex items-center justify-between p-2 bg-muted/40 rounded-md"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <StatusIndicator 
-                                      status={
-                                        server.status === "running" ? "active" : 
-                                        server.status === "error" ? "error" : 
-                                        server.status === "connecting" ? "warning" : "inactive"
-                                      } 
-                                    />
-                                    <span className="text-sm font-medium">{server.name}</span>
-                                  </div>
-                                  <Switch checked={true} />
-                                </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        ) : (
-                          <div className="h-[180px] flex flex-col items-center justify-center border border-dashed rounded-md p-4">
-                            <p className="text-muted-foreground text-center text-sm mb-3">
-                              No servers are connected to this host
-                            </p>
-                            <Button variant="outline" size="sm">
-                              Connect Servers
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <label className="text-sm font-medium">Config Path</label>
-                          <Button variant="ghost" size="sm">
-                            <FileText className="h-3.5 w-3.5 mr-1" />
-                            <span className="text-xs">Edit</span>
-                          </Button>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-4 flex-1">
+                    {host.configStatus === "unknown" ? (
+                      <div className="text-center space-y-4 py-6">
+                        <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                          <FileText className="h-6 w-6 text-blue-500" />
                         </div>
-                        <div className="bg-muted/50 p-2 rounded-md text-sm font-mono truncate">
-                          {host.configPath || "/Users/user/.mcp/hosts/default.json"}
+                        <div className="space-y-2">
+                          <h3 className="font-medium">Configuration Required</h3>
+                          <p className="text-muted-foreground text-sm">
+                            Configure this host to connect servers to it
+                          </p>
                         </div>
+                        <Button 
+                          onClick={() => handleCreateConfigDialog(host.id)}
+                          className="bg-blue-500 hover:bg-blue-600"
+                        >
+                          Create Configuration
+                        </Button>
                       </div>
-                    </>
-                  )}
-                </CardContent>
-                <CardFooter className="border-t p-3 bg-muted/10">
-                  <div className="flex justify-between w-full">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-destructive"
-                      onClick={() => handleDeleteHost(host.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-                      Delete
-                    </Button>
-                    {host.configStatus !== "unknown" && (
-                      <Button variant="outline" size="sm">
-                        <Settings2 className="h-3.5 w-3.5 mr-1.5" />
-                        Settings
-                      </Button>
-                    )}
-                  </div>
-                </CardFooter>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-2 flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
-              <Server className="h-10 w-10 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No Hosts Found</h3>
-              <p className="text-muted-foreground text-center mb-4">
-                {searchQuery ? `No results for "${searchQuery}"` : "Add your first host or scan for local hosts."}
-              </p>
-              {searchQuery ? (
-                <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
-              ) : (
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
-                    {isScanning ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Scanning...
-                      </>
                     ) : (
                       <>
-                        <ScanLine className="h-4 w-4 mr-2" />
-                        Scan for Hosts
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Servers</label>
+                          {serversList.length > 0 ? (
+                            <ScrollArea className="h-[180px] border rounded-md p-2">
+                              <div className="space-y-2">
+                                {serversList.map(server => (
+                                  <div 
+                                    key={server.id}
+                                    className="flex items-center justify-between p-2 bg-muted/40 rounded-md"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <StatusIndicator 
+                                        status={
+                                          server.status === "running" ? "active" : 
+                                          server.status === "error" ? "error" : 
+                                          server.status === "connecting" ? "warning" : "inactive"
+                                        } 
+                                      />
+                                      <span className="text-sm font-medium">{server.name}</span>
+                                    </div>
+                                    <Switch checked={true} />
+                                  </div>
+                                ))}
+                              </div>
+                            </ScrollArea>
+                          ) : (
+                            <div className="h-[180px] flex flex-col items-center justify-center border border-dashed rounded-md p-4">
+                              <p className="text-muted-foreground text-center text-sm mb-3">
+                                No servers are connected to this host
+                              </p>
+                              <Button variant="outline" size="sm">
+                                Connect Servers
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium">Config Path</label>
+                            <Button variant="ghost" size="sm">
+                              <FileText className="h-3.5 w-3.5 mr-1" />
+                              <span className="text-xs">Edit</span>
+                            </Button>
+                          </div>
+                          <div className="bg-muted/50 p-2 rounded-md text-sm font-mono truncate">
+                            {host.configPath || "/Users/user/.mcp/hosts/default.json"}
+                          </div>
+                        </div>
                       </>
                     )}
-                  </Button>
-                  <Button onClick={() => setAddHostDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Host Manually
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </TabsContent>
+                  </CardContent>
+                  <CardFooter className="border-t p-3 bg-muted/10">
+                    <div className="flex justify-between w-full">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-destructive"
+                        onClick={() => handleDeleteHost(host.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                        Delete
+                      </Button>
+                      {host.configStatus !== "unknown" && (
+                        <Button variant="outline" size="sm">
+                          <Settings2 className="h-3.5 w-3.5 mr-1.5" />
+                          Settings
+                        </Button>
+                      )}
+                    </div>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+                <Server className="h-10 w-10 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Hosts Found</h3>
+                <p className="text-muted-foreground text-center mb-4">
+                  {searchQuery ? `No results for "${searchQuery}"` : "Add your first host or scan for local hosts."}
+                </p>
+                {searchQuery ? (
+                  <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
+                ) : (
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
+                      {isScanning ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Scanning...
+                        </>
+                      ) : (
+                        <>
+                          <ScanLine className="h-4 w-4 mr-2" />
+                          Scan for Hosts
+                        </>
+                      )}
+                    </Button>
+                    <Button onClick={() => setAddHostDialogOpen(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Host Manually
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Add to Profile Dialog */}
