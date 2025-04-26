@@ -45,7 +45,6 @@ interface HostCardProps {
   onOpenConfigDialog: (hostId: string) => void;
   onCreateConfig: (hostId: string, profileId?: string) => void;
   onFixConfig: (hostId: string) => void;
-  onDelete: (hostId: string) => void;
 }
 
 export function HostCard({ 
@@ -55,8 +54,7 @@ export function HostCard({
   onProfileChange, 
   onOpenConfigDialog,
   onCreateConfig,
-  onFixConfig,
-  onDelete
+  onFixConfig
 }: HostCardProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [instanceStatuses, setInstanceStatuses] = useState<InstanceStatus[]>([]);
@@ -318,7 +316,7 @@ export function HostCard({
             variant="outline" 
             size="sm"
             className="text-destructive"
-            onClick={() => onDelete(host.id)}
+            onClick={handleDeleteHost}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete Host
@@ -577,7 +575,7 @@ export function HostCard({
           variant="outline" 
           size="sm"
           className="text-destructive"
-          onClick={() => onDelete(host.id)}
+          onClick={handleDeleteHost}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           Delete Host
