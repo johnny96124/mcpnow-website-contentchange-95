@@ -28,7 +28,6 @@ interface AddToProfileDialogProps {
   onAddToProfile: (profileId: string) => void;
   serverDefinition: ServerDefinition | null;
   profiles: Profile[];
-  existingProfiles?: string[]; // IDs of profiles this server is already in
 }
 
 export function AddToProfileDialog({
@@ -37,14 +36,11 @@ export function AddToProfileDialog({
   onAddToProfile,
   serverDefinition,
   profiles,
-  existingProfiles = []
 }: AddToProfileDialogProps) {
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [showInfoBox, setShowInfoBox] = useState<boolean>(true);
   const [createProfileDialogOpen, setCreateProfileDialogOpen] = useState<boolean>(false);
   const { toast } = useToast();
-
-  const availableProfiles = profiles.filter(profile => !existingProfiles.includes(profile.id));
 
   const handleSubmit = () => {
     if (selectedProfileId) {
@@ -126,24 +122,6 @@ export function AddToProfileDialog({
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Select Profile
                 </label>
-                
-                {existingProfiles.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-sm text-amber-600 dark:text-amber-400 mb-2">
-                      This server is already in the following profiles:
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {profiles
-                        .filter(profile => existingProfiles.includes(profile.id))
-                        .map(profile => (
-                          <span key={profile.id} className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs px-2 py-1 rounded">
-                            {profile.name}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                )}
-                
                 <Select
                   value={selectedProfileId}
                   onValueChange={handleSelectChange}
@@ -152,9 +130,9 @@ export function AddToProfileDialog({
                     <SelectValue placeholder="Select a profile" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableProfiles.length > 0 ? (
+                    {profiles.length > 0 ? (
                       <>
-                        {availableProfiles.map((profile) => (
+                        {profiles.map((profile) => (
                           <SelectItem key={profile.id} value={profile.id}>
                             {profile.name}
                           </SelectItem>
@@ -167,7 +145,7 @@ export function AddToProfileDialog({
                     ) : (
                       <>
                         <SelectItem value="no-profiles" disabled>
-                          {profiles.length > 0 ? "Server is in all profiles" : "No profiles available"}
+                          No profiles available
                         </SelectItem>
                         <SelectItem value="create-new" className="text-primary flex items-center gap-2">
                           <PlusCircle className="h-4 w-4" />
@@ -183,7 +161,7 @@ export function AddToProfileDialog({
 
           <DialogFooter className="flex justify-between">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
+              Skip
             </Button>
             <Button
               onClick={handleSubmit}

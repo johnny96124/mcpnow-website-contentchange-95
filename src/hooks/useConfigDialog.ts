@@ -62,10 +62,6 @@ export function useConfigDialog(mockJsonConfig: any) {
     setConfigDialog(prev => ({ ...prev, isOpen }));
   };
   
-  const setConfigContent = (content: string) => {
-    setConfigDialog(prev => ({ ...prev, configContent: content }));
-  };
-  
   const resetConfigDialog = () => {
     setConfigDialog({
       isOpen: false,
@@ -85,7 +81,6 @@ export function useConfigDialog(mockJsonConfig: any) {
     openConfigDialog,
     closeConfigDialog,
     setDialogOpen,
-    setConfigContent,
     resetConfigDialog
   };
 }

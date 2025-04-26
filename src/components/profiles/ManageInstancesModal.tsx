@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown, ServerIcon, Trash } from "lucide-react";
+import { Check, ChevronsUpDown, ServerIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,16 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 // Ensure only one close mechanism is used
 import { 
   Command, 
@@ -56,8 +46,6 @@ export function ManageInstancesModal({
 }: ManageInstancesModalProps) {
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>(profile.instances);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
-  const [instanceToRemove, setInstanceToRemove] = useState<string | null>(null);
 
   // Reset selections when modal opens
   useEffect(() => {
@@ -81,19 +69,6 @@ export function ManageInstancesModal({
     });
   };
 
-  const handleRemoveClick = (instanceId: string) => {
-    setInstanceToRemove(instanceId);
-    setConfirmRemoveOpen(true);
-  };
-
-  const handleConfirmRemove = () => {
-    if (instanceToRemove) {
-      setSelectedInstanceIds(prev => prev.filter(id => id !== instanceToRemove));
-      setConfirmRemoveOpen(false);
-      setInstanceToRemove(null);
-    }
-  };
-
   // Filter out already selected instances for the dropdown
   const availableInstances = allInstances.filter(
     instance => !selectedInstanceIds.includes(instance.id)
@@ -105,137 +80,116 @@ export function ManageInstancesModal({
   );
 
   return (
-    <>
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Manage Instances for {profile.name}</DialogTitle>
-            <DialogDescription>
-              Add or remove server instances from this profile.
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Manage Instances for {profile.name}</DialogTitle>
+          <DialogDescription>
+            Add or remove server instances from this profile.
+          </DialogDescription>
+          {/* DialogContent already includes a default close button, 
+              so we remove any additional close buttons */}
+        </DialogHeader>
 
-          <div className="py-4 space-y-4">
-            {/* Add new instance dropdown */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
-              <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={searchOpen}
-                    className="w-full justify-between"
-                    disabled={availableInstances.length === 0}
-                  >
-                    {availableInstances.length > 0 
-                      ? "Select a server instance..." 
-                      : "No available instances"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search instances..." />
-                    <CommandEmpty>No instances found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>
-                        {availableInstances.map(instance => (
-                          <CommandItem
-                            key={instance.id}
-                            onSelect={() => {
-                              toggleInstance(instance.id);
-                              setSearchOpen(false);
-                            }}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center">
-                                <ServerIcon className="mr-2 h-4 w-4" />
-                                <span>{instance.name}</span>
-                              </div>
-                              <StatusIndicator 
-                                status={
-                                  instance.status === 'running' ? 'active' : 
-                                  instance.status === 'error' ? 'error' : 'inactive'
-                                } 
-                              />
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* List of currently selected instances */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
-              <ScrollArea className="h-[200px] rounded-md border">
-                {selectedInstances.length > 0 ? (
-                  <div className="p-0">
-                    {selectedInstances.map(instance => (
-                      <div 
-                        key={instance.id}
-                        className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
-                      >
-                        <div className="flex items-center">
-                          <StatusIndicator 
-                            status={
-                              instance.status === 'running' ? 'active' : 
-                              instance.status === 'error' ? 'error' : 'inactive'
-                            } 
-                          />
-                          <span className="ml-2">{instance.name}</span>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveClick(instance.id)}
+        <div className="py-4 space-y-4">
+          {/* Add new instance dropdown */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Add Server Instance</label>
+            <Popover open={searchOpen} onOpenChange={setSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={searchOpen}
+                  className="w-full justify-between"
+                  disabled={availableInstances.length === 0}
+                >
+                  {availableInstances.length > 0 
+                    ? "Select a server instance..." 
+                    : "No available instances"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search instances..." />
+                  <CommandEmpty>No instances found.</CommandEmpty>
+                  <CommandList>
+                    <CommandGroup>
+                      {availableInstances.map(instance => (
+                        <CommandItem
+                          key={instance.id}
+                          onSelect={() => {
+                            toggleInstance(instance.id);
+                            setSearchOpen(false);
+                          }}
                         >
-                          <Trash className="h-3.5 w-3.5 mr-1" />
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    No instances selected
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center">
+                              <ServerIcon className="mr-2 h-4 w-4" />
+                              <span>{instance.name}</span>
+                            </div>
+                            <StatusIndicator 
+                              status={
+                                instance.status === 'running' ? 'active' : 
+                                instance.status === 'error' ? 'error' : 'inactive'
+                              } 
+                            />
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {/* List of currently selected instances */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Selected Instances ({selectedInstanceIds.length})</label>
+            <ScrollArea className="h-[200px] rounded-md border">
+              {selectedInstances.length > 0 ? (
+                <div className="p-0">
+                  {selectedInstances.map(instance => (
+                    <div 
+                      key={instance.id}
+                      className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
+                    >
+                      <div className="flex items-center">
+                        <StatusIndicator 
+                          status={
+                            instance.status === 'running' ? 'active' : 
+                            instance.status === 'error' ? 'error' : 'inactive'
+                          } 
+                        />
+                        <span className="ml-2">{instance.name}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => toggleInstance(instance.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No instances selected
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        </div>
 
-      <AlertDialog open={confirmRemoveOpen} onOpenChange={setConfirmRemoveOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Server Instance</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this instance from the profile? This won't delete the server instance itself.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setInstanceToRemove(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmRemove}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
