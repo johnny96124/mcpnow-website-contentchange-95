@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,10 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { ConnectionStatus, Host, profiles, ServerDefinition } from "@/data/mockData";
+import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
-import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -36,7 +34,6 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
-  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
 
   const {
     hostProfiles,
@@ -179,13 +176,6 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
-  const handleAddServers = (servers: ServerDefinition[]) => {
-    toast({
-      title: "Servers added",
-      description: `Successfully added ${servers.length} servers`
-    });
-  };
-
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -205,9 +195,9 @@ const Hosts = () => {
                 Scan for Hosts
               </>}
           </Button>
-          <Button onClick={() => setAddServerDialogOpen(true)}>
+          <Button onClick={() => setAddHostDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
-            Add Server
+            Add Host Manually
           </Button>
         </div>
       </div>
@@ -297,12 +287,6 @@ const Hosts = () => {
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
-      
-      <AddServerToHostDialog
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onAddServers={handleAddServers}
-      />
     </div>
   );
 };
