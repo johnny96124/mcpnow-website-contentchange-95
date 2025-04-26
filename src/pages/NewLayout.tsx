@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -509,18 +508,18 @@ const NewLayout = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[220px]">Name</TableHead>
-                    
                     <TableHead>Type</TableHead>
+                    <TableHead className="max-w-[160px]">Connection</TableHead>
                     <TableHead>Profiles</TableHead>
-                    <TableHead>Connection</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredServers.map(server => {
-                const serverProfiles = getProfilesForServer(server.id);
-                const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
-                return <TableRow key={server.id}>
+                    const serverProfiles = getProfilesForServer(server.id);
+                    const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
+                    return (
+                      <TableRow key={server.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <span className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2" onClick={() => handleOpenServerDetails(server)}>
@@ -533,15 +532,21 @@ const NewLayout = () => {
                         <TableCell>
                           <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
                         </TableCell>
-                        <TableCell>
-                          {serverProfiles.length > 0 ? <div className="flex flex-wrap gap-1 max-w-[200px]">
-                              {serverProfiles.map((profile, index) => <Badge key={index} variant="secondary" className="whitespace-nowrap">
-                                  {profile.name}
-                                </Badge>)}
-                            </div> : <span className="text-muted-foreground text-sm">No profiles</span>}
-                        </TableCell>
                         <TableCell className="max-w-[160px] truncate">
                           <span className="text-sm font-mono">{server.connectionDetails}</span>
+                        </TableCell>
+                        <TableCell>
+                          {serverProfiles.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {serverProfiles.map((profile, index) => (
+                                <Badge key={index} variant="secondary" className="whitespace-nowrap">
+                                  {profile.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">No profiles</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
@@ -575,8 +580,9 @@ const NewLayout = () => {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>;
-              })}
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
