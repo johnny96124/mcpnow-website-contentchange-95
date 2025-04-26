@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader } from "lucide-react";
+import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -589,7 +589,7 @@ const NewLayout = () => {
                                 onClick={() => handleRemoveFromProfile(server.id)}
                                 className="text-purple-600 hover:text-purple-700 hover:border-purple-600"
                               >
-                                <MinusCircle className="h-3.5 w-3.5 mr-1.5" />
+                                <Minus className="h-3.5 w-3.5 mr-1.5" />
                                 Remove from Profile
                               </Button>
                             )}
