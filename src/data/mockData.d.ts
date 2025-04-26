@@ -50,6 +50,7 @@ export interface ServerInstance {
 }
 
 export type EndpointType = 'HTTP_SSE' | 'STDIO';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
@@ -62,6 +63,18 @@ export interface Profile {
   endpoint: string;
   instances: string[];
   description?: string;
+}
+
+export interface Host {
+  id: string;
+  name: string;
+  profileId?: string;
+  configStatus: 'configured' | 'misconfigured' | 'unknown';
+  connectionStatus: ConnectionStatus;
+  configPath?: string;
+  icon?: string;
+  needsUpdate?: boolean;
+  servers?: { id: string; name: string }[];
 }
 
 export const profiles: Profile[];
