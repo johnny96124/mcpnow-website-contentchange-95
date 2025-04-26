@@ -1,5 +1,5 @@
-import { ServerInstance, ServerDefinition } from "@/data/mockData";
-import { ServerTool } from "@/types/events";
+import { useState, useEffect } from "react";
+import { ServerInstance, serverDefinitions, Tool } from "@/data/mockData";
 import {
   Dialog,
   DialogContent,
@@ -8,195 +8,235 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogCancel,
-  AlertDialogAction,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ChevronDown, ChevronUp, AlertTriangle, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { ServerHistoryDialog } from "./ServerHistoryDialog";
 
 interface ServerDebugDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   server: ServerInstance | null;
-  definition: ServerDefinition | null;
 }
 
-interface ToolExecutionResult {
-  toolName: string;
-  result: any;
-  error?: any;
+interface ToolParameterValue {
+  [key: string]: string;
 }
 
 export function ServerDebugDialog({
   open,
   onOpenChange,
-  server,
-  definition
+  server
 }: ServerDebugDialogProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
+  const [expandedTools, setExpandedTools] = useState<Record<string, boolean>>({});
+  const [toolsResults, setToolsResults] = useState<Record<string, { success: boolean; message: string; isLoading: boolean }>>({});
+  const [paramValues, setParamValues] = useState<Record<string, ToolParameterValue>>({});
   const { toast } = useToast();
-  const [executionResults, setExecutionResults] = useState<ToolExecutionResult[]>([]);
-
-  const handleExecute = async (tool: ServerTool) => {
-    try {
-      // Simulate execution and result
-      const result = {
-        status: "success",
-        message: `Tool "${tool.name}" executed successfully.`,
-        timestamp: new Date().toISOString(),
-      };
-
-      setExecutionResults((prevResults) => [
-        ...prevResults,
-        { toolName: tool.name, result: result },
-      ]);
-
-      toast({
-        title: "Tool Executed",
-        description: `Tool "${tool.name}" executed successfully.`,
+  
+  const definition = server ? serverDefinitions.find(def => def.id === server.definitionId) : null;
+  
+  useEffect(() => {
+    if (definition?.tools) {
+      const initialValues: Record<string, ToolParameterValue> = {};
+      
+      definition.tools.forEach(tool => {
+        initialValues[tool.id] = {};
+        if (tool.parameters) {
+          tool.parameters.forEach(param => {
+            initialValues[tool.id][param.name] = '';
+          });
+        }
       });
-    } catch (error: any) {
-      console.error(`Error executing tool "${tool.name}":`, error);
-
-      setExecutionResults((prevResults) => [
-        ...prevResults,
-        { toolName: tool.name, result: null, error: error.message || "Unknown error" },
-      ]);
-
-      toast({
-        variant: "destructive",
-        title: "Execution Error",
-        description: `Failed to execute tool "${tool.name}": ${error.message || "Unknown error"}`,
-      });
+      
+      setParamValues(initialValues);
     }
-  };
-
-  const handleDeleteAction = (toolId: string) => {
-    setSelectedToolId(toolId);
-    setConfirmDelete(true);
-  };
-
-  const handleConfirmDelete = () => {
-    toast({
-      title: "Action deleted",
-      description: "The selected action has been removed successfully"
-    });
-    setConfirmDelete(false);
-    setSelectedToolId(null);
+  }, [definition]);
+  
+  const handleParamChange = (toolId: string, paramName: string, value: string) => {
+    setParamValues(prev => ({
+      ...prev,
+      [toolId]: {
+        ...prev[toolId],
+        [paramName]: value
+      }
+    }));
   };
   
+  const handleExecuteTool = (tool: Tool) => {
+    setToolsResults(prev => ({
+      ...prev,
+      [tool.id]: { success: false, message: "", isLoading: true }
+    }));
+    
+    toast({
+      title: "工具执行中",
+      description: `正在执行 ${tool.name}...`,
+    });
+    
+    setTimeout(() => {
+      const success = Math.random() > 0.3;
+      const resultMessage = success 
+        ? `Tool executed successfully with parameters: ${JSON.stringify(paramValues[tool.id])}` 
+        : "执行失败: 无法连接到服务器或参数无效";
+      
+      setToolsResults(prev => ({
+        ...prev,
+        [tool.id]: { 
+          success: success, 
+          message: resultMessage,
+          isLoading: false
+        }
+      }));
+      
+      toast({
+        title: success ? "执行成功" : "执行失败",
+        description: success 
+          ? `${tool.name} 已成功执行，请检查结果` 
+          : `${tool.name} 执行过程中遇到错误，请重试`,
+        variant: success ? "default" : "destructive"
+      });
+    }, 2000);
+  };
+  
+  const toggleTool = (toolId: string) => {
+    setExpandedTools(prev => ({
+      ...prev,
+      [toolId]: !prev[toolId]
+    }));
+  };
+  
+  if (!server || !definition) {
+    return null;
+  }
+  
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20" hideClose>
-          <DialogHeader className="p-6 pb-4">
-            <DialogTitle className="text-xl">
-              Debug Tools - {server?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Execute and monitor server actions for debugging purposes
-            </DialogDescription>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px] p-0 gap-0 bg-gradient-to-b from-background to-muted/20" hideClose>
+        <DialogHeader className="p-6 pb-4">
+          <DialogTitle className="text-xl">
+            Debug Tools - {server?.name}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Execute and test server tools
+          </DialogDescription>
+        </DialogHeader>
 
-          <ScrollArea className="h-[600px] px-6">
-            <div className="space-y-4">
-              {definition?.tools?.map((tool) => (
+        <ScrollArea className="h-[600px] px-6">
+          <div className="space-y-4">
+            {definition?.tools?.map((tool) => (
+              <div 
+                key={tool.id} 
+                className="group rounded-lg border bg-card transition-all duration-200 hover:shadow-md"
+              >
                 <div 
-                  key={tool.id}
-                  className="border rounded-md p-4 bg-background space-y-4"
+                  className="flex items-center justify-between p-4 cursor-pointer"
+                  onClick={() => toggleTool(tool.id)}
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="font-medium text-lg">{tool.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {tool.description}
-                      </p>
-                    </div>
+                  <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Debug Tool</Badge>
+                      <h3 className="font-medium text-base tracking-tight">{tool.name}</h3>
+                      <Badge variant="secondary" className="font-mono text-xs">
+                        Tool
+                      </Badge>
                     </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {tool.description || "No description available"}
+                    </p>
                   </div>
-
-                  <Separator />
-
-                  {tool.parameters && tool.parameters.length > 0 && (
-                    <div className="space-y-4">
-                      <h4 className="text-sm font-medium">Parameters</h4>
-                      <div className="grid gap-4">
-                        {tool.parameters.map((param) => (
-                          <div key={param.name}>
-                            <Label htmlFor={`${tool.id}-${param.name}`}>
-                              {param.name}
-                            </Label>
-                            <Input
-                              id={`${tool.id}-${param.name}`}
-                              placeholder={param.type}
-                              className="mt-1"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  {expandedTools[tool.id] ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
                   )}
-
-                  <div className="flex justify-between items-center">
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => handleDeleteAction(tool.id)}
-                    >
-                      Delete
-                    </Button>
-                    <Button onClick={() => handleExecute(tool)}>
-                      Execute
-                    </Button>
-                  </div>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-          
-          <DialogFooter className="p-6 pt-4 border-t">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Action</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this action? This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmDelete(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+                
+                {expandedTools[tool.id] && (
+                  <div className="border-t bg-muted/50 p-4 space-y-4">
+                    {tool.parameters && tool.parameters.length > 0 && (
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium text-foreground/80 mb-3">
+                          Parameters
+                        </h4>
+                        <div className="grid gap-4">
+                          {tool.parameters.map((param) => (
+                            <div
+                              key={param.name}
+                              className="bg-background rounded-lg p-4 border shadow-sm"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <Label htmlFor={`${tool.id}-${param.name}`} className="font-mono text-xs bg-primary/5 px-2 py-1 rounded text-primary/90">
+                                  {param.name}
+                                </Label>
+                                <Badge variant="outline" className="text-[10px]">
+                                  {param.type}
+                                </Badge>
+                                {param.required && (
+                                  <Badge variant="destructive" className="text-[10px]">
+                                    required
+                                  </Badge>
+                                )}
+                              </div>
+                              {param.description && (
+                                <p className="text-sm text-muted-foreground mb-3">
+                                  {param.description}
+                                </p>
+                              )}
+                              <div className="mt-2">
+                                  <Input
+                                    id={`${tool.id}-${param.name}`}
+                                    value={paramValues[tool.id]?.[param.name] || ''}
+                                    onChange={(e) => handleParamChange(tool.id, param.name, e.target.value)}
+                                    placeholder={`Enter ${param.name}...`}
+                                    className="bg-background"
+                                  />
+                                </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {toolsResults[tool.id] && !toolsResults[tool.id].isLoading && (
+                      <Alert variant={toolsResults[tool.id].success ? "default" : "destructive"} 
+                            className={`mt-4 ${toolsResults[tool.id].success ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : ''}`}>
+                        {toolsResults[tool.id].success ? (
+                          <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4" />
+                        )}
+                        <AlertDescription className="ml-2">
+                          {toolsResults[tool.id].message}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="flex justify-end pt-2">
+                      <Button 
+                        onClick={() => handleExecuteTool(tool)}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        disabled={toolsResults[tool.id]?.isLoading}
+                      >
+                        Execute
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+        
+        <DialogFooter className="p-6 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
