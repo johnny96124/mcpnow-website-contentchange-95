@@ -35,13 +35,15 @@ interface ServerDetailsProps {
   onOpenChange: (open: boolean) => void;
   server: ServerInstance | null;
   onDelete: (id: string) => void;
+  onStatusChange?: (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => void;
 }
 
 export function ServerDetails({
   open,
   onOpenChange,
   server,
-  onDelete
+  onDelete,
+  onStatusChange
 }: ServerDetailsProps) {
   const [activeTab, setActiveTab] = useState("general");
   const [confirmDelete, setConfirmDelete] = useState(false);

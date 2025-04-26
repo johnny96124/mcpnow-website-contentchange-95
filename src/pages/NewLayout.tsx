@@ -907,6 +907,8 @@ const NewLayout = () => {
 
       <ConfigFileDialog
         {...configDialog}
+        open={configDialog.isOpen}
+        initialConfig={configDialog.configContent}
         onOpenChange={setDialogOpen}
         onSave={handleUpdateConfig}
       />
@@ -926,8 +928,8 @@ const NewLayout = () => {
       <DeleteProfileDialog 
         open={profileToDelete !== null}
         onOpenChange={() => setProfileToDelete(null)}
-        profile={profileToDelete}
-        onDelete={confirmDeleteProfile}
+        profileName={profileToDelete?.name || ""}
+        onConfirmDelete={confirmDeleteProfile}
       />
 
       <AddToProfilesDialog
