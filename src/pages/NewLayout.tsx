@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Plus, 
@@ -587,8 +588,6 @@ const NewLayout = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
-                            
-                            
                             <Button 
                               variant="outline" 
                               size="sm"
@@ -845,8 +844,6 @@ const NewLayout = () => {
                                   </TableCell>
                                   <TableCell className="text-right">
                                     <div className="flex justify-end gap-1.5">
-                                      
-                                      
                                       <Button 
                                         variant="outline" 
                                         size="sm"
@@ -871,3 +868,195 @@ const NewLayout = () => {
                             </Button>
                             <Button size="sm" onClick={() => handleAddServerToHost(selectedHost)}>
                               Add Server
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+              <Server className="h-10 w-10 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No Hosts Found</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                {searchQuery ? `No results for "${searchQuery}"` : "Add your first host to get started."}
+              </p>
+              {searchQuery ? (
+                <Button onClick={() => setSearchQuery("")}>Clear Search</Button>
+              ) : (
+                <Button onClick={() => setAddHostDialogOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Host
+                </Button>
+              )}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Dialogs */}
+      <AddServerDialog 
+        open={addServerDialogOpen}
+        onOpenChange={setAddServerDialogOpen}
+        onCreateServer={handleAddServerSuccess}
+      />
+
+      <AddHostDialog
+        open={addHostDialogOpen}
+        onOpenChange={setAddHostDialogOpen}
+        onSuccess={handleAddHostSuccess}
+      />
+
+      <ServerDetails
+        open={serverDetailOpen}
+        onOpenChange={setServerDetailOpen}
+        server={selectedServerDetails}
+      />
+
+      <ConfigFileDialog 
+        open={configDialog.isOpen}
+        onOpenChange={setDialogOpen}
+        initialConfig={JSON.stringify(mockJsonConfig, null, 2)}
+        configPath={configDialog.configPath}
+        title="Host Configuration"
+        onSave={handleUpdateConfig}
+      />
+
+      {/* Add to Profile Dialog */}
+      <Dialog open={isAddToProfileDialogOpen} onOpenChange={setIsAddToProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Server to Profile</DialogTitle>
+            <DialogDescription>
+              Select a profile to add the server to, or create a new profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmAddToProfile}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profilesList.map(profile => (
+                    <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateProfileDialogOpen(true)}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create New Profile
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Profile Dialog */}
+      <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Create a new profile to organize your servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="name" className="text-right col-span-1">
+                Name
+              </label>
+              <Input
+                id="name"
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateProfileDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewProfile}>Create Profile</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Server to Host Dialog */}
+      <Dialog open={addServerToHostOpen} onOpenChange={setAddServerToHostOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Server to Host</DialogTitle>
+            <DialogDescription>
+              Select a server to add to {selectedHostForAddServer?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmAddServerToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a server" />
+                </SelectTrigger>
+                <SelectContent>
+                  {serversList.map(server => (
+                    <SelectItem key={server.id} value={server.id}>{server.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddServerToHostOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => confirmAddServerToHost(serversList[0]?.id)}>
+              Add Server
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Profile to Host Dialog */}
+      <Dialog open={importByProfileOpen} onOpenChange={setImportByProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Import Profile</DialogTitle>
+            <DialogDescription>
+              Select a profile to import to {selectedHostForAddServer?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmImportProfileToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profilesList.map(profile => (
+                    <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportByProfileOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => confirmImportProfileToHost(profilesList[0]?.id)}>
+              Import Profile
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default NewLayout;
