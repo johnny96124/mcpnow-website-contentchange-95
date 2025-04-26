@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, ServerCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { AddHostDialog } from "@/components/hosts/AddHostDialog";
-import { ConnectionStatus, Host, profiles } from "@/data/mockData";
+import { ConnectionStatus, Host, profiles, ServerDefinition } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";

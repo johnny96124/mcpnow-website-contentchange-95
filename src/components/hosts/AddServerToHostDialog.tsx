@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ServerDefinition, profiles } from "@/data/mockData";
+import { ServerDefinition, serverDefinitions, profiles } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 
