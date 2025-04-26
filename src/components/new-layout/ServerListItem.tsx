@@ -22,7 +22,7 @@ export function ServerListItem({ server, onUpdateServer }: ServerListItemProps) 
         <div className="flex-1">
           <h3 className="font-medium">{server.name}</h3>
           <p className="text-sm text-muted-foreground">
-            {server.type === "HTTP_SSE" ? "HTTP Server" : "STDIO Server"}
+            {server.definitionId ? "HTTP Server" : "STDIO Server"}
           </p>
         </div>
       </div>
@@ -37,7 +37,14 @@ export function ServerListItem({ server, onUpdateServer }: ServerListItemProps) 
           });
           setShowEditDialog(false);
         }}
-        serverDefinition={server}
+        serverDefinition={{
+          id: server.definitionId || "",
+          name: server.name,
+          type: "HTTP_SSE", // Default to HTTP_SSE since we don't have type in ServerInstance
+          version: "1.0.0",
+          description: "",
+          downloads: 0
+        }}
       />
     </>
   );

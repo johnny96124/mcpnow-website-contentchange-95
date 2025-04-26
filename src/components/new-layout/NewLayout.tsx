@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -79,7 +80,7 @@ export default function NewLayout() {
       <AddServerDialog
         open={showAddServerDialog}
         onOpenChange={setShowAddServerDialog}
-        onAddServer={handleAddServer}
+        onCreateServer={handleAddServer}
       />
       
       <AddHostDialog
