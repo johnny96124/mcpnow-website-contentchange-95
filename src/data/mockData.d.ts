@@ -1,4 +1,3 @@
-
 export interface ServerDefinition {
   id: string;
   name: string;
