@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ServerInstance, serverDefinitions } from "@/data/mockData";
 import { PageHeader } from "@/components/ui/page-header";
@@ -13,7 +12,6 @@ export default function NewLayout() {
   const [openDebugDialog, setOpenDebugDialog] = useState(false);
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
 
-  // Example server for demonstration
   const mockServer: ServerInstance = {
     id: "server-123",
     name: "Production API",
