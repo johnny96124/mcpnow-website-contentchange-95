@@ -400,6 +400,25 @@ const NewLayout = () => {
     setProfileToDelete(null);
   };
 
+  const handleRemoveFromProfile = (serverId: string) => {
+    if (selectedProfileId === "all") return;
+    
+    setProfilesList(prev => prev.map(profile => {
+      if (profile.id === selectedProfileId) {
+        return {
+          ...profile,
+          instances: profile.instances.filter(id => id !== serverId)
+        };
+      }
+      return profile;
+    }));
+
+    toast({
+      title: "Server Removed",
+      description: "Server has been removed from the profile"
+    });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
@@ -550,10 +569,22 @@ const NewLayout = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
-                            <Button variant="outline" size="sm" onClick={() => handleAddToProfile(server.id)}>
-                              <Plus className="h-3.5 w-3.5 mr-1.5" />
-                              Profile
-                            </Button>
+                            {selectedProfileId === "all" ? (
+                              <Button variant="outline" size="sm" onClick={() => handleAddToProfile(server.id)}>
+                                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                Profile
+                              </Button>
+                            ) : (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleRemoveFromProfile(server.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                                Remove
+                              </Button>
+                            )}
                             
                             <Button 
                               variant="outline" 
