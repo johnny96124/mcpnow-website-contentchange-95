@@ -14,6 +14,7 @@ import { ConnectionStatus, Host, profiles } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
+import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -34,6 +35,7 @@ const Hosts = () => {
   const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
+  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
 
   const {
     hostProfiles,
@@ -176,6 +178,13 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
+  const handleAddServers = (selectedServers: ServerDefinition[]) => {
+    toast({
+      title: "Servers added",
+      description: `Successfully added ${selectedServers.length} servers to the host.`
+    });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -287,6 +296,12 @@ const Hosts = () => {
       <ConfigFileDialog open={configDialog.isOpen} onOpenChange={setDialogOpen} configPath={configDialog.configPath} initialConfig={configDialog.configContent} onSave={handleUpdateConfig} profileEndpoint={configDialog.profileEndpoint} needsUpdate={configDialog.needsUpdate} allowPathEdit={configDialog.allowPathEdit} isViewOnly={configDialog.isViewOnly} isFixMode={configDialog.isFixMode} isUpdateMode={configDialog.isUpdateMode} isCreateMode={configDialog.isCreateMode} />
       
       <AddHostDialog open={addHostDialogOpen} onOpenChange={setAddHostDialogOpen} onAddHost={handleAddHost} />
+      
+      <AddServerToHostDialog
+        open={addServerDialogOpen}
+        onOpenChange={setAddServerDialogOpen}
+        onAddServers={handleAddServers}
+      />
     </div>
   );
 };
