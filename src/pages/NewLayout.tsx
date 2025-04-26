@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Plus, Minus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
+import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -508,18 +509,18 @@ const NewLayout = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[220px]">Name</TableHead>
+                    
                     <TableHead>Type</TableHead>
-                    <TableHead className="max-w-[160px]">Connection</TableHead>
                     <TableHead>Profiles</TableHead>
+                    <TableHead>Connection</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredServers.map(server => {
-                    const serverProfiles = getProfilesForServer(server.id);
-                    const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
-                    return (
-                      <TableRow key={server.id}>
+                const serverProfiles = getProfilesForServer(server.id);
+                const status = serverInstanceStatuses[server.id] || server.status || 'stopped';
+                return <TableRow key={server.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <span className="cursor-pointer hover:text-primary transition-colors flex items-center gap-2" onClick={() => handleOpenServerDetails(server)}>
@@ -532,40 +533,21 @@ const NewLayout = () => {
                         <TableCell>
                           <EndpointLabel type={getDefinitionType(server.definitionId) as any} />
                         </TableCell>
+                        <TableCell>
+                          {serverProfiles.length > 0 ? <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {serverProfiles.map((profile, index) => <Badge key={index} variant="secondary" className="whitespace-nowrap">
+                                  {profile.name}
+                                </Badge>)}
+                            </div> : <span className="text-muted-foreground text-sm">No profiles</span>}
+                        </TableCell>
                         <TableCell className="max-w-[160px] truncate">
                           <span className="text-sm font-mono">{server.connectionDetails}</span>
                         </TableCell>
-                        <TableCell>
-                          {serverProfiles.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 max-w-[200px]">
-                              {serverProfiles.map((profile, index) => (
-                                <Badge key={index} variant="secondary" className="whitespace-nowrap">
-                                  {profile.name}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">No profiles</span>
-                          )}
-                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1.5">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleAddToProfile(server.id)}
-                            >
-                              {selectedProfileId !== "all" ? (
-                                <>
-                                  <Minus className="h-3.5 w-3.5 mr-1.5" />
-                                  Profile
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                                  Profile
-                                </>
-                              )}
+                            <Button variant="outline" size="sm" onClick={() => handleAddToProfile(server.id)}>
+                              <Plus className="h-3.5 w-3.5 mr-1.5" />
+                              Profile
                             </Button>
                             
                             <Button 
@@ -593,9 +575,8 @@ const NewLayout = () => {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                      </TableRow>;
+              })}
                 </TableBody>
               </Table>
             </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
@@ -765,4 +746,206 @@ const NewLayout = () => {
                     </CardContent>
                   </Card>
                 </div>}
-            </div> : <div className="flex flex
+            </div> : <div className="flex flex-col items-center justify-center h-[400px] border border-dashed rounded-md p-6">
+              <Server className="h-10 w-10 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">No Hosts Found</h3>
+              <p className="text-muted-foreground text-center mb-4">
+                {searchQuery ? `No results for "${searchQuery}"` : "Add your first host to get started."}
+              </p>
+              {searchQuery ? <Button onClick={() => setSearchQuery("")}>Clear Search</Button> : <Button onClick={() => setAddHostDialogOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Host
+                </Button>}
+            </div>}
+        </TabsContent>
+      </Tabs>
+
+      <AddServerDialog 
+        open={addServerDialogOpen} 
+        onOpenChange={setAddServerDialogOpen} 
+        onAddServer={handleAddServerSuccess} 
+      />
+
+      <AddHostDialog 
+        open={addHostDialogOpen} 
+        onOpenChange={setAddHostDialogOpen} 
+        onAddHost={handleAddHostSuccess} 
+      />
+
+      <ServerDetails 
+        open={serverDetailOpen} 
+        onOpenChange={setServerDetailOpen} 
+        server={selectedServerDetails} 
+        onDelete={handleDeleteServer} 
+      />
+
+      <ConfigFileDialog 
+        open={configDialog.isOpen} 
+        onOpenChange={setDialogOpen} 
+        initialConfig={JSON.stringify(mockJsonConfig, null, 2)} 
+        configPath={configDialog.configPath} 
+        onSave={handleUpdateConfig} 
+      />
+
+      <ServerDebugDialog
+        open={isDebugDialogOpen}
+        onOpenChange={setIsDebugDialogOpen}
+        server={selectedDebugServer}
+      />
+
+      <ServerHistoryDialog
+        open={messageHistoryOpen}
+        onOpenChange={setMessageHistoryOpen}
+        server={selectedDebugServer}
+      />
+
+      <DeleteProfileDialog
+        open={!!profileToDelete}
+        onOpenChange={(open) => !open && setProfileToDelete(null)}
+        profileName={profileToDelete?.name || ""}
+        onConfirmDelete={confirmDeleteProfile}
+      />
+
+      <Dialog open={isAddToProfileDialogOpen} onOpenChange={setIsAddToProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Server to Profile</DialogTitle>
+            <DialogDescription>
+              Select a profile to add the server to, or create a new profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmAddToProfile}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profilesList.map(profile => (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setCreateProfileDialogOpen(true)} className="w-full">
+                Create New Profile
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsAddToProfileDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Create a new profile to group and manage your servers together.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profile-name" className="text-sm font-medium">
+                Profile Name
+              </label>
+              <Input
+                id="profile-name"
+                placeholder="Enter profile name (e.g. Development Servers)"
+                value={newProfileName}
+                onChange={(e) => setNewProfileName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setNewProfileName("");
+                setCreateProfileDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateNewProfile}>
+              Create Profile
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addServerToHostOpen} onOpenChange={setAddServerToHostOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Server to Host</DialogTitle>
+            <DialogDescription>
+              {selectedHostForAddServer && `Select a server to add to ${selectedHostForAddServer.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmAddServerToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a server" />
+                </SelectTrigger>
+                <SelectContent>
+                  {serversList.map(server => (
+                    <SelectItem key={server.id} value={server.id}>
+                      {server.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAddServerToHostOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={importByProfileOpen} onOpenChange={setImportByProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Import Profile to Host</DialogTitle>
+            <DialogDescription>
+              {selectedHostForAddServer && `Select a profile to import to ${selectedHostForAddServer.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmImportProfileToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profilesList.map(profile => (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setImportByProfileOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default NewLayout;
