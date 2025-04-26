@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ServerInstance, serverDefinitions } from "@/data/mockData";
 import {
@@ -89,6 +90,19 @@ export function ServerDetails({
   
   // Find the definition with null checking for server
   const definition = server && serverDefinitions.find(def => def.id === server.definitionId);
+  
+  // Add the missing handleViewResourceDetails function
+  const handleViewResourceDetails = () => {
+    // For now, just show a toast to indicate this functionality
+    // would typically open the resource details in a new view
+    toast({
+      title: "Resource Details",
+      description: `Viewing details for ${definition?.name || "Unknown"} resource`,
+    });
+    
+    // In a real application, this might navigate to a dedicated page
+    // or open another dialog with more detailed information
+  };
   
   const handleDelete = () => {
     if (confirmDelete && server) {
