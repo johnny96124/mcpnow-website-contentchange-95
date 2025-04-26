@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader, X, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,14 +19,14 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { serverInstances, serverDefinitions, profiles, hosts, Profile, ServerInstance, Host } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
-import { AddHostDialog } from "@/components/new-layout/AddHostDialog";
+import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
-import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
+import { DeleteProfileDialog } from "@/components/profiles/DeleteProfileDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -46,8 +47,14 @@ const NewLayout = () => {
   const [isDeleteProfileDialogOpen, setIsDeleteProfileDialogOpen] = useState(false);
   const [selectedProfileToDelete, setSelectedProfileToDelete] = useState<Profile | null>(null);
   const { toast } = useToast();
-  const { isOpen: isConfigDialogOpen, openConfigDialog, closeConfigDialog, configContent, setConfigContent } = useConfigDialog();
-  const { profilesWithHosts, addProfileToHost, removeProfileFromHost } = useHostProfiles();
+  
+  // Fix: Pass mockJsonConfig to useConfigDialog hook
+  const configDialogUtils = useConfigDialog(mockJsonConfig);
+  const { configDialog, openConfigDialog, closeConfigDialog } = configDialogUtils;
+  
+  // Fix: Use the correct properties from useHostProfiles
+  const hostProfilesUtils = useHostProfiles();
+  const { hostProfiles, allProfiles, handleProfileChange, addInstanceToProfile } = hostProfilesUtils;
 
   const [servers, setServers] = useState(serverInstances);
   const [hostsList, setHosts] = useState(hosts);
@@ -131,25 +138,36 @@ const NewLayout = () => {
   };
 
   const handleConfigEdit = (config: string) => {
-    setConfigContent(config);
-    openConfigDialog();
+    // Fix: Use openConfigDialog with required parameters
+    openConfigDialog("default", "/path/to/config.json", undefined, false, false, false);
   };
 
   const handleProfileAddToHost = (hostId: string, profileId: string) => {
-    addProfileToHost(hostId, profileId);
+    // Use handleProfileChange instead of addProfileToHost
+    handleProfileChange(hostId, profileId);
+    
+    // Update local state
     setHosts(prevHosts =>
       prevHosts.map(host =>
-        host.id === hostId ? { ...host, profiles: [...(host.profiles || []), profileId] } : host
+        host.id === hostId ? { 
+          ...host, 
+          // Fix: Use profileId instead of profiles array
+          profileId: profileId
+        } : host
       )
     );
   };
 
   const handleProfileRemoveFromHost = (hostId: string, profileId: string) => {
-    removeProfileFromHost(hostId, profileId);
+    // Use handleProfileChange to remove profile (set to empty string)
+    handleProfileChange(hostId, "");
+    
+    // Update local state
     setHosts(prevHosts =>
       prevHosts.map(host => ({
         ...host,
-        profiles: host.profiles ? host.profiles.filter(id => id !== profileId) : [],
+        // Fix: Set profileId to empty string if it matches the profileId to remove
+        profileId: host.profileId === profileId ? "" : host.profileId
       }))
     );
   };
@@ -166,10 +184,12 @@ const NewLayout = () => {
 
   const handleDeleteProfile = (profileToDelete: Profile) => {
     setProfiles(profiles.filter(profile => profile.id !== profileToDelete.id));
+    // Update hosts that had this profile
     setHosts(prevHosts =>
       prevHosts.map(host => ({
         ...host,
-        profiles: host.profiles ? host.profiles.filter(id => id !== profileToDelete.id) : [],
+        // Fix: Clear profileId if it matches the deleted profile
+        profileId: host.profileId === profileToDelete.id ? "" : host.profileId
       }))
     );
     toast({
