@@ -27,6 +27,7 @@ import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
 import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
 import { AddToCollectionsDialog } from "@/components/profiles/AddToCollectionsDialog";
+import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -364,11 +365,11 @@ const NewLayout = () => {
     setAddServerToHostOpen(true);
   };
 
-  const confirmAddServerToHost = (serverId: string) => {
+  const confirmAddServerToHost = (servers: ServerInstance[]) => {
     if (!selectedHostForAddServer) return;
     toast({
-      title: "Server Added to Host",
-      description: `Server has been successfully added to ${selectedHostForAddServer.name}`
+      title: "Servers Added",
+      description: `Successfully added ${servers.length} servers to ${selectedHostForAddServer.name}.`
     });
 
     setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
@@ -938,6 +939,26 @@ const NewLayout = () => {
         server={selectedServerForProfile}
         collections={profilesList}
         serverCollections={selectedServerForProfile ? getProfilesForServer(selectedServerForProfile.id) : []}
+      />
+
+      <AddServerToHostDialog
+        open={addServerToHostOpen}
+        onOpenChange={setAddServerToHostOpen}
+        onAddServers={(servers) => {
+          if (selectedHostForAddServer) {
+            toast({
+              title: "Servers Added",
+              description: `Successfully added ${servers.length} servers to ${selectedHostForAddServer.name}.`
+            });
+            
+            setHostsList(prev => prev.map(h => h.id === selectedHostForAddServer.id ? {
+              ...h,
+              configStatus: h.configStatus === "unknown" ? "configured" : h.configStatus,
+              connectionStatus: "connected"
+            } : h));
+          }
+          setAddServerToHostOpen(false);
+        }}
       />
 
       <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
