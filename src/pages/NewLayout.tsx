@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, PlusCircle, ChevronDown, ChevronUp, Search, Filter, Settings2, RefreshCw, ArrowRight, Server, FileText, ScanLine, Edit, Trash2, Wrench, MessageSquare, Circle, CircleDot, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -376,7 +377,8 @@ const NewLayout = () => {
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
-  return <div className="space-y-6 animate-fade-in">
+  return (
+    <div className="space-y-6 animate-fade-in">
       <Tabs value={currentTab} onValueChange={value => setCurrentTab(value as "servers" | "hosts")} className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
