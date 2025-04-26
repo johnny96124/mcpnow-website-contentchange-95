@@ -301,13 +301,11 @@ const NewLayout = () => {
   };
 
   const handleOpenDebugTools = (server: ServerInstance) => {
-    // Set loading state for this server
     setServerInstanceStatuses(prev => ({
       ...prev,
       [server.id]: { ...prev[server.id], isLoading: true }
     }));
     
-    // Simulate API check
     setTimeout(() => {
       setServerInstanceStatuses(prev => ({
         ...prev,
@@ -719,4 +717,101 @@ const NewLayout = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
-                </
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-between items-center">
+              <Button variant="outline" onClick={() => setCreateProfileDialogOpen(true)}>
+                Create New Profile
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddToProfileDialogOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createProfileDialogOpen} onOpenChange={setCreateProfileDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Enter a name for your new profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="profileName" className="text-right col-span-1">
+                Name
+              </label>
+              <Input
+                id="profileName"
+                value={newProfileName}
+                onChange={e => setNewProfileName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateProfileDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateNewProfile}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addServerToHostOpen} onOpenChange={setAddServerToHostOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Server to Host</DialogTitle>
+            <DialogDescription>
+              Select a server to add to this host.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmAddServerToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a server" />
+                </SelectTrigger>
+                <SelectContent>
+                  {serversList.map(server => <SelectItem key={server.id} value={server.id}>{server.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddServerToHostOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={importByProfileOpen} onOpenChange={setImportByProfileOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Import Profile</DialogTitle>
+            <DialogDescription>
+              Select a profile to import to this host.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Select onValueChange={confirmImportProfileToHost}>
+                <SelectTrigger className="w-full col-span-4">
+                  <SelectValue placeholder="Select a profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profilesList.map(profile => <SelectItem key={profile.id} value={profile.id}>{profile.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportByProfileOpen(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>;
+};
+
+export default NewLayout;
