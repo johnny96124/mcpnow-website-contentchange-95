@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Search, X, Server, Plus, Check, ArrowRight, AlertTriangle, Info
@@ -11,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Radio, RadioGroup } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { serverDefinitions, Profile, ServerInstance } from "@/data/mockData";
@@ -35,15 +34,13 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
   const [availableServers, setAvailableServers] = useState<ServerInstance[]>([]);
   const [discoveryServers, setDiscoveryServers] = useState<any[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
-  
-  // Reset state when dialog opens
+
   useEffect(() => {
     if (open) {
       setSelectedServers([]);
       setSearchQuery("");
       setSelectedProfileId("");
       
-      // Create some mock available servers
       const mockServers: ServerInstance[] = [
         {
           id: "server-1",
@@ -72,7 +69,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
       ];
       setAvailableServers(mockServers);
       
-      // Mock discovery servers
       const mockDiscoveryServers = serverDefinitions.slice(0, 5).map(def => ({
         id: `discovery-${def.id}`,
         name: def.name,
@@ -85,7 +81,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
     }
   }, [open]);
 
-  // Filter servers based on search query
   const filteredServers = availableServers.filter(server =>
     server.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -94,12 +89,10 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
     server.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get profile servers
   const getProfileServers = (profileId: string): ServerInstance[] => {
     const profile = profiles.find(p => p.id === profileId);
     if (!profile) return [];
     
-    // In a real app, this would query the actual server instances
     return profile.instances.map(instanceId => ({
       id: instanceId,
       name: `Server ${instanceId.split('-')[1]}`,
@@ -121,7 +114,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
   };
 
   const handleAddDiscoveryServer = (server: any) => {
-    // Create a server instance from the discovery server
     const newServer: ServerInstance = {
       id: server.id,
       name: server.name,
@@ -177,7 +169,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
           </TabsList>
           
           <TabsContent value="servers" className="mt-4 space-y-4">
-            {/* Search bar */}
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -196,9 +187,7 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
               )}
             </div>
             
-            {/* Server lists */}
             <div className="space-y-6">
-              {/* Available servers section */}
               <div>
                 <h3 className="text-sm font-medium mb-2">Available Servers</h3>
                 <div className="border rounded-md overflow-hidden">
@@ -250,7 +239,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
                 </div>
               </div>
               
-              {/* Discovery servers section */}
               <div>
                 <h3 className="text-sm font-medium mb-2">Discover New Servers</h3>
                 <div className="border rounded-md overflow-hidden">
@@ -326,13 +314,9 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
                     
                     return (
                       <div key={profile.id} className="flex items-center space-x-2 border rounded-md p-3">
-                        <input
-                          type="radio"
-                          id={profile.id}
+                        <RadioGroupItem 
                           value={profile.id}
-                          checked={selectedProfileId === profile.id}
-                          onChange={() => handleProfileSelect(profile.id)}
-                          className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                          id={profile.id}
                         />
                         <Label 
                           htmlFor={profile.id} 
@@ -388,7 +372,6 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
           </TabsContent>
         </Tabs>
         
-        {/* Selected servers preview */}
         {selectedServers.length > 0 && (
           <div className="mt-4 border-t pt-4">
             <div className="flex items-center justify-between mb-2">
@@ -443,3 +426,5 @@ export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
     </Dialog>
   );
 };
+
+export default AddServerToHostDialog;

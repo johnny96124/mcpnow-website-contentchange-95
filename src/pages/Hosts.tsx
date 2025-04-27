@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,6 @@ const Hosts = () => {
         description: "Now you can select a profile for this host to connect to."
       });
 
-      // Open profile selector after configuration
       setProfileSelectorOpen(true);
     }
     resetConfigDialog();
@@ -156,7 +154,7 @@ const Hosts = () => {
     setAddServerDialogOpen(true);
   };
   
-  const handleImportByProfile = (host: Host) => {
+  const handleImportByProfile = (hostId: string, profileId: string) => {
     if (hasUnsavedChanges) {
       setUnsavedChangesDialogOpen(true);
     } else {
@@ -166,16 +164,12 @@ const Hosts = () => {
   
   const handleAddServers = (newServers: ServerInstance[]) => {
     if (selectedProfileId && selectedHost) {
-      // Find profile and add servers to it
       setProfilesList(prev => prev.map(profile => {
         if (profile.id === selectedProfileId) {
-          // Get existing server IDs
           const existingIds = profile.instances;
-          // Get new server IDs that don't already exist
           const newIds = newServers.filter(s => !existingIds.includes(s.id)).map(s => s.id);
           
           if (newIds.length > 0) {
-            // Add new servers to instances list
             setHasUnsavedChanges(true);
             setAddedServers(prev => [...prev, ...newServers]);
             return {
@@ -192,7 +186,6 @@ const Hosts = () => {
         description: `Added ${newServers.length} servers to profile "${selectedProfile?.name}". Save changes to apply.`,
       });
     } else {
-      // If no profile is selected, create a new one
       const newProfileId = `profile-${Date.now()}`;
       const newProfile: Profile = {
         id: newProfileId,
@@ -212,7 +205,6 @@ const Hosts = () => {
       });
     }
     
-    // Update host if needed
     if (selectedHost?.configStatus === "unknown") {
       setHostsList(prev => prev.map(h => h.id === selectedHost.id ? {
         ...h,
@@ -230,7 +222,6 @@ const Hosts = () => {
       status
     } : server));
     
-    // Mark profile as having unsaved changes
     setHasUnsavedChanges(true);
   };
   
@@ -284,7 +275,6 @@ const Hosts = () => {
   
   const handleSaveProfileChangesWithOption = (createNew: boolean, profileName?: string) => {
     if (createNew && profileName) {
-      // Create new profile based on current one
       const currentProfile = profilesList.find(p => p.id === selectedProfileId);
       if (currentProfile && selectedHost) {
         const newProfileId = `profile-${Date.now()}`;
@@ -304,7 +294,6 @@ const Hosts = () => {
         });
       }
     } else {
-      // Just save current profile
       toast({
         title: "Profile Updated",
         description: `Changes to "${selectedProfile?.name}" have been saved`
@@ -316,7 +305,6 @@ const Hosts = () => {
     setRemovedServers([]);
     setUnsavedChangesDialogOpen(false);
     
-    // If we were trying to change profiles, complete that action
     if (targetProfileId) {
       handleProfileChange(selectedHost!.id, targetProfileId);
       setTargetProfileId(null);
@@ -324,9 +312,6 @@ const Hosts = () => {
   };
   
   const handleDiscardChanges = () => {
-    // Revert any changes by refreshing the profiles from server
-    // In this mock, we would normally reload from the API
-    
     setHasUnsavedChanges(false);
     setAddedServers([]);
     setRemovedServers([]);
@@ -337,7 +322,6 @@ const Hosts = () => {
       description: "Profile changes have been discarded"
     });
     
-    // If we were trying to change profiles, complete that action
     if (targetProfileId) {
       handleProfileChange(selectedHost!.id, targetProfileId);
       setTargetProfileId(null);
@@ -348,7 +332,6 @@ const Hosts = () => {
     setHostsList(prev => prev.filter(h => h.id !== hostId));
     
     if (selectedHostId === hostId) {
-      // Select another host if available
       const remainingHosts = hostsList.filter(h => h.id !== hostId);
       setSelectedHostId(remainingHosts.length > 0 ? remainingHosts[0].id : null);
     }
@@ -385,7 +368,6 @@ const Hosts = () => {
         </div>
       </div>
       
-      {/* Host search */}
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <input
@@ -405,9 +387,7 @@ const Hosts = () => {
         )}
       </div>
       
-      {/* Main content area */}
       <div className="grid gap-6 md:grid-cols-4">
-        {/* Hosts list sidebar */}
         <div className="space-y-4">
           {filteredHosts.length > 0 ? (
             <div className="space-y-2">
@@ -466,7 +446,6 @@ const Hosts = () => {
             </div>
           )}
           
-          {/* Add host card */}
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setAddHostDialogOpen(true)}>
             <CardContent className="p-4 text-center space-y-2">
               <PlusCircle className="h-6 w-6 mx-auto text-muted-foreground" />
@@ -474,7 +453,6 @@ const Hosts = () => {
             </CardContent>
           </Card>
           
-          {/* Scanning card */}
           {isScanning && (
             <Card>
               <CardContent className="p-4">
@@ -492,7 +470,6 @@ const Hosts = () => {
           )}
         </div>
         
-        {/* Host detail area */}
         <div className="md:col-span-3">
           {selectedHost ? (
             <HostDetailView 
@@ -521,7 +498,6 @@ const Hosts = () => {
         </div>
       </div>
       
-      {/* Dialogs */}
       <ConfigFileDialog 
         open={configDialog.isOpen} 
         onOpenChange={setDialogOpen} 

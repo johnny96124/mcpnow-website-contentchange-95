@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   FileText, Edit, Plus, Save, Server, Trash2, AlertTriangle, 
@@ -17,7 +16,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { toast } from "@/hooks/use-toast";
-import { Host, Profile, ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
+import { Host, Profile, ServerInstance, ConnectionStatus, serverDefinitions, EndpointType } from "@/data/mockData";
 
 interface HostDetailViewProps {
   host: Host;
@@ -50,20 +49,16 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   const [activeTab, setActiveTab] = useState<string>("servers");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Find the currently selected profile
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
   
-  // Filter server instances that belong to the selected profile
   const profileServers = serverInstances.filter(
     server => selectedProfile?.instances.includes(server.id)
   );
 
-  // Filter servers based on search query
   const filteredServers = profileServers.filter(server => 
     server.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Mock function to simulate profile changes that would trigger unsaved state
   const handleInstanceChange = (serverId: string, enabled: boolean) => {
     setIsUnsavedChanges(true);
     onServerStatusChange(serverId, enabled ? 'running' : 'stopped');
@@ -74,19 +69,11 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     });
   };
 
-  // Simulating server load
   const getServerLoad = (serverId: string) => {
     return Math.floor(Math.random() * 90) + 10;
   };
 
-  // Get server definition name
-  const getDefinitionName = (definitionId: string): string => {
-    const definition = serverDefinitions.find(def => def.id === definitionId);
-    return definition ? definition.name : "Unknown";
-  };
-
-  // Get server definition type
-  const getDefinitionType = (definitionId: string): string => {
+  const getDefinitionType = (definitionId: string): EndpointType | "Custom" | "WS" => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
     return definition ? definition.type : "HTTP_SSE";
   };
@@ -157,7 +144,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Host header with actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-muted/30 p-3 rounded-full">
@@ -200,7 +186,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Unsaved changes alert */}
       {isUnsavedChanges && (
         <Alert className="bg-yellow-50 border-yellow-200">
           <AlertTriangle className="h-4 w-4 text-yellow-600" />
@@ -211,7 +196,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </Alert>
       )}
       
-      {/* Profile selection */}
       <div className="bg-muted/10 p-4 rounded-md">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-medium">Profile</h3>
@@ -247,7 +231,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         )}
       </div>
       
-      {/* Server instances */}
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between">
           <div>
