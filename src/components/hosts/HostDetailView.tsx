@@ -24,7 +24,7 @@ interface HostDetailViewProps {
   serverInstances: ServerInstance[];
   selectedProfileId: string;
   onCreateConfig: (hostId: string) => void;
-  onProfileChange: (hostId: string, profileId: string) => void;
+  onProfileChange: (host: Host) => void;
   onAddServersToHost: (host: Host) => void;
   onImportByProfile: (host: Host) => void;
   onDeleteHost: (hostId: string) => void;
@@ -75,7 +75,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   const getDefinitionType = (definitionId: string): EndpointType | "Custom" | "WS" => {
     const definition = serverDefinitions.find(def => def.id === definitionId);
-    return definition ? definition.type : "HTTP_SSE";
+    return definition?.type as (EndpointType | "Custom" | "WS") || "HTTP_SSE";
   };
 
   const handleSaveChanges = () => {

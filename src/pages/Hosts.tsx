@@ -154,7 +154,7 @@ const Hosts = () => {
     setAddServerDialogOpen(true);
   };
   
-  const handleImportByProfile = (hostId: string, profileId: string) => {
+  const handleImportByProfile = (host: Host) => {
     if (hasUnsavedChanges) {
       setUnsavedChangesDialogOpen(true);
     } else {
