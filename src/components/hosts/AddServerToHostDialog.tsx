@@ -1,430 +1,221 @@
-import React, { useState, useEffect } from "react";
-import { 
-  Search, X, Server, Plus, Check, ArrowRight, AlertTriangle, Info
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { useState } from "react";
+import { TabsList, TabsTrigger, Tabs, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, X, Plus, FolderPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { serverDefinitions, Profile, ServerInstance } from "@/data/mockData";
+import { Card, CardContent } from "@/components/ui/card";
+import { ServerDefinition, serverDefinitions } from "@/data/mockData";
+import { Separator } from "@/components/ui/separator";
 
 interface AddServerToHostDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddServers: (servers: ServerInstance[]) => void;
-  profiles?: Profile[];
+  onAddServers: (servers: ServerDefinition[]) => void;
 }
 
-export const AddServerToHostDialog: React.FC<AddServerToHostDialogProps> = ({
-  open,
-  onOpenChange,
-  onAddServers,
-  profiles = []
-}) => {
-  const [activeTab, setActiveTab] = useState<"servers" | "profile">("servers");
+export function AddServerToHostDialog({ open, onOpenChange, onAddServers }: AddServerToHostDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedServers, setSelectedServers] = useState<ServerInstance[]>([]);
-  const [availableServers, setAvailableServers] = useState<ServerInstance[]>([]);
-  const [discoveryServers, setDiscoveryServers] = useState<any[]>([]);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+  const [selectedTab, setSelectedTab] = useState("list");
+  const [selectedServers, setSelectedServers] = useState<ServerDefinition[]>([]);
 
-  useEffect(() => {
-    if (open) {
-      setSelectedServers([]);
-      setSearchQuery("");
-      setSelectedProfileId("");
-      
-      const mockServers: ServerInstance[] = [
-        {
-          id: "server-1",
-          name: "Local HTTP Server",
-          definitionId: "http-sse-server",
-          status: "stopped",
-          connectionDetails: "http://localhost:8008/mcp",
-          enabled: true
-        },
-        {
-          id: "server-2",
-          name: "Python Model Server",
-          definitionId: "stdio-server",
-          status: "stopped",
-          connectionDetails: "python3 server.py",
-          enabled: true
-        },
-        {
-          id: "server-3",
-          name: "Node.js Server",
-          definitionId: "http-sse-server",
-          status: "stopped",
-          connectionDetails: "node server.js",
-          enabled: true
-        }
-      ];
-      setAvailableServers(mockServers);
-      
-      const mockDiscoveryServers = serverDefinitions.slice(0, 5).map(def => ({
-        id: `discovery-${def.id}`,
-        name: def.name,
-        type: def.type,
-        description: def.description,
-        author: def.author,
-        definitionId: def.id
-      }));
-      setDiscoveryServers(mockDiscoveryServers);
-    }
-  }, [open]);
-
-  const filteredServers = availableServers.filter(server =>
-    server.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const filteredDiscoveryServers = discoveryServers.filter(server =>
-    server.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const getProfileServers = (profileId: string): ServerInstance[] => {
-    const profile = profiles.find(p => p.id === profileId);
-    if (!profile) return [];
-    
-    return profile.instances.map(instanceId => ({
-      id: instanceId,
-      name: `Server ${instanceId.split('-')[1]}`,
-      definitionId: "http-sse-server",
-      status: "stopped",
-      connectionDetails: "http://localhost:8008/mcp",
-      enabled: true
-    }));
-  };
-  
-  const profileServers = getProfileServers(selectedProfileId);
-
-  const handleToggleServer = (server: ServerInstance) => {
-    if (selectedServers.some(s => s.id === server.id)) {
-      setSelectedServers(selectedServers.filter(s => s.id !== server.id));
-    } else {
+  const handleServerSelect = (server: ServerDefinition) => {
+    if (!selectedServers.find(s => s.id === server.id)) {
       setSelectedServers([...selectedServers, server]);
     }
   };
 
-  const handleAddDiscoveryServer = (server: any) => {
-    const newServer: ServerInstance = {
-      id: server.id,
-      name: server.name,
-      definitionId: server.definitionId,
-      status: "stopped",
-      connectionDetails: "Newly added from discovery",
-      enabled: true
-    };
-    
-    if (!selectedServers.some(s => s.id === newServer.id)) {
-      setSelectedServers([...selectedServers, newServer]);
-    }
-  };
-
-  const handleConfirm = () => {
-    onAddServers(selectedServers);
-  };
-
-  const handleProfileSelect = (profileId: string) => {
-    setSelectedProfileId(profileId);
-    
-    if (profileId) {
-      const servers = getProfileServers(profileId);
-      setSelectedServers(servers);
-    } else {
-      setSelectedServers([]);
-    }
-  };
-
-  const handleRemoveServer = (serverId: string) => {
+  const handleServerRemove = (serverId: string) => {
     setSelectedServers(selectedServers.filter(s => s.id !== serverId));
   };
 
+  const handleAddServers = () => {
+    onAddServers(selectedServers);
+    setSelectedServers([]);
+    onOpenChange(false);
+  };
+
+  const handleDialogClose = () => {
+    setSelectedServers([]);
+    setSearchQuery("");
+    setSelectedTab("list");
+    onOpenChange(false);
+  };
+
+  const filteredServers = serverDefinitions.filter(server => 
+    server.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const collections = [
+    {
+      id: "core",
+      name: "Core Services",
+      servers: serverDefinitions.slice(0, 3)
+    },
+    {
+      id: "data",
+      name: "Data Services",
+      servers: serverDefinitions.slice(3, 4)
+    }
+  ];
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px]">
+    <Dialog open={open} onOpenChange={handleDialogClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add Servers to Host</DialogTitle>
-          <DialogDescription>
-            Select servers to add to this host or import from a profile.
-          </DialogDescription>
+          <DialogTitle>Configure Host Services</DialogTitle>
         </DialogHeader>
-        
-        <Tabs 
-          defaultValue="servers" 
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as "servers" | "profile")}
-          className="w-full"
-        >
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="servers">Select Servers</TabsTrigger>
-            <TabsTrigger value="profile">Import from Profile</TabsTrigger>
+
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="list">
+              <Plus className="w-4 h-4 mr-2" />
+              Service List
+            </TabsTrigger>
+            <TabsTrigger value="collections">
+              <FolderPlus className="w-4 h-4 mr-2" />
+              From Collections
+            </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="servers" className="mt-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search servers..." 
-                className="pl-8"
+
+          <TabsContent value="list" className="mt-4">
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search services..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
               />
-              {searchQuery && (
-                <button 
-                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
             </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-sm font-medium mb-2">Available Servers</h3>
-                <div className="border rounded-md overflow-hidden">
-                  {filteredServers.length > 0 ? (
-                    <ScrollArea className="h-[200px]">
-                      <div className="p-1">
-                        {filteredServers.map(server => {
-                          const isSelected = selectedServers.some(s => s.id === server.id);
-                          
-                          return (
-                            <div 
-                              key={server.id} 
-                              className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer hover:bg-muted/50 ${isSelected ? 'bg-primary/10' : ''}`}
-                              onClick={() => handleToggleServer(server)}
-                            >
-                              <Checkbox 
-                                checked={isSelected}
-                                onCheckedChange={() => handleToggleServer(server)}
-                              />
-                              <div className="flex-grow">
-                                <div className="font-medium flex items-center gap-2">
-                                  <Server className="h-4 w-4 text-muted-foreground" />
-                                  {server.name}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {server.connectionDetails}
-                                </div>
-                              </div>
-                              <EndpointLabel 
-                                type={
-                                  serverDefinitions.find(def => def.id === server.definitionId)?.type || "HTTP_SSE"
-                                } 
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </ScrollArea>
-                  ) : searchQuery ? (
-                    <div className="p-8 text-center">
-                      <p className="text-muted-foreground">No servers matching "{searchQuery}"</p>
-                      <Button variant="link" onClick={() => setSearchQuery("")}>Clear search</Button>
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center">
-                      <p className="text-muted-foreground">No available servers found</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium mb-2">Discover New Servers</h3>
-                <div className="border rounded-md overflow-hidden">
-                  {filteredDiscoveryServers.length > 0 ? (
-                    <ScrollArea className="h-[200px]">
-                      <div className="p-1">
-                        {filteredDiscoveryServers.map(server => {
-                          const isSelected = selectedServers.some(s => s.id === server.id);
-                          
-                          return (
-                            <div key={server.id} className="p-3 border-b last:border-b-0">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="font-medium">{server.name}</div>
-                                <div>
-                                  {isSelected ? (
-                                    <Badge className="bg-green-500">Added</Badge>
-                                  ) : (
-                                    <Button 
-                                      size="sm" 
-                                      variant="secondary"
-                                      onClick={() => handleAddDiscoveryServer(server)}
-                                    >
-                                      <Plus className="h-3.5 w-3.5 mr-1" /> 
-                                      Add
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                {server.description}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <EndpointLabel type={server.type} />
-                                {server.author && (
-                                  <Badge variant="outline" className="text-xs">
-                                    By {server.author}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </ScrollArea>
-                  ) : searchQuery ? (
-                    <div className="p-8 text-center">
-                      <p className="text-muted-foreground">No discovery servers matching "{searchQuery}"</p>
-                      <Button variant="link" onClick={() => setSearchQuery("")}>Clear search</Button>
-                    </div>
-                  ) : (
-                    <div className="p-8 text-center">
-                      <p className="text-muted-foreground">No discovery servers available</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="profile" className="mt-4 space-y-4">
-            {profiles.length > 0 ? (
-              <>
-                <div className="space-y-1 mb-2">
-                  <Label>Select a profile to import servers from</Label>
-                  <p className="text-sm text-muted-foreground">
-                    All servers from the selected profile will be added to this host
-                  </p>
-                </div>
-                
-                <RadioGroup value={selectedProfileId} onValueChange={handleProfileSelect}>
-                  {profiles.map(profile => {
-                    const serverCount = profile.instances.length;
-                    
-                    return (
-                      <div key={profile.id} className="flex items-center space-x-2 border rounded-md p-3">
-                        <RadioGroupItem 
-                          value={profile.id}
-                          id={profile.id}
-                        />
-                        <Label 
-                          htmlFor={profile.id} 
-                          className="flex-grow flex items-center justify-between cursor-pointer"
-                        >
-                          <span className="font-medium">{profile.name}</span>
-                          <div className="text-sm text-muted-foreground">
-                            {serverCount} {serverCount === 1 ? 'server' : 'servers'}
+            <ScrollArea className="h-[300px]">
+              {filteredServers.length > 0 ? (
+                <div className="space-y-2">
+                  {filteredServers.map((server) => (
+                    <Card key={server.id} className="cursor-pointer hover:bg-accent">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {server.icon && <span>{server.icon}</span>}
+                          <div>
+                            <p className="font-medium">{server.name}</p>
+                            <p className="text-sm text-muted-foreground">{server.description}</p>
                           </div>
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
-                
-                {selectedProfileId && profileServers.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium mb-2">Profile Servers</h4>
-                    <div className="border rounded-md p-2">
-                      <ScrollArea className="h-[150px]">
-                        <div className="space-y-1">
-                          {profileServers.map(server => (
-                            <div key={server.id} className="p-2 text-sm flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Server className="h-4 w-4 text-muted-foreground" />
-                                {server.name}
-                              </div>
-                              <EndpointLabel 
-                                type={
-                                  serverDefinitions.find(def => def.id === server.definitionId)?.type || "HTTP_SSE"
-                                } 
-                              />
-                            </div>
-                          ))}
                         </div>
-                      </ScrollArea>
-                    </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleServerSelect(server)}
+                          disabled={selectedServers.some(s => s.id === server.id)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                  <p className="text-muted-foreground">No services found</p>
+                </div>
+              )}
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent value="collections" className="mt-4">
+            <ScrollArea className="h-[300px]">
+              {collections.map((collection) => (
+                <div key={collection.id} className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">{collection.name}</h3>
+                    <Badge variant="secondary">{collection.servers.length} services</Badge>
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="border border-dashed rounded-md p-8 text-center space-y-2">
-                <Info className="h-8 w-8 mx-auto text-muted-foreground" />
-                <h4 className="font-medium">No Profiles Available</h4>
-                <p className="text-muted-foreground">
-                  You don't have any profiles created yet. Create a profile to import servers from.
-                </p>
-                <Button variant="outline" onClick={() => setActiveTab("servers")}>
-                  Select servers individually
-                </Button>
-              </div>
-            )}
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-2"
+                    onClick={() => {
+                      const newServers = collection.servers.filter(
+                        server => !selectedServers.some(s => s.id === server.id)
+                      );
+                      setSelectedServers([...selectedServers, ...newServers]);
+                    }}
+                  >
+                    Add all services from this collection
+                  </Button>
+                  <div className="space-y-2">
+                    {collection.servers.map((server) => (
+                      <Card key={server.id} className="cursor-pointer hover:bg-accent">
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {server.icon && <span>{server.icon}</span>}
+                            <div>
+                              <p className="font-medium">{server.name}</p>
+                              <p className="text-sm text-muted-foreground">{server.description}</p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleServerSelect(server)}
+                            disabled={selectedServers.some(s => s.id === server.id)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </ScrollArea>
           </TabsContent>
         </Tabs>
-        
+
         {selectedServers.length > 0 && (
-          <div className="mt-4 border-t pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium">Selected Servers ({selectedServers.length})</h3>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground h-8"
-                onClick={() => setSelectedServers([])}
-              >
-                Clear
-              </Button>
-            </div>
-            <ScrollArea className="h-[120px] border rounded-md">
-              <div className="p-1">
-                {selectedServers.map(server => (
-                  <div 
-                    key={server.id} 
-                    className="flex items-center justify-between py-1.5 px-2 rounded-sm hover:bg-muted/50 group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Server className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-sm">{server.name}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                      onClick={() => handleRemoveServer(server.id)}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
+          <>
+            <Separator className="my-4" />
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold">Selected Services</h3>
+                <Badge>{selectedServers.length}</Badge>
               </div>
-            </ScrollArea>
-          </div>
+              <ScrollArea className="max-h-[100px]">
+                <div className="flex flex-wrap gap-2">
+                  {selectedServers.map((server) => (
+                    <Badge
+                      key={server.id}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
+                      {server.name}
+                      <button
+                        onClick={() => handleServerRemove(server.id)}
+                        className="ml-1 hover:bg-background/20 rounded-full p-1"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </>
         )}
-        
-        <DialogFooter className="pt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+
+        <DialogFooter className="mt-4">
+          <Button variant="outline" onClick={handleDialogClose}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleAddServers}
             disabled={selectedServers.length === 0}
           >
-            Add {selectedServers.length} {selectedServers.length === 1 ? 'Server' : 'Servers'}
+            Save Configuration
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default AddServerToHostDialog;
+}
