@@ -25,12 +25,12 @@ interface HostDetailViewProps {
   host: Host;
   profiles: Profile[];
   serverInstances: ServerInstance[];
-  serverDefinitions: ServerDefinition[];
+  serverDefinitions: ServerDefinition[]; // Updated to accept an array instead of a type
   currentProfileId: string | null;
   onProfileChange: (hostId: string, profileId: string) => void;
   onConfigureHost: (hostId: string) => void;
   onDeleteHost: (hostId: string) => void;
-  onServerStatusChange: (serverId: string, status: string) => void;
+  onServerStatusChange: (serverId: string, status: "running" | "stopped" | "connecting" | "error") => void; // Fixed status type
   onSaveProfile: (profile: Profile, newName?: string) => void;
   onCreateProfile: (name: string, initialInstances?: string[]) => Profile;
 }

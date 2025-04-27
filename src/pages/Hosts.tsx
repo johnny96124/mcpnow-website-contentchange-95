@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { PlusCircle, Search, RefreshCw, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { hosts, profiles, ServerDefinition, Host, Profile, ServerInstance, serverInstances } from "@/data/mockData";
+import { hosts, profiles, ServerDefinition as ServerDefType, Host, Profile, ServerInstance, serverInstances } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { HostSearch } from "@/components/hosts/HostSearch";
@@ -144,7 +144,7 @@ const Hosts = () => {
     });
   };
 
-  const handleServerStatusChange = (serverId: string, status: string) => {
+  const handleServerStatusChange = (serverId: string, status: "running" | "stopped" | "connecting" | "error") => {
     setServerInstancesList(prev => prev.map(server => 
       server.id === serverId ? { ...server, status } : server
     ));
@@ -276,7 +276,7 @@ const Hosts = () => {
                 host={selectedHost}
                 profiles={profilesList}
                 serverInstances={serverInstancesList}
-                serverDefinitions={ServerDefinition}
+                serverDefinitions={[]} // Fixed: Pass empty array instead of ServerDefinition type
                 currentProfileId={hostProfiles[selectedHost.id] || null}
                 onProfileChange={handleProfileChange}
                 onConfigureHost={handleCreateConfigDialog}
