@@ -1,151 +1,215 @@
 
-import { useState } from "react";
-import { Profile } from "@/data/mockData";
+import React, { useState } from "react";
+import { 
+  AlertTriangle, Check, Info, Plus, Save, X 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Server, Check } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Profile, ServerInstance } from "@/data/mockData";
 
 interface ProfileSelectorProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   profiles: Profile[];
+  serverInstances: ServerInstance[];
   onSelectProfile: (profileId: string) => void;
-  onCreateProfile: (name: string) => void;
+  onCreateProfile: (profileName: string) => void;
+  hasUnsavedChanges?: boolean;
+  currentProfileId?: string;
 }
 
-export function ProfileSelector({ profiles, onSelectProfile, onCreateProfile }: ProfileSelectorProps) {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
+  open,
+  onOpenChange,
+  profiles,
+  serverInstances,
+  onSelectProfile,
+  onCreateProfile,
+  hasUnsavedChanges = false,
+  currentProfileId
+}) => {
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [newProfileMode, setNewProfileMode] = useState(false);
   const [newProfileName, setNewProfileName] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(hasUnsavedChanges);
 
-  const filteredProfiles = profiles.filter(profile => 
-    profile.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleCreateProfile = () => {
-    if (newProfileName.trim()) {
-      onCreateProfile(newProfileName);
+  // Reset state when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      setSelectedProfileId(null);
+      setNewProfileMode(false);
       setNewProfileName("");
-      setCreateDialogOpen(false);
+      setShowUnsavedWarning(hasUnsavedChanges);
+    }
+  }, [open, hasUnsavedChanges]);
+
+  const handleConfirm = () => {
+    if (newProfileMode) {
+      if (newProfileName.trim()) {
+        onCreateProfile(newProfileName.trim());
+        onOpenChange(false);
+      }
+    } else if (selectedProfileId) {
+      onSelectProfile(selectedProfileId);
+      onOpenChange(false);
     }
   };
 
+  const getServerCountByProfile = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    return profile ? profile.instances.length : 0;
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Choose a Profile</h2>
-        <Button 
-          onClick={() => setCreateDialogOpen(true)}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          <Plus className="h-4 w-4" />
-          Create New
-        </Button>
-      </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>
+            {hasUnsavedChanges ? "Save Changes Before Switching" : "Select Profile"}
+          </DialogTitle>
+          <DialogDescription>
+            {hasUnsavedChanges 
+              ? "You have unsaved changes. Choose how to proceed." 
+              : "Select an existing profile or create a new one."}
+          </DialogDescription>
+        </DialogHeader>
 
-      <Input
-        placeholder="Search profiles..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full"
-      />
-
-      <ScrollArea className="h-[400px] rounded-md border">
-        {filteredProfiles.length > 0 ? (
-          <div className="p-4 grid gap-3">
-            {filteredProfiles.map((profile) => (
-              <Card 
-                key={profile.id}
-                className="cursor-pointer hover:bg-accent transition-colors"
-                onClick={() => onSelectProfile(profile.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-medium">{profile.name}</h3>
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Server className="h-3.5 w-3.5 inline-block" />
-                        <span>
-                          {profile.instances.length} service{profile.instances.length !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    </div>
-                    <Button size="sm" className="flex items-center gap-1.5">
-                      <Check className="h-4 w-4" />
-                      Select
-                    </Button>
-                  </div>
-
-                  {profile.instances.length > 0 && (
-                    <div className="mt-3">
-                      <div className="text-xs text-muted-foreground mb-1.5">Services:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {profile.instances.slice(0, 5).map((instanceId, index) => (
-                          <Badge key={instanceId} variant="outline" className="bg-muted/50">
-                            Instance {index + 1}
-                          </Badge>
-                        ))}
-                        {profile.instances.length > 5 && (
-                          <Badge variant="outline">+{profile.instances.length - 5} more</Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full py-8">
-            <p className="text-muted-foreground mb-2">No profiles found</p>
-            {searchQuery ? (
-              <Button variant="link" onClick={() => setSearchQuery("")}>
-                Clear search
-              </Button>
-            ) : (
-              <Button variant="outline" onClick={() => setCreateDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />
-                Create New Profile
-              </Button>
-            )}
-          </div>
+        {showUnsavedWarning && hasUnsavedChanges && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertTitle className="text-yellow-800">Unsaved Changes</AlertTitle>
+            <AlertDescription className="text-yellow-700">
+              Your current profile has unsaved changes that will be lost if you switch without saving.
+            </AlertDescription>
+          </Alert>
         )}
-      </ScrollArea>
 
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Profile</DialogTitle>
-            <DialogDescription>
-              Enter a name for your new profile.
-            </DialogDescription>
-          </DialogHeader>
+        <div className="py-4 space-y-4">
+          {!newProfileMode ? (
+            <>
+              <div className="flex justify-between mb-2">
+                <h3 className="font-medium">Existing Profiles</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setNewProfileMode(true)}
+                  className="text-sm flex items-center"
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  New Profile
+                </Button>
+              </div>
 
-          <div className="py-4">
-            <Input
-              placeholder="Profile name"
-              value={newProfileName}
-              onChange={(e) => setNewProfileName(e.target.value)}
-            />
-          </div>
+              {profiles.length > 0 ? (
+                <RadioGroup value={selectedProfileId || ""} onValueChange={setSelectedProfileId}>
+                  {profiles.map(profile => {
+                    const serverCount = getServerCountByProfile(profile.id);
+                    const isCurrentProfile = profile.id === currentProfileId;
+                    
+                    return (
+                      <div key={profile.id} className={`flex items-center space-x-2 border rounded-md p-3 ${isCurrentProfile ? 'bg-muted/20 border-primary/30' : ''}`}>
+                        <RadioGroupItem value={profile.id} id={profile.id} />
+                        <Label 
+                          htmlFor={profile.id} 
+                          className="flex-grow flex items-center justify-between cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{profile.name}</span>
+                            {isCurrentProfile && (
+                              <Badge variant="outline" className="ml-2">Current</Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {serverCount} {serverCount === 1 ? 'server' : 'servers'}
+                          </div>
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
+              ) : (
+                <div className="text-center py-6 border border-dashed rounded-md">
+                  <Info className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground">No profiles available</p>
+                  <Button 
+                    variant="link" 
+                    className="mt-2" 
+                    onClick={() => setNewProfileMode(true)}
+                  >
+                    Create your first profile
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between mb-2">
+                <h3 className="font-medium">Create New Profile</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setNewProfileMode(false)}
+                  className="text-sm"
+                >
+                  Back to existing profiles
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profile-name">Profile Name</Label>
+                  <Input 
+                    id="profile-name"
+                    placeholder="Enter profile name" 
+                    value={newProfileName}
+                    onChange={(e) => setNewProfileName(e.target.value)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+        <DialogFooter className="flex justify-between">
+          {hasUnsavedChanges && showUnsavedWarning && (
+            <div className="flex gap-2 mr-auto">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setShowUnsavedWarning(false)}
+              >
+                Discard Changes
+              </Button>
+              <Button 
+                type="button"
+                variant="default"
+                className="bg-green-500 hover:bg-green-600"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Current Profile
+              </Button>
+            </div>
+          )}
+          
+          <div className="flex gap-2 ml-auto">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button 
-              onClick={handleCreateProfile} 
-              disabled={!newProfileName.trim()}
+              type="button" 
+              onClick={handleConfirm}
+              disabled={(newProfileMode && !newProfileName.trim()) || (!newProfileMode && !selectedProfileId)}
             >
-              Create Profile
+              {newProfileMode ? "Create Profile" : "Select Profile"}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
+};

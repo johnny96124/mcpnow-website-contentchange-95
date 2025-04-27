@@ -1,212 +1,171 @@
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState } from "react";
+import { 
+  AlertTriangle, Save, X, Plus, Check 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Profile, ServerInstance } from "@/data/mockData";
-import { Info, Save, FileText } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { ServerInstance } from "@/data/mockData";
 
 interface ProfileChangesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentProfile: Profile | null;
-  availableProfiles: Profile[];
-  changedInstances: {
-    added: ServerInstance[];
-    removed: ServerInstance[];
-  };
-  onSaveChanges: (saveType: "current" | "new" | "none", newProfileName?: string) => void;
-  onSwitchWithoutSaving: () => void;
+  currentProfileName: string;
+  addedServers: ServerInstance[];
+  removedServers: ServerInstance[];
+  onSaveChanges: (createNew: boolean, profileName?: string) => void;
+  onDiscardChanges: () => void;
 }
 
-export function ProfileChangesDialog({
+export const ProfileChangesDialog: React.FC<ProfileChangesDialogProps> = ({
   open,
   onOpenChange,
-  currentProfile,
-  availableProfiles,
-  changedInstances,
+  currentProfileName,
+  addedServers,
+  removedServers,
   onSaveChanges,
-  onSwitchWithoutSaving
-}: ProfileChangesDialogProps) {
-  const [saveType, setSaveType] = useState<"current" | "new" | "none">("current");
+  onDiscardChanges
+}) => {
+  const [saveOption, setSaveOption] = useState<"update" | "new">("update");
   const [newProfileName, setNewProfileName] = useState("");
-  const [activeTab, setActiveTab] = useState<"save" | "discard">("save");
 
-  const handleSave = () => {
-    if (saveType === "new" && !newProfileName.trim()) {
-      return; // Don't save if new profile name is empty
+  // Reset state when dialog opens
+  React.useEffect(() => {
+    if (open) {
+      setSaveOption("update");
+      setNewProfileName(`${currentProfileName} (Copy)`);
     }
-    onSaveChanges(saveType, newProfileName);
-  };
+  }, [open, currentProfileName]);
 
-  const handleDiscard = () => {
-    onSwitchWithoutSaving();
+  const handleConfirm = () => {
+    if (saveOption === "new" && !newProfileName.trim()) {
+      return;
+    }
+    
+    onSaveChanges(
+      saveOption === "new", 
+      saveOption === "new" ? newProfileName : undefined
+    );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Unsaved Profile Changes</DialogTitle>
+          <DialogTitle>Save Profile Changes</DialogTitle>
           <DialogDescription>
-            You have made changes to the current profile. What would you like to do?
+            You've made changes to the profile. How would you like to save them?
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "save" | "discard")} className="mt-4">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="save" className="flex items-center gap-1">
-              <Save className="h-4 w-4" />
-              Save Changes
-            </TabsTrigger>
-            <TabsTrigger value="discard" className="flex items-center gap-1">
-              <FileText className="h-4 w-4" />
-              Switch Without Saving
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="save" className="space-y-4 py-4">
-            <Alert variant="default" className="bg-amber-50 border-amber-200">
-              <Info className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="text-amber-700 text-sm">
-                Your changes to "{currentProfile?.name}" have not been saved
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-4">
-              <RadioGroup 
-                value={saveType} 
-                onValueChange={(v) => setSaveType(v as "current" | "new" | "none")}
-                className="gap-4"
-              >
-                <div className="flex items-start space-x-2">
-                  <RadioGroupItem value="current" id="save-current" />
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="save-current" className="font-medium">
-                      Save to current profile
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      Update "{currentProfile?.name}" with your changes
-                    </p>
+        <Alert className="bg-yellow-50 border-yellow-200">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertTitle className="text-yellow-800">Unsaved Changes</AlertTitle>
+          <AlertDescription className="text-yellow-700">
+            Your changes to profile "{currentProfileName}" need to be saved.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="py-3 space-y-4">
+          <div>
+            <h3 className="text-sm font-medium mb-2">Changes Summary:</h3>
+            <div className="bg-muted/20 rounded-md p-3 space-y-2 text-sm">
+              {addedServers.length > 0 && (
+                <div>
+                  <Badge variant="secondary" className="mb-1">Added</Badge>
+                  <div className="pl-2 space-y-1">
+                    {addedServers.map(server => (
+                      <div key={server.id} className="flex items-center gap-1">
+                        <Plus className="h-3.5 w-3.5 text-green-500" />
+                        {server.name}
+                      </div>
+                    ))}
                   </div>
                 </div>
-                
-                <div className="flex items-start space-x-2">
-                  <RadioGroupItem value="new" id="save-new" />
-                  <div className="grid gap-1.5 flex-1">
-                    <Label htmlFor="save-new" className="font-medium">
-                      Create a new profile
-                    </Label>
-                    <div className="grid gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        Save your changes as a new profile
-                      </p>
-                      <Input
-                        placeholder="Enter new profile name"
-                        value={newProfileName}
-                        onChange={(e) => setNewProfileName(e.target.value)}
-                        disabled={saveType !== "new"}
-                      />
-                    </div>
+              )}
+              
+              {removedServers.length > 0 && (
+                <div>
+                  <Badge variant="outline" className="mb-1">Removed</Badge>
+                  <div className="pl-2 space-y-1">
+                    {removedServers.map(server => (
+                      <div key={server.id} className="flex items-center gap-1">
+                        <X className="h-3.5 w-3.5 text-red-500" />
+                        {server.name}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </RadioGroup>
-
-              <div className="pt-2">
-                <div className="text-sm font-medium mb-1">Changes summary:</div>
-                <div className="text-sm space-y-1 ml-1">
-                  {changedInstances.added.length > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                        Added
-                      </Badge>
-                      <span className="text-muted-foreground">
-                        {changedInstances.added.length} service{changedInstances.added.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {changedInstances.removed.length > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">
-                        Removed
-                      </Badge>
-                      <span className="text-muted-foreground">
-                        {changedInstances.removed.length} service{changedInstances.removed.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              )}
             </div>
-          </TabsContent>
-
-          <TabsContent value="discard" className="space-y-4 py-4">
-            <Alert variant="destructive" className="bg-red-50 border-red-200">
-              <Info className="h-4 w-4 text-red-500" />
-              <AlertDescription className="text-red-700 text-sm">
-                Your changes will be lost if you switch profiles without saving
-              </AlertDescription>
-            </Alert>
+          </div>
+          
+          <RadioGroup value={saveOption} onValueChange={(value) => setSaveOption(value as "update" | "new")}>
+            <div className="flex items-start space-x-2 border rounded-md p-3">
+              <RadioGroupItem value="update" id="option-update" />
+              <Label htmlFor="option-update" className="cursor-pointer">
+                <div>
+                  <p className="font-medium">Update existing profile</p>
+                  <p className="text-sm text-muted-foreground">
+                    Save changes to "{currentProfileName}" directly
+                  </p>
+                </div>
+              </Label>
+            </div>
             
-            <div className="space-y-2">
-              <p className="text-sm">The following changes will be discarded:</p>
-              
-              {changedInstances.added.length > 0 && (
-                <div className="space-y-1 ml-4">
-                  <p className="text-sm font-medium">Added services:</p>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground">
-                    {changedInstances.added.slice(0, 3).map(instance => (
-                      <li key={instance.id}>{instance.name}</li>
-                    ))}
-                    {changedInstances.added.length > 3 && (
-                      <li>And {changedInstances.added.length - 3} more...</li>
-                    )}
-                  </ul>
+            <div className="flex items-start space-x-2 border rounded-md p-3">
+              <RadioGroupItem value="new" id="option-new" />
+              <Label htmlFor="option-new" className="w-full cursor-pointer">
+                <div>
+                  <p className="font-medium">Create new profile</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Save as a new profile with your changes
+                  </p>
+                  <div className="space-y-1">
+                    <Label htmlFor="new-profile-name">Profile Name</Label>
+                    <Input
+                      id="new-profile-name"
+                      value={newProfileName}
+                      onChange={(e) => setNewProfileName(e.target.value)}
+                      disabled={saveOption !== "new"}
+                    />
+                  </div>
                 </div>
-              )}
-              
-              {changedInstances.removed.length > 0 && (
-                <div className="space-y-1 ml-4">
-                  <p className="text-sm font-medium">Removed services:</p>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground">
-                    {changedInstances.removed.slice(0, 3).map(instance => (
-                      <li key={instance.id}>{instance.name}</li>
-                    ))}
-                    {changedInstances.removed.length > 3 && (
-                      <li>And {changedInstances.removed.length - 3} more...</li>
-                    )}
-                  </ul>
-                </div>
-              )}
+              </Label>
             </div>
-          </TabsContent>
-        </Tabs>
+          </RadioGroup>
+        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+        <DialogFooter className="flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="text-destructive"
+            onClick={onDiscardChanges}
+          >
+            Discard Changes
           </Button>
           
-          {activeTab === "save" ? (
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button 
-              onClick={handleSave}
-              disabled={saveType === "new" && !newProfileName.trim()}
+              type="button" 
+              onClick={handleConfirm}
+              disabled={saveOption === "new" && !newProfileName.trim()}
             >
-              Save Changes
+              <Save className="h-4 w-4 mr-2" />
+              {saveOption === "update" ? "Update Profile" : "Save as New Profile"}
             </Button>
-          ) : (
-            <Button variant="destructive" onClick={handleDiscard}>
-              Discard Changes & Switch
-            </Button>
-          )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
