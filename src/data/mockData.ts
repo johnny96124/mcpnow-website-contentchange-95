@@ -47,6 +47,7 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string[];
   requestCount?: number;
+  url?: string;
 }
 
 export interface Profile {
@@ -481,7 +482,8 @@ export const serverInstances: ServerInstance[] = [
     environment: {
       'DB_URL': 'postgresql://dev:password@localhost:5432/dev'
     },
-    requestCount: 124
+    requestCount: 124,
+    url: '/usr/local/bin/postgres-mcp'
   },
   {
     id: 'postgres-prod',
