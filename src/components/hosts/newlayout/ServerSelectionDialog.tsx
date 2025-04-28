@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog, 
@@ -57,7 +56,6 @@ export function ServerSelectionDialog({
   const [showInstanceSelection, setShowInstanceSelection] = useState(false);
   const { addInstanceToProfile, getProfileById } = useHostProfiles();
   
-  // Reset state when dialog opens/closes
   useEffect(() => {
     if (!open) {
       setSearchTerm("");
@@ -67,14 +65,12 @@ export function ServerSelectionDialog({
     }
   }, [open]);
   
-  // Filter servers based on search term and instance filter
   const filteredServers = serverDefinitions.filter(server => {
     const matchesSearch = 
       server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (server.description && server.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
     if (showOnlyWithInstances) {
-      // Check if there are instances for this server
       const hasInstances = serverInstances.some(instance => 
         instance.definitionId === server.id
       );
@@ -84,11 +80,9 @@ export function ServerSelectionDialog({
     return matchesSearch;
   });
   
-  // Handle server selection
   const handleServerSelect = (server: ServerDefinition) => {
     setSelectedServer(server);
     
-    // Check if there are instances for this server
     const instances = serverInstances.filter(
       instance => instance.definitionId === server.id
     );
@@ -98,20 +92,17 @@ export function ServerSelectionDialog({
     if (instances.length > 0) {
       setShowInstanceSelection(true);
     } else {
-      // Show add instance dialog
       setShowAddInstanceDialog(true);
     }
   };
   
-  // Handle instance selection
   const handleInstanceSelect = (instance: ServerInstance) => {
-    // Add instance to profile
     if (profileId) {
       const updatedProfile = addInstanceToProfile(profileId, instance.id);
       
       if (updatedProfile) {
         toast.success(`Added ${instance.name} to profile`);
-        onOpenChange(false); // Close the dialog
+        onOpenChange(false);
       } else {
         toast.error("Failed to add server to profile");
       }
@@ -120,11 +111,9 @@ export function ServerSelectionDialog({
     }
   };
   
-  // Handle creating a new instance
   const handleCreateInstance = (data: InstanceFormValues) => {
     if (!selectedServer) return;
     
-    // In a real app, this would make an API call
     console.log("Creating instance:", data);
     
     const newInstance: ServerInstance = {
@@ -140,13 +129,12 @@ export function ServerSelectionDialog({
       enabled: true
     };
     
-    // Add instance to profile
     if (profileId) {
       const updatedProfile = addInstanceToProfile(profileId, newInstance.id);
       
       if (updatedProfile) {
         toast.success(`Created and added ${data.name} to profile`);
-        onOpenChange(false); // Close the dialog
+        onOpenChange(false);
       } else {
         toast.error("Failed to add server to profile");
       }
@@ -157,7 +145,6 @@ export function ServerSelectionDialog({
     setShowAddInstanceDialog(false);
   };
   
-  // Render instance selection view
   const renderInstanceSelection = () => {
     return (
       <>
@@ -221,7 +208,6 @@ export function ServerSelectionDialog({
     );
   };
   
-  // Render server selection view
   const renderServerSelection = () => {
     return (
       <>
