@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   FileText, Server, Trash2, AlertTriangle, 
   CheckCircle, Info, Plus, ChevronDown, MoreHorizontal, 
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -52,6 +53,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   onCreateProfile,
   onDeleteProfile
 }) => {
+  const [searchQuery, setSearchQuery] = useState("");
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
 
@@ -59,6 +61,10 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   
   const profileServers = serverInstances.filter(
     server => selectedProfile?.instances.includes(server.id)
+  );
+
+  const filteredServers = profileServers.filter(server => 
+    server.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleServerStatusChange = (serverId: string, enabled: boolean) => {
@@ -73,8 +79,9 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         description: "Attempting to establish connection"
       });
       
+      // Simulate connection success/failure after a delay
       setTimeout(() => {
-        const success = Math.random() > 0.3;
+        const success = Math.random() > 0.3; // 70% chance of success
         if (success) {
           onServerStatusChange(serverId, 'running');
           toast({
@@ -108,6 +115,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     setConfigDialogOpen(true);
   };
 
+  // If the host needs configuration first
   if (host.configStatus === "unknown") {
     return (
       <div className="space-y-6">
@@ -209,21 +217,35 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ProfileDropdown 
-                profiles={profiles} 
-                currentProfileId={selectedProfileId} 
-                onProfileChange={onProfileChange}
-                onCreateProfile={onCreateProfile}
-                onDeleteProfile={onDeleteProfile}
-              />
+              <CardTitle className="text-lg">Connected Servers</CardTitle>
+              {selectedProfile && (
+                <ProfileDropdown 
+                  profiles={profiles} 
+                  currentProfileId={selectedProfileId} 
+                  onProfileChange={onProfileChange}
+                  onCreateProfile={onCreateProfile}
+                  onDeleteProfile={onDeleteProfile}
+                />
+              )}
             </div>
-            <Button 
-              onClick={() => setServerSelectionDialogOpen(true)} 
-              className="whitespace-nowrap"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Servers
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="relative w-[240px]">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search servers..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              <Button 
+                onClick={() => setServerSelectionDialogOpen(true)} 
+                className="whitespace-nowrap"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Servers
+              </Button>
+            </div>
           </div>
         </CardHeader>
         
@@ -241,7 +263,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {profileServers.map(server => (
+                  {filteredServers.map(server => (
                     <ServerItem 
                       key={server.id}
                       server={server}
@@ -249,6 +271,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                       onStatusChange={handleServerStatusChange}
                       load={getServerLoad(server.id)}
                       onRemoveFromProfile={(serverId) => {
+                        // Implementation for removing server from profile
                         toast({
                           title: "Server removed",
                           description: `${server.name} has been removed from this profile`,
@@ -269,6 +292,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
         onAddServers={(servers) => {
+          // Implementation for adding servers to profile
           toast({
             title: "Servers added",
             description: `${servers.length} server(s) added to profile`,
@@ -286,6 +310,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   );
 };
 
+// Helper component for the search icon
 function Search(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
