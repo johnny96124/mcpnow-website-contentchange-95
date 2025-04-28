@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Info, X } from "lucide-react";
+import { Plus, Search, Info, X, RefreshCw, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type ServerDefinition, Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -394,28 +394,12 @@ const Hosts = () => {
             </div>
           )}
           
-          <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setAddHostDialogOpen(true)}>
+          <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
             <CardContent className="p-4 text-center space-y-2">
               <PlusCircle className="h-6 w-6 mx-auto text-muted-foreground" />
               <p className="text-sm font-medium">Add New Host</p>
             </CardContent>
           </Card>
-          
-          {isScanning && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
-                  <p className="text-sm">Scanning for hosts...</p>
-                </div>
-                <div className="mt-3">
-                  <div className="h-1 w-full bg-muted overflow-hidden rounded-full">
-                    <div className="h-full bg-primary animate-pulse rounded-full" style={{ width: '60%' }}></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
         
         <div className="md:col-span-3">
@@ -440,7 +424,7 @@ const Hosts = () => {
               <p className="text-muted-foreground">
                 Select a host from the list or add a new host to get started
               </p>
-              <Button onClick={() => setAddHostDialogOpen(true)}>Add Host</Button>
+              <Button onClick={() => setUnifiedHostDialogOpen(true)}>Add Host</Button>
             </div>
           )}
         </div>
