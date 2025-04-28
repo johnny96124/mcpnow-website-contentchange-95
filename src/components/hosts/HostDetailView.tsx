@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   FileText, Edit, Plus, Save, Server, Trash2, AlertTriangle, 
@@ -220,7 +221,10 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
               <ProfileDropdown
                 profiles={profiles}
                 currentProfileId={selectedProfileId}
-                onSelectProfile={onImportByProfile}
+                onSelectProfile={(profileId: string) => {
+                  // Create a wrapper function to convert from profileId to host
+                  onImportByProfile(host);
+                }}
                 onCreateProfile={() => onAddServersToHost(host)}
                 onDeleteProfile={(profileId) => {
                   // Handle profile deletion
