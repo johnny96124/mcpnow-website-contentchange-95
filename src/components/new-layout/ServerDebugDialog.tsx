@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ServerInstance } from "@/data/mockData";
+import { ServerInstance, serverDefinitions } from "@/data/mockData";
 import { 
   Dialog, 
   DialogContent, 
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { ServerEventsList } from "@/components/discovery/ServerEventsList";
 import { Wrench, MessageSquare } from "lucide-react";
+import { ServerEvent, EventType, EventCategory } from "@/types/events";
 
 interface ServerDebugDialogProps {
   open: boolean;
@@ -21,12 +22,13 @@ interface ServerDebugDialogProps {
   server: ServerInstance;
 }
 
-const SAMPLE_EVENTS = [
+// Creating properly typed sample events
+const SAMPLE_EVENTS: ServerEvent[] = [
   {
     id: "1",
     timestamp: "2025-04-26T16:02:19Z",
-    type: "notification",
-    category: "Tools",
+    type: "notification" as EventType,
+    category: "Tools" as EventCategory,
     method: "notification/system",
     content: {
       message: "System is running normally",
@@ -38,8 +40,8 @@ const SAMPLE_EVENTS = [
   {
     id: "2",
     timestamp: "2024-04-18T12:59:47Z",
-    type: "error",
-    category: "Tools",
+    type: "error" as EventType,
+    category: "Tools" as EventCategory,
     method: "tools/call",
     content: {
       error: "Failed to execute get_transcript",
@@ -59,6 +61,9 @@ export function ServerDebugDialog({
   onOpenChange,
   server
 }: ServerDebugDialogProps) {
+  // Find the server definition to get access to tools
+  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px] p-0 gap-0">
@@ -89,7 +94,7 @@ export function ServerDebugDialog({
           <div className="p-6 pt-4">
             <TabsContent value="tools" className="m-0">
               <ServerToolsList 
-                tools={server.tools || []}
+                tools={definition?.tools || []}
                 debugMode={true}
                 serverName={server.name}
                 instanceId={server.id}
@@ -111,4 +116,3 @@ export function ServerDebugDialog({
     </Dialog>
   );
 }
-
