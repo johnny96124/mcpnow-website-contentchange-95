@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
+import { ServerInstance, ConnectionStatus } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
@@ -15,9 +15,10 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ServerDebugDialog } from "../new-layout/ServerDebugDialog";
+import { serverDefinitions } from "@/data/mockData";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
-import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -35,7 +36,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   onRemoveFromProfile
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
+  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
@@ -131,7 +132,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             size="icon" 
             className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
             title="Debug Tools"
-            onClick={() => setToolsDialogOpen(true)}
+            onClick={() => setDebugDialogOpen(true)}
           >
             <Wrench className="h-4 w-4" />
           </Button>
@@ -177,28 +178,12 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
       />
       
-      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Wrench className="h-5 w-5 text-muted-foreground" />
-              Server Tools - {server.name}
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Debug, execute tools, and view message history for this server instance
-            </p>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden py-4">
-            <ServerToolsList 
-              tools={definition?.tools} 
-              debugMode={true} 
-              serverName={server.name} 
-              instanceId={server.id} 
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-      
+      <ServerDebugDialog
+        open={debugDialogOpen}
+        onOpenChange={setDebugDialogOpen}
+        server={server}
+      />
+
       <ServerDetailsDialog 
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
