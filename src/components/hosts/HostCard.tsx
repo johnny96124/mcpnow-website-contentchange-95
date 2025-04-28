@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CircleCheck, CircleX, CircleMinus, FilePlus, Settings2, PlusCircle, RefreshCw, ChevronDown, FileCheck, FileText, AlertCircle, Trash2, X } from "lucide-react";
+import { Server, AlertCircle, CircleCheck, ChevronDown, FileText, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -67,7 +67,6 @@ export function HostCard({
   const { toast } = useToast();
   
   const isHostDisconnected = host.connectionStatus === 'disconnected' || host.connectionStatus === 'unknown';
-  const needsConfiguration = host.configStatus === 'unknown' || host.configStatus === 'misconfigured';
   
   const getProfileConnectionStatus = () => {
     if (!instanceStatuses.length) return 'disconnected';
@@ -77,7 +76,7 @@ export function HostCard({
     
     if (connectedCount === 0) return 'error';
     if (connectedCount === totalEnabledInstances) return 'connected';
-    return 'warning'; // Partially connected
+    return 'warning';
   };
   
   const getDefinitionName = (definitionId: string) => {
@@ -266,85 +265,6 @@ export function HostCard({
   const instancesByDefinition = getInstancesByDefinition();
   const statusCounts = getInstanceStatusCounts();
   
-  if (needsConfiguration) {
-    return (
-      <Card className="overflow-hidden flex flex-col h-[400px]">
-        <CardHeader className="bg-muted/50 pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {host.icon && <span className="text-xl">{host.icon}</span>}
-              <h3 className="font-medium text-lg">{host.name}</h3>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusIndicator 
-                status="inactive" 
-                label="No Config"
-                useIcon={true}
-              />
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="pt-4 flex-1 flex flex-col justify-center">
-          <div className="text-center space-y-6">
-            <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-              <FileText className="h-8 w-8 text-blue-500" />
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="font-medium text-lg">Host Configuration Required</h3>
-              <p className="text-muted-foreground">
-                This host needs to be configured before you can connect it to a profile.
-              </p>
-            </div>
-            
-            <Button 
-              onClick={() => onCreateConfig(host.id)}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-              size="lg"
-            >
-              <FilePlus className="h-4 w-4 mr-2" />
-              Create Configuration
-            </Button>
-          </div>
-        </CardContent>
-
-        <Separator className="mt-auto" />
-        
-        <CardFooter className="mt-2 justify-between">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-destructive"
-            onClick={handleDeleteHost}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Host
-          </Button>
-        </CardFooter>
-
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Delete Host</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this host? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button variant="destructive" onClick={confirmDeleteHost}>
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </Card>
-    );
-  }
-  
   return (
     <Card className="overflow-hidden flex flex-col h-[400px]">
       <CardHeader className="bg-muted/50 pb-2">
@@ -358,18 +278,14 @@ export function HostCard({
               status={
                 !profileId ? 'inactive' :
                 isConnecting ? 'warning' :
-                host.connectionStatus === 'connected' ? 'active' : 
-                host.connectionStatus === 'disconnected' ? 'inactive' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'inactive' : 
-                host.configStatus === 'unknown' ? 'warning' : 'inactive'
+                host.connectionStatus === 'connected' ? 'active' : 'inactive'
               } 
               label={
                 !profileId ? 'Disconnected' :
                 isConnecting ? 'Connecting' :
-                host.connectionStatus === 'connected' ? 'Connected' : 
-                host.connectionStatus === 'disconnected' ? 'Disconnected' : 
-                host.connectionStatus === 'misconfigured' || host.configStatus === 'misconfigured' ? 'Disconnected' : 'Unknown'
+                host.connectionStatus === 'connected' ? 'Connected' : 'Disconnected'
               }
+              className={isHostDisconnected ? 'text-neutral-400' : ''}
             />
           </div>
         </div>

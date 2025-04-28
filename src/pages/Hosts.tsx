@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
-import { SearchIcon } from "lucide-react"; // Changed from importing Search to SearchIcon
+import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -24,7 +23,6 @@ const mockJsonConfig = {
 
 const Hosts = () => {
   useEffect(() => {
-    // Mark hosts onboarding as seen
     const markHostsOnboardingAsSeen = () => {
       localStorage.setItem('hostsOnboardingSeen', 'true');
     };
@@ -40,7 +38,7 @@ const Hosts = () => {
 
   const {
     hostProfiles,
-    handleProfileChange: updateProfileInHook, // Renamed to avoid conflict
+    handleProfileChange: updateProfileInHook,
   } = useHostProfiles();
 
   const {
@@ -72,7 +70,6 @@ const Hosts = () => {
 
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
-      // Update host config status
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
         ...host,
         configPath,
@@ -80,7 +77,6 @@ const Hosts = () => {
         connectionStatus: 'connected'
       } : host));
       
-      // Auto-create a profile for this host
       const host = hostsList.find(h => h.id === configDialog.hostId);
       if (host) {
         const profileId = handleCreateProfile(`${host.name} Profile`);
@@ -107,7 +103,6 @@ const Hosts = () => {
   };
 
   const handleAddServersToHost = () => {
-    // This function now opens the server selection dialog in HostDetailView
     toast({
       title: "Add servers",
       description: "Select servers to add to this profile"
@@ -161,7 +156,6 @@ const Hosts = () => {
   };
   
   const handleDeleteProfile = (profileId: string) => {
-    // Don't delete a profile if it's the only one
     if (profilesList.length <= 1) {
       toast({
         title: "Cannot delete profile",
@@ -171,10 +165,8 @@ const Hosts = () => {
       return;
     }
     
-    // Remove the profile
     setProfilesList(prev => prev.filter(p => p.id !== profileId));
     
-    // If the deleted profile was selected, select another one
     if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
       const otherProfile = profilesList.find(p => p.id !== profileId);
       if (otherProfile) {
@@ -256,35 +248,23 @@ const Hosts = () => {
                         <p className="text-xs text-muted-foreground">
                           {host.connectionStatus === "connected" 
                             ? "Connected" 
-                            : host.configStatus === "unknown"
-                              ? "Needs setup"
-                              : "Disconnected"}
+                            : "Disconnected"}
                         </p>
                       </div>
                     </div>
                     <div className={`w-3 h-3 rounded-full ${
                       host.connectionStatus === "connected" 
                         ? 'bg-green-500' 
-                        : host.connectionStatus === "misconfigured" 
-                          ? 'bg-red-500' 
-                          : 'bg-amber-500'
+                        : 'bg-neutral-400'
                     }`} />
                   </CardContent>
                 </Card>
               ))}
             </div>
-          ) : searchQuery ? (
+          ) : (
             <div className="text-center py-8 border border-dashed rounded-md">
               <p className="text-muted-foreground mb-2">No results for "{searchQuery}"</p>
               <Button variant="link" onClick={() => setSearchQuery("")}>Clear search</Button>
-            </div>
-          ) : (
-            <div className="text-center py-12 border border-dashed rounded-md space-y-2">
-              <div className="text-4xl mb-2">🔍</div>
-              <h3 className="font-medium">No hosts found</h3>
-              <p className="text-muted-foreground text-sm px-4">
-                Scan your network to discover hosts or add one manually
-              </p>
             </div>
           )}
           
