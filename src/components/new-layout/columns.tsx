@@ -1,8 +1,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Wrench, MessageSquare } from "lucide-react";
+import { Wrench, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ServerInstance, Profile } from "@/data/mockData";
@@ -18,7 +17,12 @@ export const columns = (
     accessorKey: "name",
     header: "Name",
     cell: ({ row }) => (
-      <div className="font-medium">{row.original.name}</div>
+      <button 
+        className="text-left font-medium hover:underline"
+        onClick={() => onAction('details', row.original)}
+      >
+        {row.original.name}
+      </button>
     ),
   },
   {
@@ -49,6 +53,7 @@ export const columns = (
             const selectedIds = value.split(",").filter(id => id);
             onAddToProfiles(serverId, selectedIds);
           }}
+          value={currentProfileIds.join(",")}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue>
@@ -80,11 +85,12 @@ export const columns = (
                     type="checkbox"
                     checked={currentProfileIds.includes(profile.id)}
                     className="form-checkbox h-4 w-4"
-                    onChange={() => {
+                    onChange={(e) => {
                       const newProfileIds = currentProfileIds.includes(profile.id)
                         ? currentProfileIds.filter(id => id !== profile.id)
                         : [...currentProfileIds, profile.id];
                       onAddToProfiles(serverId, newProfileIds);
+                      e.stopPropagation();
                     }}
                   />
                   <span>{profile.name}</span>

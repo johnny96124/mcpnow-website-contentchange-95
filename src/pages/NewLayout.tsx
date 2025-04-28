@@ -8,7 +8,10 @@ import { profiles as mockProfiles, serverInstances as mockServers } from "@/data
 import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
-import { ServerInstance } from "@/data/mockData.d"; // Import the type
+import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
+import { ServerInstance, Profile } from "@/data/mockData";
+import { ProfileFilter } from "@/components/new-layout/ProfileFilter";
+import { Plus } from "lucide-react";
 
 const NewLayout = () => {
   const [profiles, setProfiles] = useState(mockProfiles);
@@ -17,12 +20,13 @@ const NewLayout = () => {
   const [showServerDetails, setShowServerDetails] = useState(false);
   const [showDebugDialog, setShowDebugDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  const [showAddServerDialog, setShowAddServerDialog] = useState(false);
   const [serverProfiles, setServerProfiles] = useState<Record<string, string[]>>({});
+  const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initialize serverProfiles from mockData
     const initialServerProfiles: Record<string, string[]> = {};
     mockServers.forEach(server => {
       initialServerProfiles[server.id] = [];
@@ -53,11 +57,10 @@ const NewLayout = () => {
 
     toast({
       title: "Profiles updated",
-      description: `Server profiles have been updated successfully`
+      description: "Server profiles have been updated successfully"
     });
   };
 
-  // Fix the status type to use the correct union type
   const handleStatusChange = (serverId: string, status: 'running' | 'stopped' | 'connecting' | 'error') => {
     setServers(prevServers =>
       prevServers.map(server =>
@@ -81,6 +84,22 @@ const NewLayout = () => {
     });
   };
 
+  const handleAddServer = (newServer: ServerInstance) => {
+    setServers(prev => [...prev, newServer]);
+    setServerProfiles(prev => ({
+      ...prev,
+      [newServer.id]: []
+    }));
+    toast({
+      title: "Server added",
+      description: "New server has been added successfully"
+    });
+  };
+
+  const filteredServers = selectedProfile
+    ? servers.filter(server => serverProfiles[server.id]?.includes(selectedProfile))
+    : servers;
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -88,12 +107,22 @@ const NewLayout = () => {
           <h1 className="text-2xl font-semibold">Servers</h1>
           <p className="text-muted-foreground">Manage your servers and instances</p>
         </div>
-        <Button>Add Server</Button>
+        <div className="flex items-center gap-4">
+          <ProfileFilter
+            profiles={profiles}
+            selectedProfile={selectedProfile}
+            onSelectProfile={setSelectedProfile}
+          />
+          <Button onClick={() => setShowAddServerDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Server
+          </Button>
+        </div>
       </div>
 
       <DataTable
         columns={columns(handleServerAction, profiles, handleAddToProfiles, serverProfiles)}
-        data={servers}
+        data={filteredServers}
       />
 
       <ServerDetails
@@ -114,6 +143,12 @@ const NewLayout = () => {
         open={showHistoryDialog}
         onOpenChange={setShowHistoryDialog}
         server={selectedServer}
+      />
+
+      <AddServerDialog 
+        open={showAddServerDialog}
+        onOpenChange={setShowAddServerDialog}
+        onAddServer={handleAddServer}
       />
     </div>
   );
