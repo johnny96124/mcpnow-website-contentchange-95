@@ -120,45 +120,55 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." 
       />
       
-      {/* Fixed AddInstanceDialog with proper open state handling */}
-      <AddInstanceDialog
-        open={editDialogOpen}
-        onOpenChange={(open) => {
-          setEditDialogOpen(open);
-        }}
-        serverDefinition={definition || null}
-        onCreateInstance={handleEditComplete}
-        editMode={true}
-        initialValues={{
-          name: server.name,
-          args: server.arguments ? server.arguments.join(' ') : "",
-          url: server.connectionDetails || "",
-          env: server.environment || {},
-          headers: {} // Ensure headers is always an object
-        }}
-        instanceId={server.id}
-      />
+      {/* Use a separate component instance for the edit dialog */}
+      {editDialogOpen && (
+        <AddInstanceDialog
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            if (!open) setEditDialogOpen(false);
+          }}
+          serverDefinition={definition || null}
+          onCreateInstance={handleEditComplete}
+          editMode={true}
+          initialValues={{
+            name: server.name,
+            args: server.arguments ? server.arguments.join(' ') : "",
+            url: server.connectionDetails || "",
+            env: server.environment || {},
+            headers: {} // Ensure headers is always an object
+          }}
+          instanceId={server.id}
+        />
+      )}
       
-      <Dialog open={toolsDialogOpen} onOpenChange={(open) => setToolsDialogOpen(open)}>
-        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Wrench className="h-5 w-5 text-purple-500" />
-              Server Tools - {server.name}
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Debug, execute tools, and view message history for this server instance
-            </p>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden py-4">
-            <ServerToolsList 
-              tools={definition?.tools || []} 
-              debugMode={true} 
-              serverName={server.name} 
-              instanceId={server.id} 
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Use a separate component instance for tools dialog */}
+      {toolsDialogOpen && (
+        <Dialog 
+          open={toolsDialogOpen} 
+          onOpenChange={(open) => {
+            if (!open) setToolsDialogOpen(false);
+          }}
+        >
+          <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <Wrench className="h-5 w-5 text-purple-500" />
+                Server Tools - {server.name}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Debug, execute tools, and view message history for this server instance
+              </p>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden py-4">
+              <ServerToolsList 
+                tools={definition?.tools || []} 
+                debugMode={true} 
+                serverName={server.name} 
+                instanceId={server.id} 
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </tr>;
 };
