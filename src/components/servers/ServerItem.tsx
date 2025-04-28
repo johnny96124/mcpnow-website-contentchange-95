@@ -4,14 +4,12 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PenLine, Info, Trash2, Server, Wrench, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, PenLine, Trash2, Server, AlertTriangle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ServerDetailsDialog } from "./ServerDetailsDialog";
-import { ServerToolsList } from "@/components/discovery/ServerToolsList";
-import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
+import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
+import { ServerDetailsDialog } from "@/components/hosts/ServerDetailsDialog";
+import { AddInstanceDialog } from "./AddInstanceDialog";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -29,7 +27,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   onRemoveFromProfile
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   
@@ -86,11 +83,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       <td className="p-4 align-middle text-right">
         <div className="flex justify-end gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Server Info" onClick={() => setDetailsDialogOpen(true)}>
-            <Info className="h-4 w-4" />
-          </Button>
-
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50" title="Server Tools" onClick={() => setToolsDialogOpen(true)}>
-            <Wrench className="h-4 w-4" />
+            <Server className="h-4 w-4" />
           </Button>
           
           <DropdownMenu>
@@ -101,6 +94,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>More Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
                 <PenLine className="h-4 w-4 mr-2" />
                 Edit Instance
@@ -117,25 +111,8 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       
       <ServerErrorDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen} serverName={server.name} errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." />
       
-      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Wrench className="h-5 w-5 text-purple-500" />
-              Server Tools - {server.name}
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Debug, execute tools, and view message history for this server instance
-            </p>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden py-4">
-            <ServerToolsList tools={definition?.tools} debugMode={true} serverName={server.name} instanceId={server.id} />
-          </div>
-        </DialogContent>
-      </Dialog>
-      
       <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
-
+      
       <AddInstanceDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
