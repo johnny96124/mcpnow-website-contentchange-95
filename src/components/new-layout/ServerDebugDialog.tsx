@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { ServerEventsList } from "@/components/discovery/ServerEventsList";
 import { Wrench, MessageSquare } from "lucide-react";
-import { ServerEvent } from "@/types/events";
+import { ServerEvent, EventType, EventCategory } from "@/types/events";
 
 interface ServerDebugDialogProps {
   open: boolean;
@@ -27,8 +27,8 @@ const SAMPLE_EVENTS: ServerEvent[] = [
   {
     id: "1",
     timestamp: "2025-04-26T16:02:19Z",
-    type: "notification" as EventType,
-    category: "Tools" as EventCategory,
+    type: "notification",
+    category: "Tools",
     method: "notification/system",
     content: {
       message: "System is running normally",
@@ -40,8 +40,8 @@ const SAMPLE_EVENTS: ServerEvent[] = [
   {
     id: "2",
     timestamp: "2024-04-18T12:59:47Z",
-    type: "error" as EventType,
-    category: "Tools" as EventCategory,
+    type: "error",
+    category: "Tools",
     method: "tools/call",
     content: {
       error: "Failed to execute get_transcript",
@@ -116,4 +116,3 @@ export function ServerDebugDialog({
     </Dialog>
   );
 }
-
