@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -6,7 +5,7 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PenLine, Trash2, Server, AlertTriangle } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
 import { ServerDetailsDialog } from "@/components/hosts/ServerDetailsDialog";
@@ -41,20 +40,33 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     }
   };
 
+  const handleEditComplete = () => {
+    toast({
+      title: "Instance updated",
+      description: "The instance settings have been updated successfully."
+    });
+    setEditDialogOpen(false);
+  };
+
   return <tr className={hasError ? "bg-red-50/30" : ""}>
       <td className="p-4 align-middle">
         <div className="flex items-center gap-2">
           <div className="bg-muted/20 p-1.5 rounded">
             <Server className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div>
+          <div className="flex items-center gap-1.5">
             <div className="font-medium">{server.name}</div>
-            {hasError && <div className="flex items-center gap-1.5 text-xs text-red-500 mt-1">
-                <span>Error: Failed to connect to server</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50" title="View Error" onClick={() => setErrorDialogOpen(true)}>
-                  <AlertTriangle className="h-3 w-3" />
-                </Button>
-              </div>}
+            {hasError && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50 p-0" 
+                title="Server Error" 
+                onClick={() => setErrorDialogOpen(true)}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </div>
       </td>
@@ -110,18 +122,11 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         initialValues={{
           name: server.name,
           args: server.arguments?.join(' ') || '',
-          // Convert these properties to optional with fallbacks to prevent TypeScript errors
-          url: '',  // Default empty string since 'url' is not in the ServerInstance type
+          url: '',
           env: server.environment || {},
-          headers: {}, // Default empty object since 'headers' is not in the ServerInstance type
+          headers: {},
         }}
-        onCreateInstance={(data) => {
-          toast({
-            title: "Instance updated",
-            description: "The instance settings have been updated successfully."
-          });
-          setEditDialogOpen(false);
-        }}
+        onCreateInstance={handleEditComplete}
       />
     </tr>;
 };
