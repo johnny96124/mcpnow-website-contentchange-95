@@ -23,6 +23,7 @@ export default function HostsNewLayout() {
   const [hostList, setHostList] = useState(hosts);
   const [showServerSelectionDialog, setShowServerSelectionDialog] = useState<boolean>(false);
   const [selectedProfile, setSelectedProfile] = useState<string>("");
+  const [configContent, setConfigContent] = useState<string>("");
   const navigate = useNavigate();
   
   const { 
@@ -79,6 +80,18 @@ export default function HostsNewLayout() {
   const handleShowConfigFile = (host: any) => {
     setSelectedHost(host);
     setConfigFilePath(host.configPath || "");
+    
+    // Generate a sample config content for demonstration
+    const sampleConfig = JSON.stringify({
+      "mcpServers": {
+        "mcpnow": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/mcpnow", "http://localhost:8008/mcp"]
+        }
+      }
+    }, null, 2);
+    
+    setConfigContent(sampleConfig);
     setShowConfigFileDialog(true);
   };
 
@@ -89,6 +102,12 @@ export default function HostsNewLayout() {
     }
     
     setShowServerSelectionDialog(true);
+  };
+  
+  const handleSaveConfig = (config: string, path: string) => {
+    console.log("Saving config:", config, "to path:", path);
+    toast.success("Configuration saved successfully");
+    setShowConfigFileDialog(false);
   };
   
   // Get the current profile based on selected host
@@ -229,7 +248,8 @@ export default function HostsNewLayout() {
           open={showConfigFileDialog}
           onOpenChange={setShowConfigFileDialog}
           configPath={configFilePath}
-          initialConfig=""
+          initialConfig={configContent}
+          onSave={handleSaveConfig}
         />
       )}
       
