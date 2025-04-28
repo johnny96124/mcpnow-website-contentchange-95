@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { serverDefinitions, type ServerInstance, type EndpointType, type Status } from "@/data/mockData";
+import { serverDefinitions, type ServerInstance, type ServerDefinition, type EndpointType, type Status } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -87,13 +86,8 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAdded, setShowAdded] = useState(false);
-  const [selectedServer, setSelectedServer] = useState<string | null>(null);
-  const [step, setStep] = useState<"selection" | "configure">("selection");
-  const [serverConfig, setServerConfig] = useState({
-    name: "",
-    connectionUrl: "",
-    additionalParams: ""
-  });
+  const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
+  const [showInstanceDialog, setShowInstanceDialog] = useState(false);
   const { toast } = useToast();
 
   // Reset when dialog opens/closes
@@ -102,87 +96,65 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       setSearchQuery("");
       setShowAdded(false);
       setSelectedServer(null);
-      setStep("selection");
-      setServerConfig({
-        name: "",
-        connectionUrl: "",
-        additionalParams: ""
-      });
+      setShowInstanceDialog(false);
     }
   }, [open]);
 
-  const handleServerSelect = (serverId: string) => {
-    setSelectedServer(serverId);
+  const handleServerSelect = (server: ServerDefinition | ServerInstance) => {
     if (showAdded) {
-      const server = existingInstances.find(s => s.id === serverId);
-      if (server) {
-        onAddServers([server]);
-        toast({
-          title: "Server added",
-          description: `${server.name} has been added to your profile`
-        });
-        onOpenChange(false);
-      }
+      // If it's an existing instance, add it directly
+      const serverInstance = server as ServerInstance;
+      onAddServers([serverInstance]);
+      toast({
+        title: "Server added",
+        description: `${serverInstance.name} has been added to your profile`
+      });
+      onOpenChange(false);
     } else {
-      // Go to configuration step for discovery servers
-      const server = availableServers.find(s => s.id === serverId);
-      if (server) {
-        setServerConfig({
-          name: server.name,
-          connectionUrl: server.connectionDetails,
-          additionalParams: ""
-        });
-        setStep("configure");
-      }
+      // If it's a definition, show the instance dialog
+      setSelectedServer(server as ServerDefinition);
+      setShowInstanceDialog(true);
     }
   };
 
-  const handleConfigureServer = () => {
-    if (!selectedServer) return;
-    
-    const server = availableServers.find(s => s.id === selectedServer);
-    if (server) {
-      const newInstance: ServerInstance = {
-        id: `new-${Date.now()}`,
-        name: serverConfig.name || server.name,
-        definitionId: server.definitionId,
-        status: "stopped" as Status,
-        connectionDetails: serverConfig.connectionUrl || server.connectionDetails,
-        enabled: false
-      };
-      
-      onAddServers([newInstance]);
-      toast({
-        title: "Server added",
-        description: `${newInstance.name} has been added to your profile`
-      });
-      onOpenChange(false);
-    }
+  const handleCreateInstance = (data: any) => {
+    const newInstance: ServerInstance = {
+      id: `instance-${Date.now()}`,
+      name: data.name,
+      definitionId: selectedServer?.id || "",
+      status: "stopped",
+      connectionDetails: data.url || data.args || "",
+      enabled: false
+    };
+
+    onAddServers([newInstance]);
+    toast({
+      title: "Server instance created",
+      description: `${newInstance.name} has been added to your profile`
+    });
+    setShowInstanceDialog(false);
+    onOpenChange(false);
   };
 
   const filteredServers = showAdded
     ? existingInstances.filter(server =>
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : availableServers.filter(server =>
+    : serverDefinitions.filter(server =>
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {step === "selection" ? "Select Server" : "Configure Server"}
-          </DialogTitle>
-          <DialogDescription>
-            {step === "selection" 
-              ? "Choose a server to add to your profile" 
-              : "Configure the server settings before adding"}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Select Server</DialogTitle>
+            <DialogDescription>
+              Choose a server to add to your profile
+            </DialogDescription>
+          </DialogHeader>
 
-        {step === "selection" ? (
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -195,12 +167,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             </div>
             
             <div className="flex items-center space-x-2">
+              <Label htmlFor="show-added">Show Added Only</Label>
               <Switch
                 id="show-added"
                 checked={showAdded}
                 onCheckedChange={setShowAdded}
               />
-              <Label htmlFor="show-added">Show Added Only</Label>
             </div>
 
             <div className="space-y-4">
@@ -208,7 +180,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 <div
                   key={server.id}
                   className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
-                  onClick={() => handleServerSelect(server.id)}
+                  onClick={() => handleServerSelect(server)}
                 >
                   <ServerLogo name={server.name} className="flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -217,9 +189,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       {'type' in server && (
                         <EndpointLabel type={server.type} />
                       )}
-                      {showAdded && (
-                        <Badge variant="secondary">Added</Badge>
-                      )}
                     </div>
                     {'description' in server && (
                       <p className="text-sm text-muted-foreground mt-1">
@@ -227,7 +196,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
-                      {server.connectionDetails}
+                      {server.connectionDetails || ('url' in server ? server.url : '')}
                     </p>
                   </div>
                 </div>
@@ -240,70 +209,15 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
               )}
             </div>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                setStep("selection");
-                setSelectedServer(null);
-              }}
-              className="mb-4 -ml-2"
-            >
-              ← Back to selection
-            </Button>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="server-name">Server Name</Label>
-                <Input
-                  id="server-name"
-                  value={serverConfig.name}
-                  onChange={(e) => setServerConfig({...serverConfig, name: e.target.value})}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="connection-url">Connection URL</Label>
-                <Input
-                  id="connection-url"
-                  value={serverConfig.connectionUrl}
-                  onChange={(e) => setServerConfig({...serverConfig, connectionUrl: e.target.value})}
-                  placeholder="e.g. https://api.example.com"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="additional-params">Additional Parameters (optional)</Label>
-                <Input
-                  id="additional-params"
-                  value={serverConfig.additionalParams}
-                  onChange={(e) => setServerConfig({...serverConfig, additionalParams: e.target.value})}
-                  placeholder="Any additional configuration"
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        </DialogContent>
+      </Dialog>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          {step === "selection" ? (
-            <Button disabled={selectedServer === null && !showAdded}>
-              {showAdded ? "Add Selected" : "Next"}
-            </Button>
-          ) : (
-            <Button 
-              onClick={handleConfigureServer}
-              disabled={!serverConfig.name || !serverConfig.connectionUrl}
-            >
-              Add Server
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <AddInstanceDialog
+        open={showInstanceDialog}
+        onOpenChange={setShowInstanceDialog}
+        serverDefinition={selectedServer}
+        onCreateInstance={handleCreateInstance}
+      />
+    </>
   );
 };
