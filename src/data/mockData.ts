@@ -623,16 +623,7 @@ export const hosts: Host[] = [
     configPath: '/Users/user/Library/Application Support/Claude/config.json',
     icon: '🧠',
     needsUpdate: true
-  },
-  {
-    id: 'windsurf',
-    name: 'Windsurf',
-    profileId: 'database-ops',
-    configStatus: 'unknown',
-    connectionStatus: 'unknown',
-    configPath: '/Users/user/.windsurf/config',
-    icon: '🏄'
-  },
+  }
 ];
 
 export const discoveryItems: ServerDefinition[] = [
