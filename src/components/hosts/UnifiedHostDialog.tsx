@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -25,15 +26,30 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
 
   useEffect(() => {
     if (open) {
-      handleScanForHosts();
+      // Only auto-scan if mode is "scan" when dialog opens
+      if (mode === "scan") {
+        handleScanForHosts();
+      }
     } else {
+      // Reset all states when dialog closes
       setScannedHosts([]);
       setSelectedHosts([]);
       setManualHostName("");
       setConfigPath("");
       setMode("scan");
+      setIsScanning(false);
     }
   }, [open]);
+
+  // Separate mode change handling from automatic scan
+  const handleModeChange = (newMode: "scan" | "manual") => {
+    setMode(newMode);
+    
+    // Only trigger scan if changing to scan mode and we haven't scanned yet
+    if (newMode === "scan" && scannedHosts.length === 0 && !isScanning) {
+      handleScanForHosts();
+    }
+  };
 
   const handleScanForHosts = () => {
     setIsScanning(true);
@@ -145,7 +161,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         <div className="space-y-6 py-4">
           <RadioGroup
             value={mode}
-            onValueChange={(value: "scan" | "manual") => setMode(value)}
+            onValueChange={handleModeChange}
             className="grid grid-cols-2 gap-4"
           >
             <div className={`relative rounded-lg border p-4 cursor-pointer ${mode === 'scan' ? 'border-primary bg-primary/5' : ''}`}>
