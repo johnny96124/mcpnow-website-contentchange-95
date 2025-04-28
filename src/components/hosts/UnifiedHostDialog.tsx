@@ -1,5 +1,5 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,12 +26,10 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
 
   useEffect(() => {
     if (open) {
-      // Only auto-scan if mode is "scan" when dialog opens
       if (mode === "scan") {
         handleScanForHosts();
       }
     } else {
-      // Reset all states when dialog closes
       setScannedHosts([]);
       setSelectedHosts([]);
       setManualHostName("");
@@ -41,11 +39,9 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     }
   }, [open]);
 
-  // Separate mode change handling from automatic scan
   const handleModeChange = (newMode: "scan" | "manual") => {
     setMode(newMode);
     
-    // Only trigger scan if changing to scan mode and we haven't scanned yet
     if (newMode === "scan" && scannedHosts.length === 0 && !isScanning) {
       handleScanForHosts();
     }
@@ -122,15 +118,29 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
       icon: "🖥️",
       configPath,
       configStatus: "configured",
-      connectionStatus: "connected"
+      connectionStatus: "connected",
+      profileId: `profile-${Date.now()}`
     };
 
-    onAddHosts([newHost]);
+    const defaultProfileName = `${manualHostName} Default`;
+    
+    const newHostWithProfile = {
+      ...newHost,
+      defaultProfileName
+    };
+
+    onAddHosts([newHostWithProfile]);
     onOpenChange(false);
   };
 
   const handleConfirmScannedHosts = () => {
-    const hostsToAdd = scannedHosts.filter(host => selectedHosts.includes(host.id));
+    const hostsToAdd = scannedHosts.filter(host => selectedHosts.includes(host.id))
+      .map(host => ({
+        ...host,
+        profileId: `profile-${Date.now()}-${host.id}`,
+        defaultProfileName: `${host.name} Default`
+      }));
+
     if (hostsToAdd.length === 0) {
       toast({
         title: "No hosts selected",
@@ -139,6 +149,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
       });
       return;
     }
+
     onAddHosts(hostsToAdd);
     onOpenChange(false);
   };

@@ -93,8 +93,24 @@ const Hosts = () => {
   };
 
   const handleAddHosts = (newHosts: Host[]) => {
-    setHostsList(prev => [...prev, ...newHosts]);
-    setSelectedHostId(newHosts[0].id);
+    const hostsWithProfiles = newHosts.map(host => {
+      const profileId = handleCreateProfile(host.defaultProfileName);
+      
+      return {
+        ...host,
+        profileId
+      };
+    });
+
+    setHostsList(prev => [...prev, ...hostsWithProfiles]);
+    
+    setSelectedHostId(hostsWithProfiles[0].id);
+    
+    hostsWithProfiles.forEach(host => {
+      if (host.profileId) {
+        updateProfileInHook(host.id, host.profileId);
+      }
+    });
     
     toast({
       title: "Hosts Added",
