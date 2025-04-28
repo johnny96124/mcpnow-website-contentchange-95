@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { ServerProvider } from "@/context/ServerContext";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import Dashboard from "@/pages/Dashboard";
 import Hosts from "@/pages/Hosts";
@@ -19,37 +20,39 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
-        <Toaster />
-        <RouterProvider router={createBrowserRouter([
-          {
-            path: "/",
-            element: <DefaultLayout><Dashboard /></DefaultLayout>
-          },
-          {
-            path: "/hosts",
-            element: <DefaultLayout><Hosts /></DefaultLayout>
-          },
-          {
-            path: "/servers",
-            element: <DefaultLayout><Servers /></DefaultLayout>
-          },
-          {
-            path: "/profiles",
-            element: <DefaultLayout><Profiles /></DefaultLayout>
-          },
-          {
-            path: "/discovery",
-            element: <DefaultLayout><Discovery /></DefaultLayout>
-          },
-          {
-            path: "/settings",
-            element: <DefaultLayout><Settings /></DefaultLayout>
-          },
-          {
-            path: "/host-new",
-            element: <DefaultLayout><HostNewLayout /></DefaultLayout>
-          }
-        ])} />
+        <ServerProvider>
+          <Toaster />
+          <RouterProvider router={createBrowserRouter([
+            {
+              path: "/",
+              element: <DefaultLayout><Dashboard /></DefaultLayout>
+            },
+            {
+              path: "/hosts",
+              element: <DefaultLayout><Hosts /></DefaultLayout>
+            },
+            {
+              path: "/servers",
+              element: <DefaultLayout><Servers /></DefaultLayout>
+            },
+            {
+              path: "/profiles",
+              element: <DefaultLayout><Profiles /></DefaultLayout>
+            },
+            {
+              path: "/discovery",
+              element: <DefaultLayout><Discovery /></DefaultLayout>
+            },
+            {
+              path: "/settings",
+              element: <DefaultLayout><Settings /></DefaultLayout>
+            },
+            {
+              path: "/host-new",
+              element: <DefaultLayout><HostNewLayout /></DefaultLayout>
+            }
+          ])} />
+        </ServerProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
