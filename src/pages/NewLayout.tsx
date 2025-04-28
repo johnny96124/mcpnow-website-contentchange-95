@@ -8,11 +8,12 @@ import { profiles as mockProfiles, serverInstances as mockServers } from "@/data
 import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
+import { ServerInstance } from "@/data/mockData.d"; // Import the type
 
 const NewLayout = () => {
   const [profiles, setProfiles] = useState(mockProfiles);
   const [servers, setServers] = useState(mockServers);
-  const [selectedServer, setSelectedServer] = useState(null);
+  const [selectedServer, setSelectedServer] = useState<ServerInstance | null>(null);
   const [showServerDetails, setShowServerDetails] = useState(false);
   const [showDebugDialog, setShowDebugDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
@@ -29,7 +30,7 @@ const NewLayout = () => {
     setServerProfiles(initialServerProfiles);
   }, []);
 
-  const handleServerAction = (action: string, server: any) => {
+  const handleServerAction = (action: string, server: ServerInstance) => {
     setSelectedServer(server);
     switch (action) {
       case 'debug':
@@ -56,7 +57,8 @@ const NewLayout = () => {
     });
   };
 
-  const handleStatusChange = (serverId: string, status: string) => {
+  // Fix the status type to use the correct union type
+  const handleStatusChange = (serverId: string, status: 'running' | 'stopped' | 'connecting' | 'error') => {
     setServers(prevServers =>
       prevServers.map(server =>
         server.id === serverId
