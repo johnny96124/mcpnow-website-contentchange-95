@@ -25,39 +25,39 @@ interface ServerSelectionDialogProps {
   onAddServers: (servers: ServerInstance[]) => void;
 }
 
-// List of mock servers to choose from
+// List of mock servers to choose from - corrected to match ServerInstance type
 const availableServers: ServerInstance[] = [
   {
     id: "server-1",
     name: "GitHub Copilot",
     definitionId: "def-http-sse",
     status: "stopped",
-    endpointUrl: "https://api.github.com/copilot",
-    command: ""
+    connectionDetails: "https://api.github.com/copilot",
+    enabled: false
   },
   {
     id: "server-2",
     name: "Local File Assistant",
     definitionId: "def-stdio",
     status: "stopped",
-    endpointUrl: "",
-    command: "npx file-assistant"
+    connectionDetails: "npx file-assistant",
+    enabled: false
   },
   {
     id: "server-3",
     name: "OpenAI API",
     definitionId: "def-http-sse",
     status: "stopped",
-    endpointUrl: "https://api.openai.com/v1",
-    command: ""
+    connectionDetails: "https://api.openai.com/v1",
+    enabled: false
   },
   {
     id: "server-4",
     name: "Code Interpreter",
     definitionId: "def-ws",
     status: "stopped",
-    endpointUrl: "ws://localhost:3000",
-    command: ""
+    connectionDetails: "ws://localhost:3000",
+    enabled: false
   }
 ];
 
@@ -68,18 +68,33 @@ const existingInstances: ServerInstance[] = [
     name: "GitHub Copilot Instance",
     definitionId: "def-http-sse",
     status: "stopped",
-    endpointUrl: "https://api.github.com/copilot",
-    command: ""
+    connectionDetails: "https://api.github.com/copilot",
+    enabled: false
   },
   {
     id: "instance-2",
     name: "Local File Assistant Dev",
     definitionId: "def-stdio",
     status: "stopped",
-    endpointUrl: "",
-    command: "npx file-assistant --dev"
+    connectionDetails: "npx file-assistant --dev",
+    enabled: false
   }
 ];
+
+// Helper function to get server description based on its type
+const getServerDescription = (serverId: string): string => {
+  const server = availableServers.find(s => s.id === serverId);
+  if (!server) return "";
+  
+  const definition = serverDefinitions.find(d => d.id === server.definitionId);
+  if (!definition) return "";
+  
+  return definition.type === "HTTP_SSE" 
+    ? "HTTP-based server using Server-Sent Events" 
+    : definition.type === "STDIO" 
+      ? "Command-line based server using standard I/O"
+      : "WebSocket-based server";
+};
 
 export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   open,
@@ -120,8 +135,16 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       const server = availableServers.find(s => s.id === selectedServerId);
       if (server) {
         setNewInstanceName(server.name);
-        setEndpointUrl(server.endpointUrl || "");
-        setCommandArgs(server.command || "");
+        
+        // Use connectionDetails based on the type
+        const definition = serverDefinitions.find(d => d.id === server.definitionId);
+        if (definition && definition.type === "HTTP_SSE" || definition?.type === "WS") {
+          setEndpointUrl(server.connectionDetails);
+          setCommandArgs("");
+        } else {
+          setEndpointUrl("");
+          setCommandArgs(server.connectionDetails);
+        }
       }
     }
   }, [selectedServerId]);
@@ -155,33 +178,21 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     }
   };
   
-  // Get a short description for a server
-  const getServerDescription = (serverId: string) => {
-    const server = availableServers.find(s => s.id === serverId);
-    if (!server) return "";
-    
-    const definition = serverDefinitions.find(d => d.id === server.definitionId);
-    if (!definition) return "";
-    
-    return definition.type === "HTTP_SSE" 
-      ? "HTTP-based server using Server-Sent Events" 
-      : definition.type === "STDIO" 
-        ? "Command-line based server using standard I/O"
-        : "WebSocket-based server";
-  };
-  
   // Create a new instance
   const handleCreateInstance = () => {
     const server = availableServers.find(s => s.id === selectedServerId);
     if (!server) return;
+    
+    const definition = serverDefinitions.find(d => d.id === server.definitionId);
+    const isHttpType = definition?.type === "HTTP_SSE" || definition?.type === "WS";
     
     const newInstance: ServerInstance = {
       id: `instance-${Date.now()}`,
       name: newInstanceName,
       definitionId: server.definitionId,
       status: "stopped",
-      endpointUrl: endpointUrl,
-      command: commandArgs
+      connectionDetails: isHttpType ? endpointUrl : commandArgs,
+      enabled: false
     };
     
     onAddServers([newInstance]);
@@ -279,8 +290,8 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     const selectedServer = availableServers.find(s => s.id === selectedServerId);
     if (!selectedServer) return null;
     
-    const isHttpType = getEndpointType(selectedServer.definitionId) === "HTTP_SSE" || 
-                       getEndpointType(selectedServer.definitionId) === "WS";
+    const endpointType = getEndpointType(selectedServer.definitionId);
+    const isHttpType = endpointType === "HTTP_SSE" || endpointType === "WS";
     
     return (
       <>
@@ -436,7 +447,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                     <div>
                       <p className="font-medium text-sm">{instance.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {instance.endpointUrl || instance.command}
+                        {instance.connectionDetails}
                       </p>
                     </div>
                   </div>

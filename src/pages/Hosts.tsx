@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Info, X } from "lucide-react";
+import { Plus, Info, X } from "lucide-react";
+import { SearchIcon } from "lucide-react"; // Changed from importing Search to SearchIcon
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -39,7 +40,7 @@ const Hosts = () => {
 
   const {
     hostProfiles,
-    handleProfileChange,
+    handleProfileChange: updateProfileInHook, // Renamed to avoid conflict
   } = useHostProfiles();
 
   const {
@@ -83,7 +84,7 @@ const Hosts = () => {
       const host = hostsList.find(h => h.id === configDialog.hostId);
       if (host) {
         const profileId = handleCreateProfile(`${host.name} Profile`);
-        handleProfileChange(host.id, profileId);
+        updateProfileInHook(host.id, profileId);
         
         toast({
           title: "Configuration complete",
@@ -129,18 +130,13 @@ const Hosts = () => {
   
   const handleProfileChange = (profileId: string) => {
     if (selectedHost) {
-      handleHostProfiles(selectedHost.id, profileId);
+      updateProfileInHook(selectedHost.id, profileId);
       
       toast({
         title: "Profile Changed",
         description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
       });
     }
-  };
-
-  const handleHostProfiles = (hostId: string, profileId: string) => {
-    // Update the profile for this host
-    handleProfileChange(hostId, profileId);
   };
   
   const handleCreateProfile = (profileName: string) => {
@@ -182,7 +178,7 @@ const Hosts = () => {
     if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
       const otherProfile = profilesList.find(p => p.id !== profileId);
       if (otherProfile) {
-        handleProfileChange(selectedHost.id, otherProfile.id);
+        updateProfileInHook(selectedHost.id, otherProfile.id);
       }
     }
     
@@ -222,7 +218,7 @@ const Hosts = () => {
       </div>
       
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search hosts..."
@@ -352,25 +348,5 @@ const Hosts = () => {
     </div>
   );
 };
-
-function Search(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
 
 export default Hosts;
