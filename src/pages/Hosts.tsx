@@ -1,16 +1,13 @@
+
 import { useState, useEffect } from "react";
-import { Plus, Search, Info, X, RefreshCw, PlusCircle } from "lucide-react";
+import { Plus, Info, X } from "lucide-react";
+import { SearchIcon } from "lucide-react"; // Changed from importing Search to SearchIcon
 import { Button } from "@/components/ui/button";
-import { hosts as initialHosts, type Host, type ServerDefinition, Profile, ServerInstance } from "@/data/mockData";
+import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
-import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
-import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 import { HostDetailView } from "@/components/hosts/HostDetailView";
-import { ProfileSelector } from "@/components/hosts/ProfileSelector";
-import { ProfileChangesDialog } from "@/components/hosts/ProfileChangesDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
@@ -27,27 +24,23 @@ const mockJsonConfig = {
 
 const Hosts = () => {
   useEffect(() => {
+    // Mark hosts onboarding as seen
+    const markHostsOnboardingAsSeen = () => {
+      localStorage.setItem('hostsOnboardingSeen', 'true');
+    };
     markHostsOnboardingAsSeen();
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
-  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
-  const [profileSelectorOpen, setProfileSelectorOpen] = useState(false);
-  const [unsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
   const [serverInstances, setServerInstances] = useState<ServerInstance[]>(initialServerInstances);
   const [profilesList, setProfilesList] = useState<Profile[]>(initialProfiles);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [addedServers, setAddedServers] = useState<ServerInstance[]>([]);
-  const [removedServers, setRemovedServers] = useState<ServerInstance[]>([]);
-  const [targetProfileId, setTargetProfileId] = useState<string | null>(null);
 
   const {
     hostProfiles,
-    handleProfileChange,
-    getProfileById
+    handleProfileChange: updateProfileInHook, // Renamed to avoid conflict
   } = useHostProfiles();
 
   const {
@@ -57,14 +50,11 @@ const Hosts = () => {
     resetConfigDialog
   } = useConfigDialog(mockJsonConfig);
 
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
-  const selectedProfile = selectedProfileId ? profilesList.find(p => p.id === selectedProfileId) : null;
 
   useEffect(() => {
     if (hostsList.length > 0 && !selectedHostId) {
@@ -82,6 +72,7 @@ const Hosts = () => {
 
   const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
+      // Update host config status
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
         ...host,
         configPath,
@@ -89,12 +80,18 @@ const Hosts = () => {
         connectionStatus: 'connected'
       } : host));
       
-      toast({
-        title: "Configuration complete",
-        description: "Now you can select a profile for this host to connect to."
-      });
-
-      setProfileSelectorOpen(true);
+      // Auto-create a profile for this host
+      const host = hostsList.find(h => h.id === configDialog.hostId);
+      if (host) {
+        const profileId = handleCreateProfile(`${host.name} Profile`);
+        updateProfileInHook(host.id, profileId);
+        
+        toast({
+          title: "Configuration complete",
+          description: "Host has been configured and is ready to use.",
+          type: "success"
+        });
+      }
     }
     resetConfigDialog();
   };
@@ -109,96 +106,31 @@ const Hosts = () => {
     });
   };
 
-  const handleAddServersToHost = (host: Host) => {
-    setAddServerDialogOpen(true);
+  const handleAddServersToHost = () => {
+    // This function now opens the server selection dialog in HostDetailView
+    toast({
+      title: "Add servers",
+      description: "Select servers to add to this profile"
+    });
   };
   
-  const handleImportByProfile = (host: Host) => {
-    if (hasUnsavedChanges) {
-      setUnsavedChangesDialogOpen(true);
-    } else {
-      setProfileSelectorOpen(true);
-    }
-  };
-  
-  const handleAddServers = (newServers: ServerInstance[]) => {
-    if (selectedProfileId && selectedHost) {
-      setProfilesList(prev => prev.map(profile => {
-        if (profile.id === selectedProfileId) {
-          const existingIds = profile.instances;
-          const newIds = newServers.filter(s => !existingIds.includes(s.id)).map(s => s.id);
-          
-          if (newIds.length > 0) {
-            setHasUnsavedChanges(true);
-            setAddedServers(prev => [...prev, ...newServers]);
-            return {
-              ...profile,
-              instances: [...existingIds, ...newIds]
-            };
-          }
-        }
-        return profile;
-      }));
-      
-      toast({
-        title: "Servers Added",
-        description: `Added ${newServers.length} servers to profile "${selectedProfile?.name}". Save changes to apply.`,
-      });
-    } else {
-      const newProfileId = `profile-${Date.now()}`;
-      const newProfile: Profile = {
-        id: newProfileId,
-        name: `${selectedHost?.name || 'New'} Profile`,
-        endpoint: "http://localhost:8008/mcp",
-        endpointType: "HTTP_SSE",
-        enabled: true,
-        instances: newServers.map(s => s.id)
-      };
-      
-      setProfilesList([...profilesList, newProfile]);
-      handleProfileChange(selectedHost!.id, newProfileId);
-      
-      toast({
-        title: "Profile Created",
-        description: `New profile created with ${newServers.length} servers`
-      });
-    }
-    
-    if (selectedHost?.configStatus === "unknown") {
-      setHostsList(prev => prev.map(h => h.id === selectedHost.id ? {
-        ...h,
-        configStatus: "configured",
-        connectionStatus: "connected"
-      } : h));
-    }
-    
-    setAddServerDialogOpen(false);
-  };
-
   const handleServerStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServerInstances(prev => prev.map(server => server.id === serverId ? {
       ...server,
       status
     } : server));
-    
-    setHasUnsavedChanges(true);
   };
   
   const handleSaveProfileChanges = () => {
-    setHasUnsavedChanges(false);
-    setAddedServers([]);
-    setRemovedServers([]);
-    
     toast({
       title: "Profile Saved",
-      description: `Changes to profile "${selectedProfile?.name}" have been saved.`
+      description: "Changes to profile have been saved."
     });
   };
   
-  const handleSelectProfile = (profileId: string) => {
+  const handleProfileChange = (profileId: string) => {
     if (selectedHost) {
-      handleProfileChange(selectedHost.id, profileId);
-      setProfileSelectorOpen(false);
+      updateProfileInHook(selectedHost.id, profileId);
       
       toast({
         title: "Profile Changed",
@@ -218,73 +150,42 @@ const Hosts = () => {
       instances: []
     };
     
-    setProfilesList([...profilesList, newProfile]);
-    
-    if (selectedHost) {
-      handleProfileChange(selectedHost.id, newProfileId);
-    }
+    setProfilesList(prev => [...prev, newProfile]);
     
     toast({
       title: "Profile Created",
       description: `New profile "${profileName}" has been created`
     });
     
-    setProfileSelectorOpen(false);
+    return newProfileId;
   };
   
-  const handleSaveProfileChangesWithOption = (createNew: boolean, profileName?: string) => {
-    if (createNew && profileName) {
-      const currentProfile = profilesList.find(p => p.id === selectedProfileId);
-      if (currentProfile && selectedHost) {
-        const newProfileId = `profile-${Date.now()}`;
-        const newProfile: Profile = {
-          ...currentProfile,
-          id: newProfileId,
-          name: profileName,
-          instances: currentProfile.instances
-        };
-        
-        setProfilesList([...profilesList, newProfile]);
-        handleProfileChange(selectedHost.id, newProfileId);
-        
-        toast({
-          title: "New Profile Created",
-          description: `Created new profile "${profileName}" with your changes`
-        });
-      }
-    } else {
+  const handleDeleteProfile = (profileId: string) => {
+    // Don't delete a profile if it's the only one
+    if (profilesList.length <= 1) {
       toast({
-        title: "Profile Updated",
-        description: `Changes to "${selectedProfile?.name}" have been saved`
+        title: "Cannot delete profile",
+        description: "You must have at least one profile",
+        type: "error"
       });
+      return;
     }
     
-    setHasUnsavedChanges(false);
-    setAddedServers([]);
-    setRemovedServers([]);
-    setUnsavedChangesDialogOpen(false);
+    // Remove the profile
+    setProfilesList(prev => prev.filter(p => p.id !== profileId));
     
-    if (targetProfileId) {
-      handleProfileChange(selectedHost!.id, targetProfileId);
-      setTargetProfileId(null);
+    // If the deleted profile was selected, select another one
+    if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
+      const otherProfile = profilesList.find(p => p.id !== profileId);
+      if (otherProfile) {
+        updateProfileInHook(selectedHost.id, otherProfile.id);
+      }
     }
-  };
-  
-  const handleDiscardChanges = () => {
-    setHasUnsavedChanges(false);
-    setAddedServers([]);
-    setRemovedServers([]);
-    setUnsavedChangesDialogOpen(false);
     
     toast({
-      title: "Changes Discarded",
-      description: "Profile changes have been discarded"
+      title: "Profile Deleted",
+      description: "The profile has been deleted"
     });
-    
-    if (targetProfileId) {
-      handleProfileChange(selectedHost!.id, targetProfileId);
-      setTargetProfileId(null);
-    }
   };
   
   const handleDeleteHost = (hostId: string) => {
@@ -307,7 +208,7 @@ const Hosts = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
           <p className="text-muted-foreground">
-            Manage host connections and profile associations
+            Manage host connections and server associations
           </p>
         </div>
         <Button onClick={() => setUnifiedHostDialogOpen(true)}>
@@ -317,7 +218,7 @@ const Hosts = () => {
       </div>
       
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search hosts..."
@@ -343,14 +244,7 @@ const Hosts = () => {
                 <Card 
                   key={host.id}
                   className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedHostId === host.id ? 'border-primary bg-primary/5' : ''}`}
-                  onClick={() => {
-                    if (hasUnsavedChanges) {
-                      setTargetProfileId(hostProfiles[host.id] || "");
-                      setUnsavedChangesDialogOpen(true);
-                    } else {
-                      setSelectedHostId(host.id);
-                    }
-                  }}
+                  onClick={() => setSelectedHostId(host.id)}
                 >
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -396,7 +290,7 @@ const Hosts = () => {
           
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
             <CardContent className="p-4 text-center space-y-2">
-              <PlusCircle className="h-6 w-6 mx-auto text-muted-foreground" />
+              <Plus className="h-6 w-6 mx-auto text-muted-foreground" />
               <p className="text-sm font-medium">Add New Host</p>
             </CardContent>
           </Card>
@@ -410,12 +304,13 @@ const Hosts = () => {
               serverInstances={serverInstances}
               selectedProfileId={selectedProfileId}
               onCreateConfig={handleCreateConfigDialog}
-              onProfileChange={handleImportByProfile}
+              onProfileChange={handleProfileChange}
               onAddServersToHost={handleAddServersToHost}
-              onImportByProfile={handleImportByProfile}
               onDeleteHost={handleDeleteHost}
               onServerStatusChange={handleServerStatusChange}
               onSaveProfileChanges={handleSaveProfileChanges}
+              onCreateProfile={handleCreateProfile}
+              onDeleteProfile={handleDeleteProfile}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">
@@ -449,34 +344,6 @@ const Hosts = () => {
         isFixMode={configDialog.isFixMode} 
         isUpdateMode={configDialog.isUpdateMode} 
         isCreateMode={configDialog.isCreateMode}
-      />
-      
-      <AddServerToHostDialog
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onAddServers={handleAddServers}
-        profiles={profilesList}
-      />
-      
-      <ProfileSelector 
-        open={profileSelectorOpen}
-        onOpenChange={setProfileSelectorOpen}
-        profiles={profilesList}
-        serverInstances={serverInstances}
-        onSelectProfile={handleSelectProfile}
-        onCreateProfile={handleCreateProfile}
-        hasUnsavedChanges={hasUnsavedChanges}
-        currentProfileId={selectedProfileId}
-      />
-      
-      <ProfileChangesDialog
-        open={unsavedChangesDialogOpen}
-        onOpenChange={setUnsavedChangesDialogOpen}
-        currentProfileName={selectedProfile?.name || "Unknown Profile"}
-        addedServers={addedServers}
-        removedServers={removedServers}
-        onSaveChanges={handleSaveProfileChangesWithOption}
-        onDiscardChanges={handleDiscardChanges}
       />
     </div>
   );

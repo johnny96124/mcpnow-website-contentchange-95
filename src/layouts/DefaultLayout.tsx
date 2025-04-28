@@ -1,4 +1,3 @@
-
 import { useEffect, useState, ReactNode } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
@@ -56,7 +55,7 @@ const DefaultLayout = ({ children }: DefaultLayoutProps) => {
   };
   
   if (checkingOnboarding) {
-    return null; // Don't render anything while checking
+    return null;
   }
   
   return (

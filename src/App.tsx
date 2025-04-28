@@ -1,75 +1,61 @@
 
-import React, { ReactNode } from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { ServerProvider } from "@/context/ServerContext";
-import DefaultLayout from "./layouts/DefaultLayout";
-import Dashboard from "./pages/Dashboard";
-import EmptyDashboard from "./pages/EmptyDashboard";
-import Hosts from "./pages/Hosts";
-import HostsNewUser from "./pages/HostsNewUser";
-import HostsNewLayout from "./pages/hosts/NewLayout";
-import Profiles from "./pages/Profiles";
-import Servers from "./pages/Servers";
-import ServersNewUser from "./pages/ServersNewUser";
-import ProfilesNewUser from "./pages/ProfilesNewUser";
-import Discovery from "./pages/Discovery";
-import DiscoveryNoNetwork from "./pages/DiscoveryNoNetwork";
-import Settings from "./pages/Settings";
-import TrayPopup from "./pages/TrayPopup";
-import NewUserTrayPopup from "./pages/NewUserTrayPopup";
-import NotFound from "./pages/NotFound";
-import NewUserDashboard from "./pages/NewUserDashboard";
-import LandingPage from "./pages/LandingPage";
-import Introduction2 from "./pages/Introduction-2";
-import Introduction3 from "./pages/Introduction-3"; 
-import NewLayout from "./pages/NewLayout"; 
+import DefaultLayout from "@/layouts/DefaultLayout";
+import Dashboard from "@/pages/Dashboard";
+import Hosts from "@/pages/Hosts";
+import Servers from "@/pages/Servers";
+import Profiles from "@/pages/Profiles";
+import Discovery from "@/pages/Discovery";
+import Settings from "@/pages/Settings";
+import HostNewLayout from "./pages/Host-newlayout";
 
-// Create a new QueryClient instance
-const queryClient = new QueryClient();
+function App() {
+  const queryClient = new QueryClient();
 
-const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="mcp-now-theme">
-        <TooltipProvider>
-          <ServerProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<DefaultLayout><Dashboard /></DefaultLayout>} />
-                <Route path="/dashboard" element={<DefaultLayout><Dashboard /></DefaultLayout>} />
-                <Route path="/new-user" element={<DefaultLayout><NewUserDashboard /></DefaultLayout>} />
-                <Route path="/empty-dashboard" element={<DefaultLayout><EmptyDashboard /></DefaultLayout>} />
-                <Route path="/hosts" element={<DefaultLayout><Hosts /></DefaultLayout>} />
-                <Route path="/hosts/new-user" element={<DefaultLayout><HostsNewUser /></DefaultLayout>} />
-                <Route path="/hosts/newlayout" element={<DefaultLayout><HostsNewLayout /></DefaultLayout>} />
-                <Route path="/profiles" element={<DefaultLayout><Profiles /></DefaultLayout>} />
-                <Route path="/profiles/new-user" element={<DefaultLayout><ProfilesNewUser /></DefaultLayout>} />
-                <Route path="/servers" element={<DefaultLayout><Servers /></DefaultLayout>} />
-                <Route path="/servers/new-user" element={<DefaultLayout><ServersNewUser /></DefaultLayout>} />
-                <Route path="/discovery" element={<DefaultLayout><Discovery /></DefaultLayout>} />
-                <Route path="/discovery/no-network" element={<DefaultLayout><DiscoveryNoNetwork /></DefaultLayout>} />
-                <Route path="/settings" element={<DefaultLayout><Settings /></DefaultLayout>} />
-                <Route path="/introduction-3" element={<DefaultLayout><Introduction3 /></DefaultLayout>} />
-                <Route path="/new-layout" element={<DefaultLayout><NewLayout /></DefaultLayout>} />
-                <Route path="/tray" element={<TrayPopup />} />
-                <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
-                <Route path="/introduction" element={<LandingPage />} />
-                <Route path="/introduction-2" element={<Introduction2 />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </ServerProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <ServerProvider>
+          <Toaster />
+          <RouterProvider router={createBrowserRouter([
+            {
+              path: "/",
+              element: <DefaultLayout><Dashboard /></DefaultLayout>
+            },
+            {
+              path: "/hosts",
+              element: <DefaultLayout><Hosts /></DefaultLayout>
+            },
+            {
+              path: "/servers",
+              element: <DefaultLayout><Servers /></DefaultLayout>
+            },
+            {
+              path: "/profiles",
+              element: <DefaultLayout><Profiles /></DefaultLayout>
+            },
+            {
+              path: "/discovery",
+              element: <DefaultLayout><Discovery /></DefaultLayout>
+            },
+            {
+              path: "/settings",
+              element: <DefaultLayout><Settings /></DefaultLayout>
+            },
+            {
+              path: "/host-new",
+              element: <DefaultLayout><HostNewLayout /></DefaultLayout>
+            }
+          ])} />
+        </ServerProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;

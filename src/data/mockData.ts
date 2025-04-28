@@ -1,4 +1,4 @@
-export type EndpointType = 'HTTP_SSE' | 'STDIO';
+export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
 
@@ -47,7 +47,6 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string[];
   requestCount?: number;
-  url?: string;
 }
 
 export interface Profile {
@@ -482,8 +481,7 @@ export const serverInstances: ServerInstance[] = [
     environment: {
       'DB_URL': 'postgresql://dev:password@localhost:5432/dev'
     },
-    requestCount: 124,
-    url: '/usr/local/bin/postgres-mcp'
+    requestCount: 124
   },
   {
     id: 'postgres-prod',
