@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { PlusCircle, Search, RefreshCw, FileText, Info, ScanLine, X } from "lucide-react";
+import { Plus, Search, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type ServerDefinition, Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markHostsOnboardingAsSeen } from "@/utils/localStorage";
 import { Card, CardContent } from "@/components/ui/card";
-import { AddHostDialog } from "@/components/hosts/AddHostDialog";
 import { AddServerToHostDialog } from "@/components/hosts/AddServerToHostDialog";
 import { HostDetailView } from "@/components/hosts/HostDetailView";
 import { ProfileSelector } from "@/components/hosts/ProfileSelector";
@@ -15,6 +14,7 @@ import { ProfileChangesDialog } from "@/components/hosts/ProfileChangesDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
+import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -32,8 +32,7 @@ const Hosts = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
-  const [addHostDialogOpen, setAddHostDialogOpen] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
+  const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [profileSelectorOpen, setProfileSelectorOpen] = useState(false);
   const [unsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
@@ -100,53 +99,13 @@ const Hosts = () => {
     resetConfigDialog();
   };
 
-  const handleScanForHosts = () => {
-    setIsScanning(true);
-    setTimeout(() => {
-      const foundHost = Math.random() > 0.5;
-      if (foundHost) {
-        const newId = `host-${Date.now()}`;
-        const newHost: Host = {
-          id: newId,
-          name: "Local Host",
-          icon: "💻",
-          connectionStatus: "disconnected",
-          configStatus: "unknown"
-        };
-        setHostsList(prevHosts => [...prevHosts, newHost]);
-        setSelectedHostId(newId);
-        toast({
-          title: "Host discovered",
-          description: "A new local host has been found and added to your hosts list."
-        });
-      } else {
-        toast({
-          title: "No hosts found",
-          description: "No new hosts were discovered on your network.",
-          variant: "destructive"
-        });
-      }
-      setIsScanning(false);
-    }, 2500);
-  };
-
-  const handleAddHost = (newHost: {
-    name: string;
-    configPath?: string;
-    icon?: string;
-    configStatus: "configured" | "misconfigured" | "unknown";
-    connectionStatus: "connected" | "disconnected" | "misconfigured";
-  }) => {
-    const id = `host-${Date.now()}`;
-    const host: Host = {
-      id,
-      ...newHost
-    };
-    setHostsList([...hostsList, host]);
-    setSelectedHostId(id);
+  const handleAddHosts = (newHosts: Host[]) => {
+    setHostsList(prev => [...prev, ...newHosts]);
+    setSelectedHostId(newHosts[0].id);
+    
     toast({
-      title: "Host Added",
-      description: `${newHost.name} has been added successfully`
+      title: "Hosts Added",
+      description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
     });
   };
 
@@ -351,21 +310,10 @@ const Hosts = () => {
             Manage host connections and profile associations
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
-            {isScanning ? <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Scanning...
-              </> : <>
-                <ScanLine className="h-4 w-4 mr-2" />
-                Scan for Hosts
-              </>}
-          </Button>
-          <Button onClick={() => setAddHostDialogOpen(true)}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Host Manually
-          </Button>
-        </div>
+        <Button onClick={() => setUnifiedHostDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Host
+        </Button>
       </div>
       
       <div className="relative">
@@ -498,6 +446,12 @@ const Hosts = () => {
         </div>
       </div>
       
+      <UnifiedHostDialog 
+        open={unifiedHostDialogOpen}
+        onOpenChange={setUnifiedHostDialogOpen}
+        onAddHosts={handleAddHosts}
+      />
+      
       <ConfigFileDialog 
         open={configDialog.isOpen} 
         onOpenChange={setDialogOpen} 
@@ -511,12 +465,6 @@ const Hosts = () => {
         isFixMode={configDialog.isFixMode} 
         isUpdateMode={configDialog.isUpdateMode} 
         isCreateMode={configDialog.isCreateMode}
-      />
-      
-      <AddHostDialog 
-        open={addHostDialogOpen} 
-        onOpenChange={setAddHostDialogOpen} 
-        onAddHost={handleAddHost} 
       />
       
       <AddServerToHostDialog

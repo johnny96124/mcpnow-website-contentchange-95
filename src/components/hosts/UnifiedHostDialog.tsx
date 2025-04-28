@@ -1,0 +1,244 @@
+
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useToast } from "@/hooks/use-toast";
+import { RefreshCw, Plus } from "lucide-react";
+import { type Host } from "@/data/mockData";
+
+interface UnifiedHostDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAddHosts: (hosts: Host[]) => void;
+}
+
+export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHostDialogProps) {
+  const [mode, setMode] = useState<"scan" | "manual">("scan");
+  const [isScanning, setIsScanning] = useState(false);
+  const [scannedHosts, setScannedHosts] = useState<Host[]>([]);
+  const [selectedHosts, setSelectedHosts] = useState<string[]>([]);
+  const [manualHostName, setManualHostName] = useState("");
+  const [configPath, setConfigPath] = useState("");
+  const { toast } = useToast();
+
+  // Start scanning when dialog opens
+  useEffect(() => {
+    if (open) {
+      handleScanForHosts();
+    } else {
+      // Reset state when dialog closes
+      setScannedHosts([]);
+      setSelectedHosts([]);
+      setManualHostName("");
+      setConfigPath("");
+      setMode("scan");
+    }
+  }, [open]);
+
+  const handleScanForHosts = () => {
+    setIsScanning(true);
+    setScannedHosts([]);
+    
+    // Simulate scanning with timeout
+    setTimeout(() => {
+      const shouldFindHost = Math.random() > 0.5;
+      
+      if (shouldFindHost) {
+        const newHost: Host = {
+          id: `host-${Date.now()}`,
+          name: "Local Host",
+          icon: "💻",
+          connectionStatus: "connected",
+          configStatus: "configured"
+        };
+        setScannedHosts([newHost]);
+      }
+      
+      setIsScanning(false);
+      
+      toast({
+        title: shouldFindHost ? "Host discovered" : "No hosts found",
+        description: shouldFindHost 
+          ? "New hosts have been found on your network." 
+          : "No new hosts were discovered. You can try scanning again or add one manually.",
+        variant: shouldFindHost ? "default" : "destructive"
+      });
+    }, 2000);
+  };
+
+  const validateConfigPath = (path: string) => {
+    // Basic validation: ensure it ends with .json and starts with /
+    return path.startsWith("/") && path.endsWith(".json");
+  };
+
+  const handleAddManualHost = () => {
+    if (!manualHostName.trim()) {
+      toast({
+        title: "Invalid host name",
+        description: "Please enter a valid host name",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!validateConfigPath(configPath)) {
+      toast({
+        title: "Invalid config path",
+        description: "Config path must start with / and end with .json",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newHost: Host = {
+      id: `host-${Date.now()}`,
+      name: manualHostName,
+      icon: "🖥️",
+      configPath,
+      configStatus: "configured",
+      connectionStatus: "connected"
+    };
+
+    onAddHosts([newHost]);
+    onOpenChange(false);
+  };
+
+  const handleConfirmScannedHosts = () => {
+    const hostsToAdd = scannedHosts.filter(host => selectedHosts.includes(host.id));
+    if (hostsToAdd.length === 0) {
+      toast({
+        title: "No hosts selected",
+        description: "Please select at least one host to add",
+        variant: "destructive"
+      });
+      return;
+    }
+    onAddHosts(hostsToAdd);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Add New Host</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <RadioGroup
+            value={mode}
+            onValueChange={(value: "scan" | "manual") => setMode(value)}
+            className="grid grid-cols-2 gap-4"
+          >
+            <div className={`relative rounded-lg border p-4 cursor-pointer ${mode === 'scan' ? 'border-primary bg-primary/5' : ''}`}>
+              <RadioGroupItem value="scan" id="scan" className="absolute right-4 top-4" />
+              <Label htmlFor="scan" className="font-medium mb-2 block">Scan for Hosts</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically discover hosts on your network
+              </p>
+            </div>
+            <div className={`relative rounded-lg border p-4 cursor-pointer ${mode === 'manual' ? 'border-primary bg-primary/5' : ''}`}>
+              <RadioGroupItem value="manual" id="manual" className="absolute right-4 top-4" />
+              <Label htmlFor="manual" className="font-medium mb-2 block">Add Manually</Label>
+              <p className="text-sm text-muted-foreground">
+                Configure a host manually with custom settings
+              </p>
+            </div>
+          </RadioGroup>
+
+          {mode === "scan" ? (
+            <div className="space-y-4">
+              {isScanning ? (
+                <div className="text-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin mx-auto text-primary" />
+                  <p className="mt-2 text-sm text-muted-foreground">Scanning for hosts...</p>
+                </div>
+              ) : (
+                <>
+                  {scannedHosts.length > 0 ? (
+                    <div className="space-y-2">
+                      {scannedHosts.map((host) => (
+                        <div
+                          key={host.id}
+                          className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer ${
+                            selectedHosts.includes(host.id) ? 'border-primary bg-primary/5' : ''
+                          }`}
+                          onClick={() => {
+                            setSelectedHosts(prev =>
+                              prev.includes(host.id)
+                                ? prev.filter(id => id !== host.id)
+                                : [...prev, host.id]
+                            );
+                          }}
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium">{host.name}</p>
+                            <p className="text-sm text-muted-foreground">Found on your network</p>
+                          </div>
+                          <div className={`w-3 h-3 rounded-full bg-green-500`} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">No hosts found. Try scanning again or add manually.</p>
+                      <Button variant="outline" onClick={handleScanForHosts} className="mt-4">
+                        Scan Again
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="hostName">Host Name</Label>
+                <Input
+                  id="hostName"
+                  value={manualHostName}
+                  onChange={(e) => setManualHostName(e.target.value)}
+                  placeholder="Enter host name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="configPath">Config Path</Label>
+                <Input
+                  id="configPath"
+                  value={configPath}
+                  onChange={(e) => setConfigPath(e.target.value)}
+                  placeholder="/path/to/config.json"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Path must start with / and end with .json
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          {mode === "scan" ? (
+            <Button 
+              onClick={handleConfirmScannedHosts}
+              disabled={selectedHosts.length === 0}
+            >
+              Add Selected Hosts
+            </Button>
+          ) : (
+            <Button onClick={handleAddManualHost}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Host
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
