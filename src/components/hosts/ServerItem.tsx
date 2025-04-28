@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
@@ -179,6 +179,15 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       
       <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
         <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <Wrench className="h-5 w-5 text-muted-foreground" />
+              Server Tools - {server.name}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Debug, execute tools, and view message history for this server instance
+            </p>
+          </DialogHeader>
           <div className="flex-1 overflow-hidden py-4">
             <ServerToolsList 
               tools={definition?.tools} 
