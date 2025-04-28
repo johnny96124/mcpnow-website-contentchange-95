@@ -280,7 +280,7 @@ export function ServerSelectionDialog({
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-medium">{server.name}</h3>
                         <EndpointLabel type={server.type} />
-                        {server.isOfficial && <OfficialBadge size="sm" />}
+                        {server.isOfficial && <OfficialBadge />}
                         {hasInstances && (
                           <Badge variant="outline" className="bg-primary/5 text-xs">
                             Added

@@ -44,7 +44,7 @@ export interface ServerInstance {
   requestCount?: number;
   environment?: Record<string, string>;
   arguments?: string[];
-  url?: string;
+  url?: string;  // Added this property
   headers?: Record<string, string>;
   enabled: boolean;
 }

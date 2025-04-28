@@ -161,7 +161,7 @@ export function ConnectedServersList({ profile, hostStatus }: ConnectedServersLi
   return (
     <div className="space-y-4">
       {hostStatus !== "connected" && (
-        <Alert variant="warning" className="mb-4">
+        <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Host is not connected. Server controls are disabled until the host connection is restored.

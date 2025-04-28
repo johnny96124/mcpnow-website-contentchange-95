@@ -127,7 +127,7 @@ export default function HostsNewLayout() {
             </div>
           </div>
           
-          <HostSearch value={searchTerm} onChange={setSearchTerm} />
+          <HostSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           
           <div className="space-y-3 max-h-[500px] overflow-auto pr-2">
             {filteredHosts.length === 0 ? (
@@ -139,9 +139,9 @@ export default function HostsNewLayout() {
                 <HostCard 
                   key={host.id} 
                   host={host} 
-                  isSelected={selectedHost?.id === host.id}
+                  selected={selectedHost?.id === host.id}
                   onSelect={() => handleHostSelect(host)}
-                  onViewConfig={() => handleShowConfigFile(host)}
+                  onConfigView={() => handleShowConfigFile(host)}
                 />
               ))
             )}
@@ -226,7 +226,7 @@ export default function HostsNewLayout() {
           open={showConfigFileDialog}
           onOpenChange={setShowConfigFileDialog}
           configPath={configFilePath}
-          hostName={selectedHost.name}
+          configContent=""
         />
       )}
       
