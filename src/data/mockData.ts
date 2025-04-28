@@ -68,6 +68,7 @@ export interface Host {
   configPath?: string;
   icon?: string;
   needsUpdate?: boolean;
+  defaultProfileName?: string;
 }
 
 export const serverDefinitions: ServerDefinition[] = [
