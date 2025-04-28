@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -16,154 +15,186 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 interface ServerItemProps {
   server: ServerInstance;
   hostConnectionStatus: ConnectionStatus;
-  onStatusChange: (serverId: string, enabled: boolean) => void;
   load: number;
+  onStatusChange: (serverId: string, enabled: boolean) => void;
   onRemoveFromProfile: (serverId: string) => void;
 }
 
 export const ServerItem: React.FC<ServerItemProps> = ({
   server,
   hostConnectionStatus,
-  onStatusChange,
   load,
+  onStatusChange,
   onRemoveFromProfile
 }) => {
-  const [showErrorDetails, setShowErrorDetails] = useState(false);
-  const [showServerDetails, setShowServerDetails] = useState(false);
-  const [showServerTools, setShowServerTools] = useState(false);
-
-  const errorMessage = server.status === 'error' 
-    ? "Failed to connect to server: Connection refused" 
-    : null;
-
-  const definition = serverDefinitions.find(def => def.id === server.type);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
+  const hasError = server.status === 'error';
+  const isDisabled = hostConnectionStatus !== "connected";
+  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+  
+  const getServerType = () => {
+    if (!definition) return "HTTP_SSE";
+    return definition.type;
+  };
+  
+  const handleRemove = () => {
+    if (window.confirm(`Are you sure you want to remove ${server.name} from this profile?`)) {
+      onRemoveFromProfile(server.id);
+    }
+  };
+  
+  const viewServerDetails = () => {
+    setDetailsDialogOpen(true);
+  };
+  
+  const viewServerDefinition = () => {
+    toast({
+      title: "View server definition",
+      description: "Navigating to server definition page"
+    });
+  };
+
   return (
-    <tr className="border-b">
-      <td className="p-4">
-        <div className="flex items-center gap-3">
-          {definition?.icon ? (
-            <div className="w-6 h-6 flex items-center justify-center">
-              <img src={definition.icon} alt={definition.name} className="max-w-full max-h-full" />
-            </div>
-          ) : (
-            <Server className="w-4 h-4 text-muted-foreground" />
-          )}
+    <tr className={hasError ? "bg-red-50/30" : ""}>
+      <td className="p-4 align-middle">
+        <div className="flex items-center gap-2">
+          <div className="bg-muted/20 p-1.5 rounded">
+            <Server className="h-4 w-4 text-muted-foreground" />
+          </div>
           <div>
-            <p className="font-medium">{server.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {server.endpoint}
-            </p>
+            <div className="font-medium">{server.name}</div>
+            {hasError && (
+              <div className="flex items-center gap-1.5 text-xs text-red-500 mt-1">
+                <span>Error: Failed to connect to server</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  title="View Error"
+                  onClick={() => setErrorDialogOpen(true)}
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </td>
-      <td className="p-4">
-        {definition?.name || "Unknown"}
+      <td className="p-4 align-middle">
+        <EndpointLabel type={getServerType()} />
       </td>
-      <td className="p-4">
-        <div className="flex items-center gap-2">
-          <StatusIndicator 
-            status={server.status === 'error' ? 'error' : server.status === 'running' ? 'active' : 'inactive'} 
-            size="sm" 
-          />
-          <span className="text-sm">
-            {server.status === 'running' 
-              ? 'Running' 
-              : server.status === 'error' 
-                ? 'Error' 
-                : server.status === 'connecting' 
-                  ? 'Connecting...' 
-                  : 'Stopped'}
-          </span>
-          
-          {server.status === 'error' && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-5 w-5 rounded-full" 
-              onClick={() => setShowErrorDetails(true)}
-            >
-              <AlertTriangle className="h-3 w-3 text-destructive" />
-            </Button>
-          )}
-        </div>
-      </td>
-      <td className="p-4 text-center">
-        <Switch
-          checked={server.status === 'running' || server.status === 'connecting' || server.status === 'error'}
-          disabled={hostConnectionStatus !== 'connected'}
-          onCheckedChange={(checked) => onStatusChange(server.id, checked)}
+      <td className="p-4 align-middle">
+        <StatusIndicator 
+          status={
+            server.status === "running" 
+              ? "active" 
+              : server.status === "error" 
+                ? "error" 
+                : server.status === "connecting" 
+                  ? "warning" 
+                  : "inactive"
+          } 
+          label={server.status} 
         />
       </td>
-      <td className="p-4 text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Server Actions</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setShowServerDetails(true)}>
-              <Info className="mr-2 h-4 w-4" />
-              <span>View Details</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setShowServerTools(true)}>
-              <Wrench className="mr-2 h-4 w-4" />
-              <span>Server Tools</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => {
-                window.open(server.endpoint, '_blank');
-              }}
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              <span>Open in Browser</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => onRemoveFromProfile(server.id)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Remove Server</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <td className="p-4 align-middle text-center">
+        <Switch
+          checked={server.status === 'running'}
+          onCheckedChange={(enabled) => onStatusChange(server.id, enabled)}
+          disabled={isDisabled}
+        />
+      </td>
+      <td className="p-4 align-middle text-right">
+        <div className="flex justify-end gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            title="Server Info"
+            onClick={viewServerDetails}
+          >
+            <Info className="h-4 w-4" />
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            title="Debug Tools"
+            onClick={() => setToolsDialogOpen(true)}
+          >
+            <Wrench className="h-4 w-4" />
+          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Server Actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={viewServerDetails}>
+                <Info className="h-4 w-4 mr-2" />
+                View Server Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={viewServerDefinition}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Definition
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                className="text-red-600" 
+                onClick={handleRemove}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Remove from Profile
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </td>
       
       <ServerErrorDialog 
-        open={showErrorDetails}
-        onOpenChange={setShowErrorDetails}
-        errorMessage={errorMessage || "An unknown error occurred"}
-        server={server}
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        serverName={server.name}
+        errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
       />
       
-      <ServerDetailsDialog 
-        open={showServerDetails}
-        onOpenChange={setShowServerDetails}
-        server={server}
-      />
-
-      <Dialog open={showServerTools} onOpenChange={setShowServerTools}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Server Tools - {server.name}</DialogTitle>
-            <DialogDescription>
-              Available tools and utilities for this server
-            </DialogDescription>
-          </DialogHeader>
-          <ServerToolsList serverId={server.id} className="mt-4" />
+      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+          <div className="flex-1 overflow-hidden py-4">
+            <ServerToolsList 
+              tools={definition?.tools} 
+              debugMode={true} 
+              serverName={server.name} 
+              instanceId={server.id} 
+            />
+          </div>
         </DialogContent>
       </Dialog>
+      
+      <ServerDetailsDialog 
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        server={server}
+      />
     </tr>
   );
 };
