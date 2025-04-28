@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { RefreshCw, Plus, Check, X } from "lucide-react";
+import { RefreshCw, Plus, Check, X, Scan, Computer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Host } from "@/data/mockData";
 
 const hostSchema = z.object({
@@ -33,6 +34,8 @@ const hostSchema = z.object({
 });
 
 type HostFormValues = z.infer<typeof hostSchema>;
+
+type AddMode = 'scan' | 'manual';
 
 interface UnifiedHostDialogProps {
   open: boolean;
@@ -48,6 +51,7 @@ export function UnifiedHostDialog({
   const [isScanning, setIsScanning] = useState(false);
   const [scannedHosts, setScannedHosts] = useState<Host[]>([]);
   const [selectedHosts, setSelectedHosts] = useState<Set<string>>(new Set());
+  const [addMode, setAddMode] = useState<AddMode>('scan');
   const { toast } = useToast();
 
   const form = useForm<HostFormValues>({
@@ -61,6 +65,9 @@ export function UnifiedHostDialog({
   useEffect(() => {
     if (open) {
       handleScan();
+      setAddMode('scan');
+      setSelectedHosts(new Set());
+      form.reset();
     } else {
       setScannedHosts([]);
       setSelectedHosts(new Set());
@@ -97,7 +104,6 @@ export function UnifiedHostDialog({
   };
 
   const validateConfigPath = (path: string): boolean => {
-    // Basic validation - check if it's a .json file and has a valid path structure
     return path.endsWith('.json') && path.startsWith('/');
   };
 
@@ -163,103 +169,162 @@ export function UnifiedHostDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Available Hosts</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleScan}
-                disabled={isScanning}
-              >
-                {isScanning ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Scanning...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Rescan
-                  </>
-                )}
-              </Button>
+          <RadioGroup
+            value={addMode}
+            onValueChange={(value) => setAddMode(value as AddMode)}
+            className="grid grid-cols-2 gap-4"
+          >
+            <div className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 cursor-pointer ${
+              addMode === 'scan' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+            }`}>
+              <RadioGroupItem value="scan" id="scan" className="sr-only" />
+              <Scan className="h-6 w-6" />
+              <label htmlFor="scan" className="font-medium cursor-pointer">
+                Scan for Hosts
+              </label>
             </div>
+            <div className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-4 cursor-pointer ${
+              addMode === 'manual' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
+            }`}>
+              <RadioGroupItem value="manual" id="manual" className="sr-only" />
+              <Computer className="h-6 w-6" />
+              <label htmlFor="manual" className="font-medium cursor-pointer">
+                Add Manually
+              </label>
+            </div>
+          </RadioGroup>
 
-            <ScrollArea className="h-[200px] rounded-md border p-2">
-              {scannedHosts.length > 0 ? (
-                <div className="space-y-2">
-                  {scannedHosts.map((host) => (
-                    <div
-                      key={host.id}
-                      className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
-                    >
-                      <Checkbox
-                        checked={selectedHosts.has(host.id)}
-                        onCheckedChange={() => toggleHostSelection(host.id)}
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{host.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {host.configPath}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                  {isScanning ? "Scanning for hosts..." : "No hosts found"}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium">Add Host Manually</h3>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleAddManualHost)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Host Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter host name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+          {addMode === 'scan' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Available Hosts</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleScan}
+                  disabled={isScanning}
+                >
+                  {isScanning ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Scanning...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Rescan
+                    </>
                   )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="configPath"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Config Path</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="/path/to/config.json"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button type="submit" variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add to List
                 </Button>
-              </form>
-            </Form>
-          </div>
+              </div>
+
+              <ScrollArea className="h-[200px] rounded-md border p-2">
+                {scannedHosts.length > 0 ? (
+                  <div className="space-y-2">
+                    {scannedHosts.map((host) => (
+                      <div
+                        key={host.id}
+                        className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
+                      >
+                        <Checkbox
+                          checked={selectedHosts.has(host.id)}
+                          onCheckedChange={() => toggleHostSelection(host.id)}
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{host.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {host.configPath}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                    {isScanning ? "Scanning for hosts..." : "No hosts found"}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          )}
+
+          {addMode === 'manual' && (
+            <div className="space-y-4">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleAddManualHost)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Host Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter host name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="configPath"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Config Path</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="/path/to/config.json"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" variant="outline" size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add to List
+                  </Button>
+                </form>
+              </Form>
+
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2">Added Hosts</h3>
+                <ScrollArea className="h-[200px] rounded-md border p-2">
+                  {scannedHosts.length > 0 ? (
+                    <div className="space-y-2">
+                      {scannedHosts.map((host) => (
+                        <div
+                          key={host.id}
+                          className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
+                        >
+                          <Checkbox
+                            checked={selectedHosts.has(host.id)}
+                            onCheckedChange={() => toggleHostSelection(host.id)}
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{host.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {host.configPath}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                      No hosts added yet
+                    </div>
+                  )}
+                </ScrollArea>
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="mt-6">
