@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { FileText, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ConfigHighlightDialogProps {
   open: boolean;
@@ -34,28 +35,38 @@ export const ConfigHighlightDialog: React.FC<ConfigHighlightDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-xl">
             <FileText className="h-5 w-5" />
             Configuration File
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="flex items-center gap-1.5">
             {configPath}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Configuration file location on your system</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <pre className="rounded-md bg-muted p-4 overflow-auto text-sm font-mono whitespace-pre">
+        <div className="mt-2">
+          <pre className="rounded-lg bg-muted/50 p-4 overflow-auto text-sm font-mono whitespace-pre border">
             {configContent}
           </pre>
         </div>
         
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          <Button>
+          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
             Edit Config
           </Button>
         </DialogFooter>
