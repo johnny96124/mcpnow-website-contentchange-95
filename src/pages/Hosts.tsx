@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
 import { SearchIcon } from "lucide-react";
@@ -94,7 +95,7 @@ const Hosts = () => {
 
   const handleAddHosts = (newHosts: Host[]) => {
     const hostsWithProfiles = newHosts.map(host => {
-      const profileId = handleCreateProfile(host.defaultProfileName);
+      const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
       
       return {
         ...host,
@@ -210,6 +211,46 @@ const Hosts = () => {
     });
   };
 
+  // Add a new function to handle adding servers to profiles
+  const handleAddServersToProfile = (servers: ServerInstance[]) => {
+    // First, make sure we have the servers in the serverInstances state
+    const newServerIds = servers.map(server => server.id);
+    
+    // Add any new servers that aren't already in the list
+    const newServers = servers.filter(server => 
+      !serverInstances.some(existingServer => existingServer.id === server.id)
+    );
+    
+    if (newServers.length > 0) {
+      setServerInstances(prev => [...prev, ...newServers]);
+    }
+    
+    // Get the selected profile
+    if (selectedProfileId) {
+      // Add the server IDs to the profile's instances
+      setProfilesList(prev => prev.map(profile => {
+        if (profile.id === selectedProfileId) {
+          // Add server IDs that aren't already in the profile
+          const updatedInstances = [
+            ...profile.instances,
+            ...newServerIds.filter(id => !profile.instances.includes(id))
+          ];
+          
+          return {
+            ...profile,
+            instances: updatedInstances
+          };
+        }
+        return profile;
+      }));
+      
+      toast({
+        title: "Servers added",
+        description: `${servers.length} server(s) added to profile`
+      });
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
@@ -307,6 +348,7 @@ const Hosts = () => {
               onSaveProfileChanges={handleSaveProfileChanges}
               onCreateProfile={handleCreateProfile}
               onDeleteProfile={handleDeleteProfile}
+              onAddServersToProfile={handleAddServersToProfile}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">

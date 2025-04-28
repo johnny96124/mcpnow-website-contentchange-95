@@ -36,6 +36,7 @@ interface HostDetailViewProps {
   onSaveProfileChanges: () => void;
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
+  onAddServersToProfile?: (servers: ServerInstance[]) => void;
 }
 
 export const HostDetailView: React.FC<HostDetailViewProps> = ({
@@ -50,7 +51,8 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   onServerStatusChange,
   onSaveProfileChanges,
   onCreateProfile,
-  onDeleteProfile
+  onDeleteProfile,
+  onAddServersToProfile
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
@@ -111,18 +113,17 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   const handleAddServers = (servers: ServerInstance[]) => {
     if (selectedProfile && servers.length > 0) {
-      const updatedProfile = {
-        ...selectedProfile,
-        instances: [...selectedProfile.instances, ...servers.map(s => s.id)]
-      };
+      if (onAddServersToProfile) {
+        onAddServersToProfile(servers);
+      } else {
+        toast({
+          title: "Servers added",
+          description: `${servers.length} server(s) added to ${selectedProfile.name}`,
+          type: "success"
+        });
       
-      toast({
-        title: "Servers added",
-        description: `${servers.length} server(s) added to ${selectedProfile.name}`,
-        type: "success"
-      });
-      
-      onSaveProfileChanges();
+        onSaveProfileChanges();
+      }
     }
   };
 
