@@ -1,4 +1,4 @@
-export type EndpointType = 'HTTP_SSE' | 'STDIO';
+export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
 
@@ -386,7 +386,7 @@ export const serverDefinitions: ServerDefinition[] = [
           {
             name: 'language',
             type: 'string',
-            description: 'Programming language of the code.',
+1 description: 'Programming language of the code.',
             required: true
           },
           {
