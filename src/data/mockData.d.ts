@@ -2,8 +2,7 @@
 export interface ServerDefinition {
   id: string;
   name: string;
-  type: 'HTTP_SSE' | 'STDIO' | 'WS';
-  version: string;
+  type: EndpointType;
   description: string;
   icon?: string;
   downloads: number;

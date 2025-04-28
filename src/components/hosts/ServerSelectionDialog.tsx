@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { ServerInstance, serverDefinitions, EndpointType } from "@/data/mockData";
-import { Server, Search, Check, X, ArrowLeft, Plus } from "lucide-react";
+import { Server, Check, X, ArrowLeft, Plus } from "lucide-react";
 
 interface ServerSelectionDialogProps {
   open: boolean;
