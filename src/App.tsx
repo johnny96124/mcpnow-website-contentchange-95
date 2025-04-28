@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import EmptyDashboard from "./pages/EmptyDashboard";
 import Hosts from "./pages/Hosts";
 import HostsNewUser from "./pages/HostsNewUser";
+import HostsNewLayout from "./pages/hosts/NewLayout";
 import Profiles from "./pages/Profiles";
 import Servers from "./pages/Servers";
 import ServersNewUser from "./pages/ServersNewUser";
@@ -26,7 +27,12 @@ import NewUserDashboard from "./pages/NewUserDashboard";
 import LandingPage from "./pages/LandingPage";
 import Introduction2 from "./pages/Introduction-2";
 import Introduction3 from "./pages/Introduction-3"; 
-import NewLayout from "./pages/NewLayout"; // Added the new layout
+import NewLayout from "./pages/NewLayout"; 
+
+// Define the interface for the DefaultLayout props
+interface DefaultLayoutProps {
+  children: React.ReactNode;
+}
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -41,23 +47,22 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<DefaultLayout />}>
-                  <Route index element={<Dashboard />} />
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="new-user" element={<NewUserDashboard />} />
-                  <Route path="empty-dashboard" element={<EmptyDashboard />} />
-                  <Route path="hosts" element={<Hosts />} />
-                  <Route path="hosts/new-user" element={<HostsNewUser />} />
-                  <Route path="profiles" element={<Profiles />} />
-                  <Route path="profiles/new-user" element={<ProfilesNewUser />} />
-                  <Route path="servers" element={<Servers />} />
-                  <Route path="servers/new-user" element={<ServersNewUser />} />
-                  <Route path="discovery" element={<Discovery />} />
-                  <Route path="discovery/no-network" element={<DiscoveryNoNetwork />} />
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="introduction-3" element={<Introduction3 />} />
-                  <Route path="new-layout" element={<NewLayout />} /> {/* Added the new route */}
-                </Route>
+                <Route path="/" element={<DefaultLayout><Dashboard /></DefaultLayout>} />
+                <Route path="/dashboard" element={<DefaultLayout><Dashboard /></DefaultLayout>} />
+                <Route path="/new-user" element={<DefaultLayout><NewUserDashboard /></DefaultLayout>} />
+                <Route path="/empty-dashboard" element={<DefaultLayout><EmptyDashboard /></DefaultLayout>} />
+                <Route path="/hosts" element={<DefaultLayout><Hosts /></DefaultLayout>} />
+                <Route path="/hosts/new-user" element={<DefaultLayout><HostsNewUser /></DefaultLayout>} />
+                <Route path="/hosts/newlayout" element={<DefaultLayout><HostsNewLayout /></DefaultLayout>} />
+                <Route path="/profiles" element={<DefaultLayout><Profiles /></DefaultLayout>} />
+                <Route path="/profiles/new-user" element={<DefaultLayout><ProfilesNewUser /></DefaultLayout>} />
+                <Route path="/servers" element={<DefaultLayout><Servers /></DefaultLayout>} />
+                <Route path="/servers/new-user" element={<DefaultLayout><ServersNewUser /></DefaultLayout>} />
+                <Route path="/discovery" element={<DefaultLayout><Discovery /></DefaultLayout>} />
+                <Route path="/discovery/no-network" element={<DefaultLayout><DiscoveryNoNetwork /></DefaultLayout>} />
+                <Route path="/settings" element={<DefaultLayout><Settings /></DefaultLayout>} />
+                <Route path="/introduction-3" element={<DefaultLayout><Introduction3 /></DefaultLayout>} />
+                <Route path="/new-layout" element={<DefaultLayout><NewLayout /></DefaultLayout>} />
                 <Route path="/tray" element={<TrayPopup />} />
                 <Route path="/tray/new-user" element={<NewUserTrayPopup />} />
                 <Route path="/introduction" element={<LandingPage />} />
