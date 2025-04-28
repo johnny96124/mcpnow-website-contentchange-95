@@ -1,17 +1,18 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ServerInstance } from "@/data/mockData";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 
-// Define a function to get status color
 const getStatusColor = (status: string) => {
   switch (status) {
     case "running":
@@ -28,12 +29,21 @@ const getStatusColor = (status: string) => {
 };
 
 export const columns = (
-  onAction: (action: string, server: ServerInstance) => void
+  onAction: (action: string, server: ServerInstance) => void,
+  onNameClick: (server: ServerInstance) => void
 ): ColumnDef<ServerInstance>[] => [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <Button 
+        variant="link" 
+        className="p-0 h-auto font-normal"
+        onClick={() => onNameClick(row.original)}
+      >
+        {row.getValue("name")}
+      </Button>
+    ),
   },
   {
     accessorKey: "status",
@@ -51,7 +61,9 @@ export const columns = (
   {
     accessorKey: "connectionDetails",
     header: "Connection",
-    cell: ({ row }) => <div className="truncate max-w-[200px]">{row.getValue("connectionDetails")}</div>,
+    cell: ({ row }) => (
+      <div className="truncate max-w-[200px]">{row.getValue("connectionDetails")}</div>
+    ),
   },
   {
     id: "actions",
@@ -67,12 +79,6 @@ export const columns = (
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onAction("details", server)}>
-              Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onAction("profiles", server)}>
-              Add to Profiles
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onAction("debug", server)}>
               Debug
             </DropdownMenuItem>
