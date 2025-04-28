@@ -386,7 +386,7 @@ export const serverDefinitions: ServerDefinition[] = [
           {
             name: 'language',
             type: 'string',
-1 description: 'Programming language of the code.',
+            description: 'Programming language of the code.',
             required: true
           },
           {
