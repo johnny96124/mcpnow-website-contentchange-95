@@ -1,6 +1,12 @@
-
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -52,15 +58,9 @@ export function AddInstanceDialog({
   initialValues,
   instanceId
 }: AddInstanceDialogProps) {
-  // For STDIO type
   const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([]);
-  
-  // For HTTP_SSE type
   const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([]);
-
-  // For info box visibility
-  const [showInfoBox, setShowInfoBox] = useState<boolean>(true);
-
+  
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
     defaultValues: {
@@ -73,10 +73,8 @@ export function AddInstanceDialog({
     },
   });
 
-  // Effect to reset form when dialog opens
   useEffect(() => {
     if (open && serverDefinition) {
-      // Initialize the form with proper defaults based on server definition
       form.reset({
         name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
         args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
@@ -88,16 +86,13 @@ export function AddInstanceDialog({
         instanceId: instanceId,
       });
       
-      // Initialize env fields based on initialValues if in edit mode
       if (editMode && initialValues?.env) {
         const envEntries = Object.entries(initialValues.env);
         setEnvFields(envEntries.map(([name, value]) => ({ name, value: value.toString() })));
       } else if (serverDefinition?.type === 'STDIO') {
-        // Set default env fields for new STDIO instance based on server definition
         if (serverDefinition.environment && Object.keys(serverDefinition.environment).length > 0) {
           setEnvFields(Object.entries(serverDefinition.environment).map(([name, value]) => ({ name, value: value.toString() })));
         } else {
-          // Default env fields if no server definition environment
           setEnvFields([
             { name: "API_KEY", value: "" },
             { name: "MODEL_NAME", value: "" },
@@ -106,30 +101,23 @@ export function AddInstanceDialog({
         }
       }
       
-      // Initialize header fields based on initialValues if in edit mode
       if (editMode && initialValues?.headers) {
         const headerEntries = Object.entries(initialValues.headers);
         setHeaderFields(headerEntries.map(([name, value]) => ({ name, value: value.toString() })));
       } else if (serverDefinition?.type === 'HTTP_SSE') {
-        // Set default header fields for new HTTP_SSE instance based on server definition
         if (serverDefinition.headers && Object.keys(serverDefinition.headers).length > 0) {
           setHeaderFields(Object.entries(serverDefinition.headers).map(([name, value]) => ({ name, value: value.toString() })));
         } else {
-          // Default header fields if no server definition headers
           setHeaderFields([
             { name: "Authorization", value: "" },
             { name: "Content-Type", value: "application/json" },
           ]);
         }
       }
-      
-      // Reset info box visibility
-      setShowInfoBox(true);
     }
   }, [open, initialValues, serverDefinition, form, editMode, instanceId]);
 
   const onSubmit = (data: InstanceFormValues) => {
-    // Process environment variables for STDIO type
     if (serverDefinition?.type === 'STDIO') {
       const envData: Record<string, string> = {};
       
@@ -142,7 +130,6 @@ export function AddInstanceDialog({
       data.env = envData;
     }
     
-    // Process HTTP headers for HTTP_SSE type
     if (serverDefinition?.type === 'HTTP_SSE') {
       const headerData: Record<string, string> = {};
       
@@ -169,14 +156,12 @@ export function AddInstanceDialog({
   };
   
   const removeEnvField = (index: number) => {
-    // Allow removing any field now
     const newFields = [...envFields];
     newFields.splice(index, 1);
     setEnvFields(newFields);
   };
 
   const removeHeaderField = (index: number) => {
-    // Allow removing any field now
     const newFields = [...headerFields];
     newFields.splice(index, 1);
     setHeaderFields(newFields);
@@ -205,31 +190,6 @@ export function AddInstanceDialog({
           </DialogDescription>
         </DialogHeader>
         
-        {/* What is an Instance explanation box */}
-        {!editMode && showInfoBox && (
-          <Alert className="bg-blue-50 dark:bg-blue-950/30 rounded-md p-4 border border-blue-100 dark:border-blue-900 mb-4 relative">
-            <div className="flex gap-2 items-center">
-              <Info className="h-4 w-4 text-blue-500" />
-              <h3 className="font-medium text-blue-800 dark:text-blue-300">
-                What is an Instance?
-              </h3>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute top-2 right-2 h-6 w-6 p-1 text-blue-600"
-              onClick={() => setShowInfoBox(false)}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-            <AlertDescription className="mt-2 text-sm text-blue-700 dark:text-blue-400">
-              An instance is a running copy of a server with specific configuration settings. 
-              You can create multiple instances of the same server type with different settings 
-              to serve different purposes or environments.
-            </AlertDescription>
-          </Alert>
-        )}
-        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -238,7 +198,7 @@ export function AddInstanceDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center">
-                    Instance Name
+                    Name
                     <span className="text-destructive ml-1">*</span>
                     <TooltipProvider>
                       <Tooltip>
@@ -262,7 +222,6 @@ export function AddInstanceDialog({
             />
             
             {isStdio ? (
-              // STDIO specific fields
               <>
                 <FormField
                   control={form.control}
@@ -376,7 +335,6 @@ export function AddInstanceDialog({
                 </div>
               </>
             ) : (
-              // HTTP_SSE specific fields
               <>
                 <FormField
                   control={form.control}
@@ -496,15 +454,11 @@ export function AddInstanceDialog({
                 variant="ghost" 
                 onClick={() => onOpenChange(false)}
               >
-                Skip
+                Cancel
               </Button>
-              <div className="flex gap-2">
-                <Button 
-                  type="submit"
-                >
-                  {editMode ? "Save Changes" : "Create Instance"}
-                </Button>
-              </div>
+              <Button type="submit">
+                {editMode ? "Save Changes" : "Add"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
