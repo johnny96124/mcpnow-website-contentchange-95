@@ -13,6 +13,8 @@ import Profiles from "@/pages/Profiles";
 import Discovery from "@/pages/Discovery";
 import Settings from "@/pages/Settings";
 import HostNewLayout from "./pages/Host-newlayout";
+import TrayPopup from "./pages/TrayPopup";
+import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 
 function App() {
   const queryClient = new QueryClient();
@@ -50,6 +52,14 @@ function App() {
             {
               path: "/host-new",
               element: <DefaultLayout><HostNewLayout /></DefaultLayout>
+            },
+            {
+              path: "/tray",
+              element: <TrayPopup />
+            },
+            {
+              path: "/new-user-tray",
+              element: <NewUserTrayPopup />
             }
           ])} />
         </ServerProvider>

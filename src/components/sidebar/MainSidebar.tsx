@@ -11,6 +11,7 @@ import {
   Database,
   BookOpen,
   HelpCircle,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,15 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
                   >
                     <ServerIcon className="h-4 w-4" />
                     Servers
+                  </NavLink>
+                  <NavLink 
+                    to="/tray" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <Download className="h-4 w-4" />
+                    Tray Popup
                   </NavLink>
                 </div>
               )}
