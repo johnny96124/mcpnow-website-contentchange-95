@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -65,14 +64,19 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           <div className="bg-muted/20 p-1.5 rounded">
             <Server className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div>
-            <div className="font-medium">{server.name}</div>
-            {hasError && <div className="flex items-center gap-1.5 text-xs text-red-500 mt-1">
-                <span>Error: Failed to connect to server</span>
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50" title="View Error" onClick={() => setErrorDialogOpen(true)}>
-                  <AlertTriangle className="h-3 w-3" />
-                </Button>
-              </div>}
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{server.name}</span>
+            {hasError && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50" 
+                title="View Error" 
+                onClick={() => setErrorDialogOpen(true)}
+              >
+                <AlertTriangle className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         </div>
       </td>
