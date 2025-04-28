@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ServerInstance, ConnectionStatus } from "@/data/mockData";
+import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
