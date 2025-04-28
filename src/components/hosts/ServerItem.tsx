@@ -3,7 +3,6 @@ import { ServerInstance, ConnectionStatus } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Info, AlertTriangle, ExternalLink, Trash2, Server } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -74,8 +73,17 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           <div>
             <div className="font-medium">{server.name}</div>
             {hasError && (
-              <div className="text-xs text-red-500 mt-1">
-                Error: Failed to connect to server
+              <div className="flex items-center gap-1.5 text-xs text-red-500 mt-1">
+                <span>Error: Failed to connect to server</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  title="View Error"
+                  onClick={() => setErrorDialogOpen(true)}
+                >
+                  <AlertTriangle className="h-3 w-3" />
+                </Button>
               </div>
             )}
           </div>
@@ -116,18 +124,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           >
             <Info className="h-4 w-4" />
           </Button>
-          
-          {hasError && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-              title="View Error"
-              onClick={() => setErrorDialogOpen(true)}
-            >
-              <AlertTriangle className="h-4 w-4" />
-            </Button>
-          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
