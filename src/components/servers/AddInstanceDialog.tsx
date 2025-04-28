@@ -6,10 +6,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Info, Plus, Trash2, X } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -76,7 +76,7 @@ export function AddInstanceDialog({
   useEffect(() => {
     if (open && serverDefinition) {
       form.reset({
-        name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
+        name: initialValues?.name || (serverDefinition ? `${serverDefinition.name}` : ""),
         args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
           serverDefinition?.commandArgs || `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
           : ""),
