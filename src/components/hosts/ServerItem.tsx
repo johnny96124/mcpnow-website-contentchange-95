@@ -130,7 +130,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           args: server.arguments ? server.arguments.join(' ') : "",
           url: server.connectionDetails || "",
           env: server.environment || {},
-          headers: {}
+          headers: {} // Ensure headers is always an object
         }}
         instanceId={server.id}
       />
@@ -147,7 +147,12 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             </p>
           </DialogHeader>
           <div className="flex-1 overflow-hidden py-4">
-            <ServerToolsList tools={definition?.tools} debugMode={true} serverName={server.name} instanceId={server.id} />
+            <ServerToolsList 
+              tools={definition?.tools || []} 
+              debugMode={true} 
+              serverName={server.name} 
+              instanceId={server.id} 
+            />
           </div>
         </DialogContent>
       </Dialog>
