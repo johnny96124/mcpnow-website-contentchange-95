@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   FileText, Server, Trash2, AlertTriangle, 
@@ -214,7 +213,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </div>
       </div>
       
-      {/* Server list card */}
       <Card className="overflow-hidden">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -252,7 +250,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </CardHeader>
         
         <CardContent>
-          {/* Server list or empty state */}
           {profileServers.length > 0 ? (
             <div className="rounded-md border">
               <table className="w-full">
@@ -261,7 +258,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                     <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
                     <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
                     <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Load</th>
                     <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
                     <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
                   </tr>
@@ -292,7 +288,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </CardContent>
       </Card>
       
-      {/* Server Selection Dialog */}
       <ServerSelectionDialog 
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
@@ -306,7 +301,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         }}
       />
       
-      {/* Config Highlight Dialog */}
       <ConfigHighlightDialog
         open={configDialogOpen}
         onOpenChange={setConfigDialogOpen}

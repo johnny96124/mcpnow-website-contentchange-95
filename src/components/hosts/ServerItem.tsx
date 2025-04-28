@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -98,12 +97,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           } 
           label={server.status} 
         />
-      </td>
-      <td className="p-4 align-middle">
-        <div className="w-24">
-          <Progress value={load} className="h-2" />
-          <span className="text-xs text-muted-foreground mt-0.5 inline-block">{load}%</span>
-        </div>
       </td>
       <td className="p-4 align-middle text-center">
         <Switch
