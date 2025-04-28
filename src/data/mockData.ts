@@ -281,7 +281,7 @@ export const serverDefinitions: ServerDefinition[] = [
           {
             name: 'encoding',
             type: 'string',
-            description: 'File encoding to use when writing the file.',
+1 description: 'File encoding to use when writing the file.',
             required: false,
             default: 'utf-8'
           }
