@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -31,7 +30,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
@@ -133,10 +131,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-      
-      {detailsDialogOpen && (
-        <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
-      )}
       
       {editDialogOpen && (
         <AddInstanceDialog
