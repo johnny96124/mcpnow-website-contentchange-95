@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { serverDefinitions, ServerInstance } from "@/data/mockData";
+import { serverDefinitions, ServerInstance, Status } from "@/data/mockData";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -37,7 +37,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     id: `server-${def.id}`,
     name: def.name,
     definitionId: def.id,
-    status: "stopped",
+    status: "stopped" as Status, // Explicitly casting to Status type
     connectionDetails: def.url || "",
     enabled: false,
     description: def.description,
