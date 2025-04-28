@@ -193,9 +193,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                         {server.description}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {server.connectionDetails || ('url' in server ? server.url : '')}
-                    </p>
                   </div>
                 </div>
               ))}
