@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Check, ChevronLeft, Search, X, Info } from "lucide-react";
@@ -76,6 +75,12 @@ export function ServerSelectionDialog({
   const getServerType = (server: ServerInstance) => {
     const definition = serverDefinitions.find(def => def.id === server.definitionId);
     return definition?.type || "HTTP_SSE";
+  };
+  
+  // Get server description from its definition
+  const getServerDescription = (server: ServerInstance) => {
+    const definition = serverDefinitions.find(def => def.id === server.definitionId);
+    return definition?.description || "No description available";
   };
   
   const handleServerSelect = (server: ServerInstance) => {
@@ -219,7 +224,7 @@ export function ServerSelectionDialog({
                           <div className="flex items-center gap-2 mt-1">
                             <EndpointLabel type={getServerType(server)} />
                             <p className="text-xs text-muted-foreground truncate">
-                              {server.description || "No description available"}
+                              {getServerDescription(server)}
                             </p>
                           </div>
                         </div>
@@ -262,7 +267,7 @@ export function ServerSelectionDialog({
                       <div>
                         <p className="font-medium">{instance.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {instance.endpoint || "No endpoint specified"}
+                          {instance.connectionDetails || "No endpoint specified"}
                         </p>
                       </div>
                     </div>
@@ -317,7 +322,7 @@ export function ServerSelectionDialog({
                   <Input 
                     id="endpoint-url" 
                     placeholder="https://example.com/api"
-                    defaultValue={selectedServer.endpoint || ""}
+                    defaultValue={selectedServer.connectionDetails || ""}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     The URL endpoint for the server
@@ -331,7 +336,7 @@ export function ServerSelectionDialog({
                   <Input 
                     id="command-args" 
                     placeholder="--port 8080 --config path/to/config"
-                    defaultValue={selectedServer.commandArgs || ""}
+                    defaultValue={selectedServer.arguments?.join(" ") || ""}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     Arguments to pass to the server command
