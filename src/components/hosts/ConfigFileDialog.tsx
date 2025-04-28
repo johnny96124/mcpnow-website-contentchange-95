@@ -10,6 +10,13 @@ export interface ConfigFileDialogProps {
   configPath: string;
   initialConfig: string;
   onSave: (config: string, path: string) => void;
+  profileEndpoint?: string;
+  needsUpdate?: boolean;
+  allowPathEdit?: boolean;
+  isViewOnly?: boolean;
+  isFixMode?: boolean;
+  isUpdateMode?: boolean;
+  isCreateMode?: boolean;
 }
 
 export function ConfigFileDialog({ 
@@ -17,7 +24,14 @@ export function ConfigFileDialog({
   onOpenChange, 
   configPath, 
   initialConfig = "", 
-  onSave 
+  onSave,
+  profileEndpoint,
+  needsUpdate,
+  allowPathEdit,
+  isViewOnly,
+  isFixMode,
+  isUpdateMode,
+  isCreateMode
 }: ConfigFileDialogProps) {
   const [configContent, setConfigContent] = useState<string>(initialConfig);
 

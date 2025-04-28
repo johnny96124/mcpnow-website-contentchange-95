@@ -177,7 +177,7 @@ export function ServerSelectionDialog({
                   <ServerLogo name={instance.name} />
                   <div>
                     <div className="font-medium">{instance.name}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs text-muted-foreground">
                       {instance.url || instance.connectionDetails}
                     </div>
                   </div>
