@@ -6,7 +6,7 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PenLine, Trash2, Server, AlertTriangle } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
 import { ServerDetailsDialog } from "@/components/hosts/ServerDetailsDialog";
@@ -39,14 +39,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     if (window.confirm(`Are you sure you want to remove ${server.name} from this profile?`)) {
       onRemoveFromProfile(server.id);
     }
-  };
-
-  const handleEditComplete = () => {
-    toast({
-      title: "Instance updated",
-      description: "The instance settings have been updated successfully."
-    });
-    setEditDialogOpen(false);
   };
 
   return <tr className={hasError ? "bg-red-50/30" : ""}>
@@ -118,11 +110,18 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         initialValues={{
           name: server.name,
           args: server.arguments?.join(' ') || '',
-          url: '',
+          // Convert these properties to optional with fallbacks to prevent TypeScript errors
+          url: '',  // Default empty string since 'url' is not in the ServerInstance type
           env: server.environment || {},
-          headers: {},
+          headers: {}, // Default empty object since 'headers' is not in the ServerInstance type
         }}
-        onCreateInstance={handleEditComplete}
+        onCreateInstance={(data) => {
+          toast({
+            title: "Instance updated",
+            description: "The instance settings have been updated successfully."
+          });
+          setEditDialogOpen(false);
+        }}
       />
     </tr>;
 };

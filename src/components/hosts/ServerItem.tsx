@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -5,7 +6,6 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PenLine, Info, Trash2, Server, Wrench, AlertTriangle } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -41,14 +41,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     if (window.confirm(`Are you sure you want to remove ${server.name} from this profile?`)) {
       onRemoveFromProfile(server.id);
     }
-  };
-
-  const handleEditComplete = () => {
-    toast({
-      title: "Instance updated",
-      description: "The instance settings have been updated successfully."
-    });
-    setEditDialogOpen(false);
   };
 
   return <tr className={hasError ? "bg-red-50/30" : ""}>
@@ -144,7 +136,9 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           env: server.environment || {},
           headers: {},
         }}
-        onCreateInstance={handleEditComplete}
+        onCreateInstance={() => {
+          setEditDialogOpen(false);
+        }}
       />
     </tr>;
 };
