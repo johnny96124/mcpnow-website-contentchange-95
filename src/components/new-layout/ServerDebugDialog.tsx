@@ -27,8 +27,8 @@ const SAMPLE_EVENTS: ServerEvent[] = [
   {
     id: "1",
     timestamp: "2025-04-26T16:02:19Z",
-    type: "notification",
-    category: "Tools",
+    type: "notification" as EventType,
+    category: "Tools" as EventCategory,
     method: "notification/system",
     content: {
       message: "System is running normally",
@@ -40,8 +40,8 @@ const SAMPLE_EVENTS: ServerEvent[] = [
   {
     id: "2",
     timestamp: "2024-04-18T12:59:47Z",
-    type: "error",
-    category: "Tools",
+    type: "error" as EventType,
+    category: "Tools" as EventCategory,
     method: "tools/call",
     content: {
       error: "Failed to execute get_transcript",
