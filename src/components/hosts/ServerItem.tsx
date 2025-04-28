@@ -8,7 +8,7 @@ import { MoreHorizontal, PenLine, Info, Trash2, Server, Wrench, AlertTriangle } 
 import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
@@ -131,6 +131,11 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           <div className="flex-1 overflow-hidden py-4">
             <ServerToolsList tools={definition?.tools} debugMode={true} serverName={server.name} instanceId={server.id} />
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setToolsDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
