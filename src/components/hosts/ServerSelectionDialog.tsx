@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
@@ -85,7 +85,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   onAddServers,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAdded, setShowAdded] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("discovery");
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [showInstanceDialog, setShowInstanceDialog] = useState(false);
   const { toast } = useToast();
@@ -94,14 +94,14 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
-      setShowAdded(false);
+      setSelectedTab("discovery");
       setSelectedServer(null);
       setShowInstanceDialog(false);
     }
   }, [open]);
 
   const handleServerSelect = (server: ServerDefinition | ServerInstance) => {
-    if (showAdded) {
+    if (selectedTab === "added") {
       // If it's an existing instance, add it directly
       const serverInstance = server as ServerInstance;
       onAddServers([serverInstance]);
@@ -136,7 +136,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
-  const filteredServers = showAdded
+  const filteredServers = selectedTab === "added"
     ? existingInstances.filter(server =>
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -166,14 +166,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
               />
             </div>
             
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="show-added">Show Added Only</Label>
-              <Switch
-                id="show-added"
-                checked={showAdded}
-                onCheckedChange={setShowAdded}
-              />
-            </div>
+            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="discovery">Discovery</TabsTrigger>
+                <TabsTrigger value="added">Added</TabsTrigger>
+              </TabsList>
+            </Tabs>
 
             <div className="space-y-4">
               {filteredServers.map((server) => (
