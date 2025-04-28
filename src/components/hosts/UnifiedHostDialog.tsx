@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Plus } from "lucide-react";
+import { RefreshCw, Plus, Checkbox } from "lucide-react";
 import { type Host } from "@/data/mockData";
 
 interface UnifiedHostDialogProps {
@@ -24,12 +24,11 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
   const [configPath, setConfigPath] = useState("");
   const { toast } = useToast();
 
-  // Start scanning when dialog opens
+  // Reset state when dialog opens/closes
   useEffect(() => {
     if (open) {
       handleScanForHosts();
     } else {
-      // Reset state when dialog closes
       setScannedHosts([]);
       setSelectedHosts([]);
       setManualHostName("");
@@ -42,35 +41,46 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     setIsScanning(true);
     setScannedHosts([]);
     
-    // Simulate scanning with timeout
+    // Simulate scanning with multiple mock hosts
     setTimeout(() => {
-      const shouldFindHost = Math.random() > 0.5;
-      
-      if (shouldFindHost) {
-        const newHost: Host = {
-          id: `host-${Date.now()}`,
-          name: "Local Host",
+      const mockHosts: Host[] = [
+        {
+          id: `host-${Date.now()}-1`,
+          name: "Local Development Host",
           icon: "💻",
-          connectionStatus: "connected",
-          configStatus: "configured"
-        };
-        setScannedHosts([newHost]);
-      }
+          configPath: "/Users/dev/.mcp/hosts/local-dev.json",
+          configStatus: "configured",
+          connectionStatus: "connected"
+        },
+        {
+          id: `host-${Date.now()}-2`,
+          name: "Test Environment",
+          icon: "🧪",
+          configPath: "/Users/dev/.mcp/hosts/test-env.json",
+          configStatus: "configured",
+          connectionStatus: "connected"
+        },
+        {
+          id: `host-${Date.now()}-3`,
+          name: "Production Server",
+          icon: "🚀",
+          configPath: "/Users/dev/.mcp/hosts/prod.json",
+          configStatus: "configured",
+          connectionStatus: "connected"
+        }
+      ];
       
+      setScannedHosts(mockHosts);
       setIsScanning(false);
       
       toast({
-        title: shouldFindHost ? "Host discovered" : "No hosts found",
-        description: shouldFindHost 
-          ? "New hosts have been found on your network." 
-          : "No new hosts were discovered. You can try scanning again or add one manually.",
-        variant: shouldFindHost ? "default" : "destructive"
+        title: "Hosts discovered",
+        description: `Found ${mockHosts.length} hosts on your network.`,
       });
     }, 2000);
   };
 
   const validateConfigPath = (path: string) => {
-    // Basic validation: ensure it ends with .json and starts with /
     return path.startsWith("/") && path.endsWith(".json");
   };
 
@@ -120,6 +130,14 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     onOpenChange(false);
   };
 
+  const toggleSelectAll = () => {
+    if (selectedHosts.length === scannedHosts.length) {
+      setSelectedHosts([]);
+    } else {
+      setSelectedHosts(scannedHosts.map(host => host.id));
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -160,10 +178,20 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
                 <>
                   {scannedHosts.length > 0 ? (
                     <div className="space-y-2">
+                      {scannedHosts.length > 1 && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={toggleSelectAll}
+                          className="w-full mb-2"
+                        >
+                          {selectedHosts.length === scannedHosts.length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      )}
                       {scannedHosts.map((host) => (
                         <div
                           key={host.id}
-                          className={`flex items-center space-x-4 p-4 rounded-lg border cursor-pointer ${
+                          className={`flex items-start space-x-4 p-4 rounded-lg border cursor-pointer ${
                             selectedHosts.includes(host.id) ? 'border-primary bg-primary/5' : ''
                           }`}
                           onClick={() => {
@@ -175,10 +203,17 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
                           }}
                         >
                           <div className="flex-1">
-                            <p className="font-medium">{host.name}</p>
-                            <p className="text-sm text-muted-foreground">Found on your network</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl">{host.icon}</span>
+                              <p className="font-medium">{host.name}</p>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {host.configPath}
+                            </p>
                           </div>
-                          <div className={`w-3 h-3 rounded-full bg-green-500`} />
+                          <div className="h-5 w-5 border rounded flex items-center justify-center">
+                            {selectedHosts.includes(host.id) && <RefreshCw className="h-3 w-3 text-primary" />}
+                          </div>
                         </div>
                       ))}
                     </div>
