@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -9,7 +10,6 @@ import { toast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 
