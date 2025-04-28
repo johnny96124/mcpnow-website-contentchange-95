@@ -22,6 +22,9 @@ export function ServerDetailsDialog({
   // Find server definition based on definitionId
   const definition = serverDefinitions.find(def => def.id === server.definitionId);
 
+  // Use connectionDetails property as a fallback for connection type
+  const connectionType = server.connectionDetails?.includes("http") ? "HTTP_SSE" : "STDIO";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -35,7 +38,7 @@ export function ServerDetailsDialog({
             <div>
               <h2 className="text-xl font-semibold">{server.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <EndpointLabel type={server.type || "HTTP_SSE"} />
+                <EndpointLabel type={connectionType} />
                 {definition?.isOfficial && (
                   <Badge variant="outline" className="text-xs">Official</Badge>
                 )}
@@ -49,7 +52,7 @@ export function ServerDetailsDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Connection Details</p>
-              <p className="font-medium">{server.connectionDetails || server.url}</p>
+              <p className="font-medium">{server.connectionDetails || "Not specified"}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Status</p>

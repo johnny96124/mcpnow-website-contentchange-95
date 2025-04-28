@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
+import { DeleteProfileDialog } from "./DeleteProfileDialog";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
 
 interface ProfileSelectorProps {
@@ -40,6 +40,12 @@ export function ProfileSelector({
     // For now, we'll just close the dialog
     setCreateDialogOpen(false);
     // Assume onSelect would be called with the new profile after it's added to the state
+  };
+
+  const handleConfirmDelete = () => {
+    // In a real app, this would remove from the profiles list
+    // For now, we'll just close the dialog
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -83,16 +89,18 @@ export function ProfileSelector({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <DeleteProfileDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        profile={profileToDelete}
-      />
+      {profileToDelete && (
+        <DeleteProfileDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          profileName={profileToDelete.name}
+          onConfirmDelete={handleConfirmDelete}
+        />
+      )}
 
       <CreateProfileDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onCreated={handleProfileCreated}
       />
     </div>
   );
