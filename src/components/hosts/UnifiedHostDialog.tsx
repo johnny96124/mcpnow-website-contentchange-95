@@ -122,15 +122,22 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
       icon: "🖥️",
       configPath,
       configStatus: "configured",
-      connectionStatus: "connected"
+      connectionStatus: "connected",
+      profileId: `profile-${Date.now()}` // Add default profile ID
     };
 
+    // Create default profile (this would typically be handled by the parent component)
     onAddHosts([newHost]);
     onOpenChange(false);
   };
 
   const handleConfirmScannedHosts = () => {
-    const hostsToAdd = scannedHosts.filter(host => selectedHosts.includes(host.id));
+    const hostsToAdd = scannedHosts.filter(host => selectedHosts.includes(host.id))
+      .map(host => ({
+        ...host,
+        profileId: `profile-${Date.now()}-${host.id}` // Add default profile ID for each host
+      }));
+
     if (hostsToAdd.length === 0) {
       toast({
         title: "No hosts selected",
@@ -139,6 +146,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
       });
       return;
     }
+
     onAddHosts(hostsToAdd);
     onOpenChange(false);
   };

@@ -17,6 +17,7 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { toast } from "@/hooks/use-toast";
 import { Host, Profile, ServerInstance, ConnectionStatus, serverDefinitions, EndpointType } from "@/data/mockData";
+import { ProfileDropdown } from "@/components/hosts/ProfileDropdown";
 
 interface HostDetailViewProps {
   host: Host;
@@ -196,81 +197,45 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </Alert>
       )}
       
-      <div className="bg-muted/10 p-4 rounded-md">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-medium">Profile</h3>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onImportByProfile(host)}
-            >
-              <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
-              Change Profile
-            </Button>
-            <Button 
-              size="sm" 
-              onClick={() => onAddServersToHost(host)}
-            >
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
-              Add Servers
-            </Button>
-          </div>
-        </div>
-        
-        {selectedProfile ? (
-          <div className="flex items-center">
-            <Badge variant="default" className="mr-2 bg-primary/90">{selectedProfile.name}</Badge>
-            <span className="text-sm text-muted-foreground">{selectedProfile.endpoint}</span>
-          </div>
-        ) : (
-          <div className="flex items-center text-muted-foreground">
-            <Info className="h-4 w-4 mr-2" />
-            No profile selected. Please import or create a profile.
-          </div>
-        )}
+      {/* Config File Details */}
+      <div className="text-sm text-muted-foreground bg-muted/5 p-4 rounded-md border border-muted">
+        <p className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          Configuration File: {host.configPath}
+        </p>
+        <Button 
+          variant="link" 
+          className="text-xs p-0 h-auto mt-1" 
+          onClick={() => onCreateConfig(host.id)}
+        >
+          View Configuration
+        </Button>
       </div>
       
       <Card>
-        <CardHeader className="pb-2 flex flex-row items-center justify-between">
-          <div>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               Connected Servers
-              {selectedProfile && (
-                <Badge variant="outline" className="ml-2">Profile: {selectedProfile.name}</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              {filteredServers.length > 0 
-                ? `${filteredServers.length} servers on this host` 
-                : "No servers connected to this host"}
-            </CardDescription>
-          </div>
-          
-          {profileServers.length > 0 && (
-            <div className="relative w-[240px]">
-              <Input
-                placeholder="Search servers..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-8"
+              <ProfileDropdown
+                profiles={profiles}
+                currentProfileId={selectedProfileId}
+                onSelectProfile={onImportByProfile}
+                onCreateProfile={() => onAddServersToHost(host)}
+                onDeleteProfile={(profileId) => {
+                  // Handle profile deletion
+                  if (window.confirm('Are you sure you want to delete this profile?')) {
+                    // TODO: Implement profile deletion logic
+                  }
+                }}
               />
-              <div className="absolute left-2.5 top-2.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
-              </div>
-              {searchQuery && (
-                <button 
-                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          )}
+            </CardTitle>
+          </div>
+          <CardDescription>
+            {filteredServers.length > 0 
+              ? `${filteredServers.length} servers on this host` 
+              : "Add your first server to get started"}
+          </CardDescription>
         </CardHeader>
         
         <CardContent>
@@ -347,29 +312,20 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                   })}
                 </TableBody>
               </Table>
-            ) : searchQuery ? (
-              <div className="text-center py-12 space-y-2">
-                <div className="text-3xl mb-2">🔍</div>
-                <h3 className="text-lg font-medium">No results found</h3>
-                <p className="text-muted-foreground">
-                  No servers matching "{searchQuery}" were found
-                </p>
-                <Button variant="outline" onClick={() => setSearchQuery("")}>Clear search</Button>
-              </div>
             ) : (
               <div className="text-center py-12 space-y-4">
                 <div className="flex flex-col items-center gap-2">
                   <div className="bg-muted/30 p-3 rounded-full">
-                    <Server className="h-6 w-6 text-muted-foreground" />
+                    <Plus className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-medium">No servers in this profile</h3>
+                  <h3 className="text-lg font-medium">Add Your First Server</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    This profile doesn't have any servers yet. Add servers to get started.
+                    Get started by adding a server to this host. You can add multiple servers and manage them all in one place.
                   </p>
                 </div>
                 <Button onClick={() => onAddServersToHost(host)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Servers to Profile
+                  Add Server
                 </Button>
               </div>
             )
