@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { ServerEventsList } from "@/components/discovery/ServerEventsList";
 import { Wrench, MessageSquare } from "lucide-react";
-import { ServerEvent, EventType, EventCategory } from "@/types/events";
+import { ServerEvent } from "@/types/events";
 
 interface ServerDebugDialogProps {
   open: boolean;
@@ -116,3 +116,4 @@ export function ServerDebugDialog({
     </Dialog>
   );
 }
+
