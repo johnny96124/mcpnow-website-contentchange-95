@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,57 +18,16 @@ interface ServerSelectionDialogProps {
   onAddServers: (servers: ServerInstance[]) => void;
 }
 
-// Mock data with descriptions
-const availableServers: Array<{
-  id: string;
-  name: string;
-  definitionId: string;
-  status: Status;
-  connectionDetails: string;
-  enabled: boolean;
-  description: string;
-  type: EndpointType;
-}> = [
-  {
-    id: "server-1",
-    name: "PostgreSQL Database",
-    definitionId: "def-http-sse",
-    status: "stopped",
-    connectionDetails: "https://api.postgresql.org",
-    enabled: false,
-    description: "PostgreSQL database server with extended JSON-RPC API",
-    type: "HTTP_SSE"
-  },
-  {
-    id: "server-2",
-    name: "Docker Assistant",
-    definitionId: "def-stdio",
-    status: "stopped",
-    connectionDetails: "npx docker-assistant",
-    enabled: false,
-    description: "Helps manage Docker containers and images with intuitive interface",
-    type: "STDIO"
-  },
-  {
-    id: "server-3",
-    name: "Redis Cache",
-    definitionId: "def-http-sse",
-    status: "stopped",
-    connectionDetails: "https://redis.cache.local",
-    enabled: false,
-    description: "In-memory data structure store used as cache, database, and message broker",
-    type: "HTTP_SSE"
-  }
-];
-
-const existingInstances: ServerInstance[] = [
+// Mock data with descriptions for existing instances
+const existingInstances: Array<ServerInstance & { description?: string }> = [
   {
     id: "instance-1",
     name: "Local PostgreSQL",
     definitionId: "def-http-sse",
     status: "stopped",
     connectionDetails: "https://localhost:5432",
-    enabled: false
+    enabled: false,
+    description: "Local PostgreSQL database server instance"
   },
   {
     id: "instance-2",
@@ -77,7 +35,8 @@ const existingInstances: ServerInstance[] = [
     definitionId: "def-stdio",
     status: "stopped",
     connectionDetails: "redis://localhost:6379",
-    enabled: false
+    enabled: false,
+    description: "Development Redis cache server"
   }
 ];
 
@@ -177,28 +136,35 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
 
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-4">
-                {filteredServers.map((server) => (
-                  <div
-                    key={server.id}
-                    className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
-                    onClick={() => handleServerSelect(server)}
-                  >
-                    <ServerLogo name={server.name} className="flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium truncate">{server.name}</h4>
-                        {'type' in server && (
-                          <EndpointLabel type={server.type} />
+                {filteredServers.map((server) => {
+                  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+                  
+                  return (
+                    <div
+                      key={server.id}
+                      className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
+                      onClick={() => handleServerSelect(server)}
+                    >
+                      <ServerLogo name={server.name} className="flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium truncate">{server.name}</h4>
+                          {definition && (
+                            <EndpointLabel type={definition.type} />
+                          )}
+                        </div>
+                        {(selectedTab === "discovery" && 'description' in server || 
+                         selectedTab === "added" && server.description) && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {selectedTab === "discovery" 
+                              ? (server as any).description 
+                              : server.description}
+                          </p>
                         )}
                       </div>
-                      {'description' in server && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {server.description}
-                        </p>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {filteredServers.length === 0 && (
                   <div className="text-center py-8 border border-dashed rounded-md">
@@ -220,4 +186,3 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     </>
   );
 };
-
