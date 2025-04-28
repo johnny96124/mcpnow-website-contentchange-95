@@ -9,9 +9,24 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Info, Plus, Trash2, X } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ServerDefinition } from "@/data/mockData";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AddInstanceDialogProps {
   open: boolean;
@@ -61,7 +76,7 @@ export function AddInstanceDialog({
   useEffect(() => {
     if (open && serverDefinition) {
       form.reset({
-        name: initialValues?.name || (serverDefinition ? `${serverDefinition.name}` : ""),
+        name: initialValues?.name || (serverDefinition ? `${serverDefinition.name} Instance` : ""),
         args: initialValues?.args || (serverDefinition?.type === 'STDIO' ? 
           serverDefinition?.commandArgs || `npx -y @smithery/cli@latest install @block/${serverDefinition?.type.toLowerCase()} --client ${serverDefinition?.name?.toLowerCase()} --key ad3dda05-c241-44f6-bcb8-283ef9149d88` 
           : ""),
