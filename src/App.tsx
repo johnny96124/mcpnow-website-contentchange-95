@@ -23,31 +23,31 @@ function App() {
         <RouterProvider router={createBrowserRouter([
           {
             path: "/",
-            element: <DefaultLayout>{<Dashboard />}</DefaultLayout>
+            element: <DefaultLayout><Dashboard /></DefaultLayout>
           },
           {
             path: "/hosts",
-            element: <DefaultLayout>{<Hosts />}</DefaultLayout>
+            element: <DefaultLayout><Hosts /></DefaultLayout>
           },
           {
             path: "/servers",
-            element: <DefaultLayout>{<Servers />}</DefaultLayout>
+            element: <DefaultLayout><Servers /></DefaultLayout>
           },
           {
             path: "/profiles",
-            element: <DefaultLayout>{<Profiles />}</DefaultLayout>
+            element: <DefaultLayout><Profiles /></DefaultLayout>
           },
           {
             path: "/discovery",
-            element: <DefaultLayout>{<Discovery />}</DefaultLayout>
+            element: <DefaultLayout><Discovery /></DefaultLayout>
           },
           {
             path: "/settings",
-            element: <DefaultLayout>{<Settings />}</DefaultLayout>
+            element: <DefaultLayout><Settings /></DefaultLayout>
           },
           {
             path: "/host-new",
-            element: <DefaultLayout>{<HostNewLayout />}</DefaultLayout>
+            element: <DefaultLayout><HostNewLayout /></DefaultLayout>
           }
         ])} />
       </QueryClientProvider>

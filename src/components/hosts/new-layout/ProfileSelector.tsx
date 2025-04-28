@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DeleteProfileDialog } from "./DeleteProfileDialog";
 import { CreateProfileDialog } from "@/components/profiles/CreateProfileDialog";
+import { serverInstances } from "@/data/mockData";
 
 interface ProfileSelectorProps {
   profiles: any[];
@@ -101,6 +102,8 @@ export function ProfileSelector({
       <CreateProfileDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+        onCreateProfile={handleProfileCreated}
+        instances={serverInstances}
       />
     </div>
   );
