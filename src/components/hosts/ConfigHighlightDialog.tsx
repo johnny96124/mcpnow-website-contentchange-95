@@ -51,7 +51,7 @@ export const ConfigHighlightDialog: React.FC<ConfigHighlightDialogProps> = ({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Label className="text-lg font-semibold">Configuration File Path</Label>
-              <TooltipProvider>
+              <TooltipProvider delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger>
                     <Info className="h-4 w-4 text-muted-foreground cursor-help" />
