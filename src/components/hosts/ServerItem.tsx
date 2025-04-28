@@ -15,10 +15,9 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
-import { ServerDebugDialog } from "../new-layout/ServerDebugDialog";
-import { serverDefinitions } from "@/data/mockData";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
+import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -36,7 +35,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   onRemoveFromProfile
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
@@ -132,7 +131,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             size="icon" 
             className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
             title="Debug Tools"
-            onClick={() => setDebugDialogOpen(true)}
+            onClick={() => setToolsDialogOpen(true)}
           >
             <Wrench className="h-4 w-4" />
           </Button>
@@ -178,12 +177,19 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
       />
       
-      <ServerDebugDialog
-        open={debugDialogOpen}
-        onOpenChange={setDebugDialogOpen}
-        server={server}
-      />
-
+      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
+          <div className="flex-1 overflow-hidden py-4">
+            <ServerToolsList 
+              tools={definition?.tools} 
+              debugMode={true} 
+              serverName={server.name} 
+              instanceId={server.id} 
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       <ServerDetailsDialog 
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
