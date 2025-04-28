@@ -50,6 +50,14 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   const handleEditInstance = () => {
     setEditDialogOpen(true);
   };
+  
+  const handleEditComplete = (data: any) => {
+    toast({
+      title: "Instance updated",
+      description: "The server instance has been updated successfully."
+    });
+    setEditDialogOpen(false);
+  };
 
   return <tr className={hasError ? "bg-red-50/30" : ""}>
       <td className="p-4 align-middle">
@@ -112,18 +120,14 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." 
       />
       
+      {/* Fixed AddInstanceDialog with proper open state handling */}
       <AddInstanceDialog
         open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        serverDefinition={definition || null}
-        onCreateInstance={(data) => {
-          // Handle instance update here
-          toast({
-            title: "Instance updated",
-            description: "The server instance has been updated successfully."
-          });
-          setEditDialogOpen(false);
+        onOpenChange={(open) => {
+          setEditDialogOpen(open);
         }}
+        serverDefinition={definition || null}
+        onCreateInstance={handleEditComplete}
         editMode={true}
         initialValues={{
           name: server.name,
@@ -135,7 +139,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         instanceId={server.id}
       />
       
-      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
+      <Dialog open={toolsDialogOpen} onOpenChange={(open) => setToolsDialogOpen(open)}>
         <DialogContent className="max-w-4xl h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
