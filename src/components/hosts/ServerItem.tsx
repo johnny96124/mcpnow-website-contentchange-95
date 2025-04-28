@@ -18,7 +18,7 @@ import { ServerErrorDialog } from "./ServerErrorDialog";
 import { ServerDebugDialog } from "../new-layout/ServerDebugDialog";
 import { serverDefinitions } from "@/data/mockData";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ServerDetailsDialog } from "../new-layout/ServerDetailsDialog";
+import { ServerDetailsDialog } from "./ServerDetailsDialog";
 
 interface ServerItemProps {
   server: ServerInstance;
