@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { serverDefinitions, type ServerInstance, type ServerDefinition, type EndpointType, type Status } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
@@ -173,36 +175,38 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
               </TabsList>
             </Tabs>
 
-            <div className="space-y-4">
-              {filteredServers.map((server) => (
-                <div
-                  key={server.id}
-                  className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
-                  onClick={() => handleServerSelect(server)}
-                >
-                  <ServerLogo name={server.name} className="flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium truncate">{server.name}</h4>
-                      {'type' in server && (
-                        <EndpointLabel type={server.type} />
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-4">
+                {filteredServers.map((server) => (
+                  <div
+                    key={server.id}
+                    className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
+                    onClick={() => handleServerSelect(server)}
+                  >
+                    <ServerLogo name={server.name} className="flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium truncate">{server.name}</h4>
+                        {'type' in server && (
+                          <EndpointLabel type={server.type} />
+                        )}
+                      </div>
+                      {'description' in server && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {server.description}
+                        </p>
                       )}
                     </div>
-                    {'description' in server && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {server.description}
-                      </p>
-                    )}
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {filteredServers.length === 0 && (
-                <div className="text-center py-8 border border-dashed rounded-md">
-                  <p className="text-muted-foreground">No servers found</p>
-                </div>
-              )}
-            </div>
+                {filteredServers.length === 0 && (
+                  <div className="text-center py-8 border border-dashed rounded-md">
+                    <p className="text-muted-foreground">No servers found</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           </div>
         </DialogContent>
       </Dialog>
@@ -216,3 +220,4 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     </>
   );
 };
+
