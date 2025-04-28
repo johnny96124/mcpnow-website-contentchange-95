@@ -1,83 +1,70 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { DataTable } from "@/components/ui/data-table";
-import { columns } from "@/components/new-layout/columns";
-import { profiles as mockProfiles, serverInstances as mockServers } from "@/data/mockData";
+import { DataTable } from "@/components/ui/data-table"
+import { columns } from "@/components/new-layout/columns"
+import { profiles as mockProfiles, serverInstances as mockServers, ServerInstance, Profile } from "@/data/mockData";
 import { ServerDetails } from "@/components/new-layout/ServerDetails";
-import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
-import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
-import { ServerInstance } from "@/data/mockData.d"; // Import the type
+import { DebugDialog } from "@/components/new-layout/DebugDialog";
+import { HistoryDialog } from "@/components/new-layout/HistoryDialog";
+import { AddServerToHostDialog } from "@/components/new-layout/AddServerToHostDialog";
 
 const NewLayout = () => {
-  const [profiles, setProfiles] = useState(mockProfiles);
-  const [servers, setServers] = useState(mockServers);
+  const [profiles, setProfiles] = useState<Profile[]>(mockProfiles);
+  const [servers, setServers] = useState<ServerInstance[]>(mockServers);
   const [selectedServer, setSelectedServer] = useState<ServerInstance | null>(null);
   const [showServerDetails, setShowServerDetails] = useState(false);
   const [showDebugDialog, setShowDebugDialog] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
-  const [serverProfiles, setServerProfiles] = useState<Record<string, string[]>>({});
-
+  const [showAddToProfilesDialog, setShowAddToProfilesDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Initialize serverProfiles from mockData
-    const initialServerProfiles: Record<string, string[]> = {};
-    mockServers.forEach(server => {
-      initialServerProfiles[server.id] = [];
-    });
-    setServerProfiles(initialServerProfiles);
+    // Simulate fetching data from an API
+    setTimeout(() => {
+      setProfiles(mockProfiles);
+      setServers(mockServers);
+    }, 500);
   }, []);
 
   const handleServerAction = (action: string, server: ServerInstance) => {
-    setSelectedServer(server);
     switch (action) {
+      case 'profiles':
+        setSelectedServer(server);
+        setShowAddToProfilesDialog(true);
+        break;
+      case 'details':
+        setSelectedServer(server);
+        setShowServerDetails(true);
+        break;
       case 'debug':
+        setSelectedServer(server);
         setShowDebugDialog(true);
         break;
       case 'history':
+        setSelectedServer(server);
         setShowHistoryDialog(true);
         break;
-      case 'details':
-        setShowServerDetails(true);
+      default:
         break;
     }
   };
 
-  const handleAddToProfiles = (serverId: string, profileIds: string[]) => {
-    setServerProfiles(prev => ({
-      ...prev,
-      [serverId]: profileIds
-    }));
-
-    toast({
-      title: "Profiles updated",
-      description: `Server profiles have been updated successfully`
-    });
-  };
-
-  // Fix the status type to use the correct union type
-  const handleStatusChange = (serverId: string, status: 'running' | 'stopped' | 'connecting' | 'error') => {
+  const handleStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServers(prevServers =>
       prevServers.map(server =>
-        server.id === serverId
-          ? { ...server, status }
-          : server
+        server.id === serverId ? { ...server, status } : server
       )
     );
   };
 
   const handleDeleteServer = (id: string) => {
-    setServers(servers.filter(server => server.id !== id));
-    setServerProfiles(prev => {
-      const newProfiles = { ...prev };
-      delete newProfiles[id];
-      return newProfiles;
-    });
+    setServers(servers.filter((server) => server.id !== id));
     toast({
       title: "Server deleted",
-      description: "Server has been deleted successfully"
+      description: "Server has been deleted successfully",
     });
   };
 
@@ -90,10 +77,31 @@ const NewLayout = () => {
         </div>
         <Button>Add Server</Button>
       </div>
+      
+      <DataTable 
+        columns={columns(handleServerAction)} 
+        data={servers} 
+      />
 
-      <DataTable
-        columns={columns(handleServerAction, profiles, handleAddToProfiles, serverProfiles)}
-        data={servers}
+      <AddServerToHostDialog
+        open={showAddToProfilesDialog}
+        onOpenChange={setShowAddToProfilesDialog}
+        profiles={profiles}
+        onAddToProfiles={(profileIds) => {
+          // Handle adding server to multiple profiles
+          profileIds.forEach(profileId => {
+            const profile = profiles.find(p => p.id === profileId);
+            if (profile && selectedServer) {
+              // Add server to each selected profile
+              profile.instances = [...profile.instances, selectedServer.id];
+            }
+          });
+          setShowAddToProfilesDialog(false);
+          toast({
+            title: "Server added to profiles",
+            description: `Server has been added to ${profileIds.length} profile${profileIds.length > 1 ? 's' : ''}`,
+          });
+        }}
       />
 
       <ServerDetails
@@ -104,13 +112,13 @@ const NewLayout = () => {
         onStatusChange={handleStatusChange}
       />
 
-      <ServerDebugDialog
+      <DebugDialog
         open={showDebugDialog}
         onOpenChange={setShowDebugDialog}
         server={selectedServer}
       />
 
-      <ServerHistoryDialog
+      <HistoryDialog
         open={showHistoryDialog}
         onOpenChange={setShowHistoryDialog}
         server={selectedServer}
