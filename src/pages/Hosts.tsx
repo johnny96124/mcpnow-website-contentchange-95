@@ -15,7 +15,6 @@ import { ProfileChangesDialog } from "@/components/hosts/ProfileChangesDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
-import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -131,13 +130,23 @@ const Hosts = () => {
     }, 2500);
   };
 
-  const handleAddHosts = (newHosts: Host[]) => {
-    setHostsList(prev => [...prev, ...newHosts]);
-    setSelectedHostId(newHosts[0].id);
-    
+  const handleAddHost = (newHost: {
+    name: string;
+    configPath?: string;
+    icon?: string;
+    configStatus: "configured" | "misconfigured" | "unknown";
+    connectionStatus: "connected" | "disconnected" | "misconfigured";
+  }) => {
+    const id = `host-${Date.now()}`;
+    const host: Host = {
+      id,
+      ...newHost
+    };
+    setHostsList([...hostsList, host]);
+    setSelectedHostId(id);
     toast({
-      title: "Hosts Added",
-      description: `Successfully added ${newHosts.length} host${newHosts.length > 1 ? 's' : ''}`
+      title: "Host Added",
+      description: `${newHost.name} has been added successfully`
     });
   };
 
@@ -342,10 +351,21 @@ const Hosts = () => {
             Manage host connections and profile associations
           </p>
         </div>
-        <Button onClick={() => setAddHostDialogOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Host
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleScanForHosts} disabled={isScanning}>
+            {isScanning ? <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Scanning...
+              </> : <>
+                <ScanLine className="h-4 w-4 mr-2" />
+                Scan for Hosts
+              </>}
+          </Button>
+          <Button onClick={() => setAddHostDialogOpen(true)}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Host Manually
+          </Button>
+        </div>
       </div>
       
       <div className="relative">
@@ -493,10 +513,10 @@ const Hosts = () => {
         isCreateMode={configDialog.isCreateMode}
       />
       
-      <UnifiedHostDialog
-        open={addHostDialogOpen}
-        onOpenChange={setAddHostDialogOpen}
-        onAddHosts={handleAddHosts}
+      <AddHostDialog 
+        open={addHostDialogOpen} 
+        onOpenChange={setAddHostDialogOpen} 
+        onAddHost={handleAddHost} 
       />
       
       <AddServerToHostDialog
