@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -126,10 +127,10 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         editMode={true}
         initialValues={{
           name: server.name,
-          args: server.commandArgs || "",
-          url: server.url || "",
+          args: server.arguments ? server.arguments.join(' ') : "",
+          url: server.connectionDetails || "",
           env: server.environment || {},
-          headers: server.headers || {}
+          headers: {}
         }}
         instanceId={server.id}
       />
