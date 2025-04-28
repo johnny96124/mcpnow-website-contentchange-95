@@ -181,7 +181,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         <DialogContent className="max-w-4xl h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <Wrench className="h-5 w-5 text-muted-foreground" />
+              <Wrench className="h-5 w-5 text-purple-500" />
               Server Tools - {server.name}
             </DialogTitle>
             <p className="text-sm text-muted-foreground">
