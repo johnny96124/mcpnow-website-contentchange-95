@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: EndpointType | 'Custom' | 'WS';
+  type: EndpointType | 'Custom';
   className?: string;
 }
 

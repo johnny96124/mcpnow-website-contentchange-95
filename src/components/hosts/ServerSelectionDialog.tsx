@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -13,10 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { ServerInstance, serverDefinitions } from "@/data/mockData";
+import { ServerInstance, serverDefinitions, EndpointType } from "@/data/mockData";
 import { Server, Search, Check, X, ArrowLeft, Plus } from "lucide-react";
 
 interface ServerSelectionDialogProps {
@@ -25,7 +23,6 @@ interface ServerSelectionDialogProps {
   onAddServers: (servers: ServerInstance[]) => void;
 }
 
-// List of mock servers to choose from - corrected to match ServerInstance type
 const availableServers: ServerInstance[] = [
   {
     id: "server-1",
@@ -61,7 +58,6 @@ const availableServers: ServerInstance[] = [
   }
 ];
 
-// Mock existing instances that the user has already configured
 const existingInstances: ServerInstance[] = [
   {
     id: "instance-1",
@@ -81,7 +77,6 @@ const existingInstances: ServerInstance[] = [
   }
 ];
 
-// Helper function to get server description based on its type
 const getServerDescription = (serverId: string): string => {
   const server = availableServers.find(s => s.id === serverId);
   if (!server) return "";
@@ -107,14 +102,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   const [instances, setInstances] = useState<ServerInstance[]>(existingInstances);
   const [selectedInstanceIds, setSelectedInstanceIds] = useState<string[]>([]);
   
-  // For creating a new instance
   const [step, setStep] = useState<"select" | "configure" | "instances">("select");
   const [newInstanceName, setNewInstanceName] = useState("");
   const [endpointUrl, setEndpointUrl] = useState("");
   const [commandArgs, setCommandArgs] = useState("");
   const [envVariables, setEnvVariables] = useState("");
   
-  // Reset states when dialog opens/closes
   useEffect(() => {
     if (!open) {
       setStep("select");
@@ -129,16 +122,14 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     }
   }, [open]);
   
-  // Set initial values for new instance when a server is selected
   useEffect(() => {
     if (selectedServerId) {
       const server = availableServers.find(s => s.id === selectedServerId);
       if (server) {
         setNewInstanceName(server.name);
         
-        // Use connectionDetails based on the type
         const definition = serverDefinitions.find(d => d.id === server.definitionId);
-        if (definition && definition.type === "HTTP_SSE" || definition?.type === "WS") {
+        if (definition && (definition.type === "HTTP_SSE" || definition.type === "WS")) {
           setEndpointUrl(server.connectionDetails);
           setCommandArgs("");
         } else {
@@ -149,7 +140,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     }
   }, [selectedServerId]);
   
-  // Filter servers based on search and instance filter
   const filteredServers = availableServers.filter(server => {
     const matchesSearch = server.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (showOnlyWithInstances) {
@@ -158,7 +148,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     return matchesSearch;
   });
   
-  // Get server instances for a selected server
   const getServerInstances = (serverId: string) => {
     const server = availableServers.find(s => s.id === serverId);
     if (!server) return [];
@@ -166,7 +155,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     return instances.filter(i => i.definitionId === server.definitionId);
   };
   
-  // Handle server selection
   const handleServerSelect = (serverId: string) => {
     setSelectedServerId(serverId);
     const serverInstances = getServerInstances(serverId);
@@ -178,13 +166,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     }
   };
   
-  // Create a new instance
   const handleCreateInstance = () => {
     const server = availableServers.find(s => s.id === selectedServerId);
     if (!server) return;
     
     const definition = serverDefinitions.find(d => d.id === server.definitionId);
-    const isHttpType = definition?.type === "HTTP_SSE" || definition?.type === "WS";
+    const isHttpType = definition && (definition.type === "HTTP_SSE" || definition.type === "WS");
     
     const newInstance: ServerInstance = {
       id: `instance-${Date.now()}`,
@@ -199,20 +186,17 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
   
-  // Add selected instances
   const handleAddInstances = () => {
     const selectedInstances = instances.filter(i => selectedInstanceIds.includes(i.id));
     onAddServers(selectedInstances);
     onOpenChange(false);
   };
   
-  // Get endpoint type based on server definition
-  const getEndpointType = (definitionId: string) => {
+  const getEndpointType = (definitionId: string): EndpointType => {
     const definition = serverDefinitions.find(d => d.id === definitionId);
     return definition?.type || "HTTP_SSE";
   };
   
-  // Render server selection step
   const renderServerSelectionStep = () => (
     <>
       <div className="flex items-center justify-between mb-4">
@@ -285,7 +269,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     </>
   );
   
-  // Render instance configuration step
   const renderConfigureStep = () => {
     const selectedServer = availableServers.find(s => s.id === selectedServerId);
     if (!selectedServer) return null;
@@ -381,7 +364,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     );
   };
   
-  // Render instance selection step
   const renderInstancesStep = () => {
     const selectedServer = availableServers.find(s => s.id === selectedServerId);
     if (!selectedServer) return null;
@@ -470,7 +452,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     );
   };
   
-  // Render the appropriate step content
   const renderStepContent = () => {
     switch (step) {
       case "select":

@@ -2,7 +2,7 @@
 export interface ServerDefinition {
   id: string;
   name: string;
-  type: 'HTTP_SSE' | 'STDIO';
+  type: 'HTTP_SSE' | 'STDIO' | 'WS';
   version: string;
   description: string;
   icon?: string;
@@ -49,7 +49,7 @@ export interface ServerInstance {
   enabled: boolean;
 }
 
-export type EndpointType = 'HTTP_SSE' | 'STDIO';
+export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 
 export const serverDefinitions: ServerDefinition[];
 export const serverInstances: ServerInstance[];
