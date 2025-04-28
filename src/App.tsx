@@ -32,11 +32,6 @@ import NewLayout from "./pages/NewLayout";
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-// Define a wrapper for DefaultLayout to handle children properly
-interface LayoutProps {
-  children: ReactNode;
-}
-
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>

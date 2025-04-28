@@ -2,7 +2,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-interface HostSearchProps {
+export interface HostSearchProps {
   value: string;
   onChange: (value: string) => void;
 }

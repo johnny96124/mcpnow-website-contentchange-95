@@ -161,9 +161,9 @@ export default function HostsNewLayout() {
                 <HostCard 
                   key={host.id} 
                   host={host} 
+                  selected={selectedHost?.id === host.id}
                   onSelect={() => handleHostSelect(host)}
                   onConfigView={() => handleShowConfigFile(host)}
-                  selected={selectedHost?.id === host.id}
                 />
               ))
             )}
