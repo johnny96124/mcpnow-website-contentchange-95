@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Search, Info, X, RefreshCw, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,9 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
+import { ServerSelectionDialog } from "@/components/hosts/ServerSelectionDialog";
+import { RemoveServerConfirmDialog } from "@/components/hosts/RemoveServerConfirmDialog";
+import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -33,6 +37,7 @@ const Hosts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
+  const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
   const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
   const [profileSelectorOpen, setProfileSelectorOpen] = useState(false);
   const [unsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
@@ -43,6 +48,14 @@ const Hosts = () => {
   const [addedServers, setAddedServers] = useState<ServerInstance[]>([]);
   const [removedServers, setRemovedServers] = useState<ServerInstance[]>([]);
   const [targetProfileId, setTargetProfileId] = useState<string | null>(null);
+  const [selectedServer, setSelectedServer] = useState<ServerInstance | null>(null);
+  const [removeServerDialogOpen, setRemoveServerDialogOpen] = useState(false);
+  const [serverToRemove, setServerToRemove] = useState<{id: string, name: string, profileId: string} | null>(null);
+  const [serverDebugDialogOpen, setServerDebugDialogOpen] = useState(false);
+  const [serverHistoryDialogOpen, setServerHistoryDialogOpen] = useState(false);
+  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
+  const [serverErrorDialogOpen, setServerErrorDialogOpen] = useState(false);
+  const [errorDetails, setErrorDetails] = useState("");
 
   const {
     hostProfiles,
@@ -91,17 +104,43 @@ const Hosts = () => {
       
       toast({
         title: "Configuration complete",
-        description: "Now you can select a profile for this host to connect to."
+        description: "Host is now ready to connect servers."
       });
 
-      setProfileSelectorOpen(true);
+      // Auto-create a default profile for this host
+      createDefaultProfile(configDialog.hostId);
     }
     resetConfigDialog();
+  };
+
+  const createDefaultProfile = (hostId: string) => {
+    const host = hostsList.find(h => h.id === hostId);
+    if (host) {
+      const profileId = `profile-${Date.now()}`;
+      const newProfile: Profile = {
+        id: profileId,
+        name: `${host.name} Default`,
+        endpoint: "http://localhost:8008/mcp",
+        endpointType: "HTTP_SSE",
+        enabled: true,
+        instances: []
+      };
+      
+      setProfilesList(prev => [...prev, newProfile]);
+      handleProfileChange(hostId, profileId);
+    }
   };
 
   const handleAddHosts = (newHosts: Host[]) => {
     setHostsList(prev => [...prev, ...newHosts]);
     setSelectedHostId(newHosts[0].id);
+    
+    // Auto-create default profiles for each new host
+    newHosts.forEach(host => {
+      if (host.configStatus === "configured") {
+        createDefaultProfile(host.id);
+      }
+    });
     
     toast({
       title: "Hosts Added",
@@ -110,15 +149,19 @@ const Hosts = () => {
   };
 
   const handleAddServersToHost = (host: Host) => {
-    setAddServerDialogOpen(true);
+    setServerSelectionDialogOpen(true);
   };
   
-  const handleImportByProfile = (host: Host) => {
-    if (hasUnsavedChanges) {
-      setUnsavedChangesDialogOpen(true);
-    } else {
-      setProfileSelectorOpen(true);
+  const handleViewConfig = (configPath: string) => {
+    if (selectedHostId) {
+      openConfigDialog(selectedHostId, configPath, 'http://localhost:8008/mcp', false, false, true, false, false, false);
     }
+  };
+  
+  const handleSelectServer = (server: ServerInstance) => {
+    setSelectedServer(server);
+    setServerSelectionDialogOpen(false);
+    setAddServerDialogOpen(true);
   };
   
   const handleAddServers = (newServers: ServerInstance[]) => {
@@ -145,23 +188,7 @@ const Hosts = () => {
         description: `Added ${newServers.length} servers to profile "${selectedProfile?.name}". Save changes to apply.`,
       });
     } else {
-      const newProfileId = `profile-${Date.now()}`;
-      const newProfile: Profile = {
-        id: newProfileId,
-        name: `${selectedHost?.name || 'New'} Profile`,
-        endpoint: "http://localhost:8008/mcp",
-        endpointType: "HTTP_SSE",
-        enabled: true,
-        instances: newServers.map(s => s.id)
-      };
-      
-      setProfilesList([...profilesList, newProfile]);
-      handleProfileChange(selectedHost!.id, newProfileId);
-      
-      toast({
-        title: "Profile Created",
-        description: `New profile created with ${newServers.length} servers`
-      });
+      console.error("No profile selected or host selected");
     }
     
     if (selectedHost?.configStatus === "unknown") {
@@ -180,6 +207,12 @@ const Hosts = () => {
       ...server,
       status
     } : server));
+    
+    if (status === "error") {
+      setSelectedServerId(serverId);
+      setErrorDetails(`Connection failed: Server "${serverInstances.find(s => s.id === serverId)?.name}" could not be reached. Check server configuration and network connectivity.`);
+      setServerErrorDialogOpen(true);
+    }
     
     setHasUnsavedChanges(true);
   };
@@ -207,29 +240,46 @@ const Hosts = () => {
     }
   };
   
-  const handleCreateProfile = (profileName: string) => {
-    const newProfileId = `profile-${Date.now()}`;
-    const newProfile: Profile = {
-      id: newProfileId,
-      name: profileName,
-      endpoint: "http://localhost:8008/mcp",
-      endpointType: "HTTP_SSE",
-      enabled: true,
-      instances: []
-    };
+  const handleCreateProfile = (hostId: string) => {
+    const host = hostsList.find(h => h.id === hostId);
+    if (host) {
+      const profileId = `profile-${Date.now()}`;
+      const newProfile: Profile = {
+        id: profileId,
+        name: `${host.name} Profile`,
+        endpoint: "http://localhost:8008/mcp",
+        endpointType: "HTTP_SSE",
+        enabled: true,
+        instances: []
+      };
+      
+      setProfilesList(prev => [...prev, newProfile]);
+      handleProfileChange(hostId, profileId);
+      
+      toast({
+        title: "Profile Created",
+        description: `New profile created for ${host.name}`
+      });
+    }
+  };
+  
+  const handleDeleteProfile = (profileId: string) => {
+    setProfilesList(prev => prev.filter(p => p.id !== profileId));
     
-    setProfilesList([...profilesList, newProfile]);
-    
-    if (selectedHost) {
-      handleProfileChange(selectedHost.id, newProfileId);
+    // If the deleted profile was selected, select another profile
+    if (selectedProfileId === profileId && selectedHost) {
+      const remainingProfiles = profilesList.filter(p => p.id !== profileId);
+      if (remainingProfiles.length > 0) {
+        handleProfileChange(selectedHost.id, remainingProfiles[0].id);
+      } else {
+        handleProfileChange(selectedHost.id, "");
+      }
     }
     
     toast({
-      title: "Profile Created",
-      description: `New profile "${profileName}" has been created`
+      title: "Profile Deleted",
+      description: `Profile has been removed`
     });
-    
-    setProfileSelectorOpen(false);
   };
   
   const handleSaveProfileChangesWithOption = (createNew: boolean, profileName?: string) => {
@@ -299,6 +349,98 @@ const Hosts = () => {
       title: "Host Deleted",
       description: "The host has been removed successfully"
     });
+  };
+  
+  const handleRemoveServerFromProfile = (serverId: string, profileId: string) => {
+    const server = serverInstances.find(s => s.id === serverId);
+    if (server) {
+      setServerToRemove({
+        id: serverId,
+        name: server.name,
+        profileId
+      });
+      setRemoveServerDialogOpen(true);
+    }
+  };
+  
+  const confirmRemoveServer = () => {
+    if (serverToRemove) {
+      const { id, profileId } = serverToRemove;
+      
+      setProfilesList(prev => prev.map(profile => {
+        if (profile.id === profileId) {
+          return {
+            ...profile,
+            instances: profile.instances.filter(instanceId => instanceId !== id)
+          };
+        }
+        return profile;
+      }));
+      
+      toast({
+        title: "Server Removed",
+        description: `${serverToRemove.name} has been removed from the profile`
+      });
+      
+      setRemoveServerDialogOpen(false);
+      setServerToRemove(null);
+    }
+  };
+  
+  const handleOpenServerDebugDialog = (serverId: string) => {
+    setSelectedServerId(serverId);
+    setServerDebugDialogOpen(true);
+  };
+  
+  const handleOpenServerHistoryDialog = (serverId: string) => {
+    setSelectedServerId(serverId);
+    setServerHistoryDialogOpen(true);
+  };
+  
+  const handleShowServerDetail = (serverId: string) => {
+    // Navigate to server details page or show dialog
+    toast({
+      title: "Server Details",
+      description: "This functionality is not implemented yet"
+    });
+  };
+  
+  const handleRetryConnection = () => {
+    if (selectedServerId) {
+      handleServerStatusChange(selectedServerId, 'connecting');
+      
+      setTimeout(() => {
+        // 80% chance of success for retry
+        const success = Math.random() > 0.2;
+        handleServerStatusChange(selectedServerId!, success ? 'running' : 'error');
+        
+        if (success) {
+          setServerErrorDialogOpen(false);
+          toast({
+            title: "Connection Successful",
+            description: "Server is now connected and running"
+          });
+        }
+      }, 1500);
+    }
+  };
+
+  const handleCreateServerInstance = (server: ServerInstance) => {
+    // Create new server instance
+    const newServerInstance: ServerInstance = {
+      ...server,
+      id: `instance-${Date.now()}`,
+      status: 'stopped'
+    };
+    
+    setServerInstances(prev => [...prev, newServerInstance]);
+    handleAddServers([newServerInstance]);
+  };
+  
+  const handleAddExistingInstance = (instance: ServerInstance) => {
+    if (selectedProfileId) {
+      handleAddServers([instance]);
+    }
   };
 
   return (
@@ -410,12 +552,18 @@ const Hosts = () => {
               serverInstances={serverInstances}
               selectedProfileId={selectedProfileId}
               onCreateConfig={handleCreateConfigDialog}
-              onProfileChange={handleImportByProfile}
+              onProfileChange={handleSelectProfile}
               onAddServersToHost={handleAddServersToHost}
-              onImportByProfile={handleImportByProfile}
               onDeleteHost={handleDeleteHost}
               onServerStatusChange={handleServerStatusChange}
               onSaveProfileChanges={handleSaveProfileChanges}
+              onViewConfig={handleViewConfig}
+              onCreateProfile={() => handleCreateProfile(selectedHost.id)}
+              onDeleteProfile={handleDeleteProfile}
+              onOpenServerDebugDialog={handleOpenServerDebugDialog}
+              onOpenServerHistoryDialog={handleOpenServerHistoryDialog}
+              onShowServerDetail={handleShowServerDetail}
+              onRemoveServerFromProfile={handleRemoveServerFromProfile}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">
@@ -451,6 +599,17 @@ const Hosts = () => {
         isCreateMode={configDialog.isCreateMode}
       />
       
+      <ServerSelectionDialog
+        open={serverSelectionDialogOpen}
+        onOpenChange={setServerSelectionDialogOpen}
+        servers={serverInstances}
+        onSelectServer={handleSelectServer}
+        onCreateInstance={handleCreateServerInstance}
+        onAddExistingInstance={handleAddExistingInstance}
+        existingInstances={selectedProfile?.instances || []}
+        onClose={() => setServerSelectionDialogOpen(false)}
+      />
+      
       <AddServerToHostDialog
         open={addServerDialogOpen}
         onOpenChange={setAddServerDialogOpen}
@@ -464,7 +623,22 @@ const Hosts = () => {
         profiles={profilesList}
         serverInstances={serverInstances}
         onSelectProfile={handleSelectProfile}
-        onCreateProfile={handleCreateProfile}
+        onCreateProfile={(name) => {
+          if (selectedHost) {
+            const profileId = `profile-${Date.now()}`;
+            const newProfile: Profile = {
+              id: profileId,
+              name,
+              endpoint: "http://localhost:8008/mcp",
+              endpointType: "HTTP_SSE",
+              enabled: true,
+              instances: []
+            };
+            
+            setProfilesList([...profilesList, newProfile]);
+            handleProfileChange(selectedHost.id, profileId);
+          }
+        }}
         hasUnsavedChanges={hasUnsavedChanges}
         currentProfileId={selectedProfileId}
       />
@@ -477,6 +651,26 @@ const Hosts = () => {
         removedServers={removedServers}
         onSaveChanges={handleSaveProfileChangesWithOption}
         onDiscardChanges={handleDiscardChanges}
+      />
+      
+      <RemoveServerConfirmDialog
+        open={removeServerDialogOpen}
+        onOpenChange={setRemoveServerDialogOpen}
+        serverName={serverToRemove?.name || ""}
+        onConfirm={confirmRemoveServer}
+      />
+      
+      <ServerErrorDialog
+        open={serverErrorDialogOpen}
+        onOpenChange={setServerErrorDialogOpen}
+        serverName={serverInstances.find(s => s.id === selectedServerId)?.name || ""}
+        errorDetails={errorDetails}
+        onRetry={handleRetryConnection}
+        onViewConfig={() => {
+          if (selectedHost && selectedHost.configPath) {
+            handleViewConfig(selectedHost.configPath);
+          }
+        }}
       />
     </div>
   );
