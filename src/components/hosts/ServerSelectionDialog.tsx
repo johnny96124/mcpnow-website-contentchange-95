@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Search, X, Server, Plus, Check, ArrowLeft, ArrowRight, AlertTriangle, Info
@@ -12,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { serverDefinitions, Profile, ServerInstance, EndpointType } from "@/data/mockData";
 
@@ -127,12 +129,15 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         setNewInstanceName(server.name);
         
         const definition = serverDefinitions.find(d => d.id === server.definitionId);
-        if (definition && (definition.type === "HTTP_SSE" || definition.type === "WS")) {
-          setEndpointUrl(server.connectionDetails);
-          setCommandArgs("");
-        } else {
-          setEndpointUrl("");
-          setCommandArgs(server.connectionDetails);
+        if (definition) {
+          const isHttpOrWsType = definition.type === "HTTP_SSE" || definition.type === "WS";
+          if (isHttpOrWsType) {
+            setEndpointUrl(server.connectionDetails);
+            setCommandArgs("");
+          } else {
+            setEndpointUrl("");
+            setCommandArgs(server.connectionDetails);
+          }
         }
       }
     }
@@ -169,14 +174,14 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     if (!server) return;
     
     const definition = serverDefinitions.find(d => d.id === server.definitionId);
-    const isHttpType = definition && (definition.type === "HTTP_SSE" || definition.type === "WS");
+    const isHttpOrWsType = definition && (definition.type === "HTTP_SSE" || definition.type === "WS");
     
     const newInstance: ServerInstance = {
       id: `instance-${Date.now()}`,
       name: newInstanceName,
       definitionId: server.definitionId,
       status: "stopped",
-      connectionDetails: isHttpType ? endpointUrl : commandArgs,
+      connectionDetails: isHttpOrWsType ? endpointUrl : commandArgs,
       enabled: false
     };
     
@@ -272,7 +277,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     if (!selectedServer) return null;
     
     const endpointType = getEndpointType(selectedServer.definitionId);
-    const isHttpType = endpointType === "HTTP_SSE" || endpointType === "WS";
+    const isHttpOrWsType = endpointType === "HTTP_SSE" || endpointType === "WS";
     
     return (
       <>
@@ -310,7 +315,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             />
           </div>
           
-          {isHttpType ? (
+          {isHttpOrWsType ? (
             <div className="space-y-2">
               <Label htmlFor="endpoint-url">Endpoint URL</Label>
               <Input 
@@ -340,19 +345,19 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
           
           <div className="space-y-2">
             <Label htmlFor="env-variables">
-              {isHttpType ? "HTTP Headers" : "Environment Variables"}
+              {isHttpOrWsType ? "HTTP Headers" : "Environment Variables"}
             </Label>
             <textarea
               id="env-variables"
               className="w-full min-h-[100px] rounded-md border border-input bg-transparent p-2 text-sm shadow-sm placeholder:text-muted-foreground"
               value={envVariables}
               onChange={e => setEnvVariables(e.target.value)}
-              placeholder={isHttpType ? 
+              placeholder={isHttpOrWsType ? 
                 "Authorization: Bearer token\nContent-Type: application/json" : 
                 "API_KEY=your_key\nDEBUG=true"}
             />
             <p className="text-xs text-muted-foreground">
-              {isHttpType ? 
+              {isHttpOrWsType ? 
                 "Enter HTTP headers as key-value pairs, one per line" : 
                 "Enter environment variables as key=value pairs, one per line"}
             </p>
@@ -461,36 +466,8 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     }
   };
 
-  const getDefinitionType = (definitionId: string): EndpointType => {
-    const definition = serverDefinitions.find(d => d.id === definitionId);
-    return definition?.type || 'HTTP_SSE';
-  };
-
   const isHttpType = (type: EndpointType): boolean => {
     return type === 'HTTP_SSE' || type === 'WS';
-  };
-  
-  const handleToggleServer = (server: ServerInstance) => {
-    if (selectedServers.some(s => s.id === server.id)) {
-      setSelectedServers(selectedServers.filter(s => s.id !== server.id));
-    } else {
-      setSelectedServers([...selectedServers, server]);
-    }
-  };
-
-  const handleAddDiscoveryServer = (server: any) => {
-    const newServer: ServerInstance = {
-      id: server.id,
-      name: server.name,
-      definitionId: server.definitionId,
-      status: "stopped",
-      connectionDetails: "Newly added from discovery",
-      enabled: true
-    };
-    
-    if (!selectedServers.some(s => s.id === newServer.id)) {
-      setSelectedServers([...selectedServers, newServer]);
-    }
   };
   
   return (

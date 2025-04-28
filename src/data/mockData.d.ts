@@ -1,3 +1,4 @@
+
 export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
