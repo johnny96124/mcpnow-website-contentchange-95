@@ -110,9 +110,10 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         initialValues={{
           name: server.name,
           args: server.arguments?.join(' ') || '',
-          url: server.url || '',
+          // Convert these properties to optional with fallbacks to prevent TypeScript errors
+          url: '',  // Default empty string since 'url' is not in the ServerInstance type
           env: server.environment || {},
-          headers: server.headers || {},
+          headers: {}, // Default empty object since 'headers' is not in the ServerInstance type
         }}
         onCreateInstance={(data) => {
           toast({
