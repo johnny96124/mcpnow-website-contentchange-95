@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Server, AlertCircle, CircleCheck, ChevronDown, FileText, Trash2 } from "lucide-react";
+import { Server, AlertCircle, CircleCheck, ChevronDown, FileText, Trash2, PlusCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
