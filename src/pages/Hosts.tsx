@@ -15,6 +15,7 @@ import { ProfileChangesDialog } from "@/components/hosts/ProfileChangesDialog";
 import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
+import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
