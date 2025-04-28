@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { 
+  Search, X, Server, Plus, Check, ArrowLeft, ArrowRight, AlertTriangle, Info
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { ServerInstance, serverDefinitions, EndpointType } from "@/data/mockData";
-import { Server, Check, X, ArrowLeft, Plus } from "lucide-react";
+import { serverDefinitions, Profile, ServerInstance, EndpointType } from "@/data/mockData";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -460,6 +458,38 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         return renderConfigureStep();
       case "instances":
         return renderInstancesStep();
+    }
+  };
+
+  const getDefinitionType = (definitionId: string): EndpointType => {
+    const definition = serverDefinitions.find(d => d.id === definitionId);
+    return definition?.type || 'HTTP_SSE';
+  };
+
+  const isHttpType = (type: EndpointType): boolean => {
+    return type === 'HTTP_SSE' || type === 'WS';
+  };
+  
+  const handleToggleServer = (server: ServerInstance) => {
+    if (selectedServers.some(s => s.id === server.id)) {
+      setSelectedServers(selectedServers.filter(s => s.id !== server.id));
+    } else {
+      setSelectedServers([...selectedServers, server]);
+    }
+  };
+
+  const handleAddDiscoveryServer = (server: any) => {
+    const newServer: ServerInstance = {
+      id: server.id,
+      name: server.name,
+      definitionId: server.definitionId,
+      status: "stopped",
+      connectionDetails: "Newly added from discovery",
+      enabled: true
+    };
+    
+    if (!selectedServers.some(s => s.id === newServer.id)) {
+      setSelectedServers([...selectedServers, newServer]);
     }
   };
   
