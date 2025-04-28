@@ -4,7 +4,7 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Info, AlertTriangle, ExternalLink, Trash2, Server } from "lucide-react";
+import { MoreHorizontal, Info, AlertTriangle, ExternalLink, Trash2, Server, Wrench } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { 
   DropdownMenu, 
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
+import { ServerDebugDialog } from "../new-layout/ServerDebugDialog";
 import { serverDefinitions } from "@/data/mockData";
 
 interface ServerItemProps {
@@ -33,6 +34,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   onRemoveFromProfile
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
   const isDisabled = hostConnectionStatus !== "connected";
@@ -124,6 +126,16 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           >
             <Info className="h-4 w-4" />
           </Button>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+            title="Debug Tools"
+            onClick={() => setDebugDialogOpen(true)}
+          >
+            <Wrench className="h-4 w-4" />
+          </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -164,6 +176,12 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         onOpenChange={setErrorDialogOpen}
         serverName={server.name}
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
+      />
+      
+      <ServerDebugDialog
+        open={debugDialogOpen}
+        onOpenChange={setDebugDialogOpen}
+        server={server}
       />
     </tr>
   );
