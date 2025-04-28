@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +22,7 @@ const NewLayout = () => {
   const [showAddServerDialog, setShowAddServerDialog] = useState(false);
   const [serverProfiles, setServerProfiles] = useState<Record<string, string[]>>({});
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
+  const [showAddProfileDialog, setShowAddProfileDialog] = useState(false);
 
   const { toast } = useToast();
 
@@ -45,6 +45,9 @@ const NewLayout = () => {
         break;
       case 'details':
         setShowServerDetails(true);
+        break;
+      case 'addProfile':
+        setShowAddProfileDialog(true);
         break;
     }
   };
@@ -121,7 +124,13 @@ const NewLayout = () => {
       </div>
 
       <DataTable
-        columns={columns(handleServerAction, profiles, handleAddToProfiles, serverProfiles)}
+        columns={columns(
+          handleServerAction,
+          profiles,
+          handleAddToProfiles,
+          serverProfiles,
+          handleDeleteServer
+        )}
         data={filteredServers}
       />
 

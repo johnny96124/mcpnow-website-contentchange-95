@@ -1,17 +1,18 @@
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Wrench, MessageSquare } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { ServerInstance, Profile } from "@/data/mockData";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
+import { ServerActionsDropdown } from "./ServerActionsDropdown";
+import { Badge } from "@/components/ui/badge";
 
 export const columns = (
   onAction: (action: string, server: ServerInstance) => void,
   profiles: Profile[],
   onAddToProfiles: (serverId: string, profileIds: string[]) => void,
-  serverProfiles: Record<string, string[]>
+  serverProfiles: Record<string, string[]>,
+  onDeleteServer: (serverId: string) => void
 ): ColumnDef<ServerInstance>[] => [
   {
     accessorKey: "name",
@@ -45,60 +46,18 @@ export const columns = (
     cell: ({ row }) => {
       const serverId = row.original.id;
       const currentProfileIds = serverProfiles[serverId] || [];
-
+      
       return (
-        <Select
-          defaultValue=""
-          onValueChange={(value) => {
-            const selectedIds = value.split(",").filter(id => id);
-            onAddToProfiles(serverId, selectedIds);
-          }}
-          value={currentProfileIds.join(",")}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue>
-              {currentProfileIds.length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {currentProfileIds.map(profileId => {
-                    const profile = profiles.find(p => p.id === profileId);
-                    return profile ? (
-                      <Badge key={profile.id} variant="secondary">
-                        {profile.name}
-                      </Badge>
-                    ) : null;
-                  })}
-                </div>
-              ) : (
-                <span className="text-muted-foreground">Select profiles...</span>
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {profiles.map(profile => (
-              <SelectItem 
-                key={profile.id} 
-                value={profile.id}
-                className="flex items-center space-x-2"
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={currentProfileIds.includes(profile.id)}
-                    className="form-checkbox h-4 w-4"
-                    onChange={(e) => {
-                      const newProfileIds = currentProfileIds.includes(profile.id)
-                        ? currentProfileIds.filter(id => id !== profile.id)
-                        : [...currentProfileIds, profile.id];
-                      onAddToProfiles(serverId, newProfileIds);
-                      e.stopPropagation();
-                    }}
-                  />
-                  <span>{profile.name}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap gap-1">
+          {currentProfileIds.map(profileId => {
+            const profile = profiles.find(p => p.id === profileId);
+            return profile ? (
+              <Badge key={profile.id} variant="secondary">
+                {profile.name}
+              </Badge>
+            ) : null;
+          })}
+        </div>
       );
     },
   },
@@ -106,28 +65,18 @@ export const columns = (
     id: "actions",
     cell: ({ row }) => {
       const server = row.original;
+      const serverId = server.id;
+      const currentProfileIds = serverProfiles[serverId] || [];
 
       return (
-        <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-purple-600 hover:text-purple-700 hover:border-purple-600"
-            onClick={() => onAction('debug', server)}
-          >
-            <Wrench className="h-3.5 w-3.5 mr-1.5" />
-            Debug
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-blue-600 hover:text-blue-700 hover:border-blue-600"
-            onClick={() => onAction('history', server)}
-          >
-            <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-            History
-          </Button>
-        </div>
+        <ServerActionsDropdown 
+          server={server}
+          profiles={profiles}
+          currentProfileIds={currentProfileIds}
+          onAction={onAction}
+          onAddToProfiles={onAddToProfiles}
+          onDeleteServer={onDeleteServer}
+        />
       );
     },
   },
