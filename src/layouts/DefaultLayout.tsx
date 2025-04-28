@@ -1,16 +1,11 @@
-import { useEffect, useState, ReactNode } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+
+import { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { useServerContext } from "@/context/ServerContext";
 import { InstanceFormValues } from "@/components/servers/AddInstanceDialog";
-import { toast } from "sonner";
-import { 
-  hasSeenOnboarding, 
-  hasSeenHostsOnboarding,
-  hasSeenServersOnboarding,
-  hasSeenProfilesOnboarding
-} from "@/utils/localStorage";
+import { toast } from "@/components/ui/use-toast";
 
 interface DefaultLayoutProps {
   children: ReactNode;
@@ -18,45 +13,16 @@ interface DefaultLayoutProps {
 
 const DefaultLayout = ({ children }: DefaultLayoutProps) => {
   const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
-  const navigate = useNavigate();
   const location = useLocation();
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
-  
-  useEffect(() => {
-    // Check main onboarding
-    if (location.pathname === '/' && !hasSeenOnboarding()) {
-      navigate('/new-user');
-    }
-    
-    // Check hosts onboarding
-    if (location.pathname === '/hosts' && !hasSeenHostsOnboarding()) {
-      navigate('/hosts/new-user');
-    }
-    
-    // Check servers onboarding
-    if (location.pathname === '/servers' && !hasSeenServersOnboarding()) {
-      navigate('/servers/new-user');
-    }
-    
-    // Check profiles onboarding
-    if (location.pathname === '/profiles' && !hasSeenProfilesOnboarding()) {
-      navigate('/profiles/new-user');
-    }
-    
-    setCheckingOnboarding(false);
-  }, [navigate, location.pathname]);
   
   const handleCreateInstance = (data: InstanceFormValues) => {
-    toast.success(`Instance created: ${data.name}`, {
-      position: "top-right",
-      duration: 3000,
+    toast({
+      title: `Instance created: ${data.name}`,
+      description: "The instance was successfully created.",
+      type: "success"
     });
     closeAddInstanceDialog();
   };
-  
-  if (checkingOnboarding) {
-    return null;
-  }
   
   return (
     <div className="flex h-screen bg-background">

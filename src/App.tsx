@@ -13,6 +13,7 @@ import Profiles from "@/pages/Profiles";
 import Discovery from "@/pages/Discovery";
 import Settings from "@/pages/Settings";
 import HostNewLayout from "./pages/Host-newlayout";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const queryClient = new QueryClient();
@@ -50,6 +51,10 @@ function App() {
             {
               path: "/host-new",
               element: <DefaultLayout><HostNewLayout /></DefaultLayout>
+            },
+            {
+              path: "*",
+              element: <DefaultLayout><NotFound /></DefaultLayout>
             }
           ])} />
         </ServerProvider>
