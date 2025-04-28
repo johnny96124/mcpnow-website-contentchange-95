@@ -17,6 +17,8 @@ import {
 import { ServerErrorDialog } from "./ServerErrorDialog";
 import { ServerDebugDialog } from "../new-layout/ServerDebugDialog";
 import { serverDefinitions } from "@/data/mockData";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ServerDetailsDialog } from "../new-layout/ServerDetailsDialog";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -35,6 +37,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
   const isDisabled = hostConnectionStatus !== "connected";
@@ -52,10 +55,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   };
   
   const viewServerDetails = () => {
-    toast({
-      title: "View server details",
-      description: "Navigating to server details page"
-    });
+    setDetailsDialogOpen(true);
   };
   
   const viewServerDefinition = () => {
@@ -181,6 +181,12 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       <ServerDebugDialog
         open={debugDialogOpen}
         onOpenChange={setDebugDialogOpen}
+        server={server}
+      />
+
+      <ServerDetailsDialog 
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
         server={server}
       />
     </tr>
