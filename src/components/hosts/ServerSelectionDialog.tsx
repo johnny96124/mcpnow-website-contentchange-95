@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { serverDefinitions, type ServerInstance, type EndpointType, type Status } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -87,36 +88,79 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [showAdded, setShowAdded] = useState(false);
   const [selectedServer, setSelectedServer] = useState<string | null>(null);
-  const [showExisting, setShowExisting] = useState(false);
+  const [step, setStep] = useState<"selection" | "configure">("selection");
+  const [serverConfig, setServerConfig] = useState({
+    name: "",
+    connectionUrl: "",
+    additionalParams: ""
+  });
+  const { toast } = useToast();
+
+  // Reset when dialog opens/closes
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery("");
+      setShowAdded(false);
+      setSelectedServer(null);
+      setStep("selection");
+      setServerConfig({
+        name: "",
+        connectionUrl: "",
+        additionalParams: ""
+      });
+    }
+  }, [open]);
 
   const handleServerSelect = (serverId: string) => {
     setSelectedServer(serverId);
-    if (showExisting) {
+    if (showAdded) {
       const server = existingInstances.find(s => s.id === serverId);
       if (server) {
         onAddServers([server]);
+        toast({
+          title: "Server added",
+          description: `${server.name} has been added to your profile`
+        });
         onOpenChange(false);
       }
     } else {
-      // Here you would proceed to configuration step
-      // For now, we'll just add the server directly
+      // Go to configuration step for discovery servers
       const server = availableServers.find(s => s.id === serverId);
       if (server) {
-        const newInstance: ServerInstance = {
-          id: `new-${Date.now()}`,
+        setServerConfig({
           name: server.name,
-          definitionId: server.definitionId,
-          status: "stopped",
-          connectionDetails: server.connectionDetails,
-          enabled: false
-        };
-        onAddServers([newInstance]);
-        onOpenChange(false);
+          connectionUrl: server.connectionDetails,
+          additionalParams: ""
+        });
+        setStep("configure");
       }
     }
   };
 
-  const filteredServers = showExisting
+  const handleConfigureServer = () => {
+    if (!selectedServer) return;
+    
+    const server = availableServers.find(s => s.id === selectedServer);
+    if (server) {
+      const newInstance: ServerInstance = {
+        id: `new-${Date.now()}`,
+        name: serverConfig.name || server.name,
+        definitionId: server.definitionId,
+        status: "stopped" as Status,
+        connectionDetails: serverConfig.connectionUrl || server.connectionDetails,
+        enabled: false
+      };
+      
+      onAddServers([newInstance]);
+      toast({
+        title: "Server added",
+        description: `${newInstance.name} has been added to your profile`
+      });
+      onOpenChange(false);
+    }
+  };
+
+  const filteredServers = showAdded
     ? existingInstances.filter(server =>
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -128,15 +172,19 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Select Server</DialogTitle>
+          <DialogTitle>
+            {step === "selection" ? "Select Server" : "Configure Server"}
+          </DialogTitle>
           <DialogDescription>
-            Choose a server to add to your profile
+            {step === "selection" 
+              ? "Choose a server to add to your profile" 
+              : "Configure the server settings before adding"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="relative flex-1">
+        {step === "selection" ? (
+          <div className="space-y-4">
+            <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search servers..."
@@ -145,61 +193,115 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 className="pl-8"
               />
             </div>
-            <div className="flex items-center gap-2">
+            
+            <div className="flex items-center space-x-2">
               <Switch
-                id="show-existing"
-                checked={showExisting}
-                onCheckedChange={setShowExisting}
+                id="show-added"
+                checked={showAdded}
+                onCheckedChange={setShowAdded}
               />
-              <Label htmlFor="show-existing">Show Added Only</Label>
+              <Label htmlFor="show-added">Show Added Only</Label>
+            </div>
+
+            <div className="space-y-4">
+              {filteredServers.map((server) => (
+                <div
+                  key={server.id}
+                  className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
+                  onClick={() => handleServerSelect(server.id)}
+                >
+                  <ServerLogo name={server.name} className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium truncate">{server.name}</h4>
+                      {'type' in server && (
+                        <EndpointLabel type={server.type} />
+                      )}
+                      {showAdded && (
+                        <Badge variant="secondary">Added</Badge>
+                      )}
+                    </div>
+                    {'description' in server && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {server.description}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {server.connectionDetails}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {filteredServers.length === 0 && (
+                <div className="text-center py-8 border border-dashed rounded-md">
+                  <p className="text-muted-foreground">No servers found</p>
+                </div>
+              )}
             </div>
           </div>
-
+        ) : (
           <div className="space-y-4">
-            {filteredServers.map((server) => (
-              <div
-                key={server.id}
-                className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
-                onClick={() => handleServerSelect(server.id)}
-              >
-                <ServerLogo name={server.name} className="flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium truncate">{server.name}</h4>
-                    {'type' in server && (
-                      <EndpointLabel type={server.type} />
-                    )}
-                    {showExisting && (
-                      <Badge variant="secondary">Added</Badge>
-                    )}
-                  </div>
-                  {'description' in server && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {server.description}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {server.connectionDetails}
-                  </p>
-                </div>
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                setStep("selection");
+                setSelectedServer(null);
+              }}
+              className="mb-4 -ml-2"
+            >
+              ← Back to selection
+            </Button>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="server-name">Server Name</Label>
+                <Input
+                  id="server-name"
+                  value={serverConfig.name}
+                  onChange={(e) => setServerConfig({...serverConfig, name: e.target.value})}
+                />
               </div>
-            ))}
-
-            {filteredServers.length === 0 && (
-              <div className="text-center py-8 border border-dashed rounded-md">
-                <p className="text-muted-foreground">No servers found</p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="connection-url">Connection URL</Label>
+                <Input
+                  id="connection-url"
+                  value={serverConfig.connectionUrl}
+                  onChange={(e) => setServerConfig({...serverConfig, connectionUrl: e.target.value})}
+                  placeholder="e.g. https://api.example.com"
+                />
               </div>
-            )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="additional-params">Additional Parameters (optional)</Label>
+                <Input
+                  id="additional-params"
+                  value={serverConfig.additionalParams}
+                  onChange={(e) => setServerConfig({...serverConfig, additionalParams: e.target.value})}
+                  placeholder="Any additional configuration"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={() => onOpenChange(false)}>
-            {showExisting ? "Add Selected" : "Next"}
-          </Button>
+          {step === "selection" ? (
+            <Button disabled={selectedServer === null && !showAdded}>
+              {showAdded ? "Add Selected" : "Next"}
+            </Button>
+          ) : (
+            <Button 
+              onClick={handleConfigureServer}
+              disabled={!serverConfig.name || !serverConfig.connectionUrl}
+            >
+              Add Server
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

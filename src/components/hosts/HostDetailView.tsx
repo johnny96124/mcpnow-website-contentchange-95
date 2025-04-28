@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Host, Profile, ServerInstance, 
   ConnectionStatus, serverDefinitions, EndpointType 
@@ -54,6 +54,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
   
@@ -106,6 +107,23 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   const showConfigFile = () => {
     setConfigDialogOpen(true);
+  };
+
+  const handleAddServers = (servers: ServerInstance[]) => {
+    if (selectedProfile && servers.length > 0) {
+      const updatedProfile = {
+        ...selectedProfile,
+        instances: [...selectedProfile.instances, ...servers.map(s => s.id)]
+      };
+      
+      toast({
+        title: "Servers added",
+        description: `${servers.length} server(s) added to ${selectedProfile.name}`,
+        type: "success"
+      });
+      
+      onSaveProfileChanges();
+    }
   };
 
   if (host.configStatus === "unknown") {
@@ -268,13 +286,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
       <ServerSelectionDialog 
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
-        onAddServers={(servers) => {
-          toast({
-            title: "Servers added",
-            description: `${servers.length} server(s) added to profile`,
-            type: "success"
-          });
-        }}
+        onAddServers={handleAddServers}
       />
       
       <ConfigHighlightDialog
