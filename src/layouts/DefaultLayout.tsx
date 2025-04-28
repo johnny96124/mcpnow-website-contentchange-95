@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { MainSidebar } from "@/components/sidebar/MainSidebar";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
@@ -13,7 +12,11 @@ import {
   hasSeenProfilesOnboarding
 } from "@/utils/localStorage";
 
-const DefaultLayout = () => {
+interface DefaultLayoutProps {
+  children: ReactNode;
+}
+
+const DefaultLayout = ({ children }: DefaultLayoutProps) => {
   const { showAddInstanceDialog, selectedServer, closeAddInstanceDialog } = useServerContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,7 +55,7 @@ const DefaultLayout = () => {
   };
   
   if (checkingOnboarding) {
-    return null; // Don't render anything while checking
+    return null;
   }
   
   return (
@@ -60,7 +63,7 @@ const DefaultLayout = () => {
       <MainSidebar />
       <div className="flex-1 overflow-auto">
         <div className="container py-6 h-full">
-          <Outlet />
+          {children}
         </div>
       </div>
       
