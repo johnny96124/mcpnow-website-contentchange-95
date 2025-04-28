@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Plus, Checkbox } from "lucide-react";
+import { RefreshCw, Plus, Check } from "lucide-react";
 import { type Host } from "@/data/mockData";
 
 interface UnifiedHostDialogProps {
@@ -24,7 +23,6 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
   const [configPath, setConfigPath] = useState("");
   const { toast } = useToast();
 
-  // Reset state when dialog opens/closes
   useEffect(() => {
     if (open) {
       handleScanForHosts();
@@ -41,7 +39,6 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     setIsScanning(true);
     setScannedHosts([]);
     
-    // Simulate scanning with multiple mock hosts
     setTimeout(() => {
       const mockHosts: Host[] = [
         {
@@ -212,7 +209,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
                             </p>
                           </div>
                           <div className="h-5 w-5 border rounded flex items-center justify-center">
-                            {selectedHosts.includes(host.id) && <RefreshCw className="h-3 w-3 text-primary" />}
+                            {selectedHosts.includes(host.id) && <Check className="h-3 w-3 text-primary" />}
                           </div>
                         </div>
                       ))}
