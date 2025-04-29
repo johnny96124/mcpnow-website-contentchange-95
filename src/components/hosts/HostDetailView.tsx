@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   FileText, Server, Trash2, AlertTriangle, 
@@ -148,14 +147,9 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              onClick={handleDeleteHost}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              <span className="text-xs">Remove</span>
+            <Button variant="outline" className="text-destructive hover:text-destructive" onClick={handleDeleteHost}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Host
             </Button>
           </div>
         </div>
@@ -223,14 +217,9 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </div>
         
         <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            onClick={handleDeleteHost}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            <span className="text-xs">Remove</span>
+          <Button variant="outline" className="text-destructive hover:text-destructive" onClick={handleDeleteHost}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Host
           </Button>
         </div>
       </div>
