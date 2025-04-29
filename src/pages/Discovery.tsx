@@ -231,10 +231,7 @@ const Discovery = () => {
       <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
         <div className="max-w-3xl relative z-10">
           <h1 className="text-3xl font-bold mb-2">Discovery</h1>
-          <p className="text-blue-100 mb-6">
-            Discover and explore powerful MCP Servers from a centralized hub. Browse our curated collection 
-            of servers that can enhance your productivity, streamline your workflow, and meet all your development needs.
-          </p>
+          <p className="text-blue-100 mb-6">Explore powerful MCP Servers from a centralized hub. Browse our curated collection of servers that can enhance your productivity, streamline your workflow, and meet all your development needs.</p>
           
           {/* My Servers button removed */}
         </div>
