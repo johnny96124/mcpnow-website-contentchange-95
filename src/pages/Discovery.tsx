@@ -5,8 +5,6 @@ import {
   CheckCircle,
   ChevronLeft,
   Clock,
-  Download, 
-  Eye,
   ExternalLink,
   FolderOpen,
   Globe,
@@ -35,14 +33,13 @@ import {
   DialogTitle,
   DialogClose
 } from "@/components/ui/dialog";
-import { discoveryItems, ServerDefinition, Profile } from "@/data/mockData";
+import { discoveryItems, ServerDefinition, Profile, Host } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { CategoryList } from "@/components/discovery/CategoryList";
 import { OfficialBadge } from "@/components/discovery/OfficialBadge";
 import { EmptyState } from "@/components/discovery/EmptyState";
 import { LoadingIndicator } from "@/components/discovery/LoadingIndicator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -125,7 +122,6 @@ const Discovery = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [selectedServer, setSelectedServer] = useState<EnhancedServerDefinition | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isInstalling, setIsInstalling] = useState<Record<string, boolean>>({});
   const [installedServers, setInstalledServers] = useState<Record<string, boolean>>({});
   const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
@@ -134,9 +130,6 @@ const Discovery = () => {
   const [installedButtonHover, setInstalledButtonHover] = useState<Record<string, boolean>>({});
   const [addInstanceOpen, setAddInstanceOpen] = useState(false);
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
-  const [justInstalledServerId, setJustInstalledServerId] = useState<string | null>(null);
-  const [addToProfileOpen, setAddToProfileOpen] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState("overview");
 
   const { toast } = useToast();
@@ -221,6 +214,7 @@ const Discovery = () => {
   const visibleServers = filteredServers.slice(0, visibleItems);
   const hasMore = visibleServers.length < filteredServers.length;
   const isSearching = searchQuery.trim().length > 0;
+  const availableHosts = getAvailableHosts();
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -261,39 +255,32 @@ const Discovery = () => {
     setActiveDetailTab("overview"); // Reset to overview tab when opening dialog
   };
 
-  const handleInstall = (serverId: string) => {
+  const handleAddServer = (serverId: string) => {
     const server = extendedItems.find(item => item.id === serverId);
     if (!server) return;
     
-    setIsInstalling(prev => ({ ...prev, [serverId]: true }));
-    
-    setTimeout(() => {
-      setIsInstalling(prev => ({ ...prev, [serverId]: false }));
-      setInstalledServers(prev => ({ ...prev, [serverId]: true }));
-      setJustInstalledServerId(serverId);
-      
-      setSelectedDefinition(server);
-      
-      toast({
-        title: "Server installed",
-        description: `${server.name} has been successfully installed.`,
-      });
-
-      setAddInstanceOpen(true);
-    }, 1500);
+    setSelectedDefinition(server);
+    setAddInstanceOpen(true);
   };
 
-  const handleCreateInstance = (data: InstanceFormValues) => {
+  const handleCreateInstance = (data: InstanceFormValues, selectedHosts: string[] = []) => {
     if (!selectedDefinition) return;
     
-    toast({
-      title: "Instance Created",
-      description: `${data.name} has been created successfully.`,
-    });
+    setInstalledServers(prev => ({ ...prev, [selectedDefinition.id]: true }));
+    
+    if (selectedHosts && selectedHosts.length > 0) {
+      toast({
+        title: "Server added",
+        description: `${data.name} has been added to ${selectedHosts.length} host(s).`,
+      });
+    } else {
+      toast({
+        title: "Server configured",
+        description: `${data.name} has been configured successfully.`,
+      });
+    }
     
     setAddInstanceOpen(false);
-    
-    setAddToProfileOpen(true);
   };
 
   const handleAddToProfile = (profileId: string) => {
@@ -305,8 +292,6 @@ const Discovery = () => {
       title: "Instance Added",
       description: `Added to profile ${profile?.name}.`,
     });
-    
-    setAddToProfileOpen(false);
   };
 
   const handleNavigateToServers = () => {
@@ -556,32 +541,21 @@ const Discovery = () => {
                           {installedButtonHover[server.id] ? (
                             <>
                               <Check className="h-3.5 w-3.5 mr-1" />
-                              Check
+                              View
                             </>
                           ) : (
                             <>
                               <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                              Installed
+                              Added
                             </>
                           )}
-                        </Button>
-                      ) : isInstalling[server.id] ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          disabled 
-                          className="bg-blue-50 text-blue-600 border-blue-200 h-8"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                          Installing...
                         </Button>
                       ) : (
                         <Button 
                           size="sm" 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleInstall(server.id);
+                            handleAddServer(server.id);
                           }}
                           className="bg-blue-600 hover:bg-blue-700 h-8 relative z-10"
                         >
@@ -802,20 +776,10 @@ const Discovery = () => {
                           {!installedServers[selectedServer.id] ? (
                             <Button 
                               className="w-full bg-blue-600 hover:bg-blue-700 py-5"
-                              onClick={() => handleInstall(selectedServer.id)}
-                              disabled={isInstalling[selectedServer.id]}
+                              onClick={() => handleAddServer(selectedServer.id)}
                             >
-                              {isInstalling[selectedServer.id] ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Installing...
-                                </>
-                              ) : (
-                                <>
-                                  <Plus className="h-4 w-4 mr-2" />
-                                  Add Server
-                                </>
-                              )}
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Server
                             </Button>
                           ) : (
                             <Button 
@@ -824,7 +788,7 @@ const Discovery = () => {
                               onClick={handleNavigateToServers}
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />
-                              Server Installed
+                              Server Added
                             </Button>
                           )}
                         </div>
@@ -864,14 +828,7 @@ const Discovery = () => {
         onOpenChange={setAddInstanceOpen}
         serverDefinition={selectedDefinition}
         onCreateInstance={handleCreateInstance}
-      />
-      
-      <AddToProfileDialog
-        open={addToProfileOpen}
-        onOpenChange={setAddToProfileOpen}
-        onAddToProfile={handleAddToProfile}
-        serverDefinition={selectedDefinition}
-        profiles={allProfiles}
+        availableHosts={availableHosts}
       />
     </div>
   );

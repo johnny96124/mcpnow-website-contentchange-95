@@ -18,6 +18,7 @@ interface ServerErrorDialogProps {
   serverName: string;
   errorMessage: string;
   onRetry?: () => Promise<boolean>;
+  onStatusChange?: (status: 'connecting' | 'error' | 'running') => void;
 }
 
 export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
@@ -26,6 +27,7 @@ export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
   serverName,
   errorMessage,
   onRetry,
+  onStatusChange
 }) => {
   const [isRetrying, setIsRetrying] = useState(false);
   
@@ -34,6 +36,11 @@ export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
     
     setIsRetrying(true);
     
+    // Update status to connecting
+    if (onStatusChange) {
+      onStatusChange('connecting');
+    }
+    
     try {
       const success = await onRetry();
       
@@ -41,22 +48,38 @@ export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
         toast({
           title: "Connection restored",
           description: `Successfully connected to ${serverName}`,
-          type: "success"
+          variant: "default",
         });
+        
+        // Update status to running
+        if (onStatusChange) {
+          onStatusChange('running');
+        }
+        
         onOpenChange(false);
       } else {
         toast({
           title: "Connection failed",
           description: `Failed to connect to ${serverName}`,
-          type: "error"
+          variant: "destructive",
         });
+        
+        // Update status back to error
+        if (onStatusChange) {
+          onStatusChange('error');
+        }
       }
     } catch (error) {
       toast({
         title: "Connection error",
         description: `Error connecting to ${serverName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        type: "error"
+        variant: "destructive",
       });
+      
+      // Update status back to error
+      if (onStatusChange) {
+        onStatusChange('error');
+      }
     } finally {
       setIsRetrying(false);
     }

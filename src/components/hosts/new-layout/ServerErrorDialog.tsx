@@ -13,6 +13,7 @@ interface ServerErrorDialogProps {
   server: ServerInstance | null;
   errorDetails: string;
   onRetry?: (serverId: string) => Promise<boolean>;
+  onStatusChange?: (serverId: string, status: 'connecting' | 'error' | 'running') => void;
 }
 
 export function ServerErrorDialog({ 
@@ -20,7 +21,8 @@ export function ServerErrorDialog({
   onOpenChange, 
   server, 
   errorDetails,
-  onRetry
+  onRetry,
+  onStatusChange
 }: ServerErrorDialogProps) {
   const [isRetrying, setIsRetrying] = useState(false);
   
@@ -31,6 +33,11 @@ export function ServerErrorDialog({
     
     setIsRetrying(true);
     
+    // Update status to connecting
+    if (onStatusChange) {
+      onStatusChange(server.id, 'connecting');
+    }
+    
     try {
       const success = await onRetry(server.id);
       
@@ -38,22 +45,38 @@ export function ServerErrorDialog({
         toast({
           title: "Connection restored",
           description: `Successfully connected to ${server.name}`,
-          type: "success"
+          variant: "default",
         });
+        
+        // Update status to running
+        if (onStatusChange) {
+          onStatusChange(server.id, 'running');
+        }
+        
         onOpenChange(false);
       } else {
         toast({
           title: "Connection failed",
           description: `Failed to connect to ${server.name}`,
-          type: "error"
+          variant: "destructive",
         });
+        
+        // Update status back to error
+        if (onStatusChange) {
+          onStatusChange(server.id, 'error');
+        }
       }
     } catch (error) {
       toast({
         title: "Connection error",
         description: `Error connecting to ${server.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        type: "error"
+        variant: "destructive",
       });
+      
+      // Update status back to error
+      if (onStatusChange) {
+        onStatusChange(server.id, 'error');
+      }
     } finally {
       setIsRetrying(false);
     }

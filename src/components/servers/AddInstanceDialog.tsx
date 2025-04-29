@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -11,12 +10,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Info, Plus, Trash2 } from "lucide-react";
+import { Info, Plus, Trash2, Check } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ServerDefinition } from "@/data/mockData";
+import { ServerDefinition, Host } from "@/data/mockData";
 import {
   Tooltip,
   TooltipContent,
@@ -27,15 +26,17 @@ import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AddInstanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serverDefinition: ServerDefinition | null;
-  onCreateInstance: (data: InstanceFormValues) => void;
+  onCreateInstance: (data: InstanceFormValues, selectedHosts?: string[]) => void;
   editMode?: boolean;
   initialValues?: InstanceFormValues;
   instanceId?: string;
+  availableHosts?: Host[];
 }
 
 const instanceFormSchema = z.object({
@@ -56,10 +57,12 @@ export function AddInstanceDialog({
   onCreateInstance,
   editMode = false,
   initialValues,
-  instanceId
+  instanceId,
+  availableHosts = []
 }: AddInstanceDialogProps) {
   const [envFields, setEnvFields] = useState<{name: string; value: string}[]>([]);
   const [headerFields, setHeaderFields] = useState<{name: string; value: string}[]>([]);
+  const [selectedHosts, setSelectedHosts] = useState<string[]>([]);
   
   const form = useForm<InstanceFormValues>({
     resolver: zodResolver(instanceFormSchema),
@@ -85,6 +88,8 @@ export function AddInstanceDialog({
         headers: initialValues?.headers || {},
         instanceId: instanceId,
       });
+      
+      setSelectedHosts([]);
       
       if (editMode && initialValues?.env) {
         const envEntries = Object.entries(initialValues.env);
@@ -143,7 +148,7 @@ export function AddInstanceDialog({
     }
     
     data.instanceId = instanceId; 
-    onCreateInstance(data);
+    onCreateInstance(data, selectedHosts);
     if (!editMode) form.reset();
   };
 
@@ -165,6 +170,14 @@ export function AddInstanceDialog({
     const newFields = [...headerFields];
     newFields.splice(index, 1);
     setHeaderFields(newFields);
+  };
+
+  const toggleHostSelection = (hostId: string) => {
+    setSelectedHosts(prev => 
+      prev.includes(hostId)
+        ? prev.filter(id => id !== hostId)
+        : [...prev, hostId]
+    );
   };
 
   if (!serverDefinition) return null;
@@ -442,6 +455,57 @@ export function AddInstanceDialog({
                           </div>
                         </div>
                       ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {!editMode && availableHosts.length > 0 && (
+              <>
+                <Separator className="my-2" />
+                
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium flex items-center">
+                    Add to Hosts (Optional)
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="ml-1 cursor-help">
+                            <Info className="h-4 w-4 text-muted-foreground" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Add this server to selected hosts immediately after creation</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </h4>
+                  
+                  <div className="max-h-[150px] overflow-y-auto border rounded-md p-3 space-y-2">
+                    {availableHosts.map((host) => (
+                      <div key={host.id} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`host-${host.id}`} 
+                          checked={selectedHosts.includes(host.id)}
+                          onCheckedChange={() => toggleHostSelection(host.id)}
+                        />
+                        <label
+                          htmlFor={`host-${host.id}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center"
+                        >
+                          <span className="mr-2">{host.icon || '🖥️'}</span>
+                          {host.name}
+                          <Badge variant="outline" className="ml-2 text-xs">
+                            {host.connectionStatus === "connected" ? "Connected" : "Disconnected"}
+                          </Badge>
+                        </label>
+                      </div>
+                    ))}
+                    {availableHosts.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-2">
+                        No available hosts. You can add hosts in the Hosts page.
+                      </p>
                     )}
                   </div>
                 </div>
