@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
-import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -12,6 +11,7 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
+import { HostsWelcome } from "@/components/hosts/HostsWelcome";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -23,6 +23,19 @@ const mockJsonConfig = {
 };
 
 const Hosts = () => {
+  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Check if user has seen the welcome screen before
+    const welcomeSeen = localStorage.getItem('hostsWelcomeSeen');
+    setHasSeenWelcome(welcomeSeen === 'true');
+  }, []);
+
+  const handleWelcomeDismiss = () => {
+    localStorage.setItem('hostsWelcomeSeen', 'true');
+    setHasSeenWelcome(true);
+  };
+
   useEffect(() => {
     const markHostsOnboardingAsSeen = () => {
       localStorage.setItem('hostsOnboardingSeen', 'true');
@@ -30,7 +43,6 @@ const Hosts = () => {
     markHostsOnboardingAsSeen();
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
@@ -51,7 +63,6 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
-  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
@@ -117,6 +128,11 @@ const Hosts = () => {
       title: "Hosts Added",
       description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
     });
+
+    // Ensure welcome screen is dismissed after adding hosts
+    if (!hasSeenWelcome) {
+      handleWelcomeDismiss();
+    }
   };
 
   const handleAddServersToHost = () => {
@@ -251,13 +267,26 @@ const Hosts = () => {
     }
   };
 
+  // Show welcome screen if user hasn't seen it before
+  if (!hasSeenWelcome) {
+    return (
+      <HostsWelcome
+        onSkip={handleWelcomeDismiss}
+        onAddHost={() => setUnifiedHostDialogOpen(true)}
+        unifiedHostDialogOpen={unifiedHostDialogOpen}
+        setUnifiedHostDialogOpen={setUnifiedHostDialogOpen}
+        onAddHosts={handleAddHosts}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Hosts</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage host connections and server associations
+            Manage your hosts, configure connections, and monitor server operations
           </p>
         </div>
         <Button onClick={() => setUnifiedHostDialogOpen(true)}>
@@ -266,30 +295,11 @@ const Hosts = () => {
         </Button>
       </div>
       
-      <div className="relative">
-        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search hosts..."
-          className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button 
-            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-            onClick={() => setSearchQuery("")}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-      
       <div className="grid gap-6 md:grid-cols-4">
         <div className="space-y-4">
-          {filteredHosts.length > 0 ? (
+          {hostsList.length > 0 ? (
             <div className="space-y-2">
-              {filteredHosts.map(host => (
+              {hostsList.map(host => (
                 <Card 
                   key={host.id}
                   className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedHostId === host.id ? 'border-primary bg-primary/5' : ''}`}
@@ -320,8 +330,8 @@ const Hosts = () => {
             </div>
           ) : (
             <div className="text-center py-8 border border-dashed rounded-md">
-              <p className="text-sm text-muted-foreground mb-2">No results for "{searchQuery}"</p>
-              <Button variant="link" onClick={() => setSearchQuery("")} className="text-xs">Clear search</Button>
+              <p className="text-sm text-muted-foreground mb-2">No hosts added yet</p>
+              <Button variant="link" onClick={() => setUnifiedHostDialogOpen(true)} className="text-xs">Add your first host</Button>
             </div>
           )}
           
