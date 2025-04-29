@@ -84,18 +84,63 @@ const TrayPopup = () => {
     
     const profileInstanceIds = profile.instances;
     
-    const initialInstances: InstanceStatus[] = profileInstanceIds
-      .map(instanceId => {
-        const instance = serverInstances.find(s => s.id === instanceId);
-        return instance ? {
-          id: instance.id,
-          definitionId: instance.definitionId,
-          name: instance.name,
+    // Create mock instances for demo purposes - generating 5 instances for first profile
+    let initialInstances: InstanceStatus[] = [];
+    
+    if (profileId === profiles[0]?.id) {
+      // Generate 5 servers for the first profile to demonstrate expand/collapse
+      initialInstances = [
+        {
+          id: "server-1",
+          definitionId: serverDefinitions[0]?.id || "",
+          name: "Database Server",
+          status: 'running',
+          enabled: true
+        },
+        {
+          id: "server-2",
+          definitionId: serverDefinitions[0]?.id || "",
+          name: "Authentication Server",
+          status: 'running',
+          enabled: true
+        },
+        {
+          id: "server-3",
+          definitionId: serverDefinitions[1]?.id || "",
+          name: "API Gateway",
+          status: 'error',
+          enabled: true
+        },
+        {
+          id: "server-4",
+          definitionId: serverDefinitions[1]?.id || "",
+          name: "Web Server",
+          status: 'stopped',
+          enabled: false
+        },
+        {
+          id: "server-5",
+          definitionId: serverDefinitions[2]?.id || "",
+          name: "Message Queue",
           status: 'connecting',
-          enabled: instance.enabled
-        } : null;
-      })
-      .filter(Boolean) as InstanceStatus[];
+          enabled: true
+        }
+      ];
+    } else {
+      // For other profiles, use the original logic
+      initialInstances = profileInstanceIds
+        .map(instanceId => {
+          const instance = serverInstances.find(s => s.id === instanceId);
+          return instance ? {
+            id: instance.id,
+            definitionId: instance.definitionId,
+            name: instance.name,
+            status: 'connecting',
+            enabled: instance.enabled
+          } : null;
+        })
+        .filter(Boolean) as InstanceStatus[];
+    }
     
     setInstanceStatuses(prev => ({
       ...prev,
@@ -286,7 +331,8 @@ const TrayPopup = () => {
                       </Select>
                     </div>
                     
-                    {profileId && instances.length > 0 && (
+                    {/* Only show servers if host is connected and profile is selected */}
+                    {isConnected && profileId && instances.length > 0 && (
                       <div className="mt-3">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-xs text-muted-foreground">Servers:</p>
