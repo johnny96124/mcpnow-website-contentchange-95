@@ -1,14 +1,25 @@
+
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
-  LayoutDashboard,
+  ChevronDown, 
+  Grid, 
+  LayoutDashboard, 
+  MonitorDot,
+  ServerIcon,
   Settings, 
-  HelpCircle,
+  UsersRound,
+  Database,
   BookOpen,
-  Telescope,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from "@/components/ui/collapsible";
 import { useState } from "react";
 import { HelpDialog } from "@/components/help/HelpDialog";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
@@ -20,6 +31,7 @@ interface MainSidebarProps {
 }
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
+  const [isOpen, setIsOpen] = useState(true);
   const [showGettingStarted, setShowGettingStarted] = useState(false);
   const navigate = useNavigate();
   
@@ -41,19 +53,71 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
       </div>
       <ScrollArea className="flex-1 px-2 py-4">
         <nav className="space-y-2">
-          <NavLink 
-            to="/hosts" 
-            className={({ isActive }) => 
-              cn(
-                "sidebar-item text-sm", 
-                isActive && "sidebar-item-active",
-                collapsed && "justify-center px-0"
-              )
-            }
-          >
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            {!collapsed && "Dashboard"}
-          </NavLink>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className={cn(
+                  "w-full justify-start text-left text-sm",
+                  collapsed && "justify-center px-0"
+                )}
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                {!collapsed && "Dashboard"}
+                {!collapsed && (
+                  <ChevronDown 
+                    className={cn(
+                      "h-4 w-4 ml-auto transition-transform",
+                      isOpen && "transform rotate-180"
+                    )} 
+                  />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              {!collapsed && (
+                <div className="space-y-1 pl-6 mt-1">
+                  <NavLink 
+                    to="/dashboard" 
+                    end
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <Grid className="h-4 w-4" />
+                    Overview
+                  </NavLink>
+                  <NavLink 
+                    to="/hosts" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <MonitorDot className="h-4 w-4" />
+                    Hosts
+                  </NavLink>
+                  <NavLink 
+                    to="/profiles" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <Database className="h-4 w-4" />
+                    Profiles
+                  </NavLink>
+                  <NavLink 
+                    to="/servers" 
+                    className={({ isActive }) => 
+                      cn("sidebar-item text-sm", isActive && "sidebar-item-active")
+                    }
+                  >
+                    <ServerIcon className="h-4 w-4" />
+                    Servers
+                  </NavLink>
+                </div>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
 
           <NavLink 
             to="/discovery" 
@@ -65,7 +129,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
               )
             }
           >
-            <Telescope className="h-4 w-4 mr-2" />
+            <UsersRound className="h-4 w-4 mr-2" />
             {!collapsed && "Discovery"}
           </NavLink>
 
