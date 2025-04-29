@@ -23,6 +23,8 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface HostDetailViewProps {
   host: Host;
@@ -148,15 +150,28 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              onClick={handleDeleteHost}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              <span className="text-xs">Remove</span>
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48" align="end">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive w-full justify-start text-xs px-2"
+                  onClick={handleDeleteHost}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Remove Host
+                </Button>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         
@@ -208,30 +223,44 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                       : "Disconnected"
                 } 
               />
-              {host.configPath && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-xs text-muted-foreground" 
-                  onClick={showConfigFile}
-                >
-                  View Config
-                </Button>
-              )}
             </div>
           </div>
         </div>
         
         <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            onClick={handleDeleteHost}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            <span className="text-xs">Remove</span>
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 bg-white" align="end">
+              {host.configPath && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-xs px-2 py-1.5 mb-1"
+                  onClick={showConfigFile}
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  View Config
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-destructive w-full justify-start text-xs px-2 py-1.5"
+                onClick={handleDeleteHost}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Remove Host
+              </Button>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       
