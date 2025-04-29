@@ -178,7 +178,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           <div className="py-2">
             <p className="font-medium">{profileToDelete?.name}</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Deleting this profile will remove all server associations, but will not delete the servers themselves.
+              Deleting this profile will only remove the profile itself and will not delete any servers that were added to it.
             </p>
           </div>
           <DialogFooter>
