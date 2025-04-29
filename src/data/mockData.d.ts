@@ -21,7 +21,6 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
-  version?: string;
 }
 
 export interface Tool {
@@ -41,16 +40,20 @@ export interface ToolParameter {
 
 export interface ServerInstance {
   id: string;
-  definitionId: string;
   name: string;
+  definitionId: string;
   status: Status;
-  enabled: boolean;
   connectionDetails: string;
+  requestCount?: number;
   environment?: Record<string, string>;
   arguments?: string[];
-  requestCount?: number;
-  isCustom?: boolean;
+  url?: string;
+  headers?: Record<string, string>;
+  enabled: boolean;
 }
+
+export const serverDefinitions: ServerDefinition[];
+export const serverInstances: ServerInstance[];
 
 export interface Profile {
   id: string;
@@ -62,6 +65,4 @@ export interface Profile {
   description?: string;
 }
 
-export const serverDefinitions: ServerDefinition[];
-export const serverInstances: ServerInstance[];
 export const profiles: Profile[];

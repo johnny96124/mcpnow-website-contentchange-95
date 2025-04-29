@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -63,7 +64,6 @@ export function AddServerDialog({
       status: "stopped",
       connectionDetails: values.connectionDetails || "http://localhost:8008/mcp",
       enabled: true,
-      isCustom: true // Mark the server as custom
     };
 
     onAddServer(newServer);
@@ -84,11 +84,11 @@ export function AddServerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[85vh]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Custom Server</DialogTitle>
+          <DialogTitle>Add New Server</DialogTitle>
           <DialogDescription>
-            Create a custom server with your own configuration
+            Create a new server instance from available server definitions
           </DialogDescription>
         </DialogHeader>
         
@@ -113,14 +113,14 @@ export function AddServerDialog({
               name="definitionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Server Type</FormLabel>
+                  <FormLabel>Server Definition</FormLabel>
                   <FormControl>
                     <Select 
                       value={field.value} 
                       onValueChange={(value) => handleDefinitionChange(value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a server type" />
+                        <SelectValue placeholder="Select a server definition" />
                       </SelectTrigger>
                       <SelectContent>
                         {serverDefinitions.map(definition => (

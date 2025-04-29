@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import { serverDefinitions, type ServerInstance, type ServerDefinition, type End
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
-import { Badge } from "@/components/ui/badge";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -29,8 +29,7 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "https://localhost:5432",
     enabled: false,
-    description: "Local PostgreSQL database server instance",
-    isCustom: true
+    description: "Local PostgreSQL database server instance"
   },
   {
     id: "instance-2",
@@ -39,8 +38,7 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "redis://localhost:6379",
     enabled: false,
-    description: "Development Redis cache server",
-    isCustom: true
+    description: "Development Redis cache server"
   }
 ];
 
@@ -91,8 +89,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       definitionId: selectedServer?.id || "",
       status: "stopped",
       connectionDetails: data.url || data.args || "",
-      enabled: false,
-      isCustom: false
+      enabled: false
     };
 
     onAddServers([newInstance]);
@@ -114,6 +111,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       id: `def-${Date.now()}`,
       name: serverData.name,
       type: serverData.type,
+      version: "1.0.0",
       description: serverData.description || "Custom server",
       downloads: 0,
       isOfficial: false
@@ -126,8 +124,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       definitionId: newDefinition.id,
       status: "stopped",
       connectionDetails: serverData.url || serverData.commandArgs || "",
-      enabled: false,
-      isCustom: true // Mark the server as custom
+      enabled: false
     };
 
     onAddServers([newInstance]);
@@ -204,9 +201,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                           <h4 className="font-medium truncate">{server.name}</h4>
                           {definition && (
                             <EndpointLabel type={definition.type} />
-                          )}
-                          {selectedTab === "added" && "isCustom" in server && server.isCustom && (
-                            <Badge variant="outline" className="text-xs">Custom</Badge>
                           )}
                         </div>
                         {(selectedTab === "discovery" && 'description' in server || 
