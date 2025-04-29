@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -167,8 +168,10 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium truncate">{server.name}</h4>
-                          {definition && (
-                            <EndpointLabel type={definition.type} />
+                          {selectedTab === "discovery" ? (
+                            <EndpointLabel type={(server as ServerDefinition).type} />
+                          ) : (
+                            definition && <EndpointLabel type={definition.type} />
                           )}
                         </div>
                         {(selectedTab === "discovery" && 'description' in server || 
