@@ -5,13 +5,14 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PenLine, Trash2, Server, Wrench, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, PenLine, Trash2, Server, Wrench, AlertTriangle, History } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
 import { ServerDetailsDialog } from "@/components/hosts/ServerDetailsDialog";
 import { AddInstanceDialog } from "./AddInstanceDialog";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
+import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -32,6 +33,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [debugDialogOpen, setDebugDialogOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
   const isDisabled = hostConnectionStatus !== "connected";
@@ -113,6 +115,16 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             <Wrench className="h-4 w-4" />
           </Button>
           
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+            title="Message History"
+            onClick={() => setHistoryDialogOpen(true)}
+          >
+            <History className="h-4 w-4" />
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -146,6 +158,8 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
       
       <ServerDebugDialog open={debugDialogOpen} onOpenChange={setDebugDialogOpen} server={server} />
+      
+      <ServerHistoryDialog open={historyDialogOpen} onOpenChange={setHistoryDialogOpen} server={server} />
       
       <AddInstanceDialog
         open={editDialogOpen}
