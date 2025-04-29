@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   FileText, Server, Trash2, AlertTriangle, 
@@ -24,7 +23,6 @@ import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
 
 interface HostDetailViewProps {
   host: Host;
@@ -133,39 +131,37 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   if (host.configStatus === "unknown") {
     return (
       <div className="space-y-6">
-        <Card className="bg-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-muted/30 p-3 rounded-full">
-                  <span className="text-2xl">{host.icon || '🖥️'}</span>
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold">{host.name}</h2>
-                  <div className="flex items-center gap-2">
-                    <StatusIndicator 
-                      status="inactive" 
-                      label="Needs Configuration" 
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                  onClick={handleDeleteHost}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Remove</span>
-                </Button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-muted/30 p-3 rounded-full">
+              <span className="text-2xl">{host.icon || '🖥️'}</span>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">{host.name}</h2>
+              <div className="flex items-center gap-2">
+                <StatusIndicator 
+                  status="inactive" 
+                  label="Needs Configuration" 
+                />
               </div>
             </div>
-            
-            <Separator className="my-6" />
-            
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              onClick={handleDeleteHost}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              <span className="text-xs">Remove</span>
+            </Button>
+          </div>
+        </div>
+        
+        <Card>
+          <CardContent className="p-6">
             <div className="text-center space-y-4 py-6">
               <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
                 <FileText className="h-6 w-6 text-blue-500" />
@@ -188,129 +184,125 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <Card className="bg-white">
-        <CardContent className="p-6">
-          {/* Host header section */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-muted/30 p-3 rounded-full">
+            <span className="text-2xl">{host.icon || '🖥️'}</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">{host.name}</h2>
+              {host.configPath && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full" 
+                        onClick={showConfigFile}
+                      >
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      View Configuration
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <StatusIndicator 
+                status={
+                  host.connectionStatus === "connected" 
+                    ? "active" 
+                    : host.connectionStatus === "misconfigured" 
+                      ? "error" 
+                      : "inactive"
+                } 
+                label={
+                  host.connectionStatus === "connected" 
+                    ? "Connected" 
+                    : host.connectionStatus === "misconfigured" 
+                      ? "Misconfigured" 
+                      : "Disconnected"
+                } 
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50/80"
+            onClick={handleDeleteHost}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            <span className="text-xs">Remove</span>
+          </Button>
+        </div>
+      </div>
+      
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-muted/30 p-3 rounded-full">
-                <span className="text-2xl">{host.icon || '🖥️'}</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-semibold">{host.name}</h2>
-                  {host.configPath && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-full" 
-                            onClick={showConfigFile}
-                          >
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          View Configuration
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusIndicator 
-                    status={
-                      host.connectionStatus === "connected" 
-                        ? "active" 
-                        : host.connectionStatus === "misconfigured" 
-                          ? "error" 
-                          : "inactive"
-                    } 
-                    label={
-                      host.connectionStatus === "connected" 
-                        ? "Connected" 
-                        : host.connectionStatus === "misconfigured" 
-                          ? "Misconfigured" 
-                          : "Disconnected"
-                    } 
-                  />
-                </div>
-              </div>
+              <ProfileDropdown 
+                profiles={profiles} 
+                currentProfileId={selectedProfileId} 
+                onProfileChange={onProfileChange}
+                onCreateProfile={onCreateProfile}
+                onDeleteProfile={onDeleteProfile}
+              />
             </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-400 hover:text-red-500 hover:bg-red-50/80"
-                onClick={handleDeleteHost}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                <span className="text-xs">Remove</span>
-              </Button>
-            </div>
+            <Button 
+              onClick={() => setServerSelectionDialogOpen(true)} 
+              className="whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Servers
+            </Button>
           </div>
-          
-          <Separator className="my-6" />
-          
-          {/* Profile and servers section */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <ProfileDropdown 
-                  profiles={profiles} 
-                  currentProfileId={selectedProfileId} 
-                  onProfileChange={onProfileChange}
-                  onCreateProfile={onCreateProfile}
-                  onDeleteProfile={onDeleteProfile}
-                />
-              </div>
-              <Button 
-                onClick={() => setServerSelectionDialogOpen(true)} 
-                className="whitespace-nowrap"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Servers
-              </Button>
+        </CardHeader>
+        
+        <CardContent>
+          {profileServers.length > 0 ? (
+            <div className="rounded-md border">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
+                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
+                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
+                    <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
+                    <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {profileServers.map(server => (
+                    <ServerItem 
+                      key={server.id}
+                      server={server}
+                      hostConnectionStatus={host.connectionStatus}
+                      onStatusChange={handleServerStatusChange}
+                      load={getServerLoad(server.id)}
+                      onRemoveFromProfile={(serverId) => {
+                        toast({
+                          title: "Server removed",
+                          description: `${server.name} has been removed from this profile`,
+                        });
+                      }}
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
-            
-            {profileServers.length > 0 ? (
-              <div className="rounded-md border mt-4">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
-                      <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {profileServers.map(server => (
-                      <ServerItem 
-                        key={server.id}
-                        server={server}
-                        hostConnectionStatus={host.connectionStatus}
-                        onStatusChange={handleServerStatusChange}
-                        load={getServerLoad(server.id)}
-                        onRemoveFromProfile={(serverId) => {
-                          toast({
-                            title: "Server removed",
-                            description: `${server.name} has been removed from this profile`,
-                          });
-                        }}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
-            )}
-          </div>
+          ) : (
+            <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
+          )}
         </CardContent>
       </Card>
       
