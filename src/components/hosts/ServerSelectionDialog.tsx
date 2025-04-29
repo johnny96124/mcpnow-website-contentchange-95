@@ -165,7 +165,9 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-4">
                 {filteredServers.map((server) => {
-                  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+                  const definition = selectedTab === "added" ? 
+                    serverDefinitions.find(def => def.id === server.definitionId) : 
+                    null;
                   const isAddedTab = selectedTab === "added";
                   
                   return (
@@ -178,10 +180,15 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-sm truncate">{server.name}</h4>
-                          {isAddedTab ? 
-                            (definition && <EndpointLabel type={definition.type} />) : 
-                            <EndpointLabel type={(server as ServerDefinition).type} />
-                          }
+                          {isAddedTab ? (
+                            <EndpointLabel 
+                              type={definition?.type || 'Custom'} 
+                            />
+                          ) : (
+                            <EndpointLabel 
+                              type={(server as ServerDefinition).type} 
+                            />
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
                           {isAddedTab ? (
