@@ -124,19 +124,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-  // Helper function to determine server type for both tabs
-  const getServerType = (server: ServerDefinition | ServerInstance, isAddedTab: boolean): EndpointType | 'Custom' => {
-    if (isAddedTab) {
-      // In "Added" tab, we need to lookup the definition based on definitionId
-      const instance = server as ServerInstance;
-      const definition = serverDefinitions.find(def => def.id === instance.definitionId);
-      return definition ? definition.type : 'Custom';
-    } else {
-      // In "Discovery" tab, we can directly use the type from the server definition
-      return (server as ServerDefinition).type;
-    }
-  };
-
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -178,8 +165,10 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-4">
                 {filteredServers.map((server) => {
+                  const definition = selectedTab === "added" ? 
+                    serverDefinitions.find(def => def.id === server.definitionId) : 
+                    null;
                   const isAddedTab = selectedTab === "added";
-                  const serverType = getServerType(server, isAddedTab);
                   
                   return (
                     <div
@@ -191,7 +180,15 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-sm truncate">{server.name}</h4>
-                          <EndpointLabel type={serverType} />
+                          {isAddedTab ? (
+                            <EndpointLabel 
+                              type={definition?.type || 'Custom'} 
+                            />
+                          ) : (
+                            <EndpointLabel 
+                              type={(server as ServerDefinition).type} 
+                            />
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
                           {isAddedTab ? (
@@ -241,4 +238,3 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     </>
   );
 };
-
