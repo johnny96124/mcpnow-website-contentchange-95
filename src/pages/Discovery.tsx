@@ -5,6 +5,8 @@ import {
   CheckCircle,
   ChevronLeft,
   Clock,
+  Download,
+  Eye,
   ExternalLink,
   FolderOpen,
   Globe,
