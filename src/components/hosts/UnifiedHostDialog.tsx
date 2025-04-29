@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -24,33 +25,25 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
   const [configPath, setConfigPath] = useState("");
   const { toast } = useToast();
 
+  // Only scan automatically when the dialog opens initially, not on every mode change
   useEffect(() => {
-    if (open) {
-      if (mode === "scan") {
-        handleScanForHosts();
-      }
-    } else {
-      setScannedHosts([]);
-      setSelectedHosts([]);
-      setManualHostName("");
-      setConfigPath("");
-      setMode("scan");
-      setIsScanning(false);
+    if (open && mode === "scan" && scannedHosts.length === 0 && !isScanning) {
+      handleScanForHosts();
     }
   }, [open]);
 
   const handleModeChange = (newMode: "scan" | "manual") => {
+    // Only change the mode without triggering additional effects
     setMode(newMode);
-    
-    if (newMode === "scan" && scannedHosts.length === 0 && !isScanning) {
-      handleScanForHosts();
-    }
   };
 
   const handleScanForHosts = () => {
-    setIsScanning(true);
-    setScannedHosts([]);
+    // Don't scan if already scanning
+    if (isScanning) return;
     
+    setIsScanning(true);
+    
+    // Use setTimeout to simulate network request but with minimal delay
     setTimeout(() => {
       const mockHosts: Host[] = [
         {
@@ -86,7 +79,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         title: "Hosts discovered",
         description: `Found ${mockHosts.length} hosts on your network.`,
       });
-    }, 2000);
+    }, 500); // Reduced from 2000ms to 500ms for faster response
   };
 
   const validateConfigPath = (path: string) => {
@@ -162,8 +155,22 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     }
   };
 
+  // Only reset state when closing the dialog, not on each render
+  const handleDialogOpenChange = (newOpenState: boolean) => {
+    if (!newOpenState) {
+      // Only reset when closing
+      setScannedHosts([]);
+      setSelectedHosts([]);
+      setManualHostName("");
+      setConfigPath("");
+      setMode("scan");
+      setIsScanning(false);
+    }
+    onOpenChange(newOpenState);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add New Host</DialogTitle>
@@ -255,7 +262,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="hostName">Host Name</Label>
+                <Label htmlFor="hostName">Host Name <span className="text-destructive">*</span></Label>
                 <Input
                   id="hostName"
                   value={manualHostName}
@@ -264,7 +271,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="configPath">Config Path</Label>
+                <Label htmlFor="configPath">Config Path <span className="text-destructive">*</span></Label>
                 <Input
                   id="configPath"
                   value={configPath}

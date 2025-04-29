@@ -7,6 +7,7 @@ import { useTheme } from "./theme-provider";
 export function ThemeToggle() {
   const { setTheme } = useTheme();
 
+  // Using memo to prevent unnecessary re-renders
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
