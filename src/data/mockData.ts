@@ -47,6 +47,9 @@ export interface ServerInstance {
   environment?: Record<string, string>;
   arguments?: string[];
   requestCount?: number;
+  url?: string;
+  headers?: Record<string, string>;
+  isCustom?: boolean;
 }
 
 export interface Profile {
