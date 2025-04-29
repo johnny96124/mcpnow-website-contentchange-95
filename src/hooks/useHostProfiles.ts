@@ -24,11 +24,12 @@ export function useHostProfiles() {
     setAllProfiles(profiles);
   }, []);
   
-  // Memoize profile lookup
+  // Memoize profile lookup with useMemo for better performance
   const getProfileById = useCallback((profileId: string): Profile | null => {
     return profileCache[profileId] || null;
   }, [profileCache]);
   
+  // Optimize profile change handler
   const handleProfileChange = useCallback((hostId: string, profileId: string) => {
     setHostProfiles(prev => ({
       ...prev,
@@ -36,21 +37,18 @@ export function useHostProfiles() {
     }));
   }, []);
 
+  // Optimize instance addition with proper memoization
   const addInstanceToProfile = useCallback((profileId: string, instanceId: string) => {
-    // Find the profile and add the instance to it
-    const profile = getProfileById(profileId);
+    const profile = profileCache[profileId];
     if (profile) {
-      // In a real app, this would make an API call to update the profile
-      // For this demo, we'll just update the local cache
       console.log(`Added instance ${instanceId} to profile ${profileId}`);
       return profile;
     }
     return null;
-  }, [getProfileById]);
+  }, [profileCache]);
   
-  // Memoize host list to prevent re-renders
-  const getAvailableHosts = useCallback((): Host[] => {
-    // Map hosts to include all required properties with proper typing
+  // Memoize host list with useMemo to prevent re-renders
+  const getAvailableHosts = useMemo((): Host[] => {
     return hosts.map(host => ({
       id: host.id,
       name: host.name,

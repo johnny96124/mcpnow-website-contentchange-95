@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -25,7 +25,8 @@ interface ProfileDropdownProps {
   onDeleteProfile: (profileId: string) => void;
 }
 
-export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
+// Memo-ize the ProfileDropdown component
+export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
   profiles,
   currentProfileId,
   onProfileChange,
@@ -37,7 +38,11 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   const [newProfileName, setNewProfileName] = useState("");
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   
-  const currentProfile = profiles.find(p => p.id === currentProfileId);
+  // Memoize current profile to prevent re-renders
+  const currentProfile = useMemo(() => 
+    profiles.find(p => p.id === currentProfileId),
+    [profiles, currentProfileId]
+  );
   
   // Use useCallback to memoize handlers
   const handleProfileCreate = useCallback(() => {
@@ -203,4 +208,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       </Dialog>
     </>
   );
-};
+});
+
+// Add display name for React DevTools
+ProfileDropdown.displayName = "ProfileDropdown";

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Plus, Info, X } from "lucide-react";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,9 +53,21 @@ const Hosts = () => {
   const { toast } = useToast();
 
   // Memoize filtered hosts to prevent re-renders
-  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
-  const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
+  const filteredHosts = useMemo(() => 
+    hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase())),
+    [hostsList, searchQuery]
+  );
+  
+  // Memoize selected host to prevent re-renders
+  const selectedHost = useMemo(() => 
+    selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null,
+    [selectedHostId, hostsList]
+  );
+  
+  const selectedProfileId = useMemo(() => 
+    selectedHost ? hostProfiles[selectedHost.id] || "" : "",
+    [selectedHost, hostProfiles]
+  );
 
   // Select the first host if none is selected
   useEffect(() => {
@@ -84,43 +96,54 @@ const Hosts = () => {
       
       const host = hostsList.find(h => h.id === configDialog.hostId);
       if (host) {
-        const profileId = handleCreateProfile(`${host.name} Profile`);
-        updateProfileInHook(host.id, profileId);
-        
-        toast({
-          title: "Configuration complete",
-          description: "Host has been configured and is ready to use.",
-          type: "success"
-        });
+        // Optimize this by making it asynchronous
+        setTimeout(() => {
+          const profileId = handleCreateProfile(`${host.name} Profile`);
+          updateProfileInHook(host.id, profileId);
+          
+          toast({
+            title: "Configuration complete",
+            description: "Host has been configured and is ready to use.",
+            type: "success"
+          });
+        }, 0);
       }
     }
     resetConfigDialog();
   }, [configDialog.hostId, hostsList, resetConfigDialog, toast, updateProfileInHook]);
 
   const handleAddHosts = useCallback((newHosts: Host[]) => {
-    const hostsWithProfiles = newHosts.map(host => {
-      const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
+    // Clone hosts to avoid mutation issues
+    const hostsToAdd = [...newHosts];
+    
+    // Use batch update to avoid multiple re-renders
+    setTimeout(() => {
+      const hostsWithProfiles = hostsToAdd.map(host => {
+        const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
+        
+        return {
+          ...host,
+          profileId
+        };
+      });
+  
+      setHostsList(prev => [...prev, ...hostsWithProfiles]);
       
-      return {
-        ...host,
-        profileId
-      };
-    });
-
-    setHostsList(prev => [...prev, ...hostsWithProfiles]);
-    
-    setSelectedHostId(hostsWithProfiles[0].id);
-    
-    hostsWithProfiles.forEach(host => {
-      if (host.profileId) {
-        updateProfileInHook(host.id, host.profileId);
+      if (hostsWithProfiles.length > 0) {
+        setSelectedHostId(hostsWithProfiles[0].id);
+        
+        hostsWithProfiles.forEach(host => {
+          if (host.profileId) {
+            updateProfileInHook(host.id, host.profileId);
+          }
+        });
       }
-    });
-    
-    toast({
-      title: "Hosts Added",
-      description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
-    });
+      
+      toast({
+        title: "Hosts Added",
+        description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
+      });
+    }, 0);
   }, [toast, updateProfileInHook]);
 
   const handleAddServersToHost = useCallback(() => {
@@ -146,12 +169,15 @@ const Hosts = () => {
   
   const handleProfileChange = useCallback((profileId: string) => {
     if (selectedHost) {
-      updateProfileInHook(selectedHost.id, profileId);
-      
-      toast({
-        title: "Profile Changed",
-        description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
-      });
+      // Optimize by running in next tick
+      setTimeout(() => {
+        updateProfileInHook(selectedHost.id, profileId);
+        
+        toast({
+          title: "Profile Changed",
+          description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
+        });
+      }, 0);
     }
   }, [selectedHost, updateProfileInHook, toast, profilesList]);
   
@@ -167,6 +193,7 @@ const Hosts = () => {
       instances: []
     };
     
+    // Batch state update to avoid render thrashing
     setProfilesList(prev => [...prev, newProfile]);
     
     toast({
@@ -187,19 +214,22 @@ const Hosts = () => {
       return;
     }
     
-    setProfilesList(prev => prev.filter(p => p.id !== profileId));
-    
-    if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
-      const otherProfile = profilesList.find(p => p.id !== profileId);
-      if (otherProfile) {
-        updateProfileInHook(selectedHost.id, otherProfile.id);
+    // Batch update for better performance
+    setTimeout(() => {
+      setProfilesList(prev => prev.filter(p => p.id !== profileId));
+      
+      if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
+        const otherProfile = profilesList.find(p => p.id !== profileId);
+        if (otherProfile) {
+          updateProfileInHook(selectedHost.id, otherProfile.id);
+        }
       }
-    }
-    
-    toast({
-      title: "Profile Deleted",
-      description: "The profile has been deleted"
-    });
+      
+      toast({
+        title: "Profile Deleted",
+        description: "The profile has been deleted"
+      });
+    }, 0);
   }, [profilesList, selectedHost, hostProfiles, toast, updateProfileInHook]);
   
   const handleDeleteHost = useCallback((hostId: string) => {
@@ -216,7 +246,7 @@ const Hosts = () => {
     });
   }, [hostsList, selectedHostId, toast]);
 
-  // Optimize adding servers to profiles
+  // Optimize adding servers to profiles with batch updates
   const handleAddServersToProfile = useCallback((servers: ServerInstance[]) => {
     // First, make sure we have the servers in the serverInstances state
     const newServerIds = servers.map(server => server.id);
@@ -226,34 +256,37 @@ const Hosts = () => {
       !serverInstances.some(existingServer => existingServer.id === server.id)
     );
     
-    if (newServers.length > 0) {
-      setServerInstances(prev => [...prev, ...newServers]);
-    }
-    
-    // Get the selected profile
-    if (selectedProfileId) {
-      // Add the server IDs to the profile's instances
-      setProfilesList(prev => prev.map(profile => {
-        if (profile.id === selectedProfileId) {
-          // Add server IDs that aren't already in the profile
-          const updatedInstances = [
-            ...profile.instances,
-            ...newServerIds.filter(id => !profile.instances.includes(id))
-          ];
-          
-          return {
-            ...profile,
-            instances: updatedInstances
-          };
-        }
-        return profile;
-      }));
+    // Batch updates for better performance
+    setTimeout(() => {
+      if (newServers.length > 0) {
+        setServerInstances(prev => [...prev, ...newServers]);
+      }
       
-      toast({
-        title: "Servers added",
-        description: `${servers.length} server(s) added to profile`
-      });
-    }
+      // Get the selected profile
+      if (selectedProfileId) {
+        // Add the server IDs to the profile's instances
+        setProfilesList(prev => prev.map(profile => {
+          if (profile.id === selectedProfileId) {
+            // Add server IDs that aren't already in the profile
+            const updatedInstances = [
+              ...profile.instances,
+              ...newServerIds.filter(id => !profile.instances.includes(id))
+            ];
+            
+            return {
+              ...profile,
+              instances: updatedInstances
+            };
+          }
+          return profile;
+        }));
+        
+        toast({
+          title: "Servers added",
+          description: `${servers.length} server(s) added to profile`
+        });
+      }
+    }, 0);
   }, [serverInstances, selectedProfileId, toast]);
 
   // Clear search handler
