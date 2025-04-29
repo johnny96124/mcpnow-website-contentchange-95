@@ -9,23 +9,9 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 import { Info, Check, X } from "lucide-react"
-import { useEffect } from "react"
 
 export function Toaster() {
-  const { toasts, dismiss } = useToast()
-
-  // Auto dismiss all toasts after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      toasts.forEach(toast => {
-        if (toast.open) {
-          dismiss(toast.id)
-        }
-      })
-    }, 5000)
-    
-    return () => clearTimeout(timer)
-  }, [toasts, dismiss])
+  const { toasts } = useToast()
 
   return (
     <ToastProvider>
