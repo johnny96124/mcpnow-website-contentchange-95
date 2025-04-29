@@ -40,16 +40,16 @@ export interface ToolParameter {
 
 export interface ServerInstance {
   id: string;
-  name: string;
   definitionId: string;
+  name: string;
   status: Status;
-  connectionDetails: string;
   enabled: boolean;
+  connectionDetails: string;
+  environment?: Record<string, string>;
+  arguments?: string[];
+  requestCount?: number;
   isCustom?: boolean;
 }
-
-export const serverDefinitions: ServerDefinition[];
-export const serverInstances: ServerInstance[];
 
 export interface Profile {
   id: string;
@@ -61,4 +61,6 @@ export interface Profile {
   description?: string;
 }
 
+export const serverDefinitions: ServerDefinition[];
+export const serverInstances: ServerInstance[];
 export const profiles: Profile[];
