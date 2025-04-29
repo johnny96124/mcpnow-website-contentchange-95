@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface ServerErrorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serverName: string;
   errorMessage: string;
+  onRetry?: () => Promise<boolean>;
 }
 
 export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
@@ -23,7 +25,43 @@ export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
   onOpenChange,
   serverName,
   errorMessage,
+  onRetry,
 }) => {
+  const [isRetrying, setIsRetrying] = useState(false);
+  
+  const handleRetry = async () => {
+    if (!onRetry) return;
+    
+    setIsRetrying(true);
+    
+    try {
+      const success = await onRetry();
+      
+      if (success) {
+        toast({
+          title: "Connection restored",
+          description: `Successfully connected to ${serverName}`,
+          type: "success"
+        });
+        onOpenChange(false);
+      } else {
+        toast({
+          title: "Connection failed",
+          description: `Failed to connect to ${serverName}`,
+          type: "error"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Connection error",
+        description: `Error connecting to ${serverName}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        type: "error"
+      });
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -54,12 +92,25 @@ export const ServerErrorDialog: React.FC<ServerErrorDialogProps> = ({
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isRetrying}>
             Close
           </Button>
-          <Button className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Retry Connection
+          <Button 
+            className="gap-2" 
+            onClick={handleRetry}
+            disabled={isRetrying || !onRetry}
+          >
+            {isRetrying ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Retry Connection
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

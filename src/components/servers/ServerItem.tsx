@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -46,6 +47,20 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       description: "The instance settings have been updated successfully."
     });
     setEditDialogOpen(false);
+  };
+  
+  const handleRetryConnection = async (): Promise<boolean> => {
+    // Simulate connection attempt with the server
+    onStatusChange(server.id, true); // This will set the status to "connecting"
+    
+    // Simulate a network request
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const success = Math.random() > 0.3; // 70% success rate
+        onStatusChange(server.id, success); // This will set the status to "running" or "error"
+        resolve(success);
+      }, 2000);
+    });
   };
 
   return <tr className={hasError ? "bg-red-50/30" : ""}>
@@ -109,7 +124,13 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         </div>
       </td>
       
-      <ServerErrorDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen} serverName={server.name} errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." />
+      <ServerErrorDialog 
+        open={errorDialogOpen} 
+        onOpenChange={setErrorDialogOpen} 
+        serverName={server.name} 
+        errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." 
+        onRetry={handleRetryConnection}
+      />
       
       <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
       
