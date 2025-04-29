@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import { serverDefinitions, type ServerInstance, type ServerDefinition, type End
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
+import { format } from "date-fns";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -20,7 +21,13 @@ interface ServerSelectionDialogProps {
   onAddServers: (servers: ServerInstance[]) => void;
 }
 
-const existingInstances: Array<ServerInstance & { description?: string }> = [
+// Enhanced instance type with additional metadata
+interface EnhancedServerInstance extends ServerInstance {
+  description?: string;
+  addedAt?: Date;
+}
+
+const existingInstances: EnhancedServerInstance[] = [
   {
     id: "instance-1",
     name: "Local PostgreSQL",
@@ -28,7 +35,8 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "https://localhost:5432",
     enabled: false,
-    description: "Local PostgreSQL database server instance"
+    description: "Local PostgreSQL database server instance",
+    addedAt: new Date(2025, 3, 20) // April 20, 2025
   },
   {
     id: "instance-2",
@@ -37,7 +45,8 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "redis://localhost:6379",
     enabled: false,
-    description: "Development Redis cache server"
+    description: "Development Redis cache server",
+    addedAt: new Date(2025, 3, 25) // April 25, 2025
   }
 ];
 
@@ -157,6 +166,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
               <div className="space-y-4">
                 {filteredServers.map((server) => {
                   const definition = serverDefinitions.find(def => def.id === server.definitionId);
+                  const isAddedTab = selectedTab === "added";
                   
                   return (
                     <div
@@ -168,20 +178,28 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium text-sm truncate">{server.name}</h4>
-                          {selectedTab === "discovery" ? (
+                          {isAddedTab ? 
+                            (definition && <EndpointLabel type={definition.type} />) : 
                             <EndpointLabel type={(server as ServerDefinition).type} />
+                          }
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {isAddedTab ? (
+                            <div className="flex flex-col space-y-1">
+                              {(server as EnhancedServerInstance).description && (
+                                <span>{(server as EnhancedServerInstance).description}</span>
+                              )}
+                              {(server as EnhancedServerInstance).addedAt && (
+                                <span className="flex items-center">
+                                  <Clock className="h-3 w-3 mr-1" /> 
+                                  Added on {format((server as EnhancedServerInstance).addedAt!, "MMM dd, yyyy")}
+                                </span>
+                              )}
+                            </div>
                           ) : (
-                            definition && <EndpointLabel type={definition.type} />
+                            <span>{(server as ServerDefinition).description}</span>
                           )}
                         </div>
-                        {(selectedTab === "discovery" && 'description' in server || 
-                         selectedTab === "added" && server.description) && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {selectedTab === "discovery" 
-                              ? (server as any).description 
-                              : server.description}
-                          </p>
-                        )}
                       </div>
                     </div>
                   );
