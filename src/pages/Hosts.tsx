@@ -404,7 +404,7 @@ const Hosts = () => {
         open={errorDialogOpen}
         onOpenChange={setErrorDialogOpen}
         server={selectedErrorServer}
-        errorDetails={selectedErrorServer?.status === 'error' ? (selectedErrorServer?.errorMessage || "Connection error occurred") : "Connection error occurred"}
+        errorDetails={selectedErrorServer?.status === 'error' ? "Connection error occurred" : "Connection error occurred"}
         onRetry={(serverId) => {
           // Simulate retry logic
           return Promise.resolve(Math.random() > 0.3);
