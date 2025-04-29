@@ -13,7 +13,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
-import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -34,7 +33,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
   
   const hasError = server.status === 'error';
   const isDisabled = hostConnectionStatus !== "connected";
@@ -106,16 +104,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             <Info className="h-4 w-4" />
           </Button>
           
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-50" 
-            title="Debug Server" 
-            onClick={() => setDebugDialogOpen(true)}
-          >
-            <Wrench className="h-4 w-4" />
-          </Button>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -147,12 +135,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       />
       
       <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
-
-      <ServerDebugDialog
-        open={debugDialogOpen}
-        onOpenChange={setDebugDialogOpen}
-        server={server}
-      />
 
       <AddInstanceDialog
         open={editDialogOpen}
