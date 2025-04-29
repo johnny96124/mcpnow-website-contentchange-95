@@ -54,8 +54,8 @@ export function useHostProfiles() {
       connectionStatus: host.connectionStatus || "disconnected",
       configStatus: (host.configStatus || "unconfigured") as "configured" | "misconfigured" | "unknown",
       icon: host.icon,
-      profileId: host.profileId,
-      status: host.status || "disconnected" // Adding the missing status property
+      profileId: host.profileId
+      // Removed the status property since it doesn't exist on the Host interface
     }));
   }, []);
   
