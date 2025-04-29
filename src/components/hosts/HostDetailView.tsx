@@ -1,28 +1,19 @@
 import React, { useState } from "react";
-import { 
-  FileText, Server, Trash2, AlertTriangle, 
-  CheckCircle, Info, Plus, ChevronDown, MoreHorizontal, 
-  ExternalLink, ArrowRight, Settings
-} from "lucide-react";
+import { Host, Profile, ServerInstance } from "@/data/mockData";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ServerItem } from "@/components/hosts/ServerItem";
+import { ProfileDropdown } from "@/components/hosts/ProfileDropdown";
+import { AddServerDialog } from "@/components/hosts/AddServerDialog";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { StatusIndicator } from "@/components/status/StatusIndicator";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  Host, Profile, ServerInstance, 
-  ConnectionStatus, serverDefinitions, EndpointType 
-} from "@/data/mockData";
-import { ConfigHighlightDialog } from "./ConfigHighlightDialog";
-import { ProfileDropdown } from "./ProfileDropdown";
-import { ServerListEmpty } from "./ServerListEmpty";
-import { ServerItem } from "./ServerItem";
-import { ServerSelectionDialog } from "./ServerSelectionDialog";
+import { AlertCircle, FileText, Settings, Trash2, PlusCircle, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
+// Add onViewServerError to the existing interface
 interface HostDetailViewProps {
   host: Host;
   profiles: Profile[];
@@ -36,7 +27,8 @@ interface HostDetailViewProps {
   onSaveProfileChanges: () => void;
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
-  onAddServersToProfile?: (servers: ServerInstance[]) => void;
+  onAddServersToProfile: (servers: ServerInstance[]) => void;
+  onViewServerError?: (server: ServerInstance) => void;
 }
 
 export const HostDetailView: React.FC<HostDetailViewProps> = ({
@@ -52,269 +44,281 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   onSaveProfileChanges,
   onCreateProfile,
   onDeleteProfile,
-  onAddServersToProfile
+  onAddServersToProfile,
+  onViewServerError
 }) => {
-  const [configDialogOpen, setConfigDialogOpen] = useState(false);
-  const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
-  const { toast } = useToast();
-
-  const selectedProfile = profiles.find(p => p.id === selectedProfileId);
+  const [addServerDialogOpen, setAddServerDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
-  const profileServers = serverInstances.filter(
-    server => selectedProfile?.instances.includes(server.id)
-  );
-
-  const handleServerStatusChange = (serverId: string, enabled: boolean) => {
-    onServerStatusChange(
-      serverId, 
-      enabled ? host.connectionStatus === "connected" ? 'connecting' : 'stopped' : 'stopped'
-    );
+  const selectedProfile = profiles.find(p => p.id === selectedProfileId);
+  const profileServers = selectedProfile 
+    ? serverInstances.filter(server => selectedProfile.instances.includes(server.id))
+    : [];
+  
+  const isHostConnected = host.connectionStatus === "connected";
+  const isHostConfigured = host.configStatus === "configured";
+  
+  const handleRefreshHost = () => {
+    setRefreshing(true);
     
-    if (enabled) {
+    // Simulate refresh
+    setTimeout(() => {
+      setRefreshing(false);
       toast({
-        title: "Connecting to server",
-        description: "Attempting to establish connection"
+        title: "Host refreshed",
+        description: "Host connection status has been updated"
       });
-      
-      setTimeout(() => {
-        const success = Math.random() > 0.3;
-        if (success) {
-          onServerStatusChange(serverId, 'running');
-          toast({
-            title: "Server connected",
-            description: "Successfully connected to server",
-            type: "success"
-          });
-        } else {
-          onServerStatusChange(serverId, 'error');
-          toast({
-            title: "Connection error",
-            description: "Failed to connect to server",
-            type: "error"
-          });
-        }
-      }, 2000);
-    }
+    }, 1500);
   };
-
-  const getServerLoad = (serverId: string) => {
-    return Math.floor(Math.random() * 90) + 10;
-  };
-
+  
   const handleDeleteHost = () => {
-    if (window.confirm(`Are you sure you want to delete host ${host.name}?`)) {
-      onDeleteHost(host.id);
-    }
+    setDeleteDialogOpen(true);
   };
-
-  const showConfigFile = () => {
-    setConfigDialogOpen(true);
+  
+  const confirmDeleteHost = () => {
+    onDeleteHost(host.id);
+    setDeleteDialogOpen(false);
   };
-
+  
   const handleAddServers = (servers: ServerInstance[]) => {
-    if (selectedProfile && servers.length > 0) {
-      if (onAddServersToProfile) {
-        onAddServersToProfile(servers);
-      } else {
-        toast({
-          title: "Servers added",
-          description: `${servers.length} server(s) added to ${selectedProfile.name}`,
-          type: "success"
-        });
+    onAddServersToProfile(servers);
+    setAddServerDialogOpen(false);
+  };
+  
+  const handleRemoveServerFromProfile = (serverId: string) => {
+    if (selectedProfile) {
+      const updatedProfile = {
+        ...selectedProfile,
+        instances: selectedProfile.instances.filter(id => id !== serverId)
+      };
       
-        onSaveProfileChanges();
-      }
+      // Update the profile
+      onSaveProfileChanges();
+      
+      toast({
+        title: "Server removed",
+        description: `Server has been removed from ${selectedProfile.name}`
+      });
     }
   };
-
-  if (host.configStatus === "unknown") {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-muted/30 p-3 rounded-full">
-              <span className="text-2xl">{host.icon || '🖥️'}</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">{host.name}</h2>
-              <div className="flex items-center gap-2">
-                <StatusIndicator 
-                  status="inactive" 
-                  label="Needs Configuration" 
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button variant="outline" className="text-destructive hover:text-destructive" onClick={handleDeleteHost}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Host
-            </Button>
-          </div>
-        </div>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center space-y-4 py-6">
-              <div className="mx-auto w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
-                <FileText className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-medium">Configuration Required</h3>
-                <p className="text-muted-foreground text-sm">
-                  This host needs to be configured before you can connect servers to it
-                </p>
-              </div>
-              <Button onClick={() => onCreateConfig(host.id)} className="bg-blue-500 hover:bg-blue-600">
-                Configure Host
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
+  
+  const handleServerStatusChange = (serverId: string, enabled: boolean) => {
+    const status = enabled ? 'running' : 'stopped';
+    onServerStatusChange(serverId, status);
+  };
+  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-muted/30 p-3 rounded-full">
-            <span className="text-2xl">{host.icon || '🖥️'}</span>
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold">{host.name}</h2>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold">{host.name}</h2>
+                {!isHostConfigured && (
+                  <Badge variant="outline" className="text-amber-500 border-amber-200 bg-amber-50">
+                    Needs Configuration
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {isHostConnected ? "Connected" : "Disconnected"} • {host.configPath || "No config file"}
+              </p>
+            </div>
+            
             <div className="flex items-center gap-2">
-              <StatusIndicator 
-                status={
-                  host.connectionStatus === "connected" 
-                    ? "active" 
-                    : host.connectionStatus === "misconfigured" 
-                      ? "error" 
-                      : "inactive"
-                } 
-                label={
-                  host.connectionStatus === "connected" 
-                    ? "Connected" 
-                    : host.connectionStatus === "misconfigured" 
-                      ? "Misconfigured" 
-                      : "Disconnected"
-                } 
-              />
-              {host.configPath && (
+              {host.configPath ? (
                 <Button 
-                  variant="ghost" 
+                  variant="outline" 
                   size="sm" 
-                  className="text-xs text-muted-foreground" 
-                  onClick={showConfigFile}
+                  onClick={() => onCreateConfig(host.id)}
                 >
+                  <FileText className="h-4 w-4 mr-2" />
                   View Config
                 </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => onCreateConfig(host.id)}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configure Host
+                </Button>
               )}
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefreshHost}
+                disabled={refreshing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground hover:text-destructive"
+                onClick={handleDeleteHost}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
             </div>
           </div>
-        </div>
+        </CardHeader>
         
-        <div className="flex gap-2">
-          <Button variant="outline" className="text-destructive hover:text-destructive" onClick={handleDeleteHost}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Host
-          </Button>
-        </div>
-      </div>
-      
-      <Card className="overflow-hidden">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <CardContent className="pb-3">
+          {!isHostConfigured && (
+            <Alert className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                This host needs to be configured before it can be used. 
+                <Button 
+                  variant="link" 
+                  className="h-auto p-0 ml-2" 
+                  onClick={() => onCreateConfig(host.id)}
+                >
+                  Configure now
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium">Profile</h3>
               <ProfileDropdown 
-                profiles={profiles} 
-                currentProfileId={selectedProfileId} 
+                profiles={profiles}
+                currentProfileId={selectedProfileId}
                 onProfileChange={onProfileChange}
                 onCreateProfile={onCreateProfile}
                 onDeleteProfile={onDeleteProfile}
               />
             </div>
+            
             <Button 
-              onClick={() => setServerSelectionDialogOpen(true)} 
-              className="whitespace-nowrap"
+              size="sm" 
+              onClick={() => setAddServerDialogOpen(true)}
+              disabled={!selectedProfileId || !isHostConnected}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <PlusCircle className="h-4 w-4 mr-2" />
               Add Servers
             </Button>
           </div>
-        </CardHeader>
-        
-        <CardContent>
-          {profileServers.length > 0 ? (
-            <div className="rounded-md border">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                    <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
-                    <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {profileServers.map(server => (
-                    <ServerItem 
-                      key={server.id}
-                      server={server}
-                      hostConnectionStatus={host.connectionStatus}
-                      onStatusChange={handleServerStatusChange}
-                      load={getServerLoad(server.id)}
-                      onRemoveFromProfile={(serverId) => {
-                        toast({
-                          title: "Server removed",
-                          description: `${server.name} has been removed from this profile`,
-                        });
-                      }}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
-          )}
         </CardContent>
       </Card>
       
-      <ServerSelectionDialog 
-        open={serverSelectionDialogOpen} 
-        onOpenChange={setServerSelectionDialogOpen}
+      <Tabs defaultValue="servers" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="servers">Servers</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="servers" className="space-y-4">
+          <Card>
+            <CardContent className="p-0">
+              {profileServers.length > 0 ? (
+                <div className="overflow-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-4 font-medium">Name</th>
+                        <th className="text-left p-4 font-medium">Type</th>
+                        <th className="text-left p-4 font-medium">Status</th>
+                        <th className="text-center p-4 font-medium">Enabled</th>
+                        <th className="text-right p-4 font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {profileServers.map(server => (
+                        <ServerItem 
+                          key={server.id}
+                          server={server}
+                          hostConnectionStatus={host.connectionStatus}
+                          load={Math.random() * 100}
+                          onStatusChange={handleServerStatusChange}
+                          onRemoveFromProfile={handleRemoveServerFromProfile}
+                          onViewServerError={onViewServerError}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="bg-muted/50 p-4 rounded-full mb-4">
+                    <Settings className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No servers in this profile</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md">
+                    Add servers to this profile to start managing your MCP environment
+                  </p>
+                  <Button onClick={() => setAddServerDialogOpen(true)} disabled={!isHostConnected}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Servers
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="settings">
+          <Card>
+            <CardContent className="py-6">
+              <h3 className="text-lg font-medium mb-4">Host Settings</h3>
+              <p className="text-muted-foreground">
+                Host settings and advanced configuration options will be available here in a future update.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="logs">
+          <Card>
+            <CardContent className="py-6">
+              <h3 className="text-lg font-medium mb-4">Host Logs</h3>
+              <p className="text-muted-foreground">
+                Host logs and activity history will be available here in a future update.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      <AddServerDialog 
+        open={addServerDialogOpen}
+        onOpenChange={setAddServerDialogOpen}
         onAddServers={handleAddServers}
+        existingServerIds={profileServers.map(s => s.id)}
       />
       
-      <ConfigHighlightDialog
-        open={configDialogOpen}
-        onOpenChange={setConfigDialogOpen}
-        configPath={host.configPath || ""}
-      />
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Host</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this host? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteHost}>
+              Delete Host
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-function Search(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
+export { HostDetailView };
+export type { HostDetailViewProps };

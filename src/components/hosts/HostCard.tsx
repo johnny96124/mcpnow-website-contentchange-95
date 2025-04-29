@@ -488,12 +488,12 @@ export function HostCard({
       
       <CardFooter className="mt-2 justify-between">
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
-          className="text-destructive"
+          className="text-muted-foreground hover:text-destructive text-xs border-none"
           onClick={handleDeleteHost}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 className="h-3 w-3 mr-1 text-muted-foreground" />
           Delete Host
         </Button>
         
