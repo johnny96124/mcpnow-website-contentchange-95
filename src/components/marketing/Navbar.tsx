@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,8 +30,8 @@ const Navbar: React.FC = () => {
             <Link to="#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               FAQ
             </Link>
-            <Link to="/introduction-3" className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700">
-              New Design
+            <Link to="/hosts" className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700">
+              Dashboard
             </Link>
           </nav>
         </div>
@@ -83,11 +82,11 @@ const Navbar: React.FC = () => {
             FAQ
           </Link>
           <Link 
-            to="/introduction-3" 
+            to="/hosts" 
             className="block py-2 text-base font-medium text-blue-600"
             onClick={() => setMobileMenuOpen(false)}
           >
-            New Design
+            Dashboard
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
             <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
