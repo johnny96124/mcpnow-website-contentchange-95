@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { hosts, profiles, type Profile, type Host, type ConnectionStatus } from "@/data/mockData";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { hosts, profiles, type Profile, type Host } from "@/data/mockData";
 
 export function useHostProfiles() {
   const [hostProfiles, setHostProfiles] = useState(
@@ -13,6 +13,7 @@ export function useHostProfiles() {
   const [profileCache, setProfileCache] = useState<Record<string, Profile | null>>({});
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   
+  // Initialize profile cache only once
   useEffect(() => {
     const initialCache = profiles.reduce((acc, profile) => {
       acc[profile.id] = profile;
@@ -23,6 +24,7 @@ export function useHostProfiles() {
     setAllProfiles(profiles);
   }, []);
   
+  // Memoize profile lookup
   const getProfileById = useCallback((profileId: string): Profile | null => {
     return profileCache[profileId] || null;
   }, [profileCache]);
@@ -46,6 +48,7 @@ export function useHostProfiles() {
     return null;
   }, [getProfileById]);
   
+  // Memoize host list to prevent re-renders
   const getAvailableHosts = useCallback((): Host[] => {
     // Map hosts to include all required properties with proper typing
     return hosts.map(host => ({
@@ -55,7 +58,6 @@ export function useHostProfiles() {
       configStatus: (host.configStatus || "unconfigured") as "configured" | "misconfigured" | "unknown",
       icon: host.icon,
       profileId: host.profileId
-      // Removed the status property since it doesn't exist on the Host interface
     }));
   }, []);
   

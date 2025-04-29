@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Info, X } from "lucide-react";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 
+// Move this outside component to prevent recreating on each render
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -51,25 +52,28 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
+  // Memoize filtered hosts to prevent re-renders
   const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
+  // Select the first host if none is selected
   useEffect(() => {
     if (hostsList.length > 0 && !selectedHostId) {
       setSelectedHostId(hostsList[0].id);
     }
   }, [hostsList, selectedHostId]);
 
-  const handleCreateConfigDialog = (hostId: string) => {
+  // Use useCallback for event handlers to prevent recreation on each render
+  const handleCreateConfigDialog = useCallback((hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
       const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
       openConfigDialog(hostId, defaultConfigPath, 'http://localhost:8008/mcp', true, true, false, false, true, true);
     }
-  };
+  }, [hostsList, openConfigDialog]);
 
-  const handleUpdateConfig = (config: string, configPath: string) => {
+  const handleUpdateConfig = useCallback((config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
         ...host,
@@ -91,9 +95,9 @@ const Hosts = () => {
       }
     }
     resetConfigDialog();
-  };
+  }, [configDialog.hostId, hostsList, resetConfigDialog, toast, updateProfileInHook]);
 
-  const handleAddHosts = (newHosts: Host[]) => {
+  const handleAddHosts = useCallback((newHosts: Host[]) => {
     const hostsWithProfiles = newHosts.map(host => {
       const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
       
@@ -117,30 +121,30 @@ const Hosts = () => {
       title: "Hosts Added",
       description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
     });
-  };
+  }, [toast, updateProfileInHook]);
 
-  const handleAddServersToHost = () => {
+  const handleAddServersToHost = useCallback(() => {
     toast({
       title: "Add servers",
       description: "Select servers to add to this profile"
     });
-  };
+  }, [toast]);
   
-  const handleServerStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
+  const handleServerStatusChange = useCallback((serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServerInstances(prev => prev.map(server => server.id === serverId ? {
       ...server,
       status
     } : server));
-  };
+  }, []);
   
-  const handleSaveProfileChanges = () => {
+  const handleSaveProfileChanges = useCallback(() => {
     toast({
       title: "Profile Saved",
       description: "Changes to profile have been saved."
     });
-  };
+  }, [toast]);
   
-  const handleProfileChange = (profileId: string) => {
+  const handleProfileChange = useCallback((profileId: string) => {
     if (selectedHost) {
       updateProfileInHook(selectedHost.id, profileId);
       
@@ -149,9 +153,10 @@ const Hosts = () => {
         description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
       });
     }
-  };
+  }, [selectedHost, updateProfileInHook, toast, profilesList]);
   
-  const handleCreateProfile = (profileName: string) => {
+  // Optimize profile creation to avoid unnecessary re-renders
+  const handleCreateProfile = useCallback((profileName: string) => {
     const newProfileId = `profile-${Date.now()}`;
     const newProfile: Profile = {
       id: newProfileId,
@@ -170,9 +175,9 @@ const Hosts = () => {
     });
     
     return newProfileId;
-  };
+  }, [toast]);
   
-  const handleDeleteProfile = (profileId: string) => {
+  const handleDeleteProfile = useCallback((profileId: string) => {
     if (profilesList.length <= 1) {
       toast({
         title: "Cannot delete profile",
@@ -195,9 +200,9 @@ const Hosts = () => {
       title: "Profile Deleted",
       description: "The profile has been deleted"
     });
-  };
+  }, [profilesList, selectedHost, hostProfiles, toast, updateProfileInHook]);
   
-  const handleDeleteHost = (hostId: string) => {
+  const handleDeleteHost = useCallback((hostId: string) => {
     setHostsList(prev => prev.filter(h => h.id !== hostId));
     
     if (selectedHostId === hostId) {
@@ -209,10 +214,10 @@ const Hosts = () => {
       title: "Host Deleted",
       description: "The host has been removed successfully"
     });
-  };
+  }, [hostsList, selectedHostId, toast]);
 
-  // Add a new function to handle adding servers to profiles
-  const handleAddServersToProfile = (servers: ServerInstance[]) => {
+  // Optimize adding servers to profiles
+  const handleAddServersToProfile = useCallback((servers: ServerInstance[]) => {
     // First, make sure we have the servers in the serverInstances state
     const newServerIds = servers.map(server => server.id);
     
@@ -249,7 +254,12 @@ const Hosts = () => {
         description: `${servers.length} server(s) added to profile`
       });
     }
-  };
+  }, [serverInstances, selectedProfileId, toast]);
+
+  // Clear search handler
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery("");
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -278,7 +288,7 @@ const Hosts = () => {
         {searchQuery && (
           <button 
             className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-            onClick={() => setSearchQuery("")}
+            onClick={handleClearSearch}
           >
             <X className="h-4 w-4" />
           </button>
@@ -321,7 +331,7 @@ const Hosts = () => {
           ) : (
             <div className="text-center py-8 border border-dashed rounded-md">
               <p className="text-sm text-muted-foreground mb-2">No results for "{searchQuery}"</p>
-              <Button variant="link" onClick={() => setSearchQuery("")} className="text-xs">Clear search</Button>
+              <Button variant="link" onClick={handleClearSearch} className="text-xs">Clear search</Button>
             </div>
           )}
           

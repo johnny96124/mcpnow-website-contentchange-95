@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -39,7 +39,8 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   
   const currentProfile = profiles.find(p => p.id === currentProfileId);
   
-  const handleProfileCreate = () => {
+  // Use useCallback to memoize handlers
+  const handleProfileCreate = useCallback(() => {
     if (!newProfileName.trim()) {
       toast({
         title: "Invalid profile name",
@@ -61,14 +62,14 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         type: "success"
       });
     }
-  };
+  }, [newProfileName, onCreateProfile, onProfileChange]);
   
-  const confirmDeleteProfile = (profile: Profile) => {
+  const confirmDeleteProfile = useCallback((profile: Profile) => {
     setProfileToDelete(profile);
     setDeleteDialogOpen(true);
-  };
+  }, []);
   
-  const handleProfileDelete = () => {
+  const handleProfileDelete = useCallback(() => {
     if (profileToDelete) {
       onDeleteProfile(profileToDelete.id);
       setDeleteDialogOpen(false);
@@ -79,7 +80,16 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         type: "success"
       });
     }
-  };
+  }, [profileToDelete, onDeleteProfile]);
+  
+  // Reset form state when dialog opens
+  const handleCreateDialogOpenChange = useCallback((open: boolean) => {
+    setCreateDialogOpen(open);
+    if (!open) {
+      // Reset form state when dialog closes
+      setNewProfileName("");
+    }
+  }, []);
   
   return (
     <>
@@ -136,7 +146,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       </DropdownMenu>
       
       {/* Create Profile Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+      <Dialog open={createDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Profile</DialogTitle>
