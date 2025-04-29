@@ -196,7 +196,9 @@ export function AddServerDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Server Name</FormLabel>
+                  <FormLabel>
+                    Server Name <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Enter server name" />
                   </FormControl>
@@ -229,7 +231,9 @@ export function AddServerDialog({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Connection Type</FormLabel>
+                  <FormLabel>
+                    Connection Type <span className="text-destructive">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Select
                       value={field.value}
@@ -259,7 +263,9 @@ export function AddServerDialog({
                   name="connectionDetails"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>URL</FormLabel>
+                      <FormLabel>
+                        URL <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
@@ -320,7 +326,9 @@ export function AddServerDialog({
                   name="connectionDetails"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Command Arguments</FormLabel>
+                      <FormLabel>
+                        Command Arguments <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
