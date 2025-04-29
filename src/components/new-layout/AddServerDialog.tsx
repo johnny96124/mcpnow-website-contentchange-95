@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -95,6 +96,7 @@ export function AddServerDialog({
   };
 
   const handleRemoveHeader = (index: number) => {
+    // Modified to allow removing the last header
     const newHeaders = [...headers];
     newHeaders.splice(index, 1);
     setHeaders(newHeaders);
@@ -111,6 +113,7 @@ export function AddServerDialog({
   };
 
   const handleRemoveEnvVar = (index: number) => {
+    // Modified to allow removing the last environment variable
     const newEnvVars = [...envVars];
     newEnvVars.splice(index, 1);
     setEnvVars(newEnvVars);
@@ -302,7 +305,6 @@ export function AddServerDialog({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveHeader(index)}
-                        disabled={headers.length === 1}
                         className="px-2"
                       >
                         <X className="h-4 w-4" />
@@ -364,7 +366,6 @@ export function AddServerDialog({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveEnvVar(index)}
-                        disabled={envVars.length === 1}
                         className="px-2"
                       >
                         <X className="h-4 w-4" />
