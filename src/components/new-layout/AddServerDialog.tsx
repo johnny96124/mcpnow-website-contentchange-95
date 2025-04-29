@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -64,7 +63,7 @@ export function AddServerDialog({
       status: "stopped",
       connectionDetails: values.connectionDetails || "http://localhost:8008/mcp",
       enabled: true,
-      isCustom: true, // Mark the server as custom
+      isCustom: true // Mark the server as custom
     };
 
     onAddServer(newServer);

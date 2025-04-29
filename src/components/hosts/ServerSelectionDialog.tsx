@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,8 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "redis://localhost:6379",
     enabled: false,
-    description: "Development Redis cache server"
+    description: "Development Redis cache server",
+    isCustom: true
   }
 ];
 
@@ -91,7 +91,8 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       definitionId: selectedServer?.id || "",
       status: "stopped",
       connectionDetails: data.url || data.args || "",
-      enabled: false
+      enabled: false,
+      isCustom: false
     };
 
     onAddServers([newInstance]);
@@ -113,7 +114,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       id: `def-${Date.now()}`,
       name: serverData.name,
       type: serverData.type,
-      version: "1.0.0",
       description: serverData.description || "Custom server",
       downloads: 0,
       isOfficial: false
