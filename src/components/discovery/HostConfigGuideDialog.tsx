@@ -12,15 +12,10 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Check, ExternalLink, Info, Server } from "lucide-react";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
-import { Profile } from "@/data/mockData";
+import { Profile, Host } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface Host {
-  id: string;
-  name: string;
-  status: string;
-}
-
+// Updated interface to match the actual Host type from mockData
 interface HostConfigGuideDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -84,7 +79,7 @@ export function HostConfigGuideDialog({
                           <StatusIndicator status="inactive" />
                           {host.name}
                         </div>
-                        {host.status === "connected" && (
+                        {host.connectionStatus === "connected" && (
                           <span className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 flex items-center gap-1">
                             <Check className="h-3 w-3" />
                             Connected
