@@ -326,22 +326,11 @@ const Discovery = () => {
     <div className="animate-fade-in">
       <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white relative overflow-hidden">
         <div className="max-w-3xl relative z-10">
-          <h1 className="text-3xl font-bold mb-2">All Server Definitions</h1>
+          <h1 className="text-3xl font-bold mb-2">Supercharge Your Development Workflow</h1>
           <p className="text-blue-100 mb-6">
-            Discover server definitions created by the community. Find what's popular,
-            trending, and recently updated to enhance your development workflow.
+            Discover powerful servers created by experts and the community. Find what's trending,
+            popular, and recently updated to enhance your development experience.
           </p>
-          
-          <div className="flex gap-4">
-            <Button 
-              variant="default"
-              className="bg-white text-blue-700 hover:bg-blue-50"
-              onClick={() => navigate("/servers")}
-            >
-              <FolderOpen className="mr-2 h-4 w-4" />
-              My Servers
-            </Button>
-          </div>
         </div>
         
         <div className="absolute right-8 top-1/2 transform -translate-y-1/2 opacity-10">
