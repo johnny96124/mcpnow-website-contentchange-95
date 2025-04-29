@@ -14,6 +14,9 @@ import Discovery from "@/pages/Discovery";
 import Settings from "@/pages/Settings";
 import HostNewLayout from "./pages/Host-newlayout";
 import NotFound from "./pages/NotFound";
+import TrayPopup from "./pages/TrayPopup";
+import NewUserTrayPopup from "./pages/NewUserTrayPopup";
+import HostsNewUser from "./pages/HostsNewUser";
 
 function App() {
   const queryClient = new QueryClient();
@@ -31,6 +34,10 @@ function App() {
             {
               path: "/hosts",
               element: <DefaultLayout><Hosts /></DefaultLayout>
+            },
+            {
+              path: "/hosts-new-user",
+              element: <DefaultLayout><HostsNewUser /></DefaultLayout>
             },
             {
               path: "/servers",
@@ -51,6 +58,14 @@ function App() {
             {
               path: "/host-new",
               element: <DefaultLayout><HostNewLayout /></DefaultLayout>
+            },
+            {
+              path: "/tray",
+              element: <TrayPopup />
+            },
+            {
+              path: "/tray-new-user",
+              element: <NewUserTrayPopup />
             },
             {
               path: "*",
