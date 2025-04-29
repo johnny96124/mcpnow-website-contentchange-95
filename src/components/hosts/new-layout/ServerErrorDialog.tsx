@@ -1,27 +1,105 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ServerInstance } from "@/data/mockData";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ServerErrorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   server: ServerInstance | null;
   errorDetails: string;
+  onRetryConnection?: (serverId: string) => Promise<boolean>;
 }
 
 export function ServerErrorDialog({ 
   open, 
   onOpenChange, 
   server, 
-  errorDetails 
+  errorDetails,
+  onRetryConnection
 }: ServerErrorDialogProps) {
+  const [isRetrying, setIsRetrying] = useState(false);
+  const { toast } = useToast();
+
   if (!server) return null;
 
+  const handleRetryConnection = async () => {
+    if (!onRetryConnection) {
+      // If no retry function provided, simulate a connection
+      handleSimulatedRetry();
+      return;
+    }
+    
+    setIsRetrying(true);
+    
+    try {
+      const success = await onRetryConnection(server.id);
+      
+      if (success) {
+        toast({
+          title: "Connection successful",
+          description: `Successfully connected to ${server.name}`,
+          type: "success",
+        });
+        onOpenChange(false);
+      } else {
+        toast({
+          title: "Connection failed",
+          description: `Failed to connect to ${server.name}. Please try again.`,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Connection error",
+        description: `An error occurred while connecting to ${server.name}`,
+        type: "error",
+      });
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  // Simulate a connection attempt if no retry function is provided
+  const handleSimulatedRetry = () => {
+    setIsRetrying(true);
+    
+    // Simulate network request with a delay
+    setTimeout(() => {
+      // 70% chance of success for demonstration
+      const success = Math.random() > 0.3;
+      
+      if (success) {
+        toast({
+          title: "Connection successful",
+          description: `Successfully connected to ${server.name}`,
+          type: "success",
+        });
+        onOpenChange(false);
+      } else {
+        toast({
+          title: "Connection failed",
+          description: `Failed to connect to ${server.name}. Please try again.`,
+          type: "error",
+        });
+      }
+      
+      setIsRetrying(false);
+    }, 2000); // 2 second delay to simulate network request
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      // Prevent closing dialog during retry attempt
+      if (isRetrying && !newOpen) {
+        return;
+      }
+      onOpenChange(newOpen);
+    }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -52,8 +130,29 @@ export function ServerErrorDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => onOpenChange(false)}
+            disabled={isRetrying}
+          >
             Close
+          </Button>
+          <Button 
+            onClick={handleRetryConnection}
+            disabled={isRetrying}
+            className="gap-2"
+          >
+            {isRetrying ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Retry Connection
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
