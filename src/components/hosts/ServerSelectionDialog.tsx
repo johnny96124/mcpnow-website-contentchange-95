@@ -49,6 +49,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
+  // No-op function since we've removed the discovery feature
+  const handleNavigateToDiscovery = () => {
+    // This function is no longer needed but still required by the component
+    console.log("Discovery navigation requested but feature is disabled");
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,6 +70,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             open={showAddServerDialog}
             onOpenChange={setShowAddServerDialog}
             onCreateServer={handleCreateServer}
+            onNavigateToDiscovery={handleNavigateToDiscovery}
           />
           
           <DialogFooter className="flex justify-between">
