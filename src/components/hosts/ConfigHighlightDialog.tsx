@@ -59,7 +59,7 @@ export const ConfigHighlightDialog: React.FC<ConfigHighlightDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-lg font-semibold">Configuration Details</Label>
+            <Label className="text-body font-semibold">Configuration Details</Label>
             <div className="w-full p-3 bg-background rounded-lg border">
               <pre className="text-sm font-mono whitespace-pre-wrap" dangerouslySetInnerHTML={{
               __html: configContent.replace(/("mcpnow"\s*:\s*{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*})/gs, '<span class="bg-blue-50 border-l-2 border-blue-500 pl-2 block">$1</span>')
