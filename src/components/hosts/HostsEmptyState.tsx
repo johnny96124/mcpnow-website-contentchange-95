@@ -1,10 +1,13 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Monitor, PlusCircle, Workflow, ArrowRight } from "lucide-react";
+
 interface HostsEmptyStateProps {
   onAddHost: () => void;
 }
+
 export const HostsEmptyState: React.FC<HostsEmptyStateProps> = ({
   onAddHost
 }) => {
