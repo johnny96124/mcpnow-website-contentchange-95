@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -250,7 +251,7 @@ const HostsNewUser = () => {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         profile={null}
-        hosts={getAvailableHosts()}
+        hosts={getAvailableHosts()} // Call the function to get hosts
       />
     </div>
   );

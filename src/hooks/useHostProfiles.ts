@@ -47,8 +47,8 @@ export function useHostProfiles() {
     return null;
   }, [profileCache]);
   
-  // Memoize host list with useMemo to prevent re-renders
-  const getAvailableHosts = useMemo((): Host[] => {
+  // Change this to a function that returns the host list - not a useMemo directly
+  const getAvailableHosts = useCallback((): Host[] => {
     return hosts.map(host => ({
       id: host.id,
       name: host.name,

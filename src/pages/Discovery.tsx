@@ -216,7 +216,7 @@ const Discovery = () => {
   const visibleServers = filteredServers.slice(0, visibleItems);
   const hasMore = visibleServers.length < filteredServers.length;
   const isSearching = searchQuery.trim().length > 0;
-  const availableHosts = getAvailableHosts();
+  const availableHosts = getAvailableHosts();  // Call the function to get hosts
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
