@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   FileText, Server, Trash2, AlertTriangle, 
@@ -238,7 +237,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50/80"
             onClick={handleDeleteHost}
           >
             <Trash2 className="h-4 w-4 mr-1" />
@@ -341,4 +340,3 @@ function Search(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-
