@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { StatusIndicator } from "@/components/status/StatusIndicator";
@@ -13,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
-import { useToast } from "@/hooks/use-toast";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -34,7 +32,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { toast } = useToast();
   
   const hasError = server.status === 'error';
   const isDisabled = hostConnectionStatus !== "connected";
@@ -52,20 +49,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       description: "The instance settings have been updated successfully."
     });
     setEditDialogOpen(false);
-  };
-
-  const handleRetryConnection = async (): Promise<boolean> => {
-    // This would normally call an API to retry the connection
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const success = Math.random() > 0.3;
-        if (success) {
-          // Update the server status to running
-          onStatusChange(server.id, true);
-        }
-        resolve(success);
-      }, 2000);
-    });
   };
 
   return <tr className={hasError ? "bg-red-50/30" : ""}>
@@ -132,13 +115,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         </div>
       </td>
       
-      <ServerErrorDialog 
-        open={errorDialogOpen} 
-        onOpenChange={setErrorDialogOpen} 
-        serverName={server.name} 
-        errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
-        onRetryConnection={handleRetryConnection}
-      />
+      <ServerErrorDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen} serverName={server.name} errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." />
       
       <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
         <DialogContent className="max-w-4xl h-[600px] flex flex-col">

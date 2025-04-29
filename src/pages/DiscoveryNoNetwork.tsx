@@ -13,30 +13,14 @@ const DiscoveryNoNetwork = () => {
   const handleRetry = () => {
     setIsRetrying(true);
     
-    // Simulate retry attempt with a network request delay
+    // Simulate retry attempt
     setTimeout(() => {
-      const success = Math.random() > 0.3;
+      setIsRetrying(false);
       
-      if (success) {
-        toast({
-          title: "Connection restored",
-          description: "Network connection is now available.",
-          type: "success"
-        });
-        
-        // Redirect to the discovery page after successful connection
-        setTimeout(() => {
-          navigate("/discovery");
-        }, 1000);
-      } else {
-        setIsRetrying(false);
-        
-        toast({
-          title: "Connection failed",
-          description: "Unable to establish connection. Please try again later.",
-          type: "error"
-        });
-      }
+      toast({
+        title: "Connection failed",
+        description: "Unable to establish connection. Please try again later.",
+      });
     }, 2000);
   };
 

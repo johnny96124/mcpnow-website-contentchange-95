@@ -1,8 +1,7 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { WifiOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 
 interface NoNetworkStateProps {
   onRetry: () => void;
@@ -13,20 +12,6 @@ export const NoNetworkState = ({
   onRetry,
   isRetrying
 }: NoNetworkStateProps) => {
-  const { toast } = useToast();
-  
-  const handleRetry = () => {
-    if (isRetrying) return;
-    
-    onRetry();
-    
-    // Optional: Show a toast when retry begins
-    toast({
-      title: "Checking connection",
-      description: "Attempting to reconnect to the network...",
-    });
-  };
-  
   return (
     <div className="flex flex-col items-center justify-center p-12 rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 w-full animate-fade-in">
       <div className="flex flex-col items-center gap-6 text-center max-w-md">
@@ -39,7 +24,7 @@ export const NoNetworkState = ({
         </div>
         <div className="mt-2">
           <Button 
-            onClick={handleRetry} 
+            onClick={onRetry} 
             className="min-w-[140px] bg-blue-600 hover:bg-blue-700" 
             disabled={isRetrying}
           >
