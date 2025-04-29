@@ -50,7 +50,6 @@ export interface ServerInstance {
   url?: string;
   headers?: Record<string, string>;
   enabled: boolean;
-  isCustom?: boolean;
 }
 
 export const serverDefinitions: ServerDefinition[];
