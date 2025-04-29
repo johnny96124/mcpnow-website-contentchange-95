@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { 
   Calendar,
@@ -21,7 +20,8 @@ import {
   Users,
   Watch,
   Wrench,
-  X
+  X,
+  Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -585,8 +585,8 @@ const Discovery = () => {
                           }}
                           className="bg-blue-600 hover:bg-blue-700 h-8 relative z-10"
                         >
-                          <Download className="h-3.5 w-3.5 mr-1" />
-                          Install
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          Add
                         </Button>
                       )}
                     </div>
@@ -812,8 +812,8 @@ const Discovery = () => {
                                 </>
                               ) : (
                                 <>
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Install Server
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Server
                                 </>
                               )}
                             </Button>
