@@ -86,7 +86,7 @@ export function AddServerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Server</DialogTitle>
+          <DialogTitle>Add Custom Server</DialogTitle>
           <DialogDescription>
             Create a new server instance from available server definitions
           </DialogDescription>
