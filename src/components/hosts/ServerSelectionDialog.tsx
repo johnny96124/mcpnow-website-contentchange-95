@@ -120,7 +120,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex justify-between items-center text-base">
+            <DialogTitle className="flex justify-between items-center">
               <span>Select Server</span>
               <Button 
                 variant="outline" 
@@ -130,7 +130,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 Add Custom
               </Button>
             </DialogTitle>
-            <DialogDescription className="text-xs">
+            <DialogDescription>
               Choose a server to add to your profile
             </DialogDescription>
           </DialogHeader>
@@ -142,14 +142,14 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 placeholder="Search servers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 text-sm"
+                className="pl-8"
               />
             </div>
             
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="discovery" className="text-xs">Discovery</TabsTrigger>
-                <TabsTrigger value="added" className="text-xs">Added</TabsTrigger>
+                <TabsTrigger value="discovery">Discovery</TabsTrigger>
+                <TabsTrigger value="added">Added</TabsTrigger>
               </TabsList>
             </Tabs>
 
@@ -167,7 +167,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                       <ServerLogo name={server.name} className="flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-sm truncate">{server.name}</h4>
+                          <h4 className="font-medium truncate">{server.name}</h4>
                           {selectedTab === "discovery" ? (
                             <EndpointLabel type={(server as ServerDefinition).type} />
                           ) : (
@@ -176,7 +176,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                         </div>
                         {(selectedTab === "discovery" && 'description' in server || 
                          selectedTab === "added" && server.description) && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {selectedTab === "discovery" 
                               ? (server as any).description 
                               : server.description}
@@ -189,7 +189,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
 
                 {filteredServers.length === 0 && (
                   <div className="text-center py-8 border border-dashed rounded-md">
-                    <p className="text-sm text-muted-foreground">No servers found</p>
+                    <p className="text-muted-foreground">No servers found</p>
                   </div>
                 )}
               </div>
