@@ -1,16 +1,14 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Monitor, PlusCircle, Workflow, ArrowRight } from "lucide-react";
-
 interface HostsEmptyStateProps {
   onAddHost: () => void;
 }
-
-export const HostsEmptyState: React.FC<HostsEmptyStateProps> = ({ onAddHost }) => {
-  return (
-    <div className="max-w-4xl mx-auto py-10">
+export const HostsEmptyState: React.FC<HostsEmptyStateProps> = ({
+  onAddHost
+}) => {
+  return <div className="max-w-4xl mx-auto py-10">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold tracking-tight mb-2">Dashboard</h1>
         <p className="text-muted-foreground max-w-lg mx-auto">
@@ -79,11 +77,7 @@ export const HostsEmptyState: React.FC<HostsEmptyStateProps> = ({ onAddHost }) =
       </div>
       
       <div className="text-center">
-        <Button variant="outline" onClick={onAddHost} className="gap-2">
-          <PlusCircle className="h-4 w-4" />
-          Add Host
-        </Button>
+        
       </div>
-    </div>
-  );
+    </div>;
 };
