@@ -54,7 +54,8 @@ const TrayPopup = () => {
 
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
-  const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
+  // Track which host ID had its profile changed most recently
+  const [recentlyChangedHostId, setRecentlyChangedHostId] = useState<string | null>(null);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [currentErrorServer, setCurrentErrorServer] = useState<string>("");
   const [expandedHosts, setExpandedHosts] = useState<Record<string, boolean>>({});
@@ -70,12 +71,15 @@ const TrayPopup = () => {
     const profile = profiles.find(p => p.id === profileId);
     toast.success(`Profile changed to ${profile?.name}`);
 
-    setShowHostRefreshHint(true);
-    const timer = setTimeout(() => {
-      setShowHostRefreshHint(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    // Only set the recently changed host ID if the host is connected
+    const host = displayHosts.find(h => h.id === hostId);
+    if (host && host.connectionStatus === 'connected') {
+      setRecentlyChangedHostId(hostId);
+      const timer = setTimeout(() => {
+        setRecentlyChangedHostId(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
   };
 
   const initializeProfileInstances = (hostId: string, profileId: string) => {
@@ -287,6 +291,7 @@ const TrayPopup = () => {
               const visibleInstances = isExpanded ? instances : instances.slice(0, 3);
               const hasMoreInstances = instances.length > 3;
               const statusCounts = getInstanceStatusCounts(host.id);
+              const shouldShowRefreshHint = recentlyChangedHostId === host.id && isConnected;
               
               return (
                 <Card key={host.id} className="overflow-hidden shadow-sm">
@@ -304,7 +309,7 @@ const TrayPopup = () => {
                   </div>
                   
                   <div className="p-3 pt-2">
-                    {showHostRefreshHint && profileId && (
+                    {shouldShowRefreshHint && (
                       <HostRefreshHint className="mb-3" />
                     )}
                     
