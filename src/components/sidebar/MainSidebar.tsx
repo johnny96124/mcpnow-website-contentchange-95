@@ -1,10 +1,10 @@
-
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard,
   Settings, 
   HelpCircle,
   BookOpen,
+  Telescope,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -65,11 +65,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
               )
             }
           >
-            <img 
-              src="/lovable-uploads/0ad4c791-4d08-4e94-bbeb-3ac78aae67ef.png" 
-              alt="Discovery" 
-              className="h-4 w-4 mr-2" 
-            />
+            <Telescope className="h-4 w-4 mr-2" />
             {!collapsed && "Discovery"}
           </NavLink>
 
