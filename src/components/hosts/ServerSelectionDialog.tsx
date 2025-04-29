@@ -1,12 +1,8 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { serverDefinitions, type ServerInstance, type ServerDefinition } from "@/data/mockData";
+import { type ServerInstance } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
 
@@ -34,22 +30,11 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   }, [open]);
 
   const handleCreateServer = (serverData: any) => {
-    // Create a new server definition based on the serverData
-    const newDefinition: ServerDefinition = {
-      id: `def-${Date.now()}`,
-      name: serverData.name,
-      type: serverData.type,
-      version: "1.0.0",
-      description: serverData.description || "Custom server",
-      downloads: 0,
-      isOfficial: false
-    };
-    
     // Create a new server instance from the definition
     const newInstance: ServerInstance = {
       id: `instance-${Date.now()}`,
       name: serverData.name,
-      definitionId: newDefinition.id,
+      definitionId: `def-${Date.now()}`,
       status: "stopped",
       connectionDetails: serverData.url || serverData.commandArgs || "",
       enabled: false
@@ -78,10 +63,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
           <AddServerDialog
             open={showAddServerDialog}
             onOpenChange={setShowAddServerDialog}
-            onAddServer={(server) => {
-              onAddServers([server]);
-              onOpenChange(false);
-            }}
+            onCreateServer={handleCreateServer}
           />
           
           <DialogFooter className="flex justify-between">
