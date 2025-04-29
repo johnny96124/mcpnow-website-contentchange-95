@@ -627,199 +627,146 @@ const Discovery = () => {
                 </div>
               </div>
               
-              <Tabs 
-                value={activeDetailTab} 
-                onValueChange={setActiveDetailTab}
-                className="w-full flex-1 flex flex-col"
-              >
-                <div className="border-b border-gray-200 dark:border-gray-800">
-                  <TabsList className="bg-transparent px-6 pt-2 h-auto">
-                    <TabsTrigger 
-                      value="overview" 
-                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
-                    >
-                      <Info className="h-4 w-4 mr-2" />
-                      Overview
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="tools"
-                      className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 rounded-none px-3 pb-2"
-                    >
-                      <Wrench className="h-4 w-4 mr-2" />
-                      Tools
-                      {selectedServer.tools && selectedServer.tools.length > 0 && (
-                        <Badge className="ml-1.5 text-[10px] bg-blue-600/20 text-blue-700 dark:bg-blue-600/30 dark:text-blue-300 border-none">
-                          {selectedServer.tools.length}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-
-                <div className="flex-1 overflow-hidden">
-                  <TabsContent value="overview" className="mt-0 pt-0 h-[500px] overflow-auto">
-                    <div className="p-6 space-y-6">
-                      <div className="grid md:grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                          <div>
-                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                              Description
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">
-                              {selectedServer.description}
-                            </p>
-                          </div>
-                          
-                          <div>
-                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                              Author
-                            </h3>
-                            <div className="flex items-center">
-                              <UserRound className="h-4 w-4 mr-2 text-blue-600" />
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                              Features
-                            </h3>
-                            <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
-                              {selectedServer.features?.map((feature, index) => (
-                                <li key={index}>{feature}</li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          <div>
-                            <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
-                              Categories
-                            </h3>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedServer.categories?.map(category => (
-                                <Badge 
-                                  key={category} 
-                                  variant="outline" 
-                                  className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
-                                >
-                                  <Tag className="h-3 w-3 mr-1.5" />
-                                  {category}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+              <div className="h-[500px] overflow-auto">
+                <div className="p-6 space-y-6">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                          Description
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          {selectedServer.description}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                          Author
+                        </h3>
+                        <div className="flex items-center">
+                          <UserRound className="h-4 w-4 mr-2 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {selectedServer.author || `${selectedServer.name.split(' ')[0]} Team`}
+                          </span>
                         </div>
-                        
-                        <div className="space-y-6">
-                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
-                            <div>
-                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
-                              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
-                              </p>
-                            </div>
-                            
-                            <div>
-                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
-                              <div className="flex items-center">
-                                <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                                <span className="text-sm text-gray-800 dark:text-gray-200">
-                                  {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
-                              <a 
-                                href="#" 
-                                className="text-sm text-blue-600 flex items-center hover:underline"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Globe className="h-4 w-4 mr-2" />
-                                <span className="truncate">
-                                  {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                </span>
-                                <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-                              </a>
-                            </div>
-                          </div>
-                          
-                          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
-                            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
-                            
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.views || 1320)}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">Views</div>
-                              </div>
-                              
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.downloads || 240)}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">Downloads</div>
-                              </div>
-                              
-                              <div className="bg-white dark:bg-gray-900 rounded-md p-3">
-                                <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
-                                  {formatNumber(selectedServer.watches || 58)}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">Stars</div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {!installedServers[selectedServer.id] ? (
-                            <Button 
-                              className="w-full bg-blue-600 hover:bg-blue-700 py-5"
-                              onClick={() => handleAddServer(selectedServer.id)}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add Server
-                            </Button>
-                          ) : (
-                            <Button 
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                          Features
+                        </h3>
+                        <ul className="list-disc list-inside space-y-1.5 text-sm text-gray-600 dark:text-gray-300 pl-1">
+                          {selectedServer.features?.map((feature, index) => (
+                            <li key={index}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-base font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                          Categories
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedServer.categories?.map(category => (
+                            <Badge 
+                              key={category} 
                               variant="outline" 
-                              className="w-full border-green-200 bg-green-50 text-green-600 hover:bg-green-100 py-5"
-                              onClick={handleNavigateToServers}
+                              className="bg-blue-50 border-blue-100 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 text-xs px-3 py-0.5 rounded-full"
                             >
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Server Added
-                            </Button>
-                          )}
+                              <Tag className="h-3 w-3 mr-1.5" />
+                              {category}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="tools" className="mt-0 pt-0 h-[500px] overflow-auto">
-                    <div className="p-6">
-                      {selectedServer.tools && selectedServer.tools.length > 0 ? (
-                        <ServerToolsList 
-                          tools={selectedServer.tools} 
-                          isDiscoveryView={true}
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-16 text-center">
-                          <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-4 mb-4">
-                            <Wrench className="h-8 w-8 text-gray-400" />
-                          </div>
-                          <h3 className="text-lg font-semibold mb-2">No tools available</h3>
-                          <p className="text-muted-foreground max-w-md">
-                            This server definition does not include any custom tools or utilities.
+                    
+                    <div className="space-y-6">
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5 space-y-4">
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Version</h3>
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            {selectedServer.version || (Math.random() > 0.5 ? '1.5.0' : '0.9.5')}
                           </p>
                         </div>
+                        
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Last Updated</h3>
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                            <span className="text-sm text-gray-800 dark:text-gray-200">
+                              {selectedServer.updated ? new Date(selectedServer.updated).toLocaleDateString() : 'April 3, 2025'}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Repository</h3>
+                          <a 
+                            href="#" 
+                            className="text-sm text-blue-600 flex items-center hover:underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            <span className="truncate">
+                              {selectedServer.repository || `github.com/${selectedServer.name.toLowerCase().replace(/\s+/g, '-')}`}
+                            </span>
+                            <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 dark:bg-gray-800/50 rounded-md p-5">
+                        <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">Usage Statistics</h3>
+                        
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                            <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                              {formatNumber(selectedServer.views || 1320)}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Views</div>
+                          </div>
+                          
+                          <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                            <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                              {formatNumber(selectedServer.downloads || 240)}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Downloads</div>
+                          </div>
+                          
+                          <div className="bg-white dark:bg-gray-900 rounded-md p-3">
+                            <div className="text-xl font-bold text-gray-800 dark:text-gray-200">
+                              {formatNumber(selectedServer.watches || 58)}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">Stars</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {!installedServers[selectedServer.id] ? (
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700 py-5"
+                          onClick={() => handleAddServer(selectedServer.id)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Server
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-green-200 bg-green-50 text-green-600 hover:bg-green-100 py-5"
+                          onClick={handleNavigateToServers}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Server Added
+                        </Button>
                       )}
                     </div>
-                  </TabsContent>
+                  </div>
                 </div>
-              </Tabs>
+              </div>
             </div>
           )}
         </DialogContent>

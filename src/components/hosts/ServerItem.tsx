@@ -103,10 +103,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Server Info" onClick={() => setDetailsDialogOpen(true)}>
             <Info className="h-4 w-4" />
           </Button>
-
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50" title="Server Tools" onClick={() => setToolsDialogOpen(true)}>
-            <Wrench className="h-4 w-4" />
-          </Button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,28 +133,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." 
         onRetry={handleRetryConnection}
       />
-      
-      <Dialog open={toolsDialogOpen} onOpenChange={setToolsDialogOpen}>
-        <DialogContent className="max-w-4xl h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Wrench className="h-5 w-5 text-purple-500" />
-              Server Tools - {server.name}
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Debug, execute tools, and view message history for this server instance
-            </p>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden py-4">
-            <ServerToolsList tools={definition?.tools} debugMode={true} serverName={server.name} instanceId={server.id} />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setToolsDialogOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       
       <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
 
