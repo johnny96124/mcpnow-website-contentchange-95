@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
 import { SearchIcon } from "lucide-react";
@@ -266,11 +265,16 @@ const Hosts = () => {
     setHasSeenOnboarding(true);
   };
 
+  // Updated this function to be used when clicking the "Add your First Host" button
+  const handleOpenAddHostDialog = () => {
+    setUnifiedHostDialogOpen(true);
+  };
+
   // Render appropriate content based on state
   if (!hasSeenOnboarding) {
     return (
       <Welcome 
-        onAddHosts={() => setUnifiedHostDialogOpen(true)} 
+        onAddHosts={handleOpenAddHostDialog} 
         onSkip={handleCompleteOnboarding}
       />
     );
@@ -278,7 +282,7 @@ const Hosts = () => {
 
   if (hostsList.length === 0) {
     return (
-      <HostsEmptyState onAddHost={() => setUnifiedHostDialogOpen(true)} />
+      <HostsEmptyState onAddHost={handleOpenAddHostDialog} />
     );
   }
 
@@ -291,7 +295,7 @@ const Hosts = () => {
             Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
-        <Button onClick={() => setUnifiedHostDialogOpen(true)}>
+        <Button onClick={handleOpenAddHostDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add Host
         </Button>
