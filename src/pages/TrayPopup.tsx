@@ -183,7 +183,8 @@ const TrayPopup = () => {
   const getInstanceStatusCounts = (hostId: string) => {
     if (!instanceStatuses[hostId]) return { active: 0, connecting: 0, error: 0, total: 0 };
     
-    const instances = instanceStatuses[hostId].filter(instance => instance.enabled);
+    // Count all instances, not just enabled ones
+    const instances = instanceStatuses[hostId];
     
     return {
       active: instances.filter(i => i.status === 'running').length,
@@ -235,7 +236,8 @@ const TrayPopup = () => {
               const profileId = selectedProfileIds[host.id] || '';
               const profile = profiles.find(p => p.id === profileId);
               const isConnected = host.connectionStatus === 'connected';
-              const instances = (instanceStatuses[host.id] || []).filter(instance => instance.enabled);
+              // Show all instances, including disabled ones
+              const instances = instanceStatuses[host.id] || [];
               const isExpanded = expandedHosts[host.id] || false;
               const visibleInstances = isExpanded ? instances : instances.slice(0, 3);
               const hasMoreInstances = instances.length > 3;
@@ -338,7 +340,7 @@ const TrayPopup = () => {
                                 </div>
                                 
                                 <Switch 
-                                  checked={status === 'running' || status === 'connecting' || status === 'error'} 
+                                  checked={instance.enabled} 
                                   onCheckedChange={() => toggleInstanceEnabled(host.id, instance.id)}
                                 />
                               </div>
