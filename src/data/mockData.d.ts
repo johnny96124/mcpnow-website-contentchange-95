@@ -21,6 +21,7 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
+  version?: string;
 }
 
 export interface Tool {
