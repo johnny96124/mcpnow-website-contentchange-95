@@ -4,14 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Form,
   FormControl,
   FormField,
@@ -83,107 +75,96 @@ export function AddServerDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Add Custom Server</DialogTitle>
-          <DialogDescription>
-            Create a new server instance from available server definitions
-          </DialogDescription>
-        </DialogHeader>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Server Name</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter server name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Server Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Enter server name" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="definitionId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Server Definition</FormLabel>
-                  <FormControl>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={(value) => handleDefinitionChange(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a server definition" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {serverDefinitions.map(definition => (
-                          <SelectItem key={definition.id} value={definition.id}>
-                            <div className="flex items-center gap-2">
-                              {definition.icon && (
-                                <span>{definition.icon}</span>
-                              )}
-                              <span>{definition.name}</span>
-                              <span className="text-muted-foreground text-xs">v{definition.version}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  {selectedDefinition && (
-                    <div className="mt-2 text-sm">
-                      <p className="text-muted-foreground">{selectedDefinition.description}</p>
-                      {selectedDefinition.categories && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {selectedDefinition.categories.map(category => (
-                            <Badge key={category} variant="secondary" className="text-xs">
-                              {category}
-                            </Badge>
-                          ))}
+        <FormField
+          control={form.control}
+          name="definitionId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Server Definition</FormLabel>
+              <FormControl>
+                <Select 
+                  value={field.value} 
+                  onValueChange={(value) => handleDefinitionChange(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a server definition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serverDefinitions.map(definition => (
+                      <SelectItem key={definition.id} value={definition.id}>
+                        <div className="flex items-center gap-2">
+                          {definition.icon && (
+                            <span>{definition.icon}</span>
+                          )}
+                          <span>{definition.name}</span>
+                          <span className="text-muted-foreground text-xs">v{definition.version}</span>
                         </div>
-                      )}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              {selectedDefinition && (
+                <div className="mt-2 text-sm">
+                  <p className="text-muted-foreground">{selectedDefinition.description}</p>
+                  {selectedDefinition.categories && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedDefinition.categories.map(category => (
+                        <Badge key={category} variant="secondary" className="text-xs">
+                          {category}
+                        </Badge>
+                      ))}
                     </div>
                   )}
-                  <FormMessage />
-                </FormItem>
+                </div>
               )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="connectionDetails"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Connection Details</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Enter connection URL or details"
-                      rows={2}
-                      className="resize-none"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="connectionDetails"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Connection Details</FormLabel>
+              <FormControl>
+                <Textarea 
+                  {...field} 
+                  placeholder="Enter connection URL or details"
+                  rows={2}
+                  className="resize-none"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <DialogFooter className="pt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
-                Cancel
-              </Button>
-              <Button type="submit">Add Server</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} type="button">
+            Cancel
+          </Button>
+          <Button type="submit">Add Server</Button>
+        </div>
+      </form>
+    </Form>
   );
 }
