@@ -255,8 +255,8 @@ const Hosts = () => {
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hosts</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Hosts</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Manage host connections and server associations
           </p>
         </div>
@@ -301,7 +301,7 @@ const Hosts = () => {
                         <span className="text-xl">{host.icon || '🖥️'}</span>
                       </div>
                       <div>
-                        <p className="font-medium">{host.name}</p>
+                        <p className="font-medium text-sm">{host.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {host.connectionStatus === "connected" 
                             ? "Connected" 
@@ -320,15 +320,15 @@ const Hosts = () => {
             </div>
           ) : (
             <div className="text-center py-8 border border-dashed rounded-md">
-              <p className="text-muted-foreground mb-2">No results for "{searchQuery}"</p>
-              <Button variant="link" onClick={() => setSearchQuery("")}>Clear search</Button>
+              <p className="text-sm text-muted-foreground mb-2">No results for "{searchQuery}"</p>
+              <Button variant="link" onClick={() => setSearchQuery("")} className="text-xs">Clear search</Button>
             </div>
           )}
           
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
             <CardContent className="p-4 text-center space-y-2">
               <Plus className="h-6 w-6 mx-auto text-muted-foreground" />
-              <p className="text-sm font-medium">Add New Host</p>
+              <p className="text-xs font-medium">Add New Host</p>
             </CardContent>
           </Card>
         </div>
@@ -353,8 +353,8 @@ const Hosts = () => {
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">
               <Info className="h-8 w-8 mx-auto text-muted-foreground" />
-              <h3 className="text-lg font-medium">No Host Selected</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-base font-medium">No Host Selected</h3>
+              <p className="text-sm text-muted-foreground">
                 Select a host from the list or add a new host to get started
               </p>
               <Button onClick={() => setUnifiedHostDialogOpen(true)}>Add Host</Button>
