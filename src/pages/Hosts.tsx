@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Info, AlertCircle } from "lucide-react";
+import { Plus, Info, X } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -13,7 +14,6 @@ import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
-import { ServerErrorDialog } from "@/components/hosts/new-layout/ServerErrorDialog";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -39,13 +39,12 @@ const Hosts = () => {
     }
   }, [hasSeenOnboarding]);
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
   const [serverInstances, setServerInstances] = useState<ServerInstance[]>(initialServerInstances);
   const [profilesList, setProfilesList] = useState<Profile[]>(initialProfiles);
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [selectedErrorServer, setSelectedErrorServer] = useState<ServerInstance | null>(null);
 
   const {
     hostProfiles,
@@ -61,6 +60,7 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
+  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
@@ -265,13 +265,9 @@ const Hosts = () => {
     setHasSeenOnboarding(true);
   };
 
+  // Updated this function to be used when clicking the "Add your First Host" button
   const handleOpenAddHostDialog = () => {
     setUnifiedHostDialogOpen(true);
-  };
-
-  const handleViewServerError = (server: ServerInstance) => {
-    setSelectedErrorServer(server);
-    setErrorDialogOpen(true);
   };
 
   // Render appropriate content based on state
@@ -305,40 +301,61 @@ const Hosts = () => {
         </Button>
       </div>
       
-      {/* Search section removed */}
+      <div className="relative">
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search hosts..."
+          className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+            onClick={() => setSearchQuery("")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
       
       <div className="grid gap-6 md:grid-cols-4">
         <div className="space-y-4">
-          <div className="space-y-2">
-            {hostsList.map(host => (
-              <Card 
-                key={host.id}
-                className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedHostId === host.id ? 'border-primary bg-primary/5' : ''}`}
-                onClick={() => setSelectedHostId(host.id)}
-              >
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-muted/30 p-2 rounded-full">
-                      <span className="text-xl">{host.icon || '🖥️'}</span>
+          {filteredHosts.length > 0 ? (
+            <div className="space-y-2">
+              {filteredHosts.map(host => (
+                <Card 
+                  key={host.id}
+                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedHostId === host.id ? 'border-primary bg-primary/5' : ''}`}
+                  onClick={() => setSelectedHostId(host.id)}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-muted/30 p-2 rounded-full">
+                        <span className="text-xl">{host.icon || '🖥️'}</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{host.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {host.connectionStatus === "connected" 
+                            ? "Connected" 
+                            : "Disconnected"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{host.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {host.connectionStatus === "connected" 
-                          ? "Connected" 
-                          : "Disconnected"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className={`w-3 h-3 rounded-full ${
-                    host.connectionStatus === "connected" 
-                      ? 'bg-green-500' 
-                      : 'bg-neutral-400'
-                  }`} />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      host.connectionStatus === "connected" 
+                        ? 'bg-green-500' 
+                        : 'bg-neutral-400'
+                    }`} />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <NoSearchResults query={searchQuery} onClear={() => setSearchQuery("")} entityName="hosts" />
+          )}
           
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
             <CardContent className="p-4 text-center space-y-2">
@@ -364,7 +381,6 @@ const Hosts = () => {
               onCreateProfile={handleCreateProfile}
               onDeleteProfile={handleDeleteProfile}
               onAddServersToProfile={handleAddServersToProfile}
-              onViewServerError={handleViewServerError}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">
@@ -398,18 +414,6 @@ const Hosts = () => {
         isFixMode={configDialog.isFixMode} 
         isUpdateMode={configDialog.isUpdateMode} 
         isCreateMode={configDialog.isCreateMode}
-      />
-
-      <ServerErrorDialog
-        open={errorDialogOpen}
-        onOpenChange={setErrorDialogOpen}
-        server={selectedErrorServer}
-        errorDetails={selectedErrorServer?.status === 'error' ? "Connection error occurred" : "Connection error occurred"}
-        onRetry={(serverId) => {
-          // Simulate retry logic
-          return Promise.resolve(Math.random() > 0.3);
-        }}
-        onStatusChange={handleServerStatusChange}
       />
     </div>
   );

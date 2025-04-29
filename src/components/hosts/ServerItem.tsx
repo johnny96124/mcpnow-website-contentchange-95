@@ -20,7 +20,6 @@ interface ServerItemProps {
   load: number;
   onStatusChange: (serverId: string, enabled: boolean) => void;
   onRemoveFromProfile: (serverId: string) => void;
-  onViewServerError?: (server: ServerInstance) => void;
 }
 
 export const ServerItem: React.FC<ServerItemProps> = ({
@@ -28,8 +27,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   hostConnectionStatus,
   load,
   onStatusChange,
-  onRemoveFromProfile,
-  onViewServerError
+  onRemoveFromProfile
 }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
@@ -68,14 +66,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
     });
   };
 
-  const handleViewError = () => {
-    if (onViewServerError) {
-      onViewServerError(server);
-    } else {
-      setErrorDialogOpen(true);
-    }
-  };
-
   return <tr className={hasError ? "bg-red-50/30" : ""}>
       <td className="p-4 align-middle">
         <div className="flex items-center gap-2">
@@ -85,23 +75,15 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           <div className="flex items-center gap-1.5">
             <div className="font-medium">{server.name}</div>
             {hasError && (
-              <div className="flex items-center">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50 p-0" 
-                  title="Server Error" 
-                  onClick={handleViewError}
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                </Button>
-                <span 
-                  className="text-xs text-red-600 hover:underline cursor-pointer font-medium"
-                  onClick={handleViewError}
-                >
-                  View Details
-                </span>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50 p-0" 
+                title="Server Error" 
+                onClick={() => setErrorDialogOpen(true)}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+              </Button>
             )}
           </div>
         </div>
@@ -139,7 +121,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
                 Edit Instance
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-neutral-500" onClick={handleRemove}>
+              <DropdownMenuItem className="text-red-600" onClick={handleRemove}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Remove from Profile
               </DropdownMenuItem>
