@@ -1,14 +1,6 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { Profile } from "@/data/mockData";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-
 interface ProfileDropdownProps {
   profiles: Profile[];
   currentProfileId: string;
@@ -24,7 +15,6 @@ interface ProfileDropdownProps {
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
 }
-
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   profiles,
   currentProfileId,
@@ -36,9 +26,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newProfileName, setNewProfileName] = useState("");
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
-  
   const currentProfile = profiles.find(p => p.id === currentProfileId);
-  
   const handleProfileCreate = () => {
     if (!newProfileName.trim()) {
       toast({
@@ -48,11 +36,9 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
       return;
     }
-    
     const profileId = onCreateProfile(newProfileName);
     setNewProfileName("");
     setCreateDialogOpen(false);
-    
     if (profileId) {
       onProfileChange(profileId);
       toast({
@@ -62,17 +48,14 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
     }
   };
-  
   const confirmDeleteProfile = (profile: Profile) => {
     setProfileToDelete(profile);
     setDeleteDialogOpen(true);
   };
-  
   const handleProfileDelete = () => {
     if (profileToDelete) {
       onDeleteProfile(profileToDelete.id);
       setDeleteDialogOpen(false);
-      
       toast({
         title: "Profile deleted",
         description: `Profile "${profileToDelete.name}" has been deleted`,
@@ -80,9 +63,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
     }
   };
-  
-  return (
-    <>
+  return <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-1 h-8">
@@ -96,37 +77,22 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Select Profile</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {profiles.map((profile) => (
-            <DropdownMenuItem
-              key={profile.id}
-              className="flex justify-between items-center"
-              onSelect={(e) => { 
-                e.preventDefault();
-                if (profile.id !== currentProfileId) {
-                  onProfileChange(profile.id);
-                }
-              }}
-            >
+          {profiles.map(profile => <DropdownMenuItem key={profile.id} className="flex justify-between items-center" onSelect={e => {
+          e.preventDefault();
+          if (profile.id !== currentProfileId) {
+            onProfileChange(profile.id);
+          }
+        }}>
               <span className={profile.id === currentProfileId ? "font-medium" : ""}>
                 {profile.name}
               </span>
-              {profile.id === currentProfileId ? (
-                <Badge variant="secondary" className="ml-2">Current</Badge>
-              ) : (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-6 w-6 ml-2 opacity-50 hover:opacity-100"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    confirmDeleteProfile(profile);
-                  }}
-                >
+              {profile.id === currentProfileId ? <Badge variant="secondary" className="ml-2">Current</Badge> : <Button variant="ghost" size="icon" className="h-6 w-6 ml-2 opacity-50 hover:opacity-100" onClick={e => {
+            e.stopPropagation();
+            confirmDeleteProfile(profile);
+          }}>
                   <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
-            </DropdownMenuItem>
-          ))}
+                </Button>}
+            </DropdownMenuItem>)}
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => setCreateDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -147,12 +113,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="profile-name">Profile Name</Label>
-              <Input 
-                id="profile-name" 
-                placeholder="Enter profile name" 
-                value={newProfileName}
-                onChange={(e) => setNewProfileName(e.target.value)}
-              />
+              <Input id="profile-name" placeholder="Enter profile name" value={newProfileName} onChange={e => setNewProfileName(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
@@ -171,15 +132,11 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Profile</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this profile? This action cannot be undone.
-            </DialogDescription>
+            <DialogDescription>Are you sure you want to delete this profile? This action cannot be undone. Your servers will not be deleted after you delete this profile.</DialogDescription>
           </DialogHeader>
           <div className="py-2">
-            <p className="font-medium">{profileToDelete?.name}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Deleting this profile will remove all server associations, but will not delete the servers themselves.
-            </p>
+            
+            
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
@@ -191,6 +148,5 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
-  );
+    </>;
 };
