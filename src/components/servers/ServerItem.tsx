@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
 import { ServerDetailsDialog } from "@/components/hosts/ServerDetailsDialog";
 import { AddInstanceDialog } from "./AddInstanceDialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface ServerItemProps {
   server: ServerInstance;
