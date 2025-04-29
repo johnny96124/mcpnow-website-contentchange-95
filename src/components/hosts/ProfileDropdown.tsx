@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-
 interface ProfileDropdownProps {
   profiles: Profile[];
   currentProfileId: string;
@@ -17,7 +15,6 @@ interface ProfileDropdownProps {
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
 }
-
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   profiles,
   currentProfileId,
@@ -30,7 +27,6 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   const [newProfileName, setNewProfileName] = useState("");
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   const currentProfile = profiles.find(p => p.id === currentProfileId);
-  
   const handleProfileCreate = () => {
     if (!newProfileName.trim()) {
       toast({
@@ -40,11 +36,9 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
       return;
     }
-    
     const profileId = onCreateProfile(newProfileName);
     setNewProfileName("");
     setCreateDialogOpen(false);
-    
     if (profileId) {
       onProfileChange(profileId);
       toast({
@@ -54,12 +48,10 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
     }
   };
-  
   const confirmDeleteProfile = (profile: Profile) => {
     setProfileToDelete(profile);
     setDeleteDialogOpen(true);
   };
-  
   const handleProfileDelete = () => {
     if (profileToDelete) {
       onDeleteProfile(profileToDelete.id);
@@ -71,7 +63,6 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       });
     }
   };
-  
   return <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -141,10 +132,12 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Profile</DialogTitle>
-            <DialogDescription>
-              Deleting this profile will not affect any servers that have been added. Your servers will remain intact and can be accessed from other profiles.
-            </DialogDescription>
+            <DialogDescription>Are you sure you want to delete this profile? This action cannot be undone. Your servers will not be deleted after you delete this profile.</DialogDescription>
           </DialogHeader>
+          <div className="py-2">
+            
+            
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
               Cancel
