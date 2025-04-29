@@ -1,8 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
-  ChevronDown, 
-  User
+  ChevronDown,
+  ChevronUp,
+  User,
+  AlertTriangle,
+  Server
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +18,8 @@ import { toast } from "sonner";
 import { profiles, hosts, serverInstances, serverDefinitions } from "@/data/mockData";
 import { NoSearchResults } from "@/components/servers/NoSearchResults";
 import { HostRefreshHint } from "@/components/hosts/HostRefreshHint";
+import { ServerErrorDialog } from "@/components/hosts/ServerErrorDialog";
+import { Dialog } from "@/components/ui/dialog";
 
 interface InstanceStatus {
   id: string;
@@ -48,9 +54,10 @@ const TrayPopup = () => {
 
   const [instanceStatuses, setInstanceStatuses] = useState<Record<string, InstanceStatus[]>>({});
   
-  const [activeInstances, setActiveInstances] = useState<Record<string, Record<string, string>>>({});
-
   const [showHostRefreshHint, setShowHostRefreshHint] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [currentErrorServer, setCurrentErrorServer] = useState<string>("");
+  const [expandedHosts, setExpandedHosts] = useState<Record<string, boolean>>({});
 
   const handleProfileChange = (hostId: string, profileId: string) => {
     setSelectedProfileIds(prev => ({
@@ -161,37 +168,16 @@ const TrayPopup = () => {
     toast.success(`Server instance ${instanceStatuses[hostId]?.find(i => i.id === instanceId)?.enabled ? 'disabled' : 'enabled'}`);
   };
 
-  const getInstancesForHost = (hostId: string) => {
-    const profileId = selectedProfileIds[hostId];
-    if (!profileId) return [];
-    
-    const profile = profiles.find(p => p.id === profileId);
-    if (!profile) return [];
-    
-    const profileInstances = serverInstances.filter(instance => 
-      profile.instances.includes(instance.id)
-    );
-    
-    const groupedInstances: Record<string, typeof serverInstances> = {};
-    profileInstances.forEach(instance => {
-      if (!groupedInstances[instance.definitionId]) {
-        groupedInstances[instance.definitionId] = [];
-      }
-      groupedInstances[instance.definitionId].push(instance);
-    });
-    
-    return Object.entries(groupedInstances).map(([defId, instances]) => {
-      const definition = serverDefinitions.find(d => d.id === defId);
-      const activeInstanceId = activeInstances[hostId]?.[defId] || instances[0]?.id;
-      const status = instanceStatuses[hostId]?.find(s => s.id === activeInstanceId);
-      
-      return {
-        definition,
-        instances,
-        activeInstanceId,
-        status
-      };
-    });
+  const handleShowErrorDialog = (serverName: string) => {
+    setCurrentErrorServer(serverName);
+    setErrorDialogOpen(true);
+  };
+
+  const toggleExpandHost = (hostId: string) => {
+    setExpandedHosts(prev => ({
+      ...prev,
+      [hostId]: !prev[hostId]
+    }));
   };
 
   const getInstanceStatusCounts = (hostId: string) => {
@@ -249,7 +235,10 @@ const TrayPopup = () => {
               const profileId = selectedProfileIds[host.id] || '';
               const profile = profiles.find(p => p.id === profileId);
               const isConnected = host.connectionStatus === 'connected';
-              const instanceGroups = getInstancesForHost(host.id);
+              const instances = (instanceStatuses[host.id] || []).filter(instance => instance.enabled);
+              const isExpanded = expandedHosts[host.id] || false;
+              const visibleInstances = isExpanded ? instances : instances.slice(0, 3);
+              const hasMoreInstances = instances.length > 3;
               const statusCounts = getInstanceStatusCounts(host.id);
               
               return (
@@ -281,34 +270,24 @@ const TrayPopup = () => {
                         <SelectTrigger className="h-8 flex-1">
                           <SelectValue placeholder="Select profile">
                             {profile && (
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={profile.enabled ? 'active' : 'inactive'} 
-                                />
-                                <span>{profile.name}</span>
-                              </div>
+                              <span>{profile.name}</span>
                             )}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {profiles.map(profile => (
                             <SelectItem key={profile.id} value={profile.id}>
-                              <div className="flex items-center gap-2">
-                                <StatusIndicator 
-                                  status={profile.enabled ? 'active' : 'inactive'} 
-                                />
-                                <span>{profile.name}</span>
-                              </div>
+                              {profile.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     
-                    {profileId && instanceGroups.length > 0 && (
+                    {profileId && instances.length > 0 && (
                       <div className="mt-3">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs text-muted-foreground">Active server instances:</p>
+                          <p className="text-xs text-muted-foreground">Servers:</p>
                           <div className="flex items-center gap-2 text-xs">
                             {statusCounts.active > 0 && (
                               <div className="flex items-center gap-1.5">
@@ -331,55 +310,62 @@ const TrayPopup = () => {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          {instanceGroups.map(({ definition, instances, activeInstanceId, status }) => (
-                            <div key={definition?.id} className="flex items-center justify-between">
-                              <div className="flex-1 min-w-0 mr-2">
-                                <span className="text-xs font-medium truncate block">{definition?.name}</span>
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <Select
-                                  value={activeInstanceId}
-                                  onValueChange={(value) => {
-                                    setActiveInstances(prev => ({
-                                      ...prev,
-                                      [host.id]: {
-                                        ...(prev[host.id] || {}),
-                                        [definition?.id || ""]: value
-                                      }
-                                    }));
-                                  }}
-                                >
-                                  <SelectTrigger className="h-8 text-xs px-2 py-1 flex items-center gap-1 w-[120px]">
-                                    <StatusIndicator 
-                                      status={
-                                        !status?.enabled ? 'inactive' :
-                                        status.status === 'running' ? 'active' : 
-                                        status.status === 'connecting' ? 'warning' :
-                                        status.status === 'error' ? 'error' : 'inactive'
-                                      } 
-                                    />
-                                    <SelectValue className="truncate">
-                                      {instances.find(i => i.id === activeInstanceId)?.name.split('-').pop()}
-                                    </SelectValue>
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {instances.map(instance => (
-                                      <SelectItem key={instance.id} value={instance.id}>
-                                        {instance.name.split('-').pop()}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                          {visibleInstances.map((instance) => {
+                            const status = instance.status;
+                            const isError = status === 'error';
+                            
+                            return (
+                              <div key={instance.id} className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <StatusIndicator 
+                                    status={
+                                      status === 'running' ? 'active' : 
+                                      status === 'connecting' ? 'warning' :
+                                      status === 'error' ? 'error' : 'inactive'
+                                    } 
+                                  />
+                                  <span className="text-xs font-medium truncate">{instance.name}</span>
+                                  {isError && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-5 w-5 text-red-600 p-0"
+                                      onClick={() => handleShowErrorDialog(instance.name)}
+                                    >
+                                      <AlertTriangle className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                </div>
                                 
                                 <Switch 
-                                  checked={status?.enabled || false} 
-                                  onCheckedChange={() => toggleInstanceEnabled(host.id, activeInstanceId)}
+                                  checked={status === 'running' || status === 'connecting' || status === 'error'} 
+                                  onCheckedChange={() => toggleInstanceEnabled(host.id, instance.id)}
                                 />
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
+                        
+                        {hasMoreInstances && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full mt-2 text-xs flex items-center justify-center gap-1"
+                            onClick={() => toggleExpandHost(host.id)}
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="h-3 w-3" />
+                                <span>Collapse</span>
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-3 w-3" />
+                                <span>Show {instances.length - 3} more servers</span>
+                              </>
+                            )}
+                          </Button>
+                        )}
                       </div>
                     )}
                     
@@ -400,6 +386,14 @@ const TrayPopup = () => {
           </div>
         </div>
       </ScrollArea>
+      
+      <ServerErrorDialog 
+        open={errorDialogOpen}
+        onOpenChange={setErrorDialogOpen}
+        serverName={currentErrorServer}
+        errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured."
+        onRetry={() => Promise.resolve(false)}
+      />
     </div>
   );
 };
