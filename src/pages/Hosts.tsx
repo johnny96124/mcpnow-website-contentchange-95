@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
-import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -11,7 +10,6 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
-import { NoSearchResults } from "@/components/hosts/NoSearchResults";
 import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
 
@@ -39,7 +37,6 @@ const Hosts = () => {
     }
   }, [hasSeenOnboarding]);
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
@@ -60,7 +57,7 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
-  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredHosts = hostsList;
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
@@ -301,24 +298,7 @@ const Hosts = () => {
         </Button>
       </div>
       
-      <div className="relative">
-        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search hosts..."
-          className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button 
-            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-            onClick={() => setSearchQuery("")}
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
+      {/* Removed search input section */}
       
       <div className="grid gap-6 md:grid-cols-4">
         <div className="space-y-4">
@@ -354,7 +334,16 @@ const Hosts = () => {
               ))}
             </div>
           ) : (
-            <NoSearchResults query={searchQuery} onClear={() => setSearchQuery("")} entityName="hosts" />
+            <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed rounded-lg mb-6">
+              <Info className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-1">No hosts found</h3>
+              <p className="text-muted-foreground mb-4">
+                No hosts were found in your system
+              </p>
+              <Button variant="outline" onClick={handleOpenAddHostDialog}>
+                Add Host
+              </Button>
+            </div>
           )}
           
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
