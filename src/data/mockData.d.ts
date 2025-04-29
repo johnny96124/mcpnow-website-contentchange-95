@@ -1,4 +1,3 @@
-
 export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -44,12 +43,8 @@ export interface ServerInstance {
   definitionId: string;
   status: Status;
   connectionDetails: string;
-  requestCount?: number;
-  environment?: Record<string, string>;
-  arguments?: string[];
-  url?: string;
-  headers?: Record<string, string>;
   enabled: boolean;
+  isCustom?: boolean;
 }
 
 export const serverDefinitions: ServerDefinition[];

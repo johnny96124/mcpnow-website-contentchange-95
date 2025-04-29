@@ -13,6 +13,7 @@ import { serverDefinitions, type ServerInstance, type ServerDefinition, type End
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { AddServerDialog } from "@/components/servers/AddServerDialog";
+import { Badge } from "@/components/ui/badge";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -29,7 +30,8 @@ const existingInstances: Array<ServerInstance & { description?: string }> = [
     status: "stopped",
     connectionDetails: "https://localhost:5432",
     enabled: false,
-    description: "Local PostgreSQL database server instance"
+    description: "Local PostgreSQL database server instance",
+    isCustom: true
   },
   {
     id: "instance-2",
@@ -124,7 +126,8 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       definitionId: newDefinition.id,
       status: "stopped",
       connectionDetails: serverData.url || serverData.commandArgs || "",
-      enabled: false
+      enabled: false,
+      isCustom: true // Mark the server as custom
     };
 
     onAddServers([newInstance]);
@@ -201,6 +204,9 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                           <h4 className="font-medium truncate">{server.name}</h4>
                           {definition && (
                             <EndpointLabel type={definition.type} />
+                          )}
+                          {selectedTab === "added" && "isCustom" in server && server.isCustom && (
+                            <Badge variant="outline" className="text-xs">Custom</Badge>
                           )}
                         </div>
                         {(selectedTab === "discovery" && 'description' in server || 

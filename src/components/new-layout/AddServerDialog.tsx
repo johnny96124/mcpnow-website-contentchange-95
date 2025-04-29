@@ -64,6 +64,7 @@ export function AddServerDialog({
       status: "stopped",
       connectionDetails: values.connectionDetails || "http://localhost:8008/mcp",
       enabled: true,
+      isCustom: true, // Mark the server as custom
     };
 
     onAddServer(newServer);
@@ -84,11 +85,11 @@ export function AddServerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[550px] overflow-y-auto max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Add New Server</DialogTitle>
+          <DialogTitle>Add Custom Server</DialogTitle>
           <DialogDescription>
-            Create a new server instance from available server definitions
+            Create a custom server with your own configuration
           </DialogDescription>
         </DialogHeader>
         
@@ -113,14 +114,14 @@ export function AddServerDialog({
               name="definitionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Server Definition</FormLabel>
+                  <FormLabel>Server Type</FormLabel>
                   <FormControl>
                     <Select 
                       value={field.value} 
                       onValueChange={(value) => handleDefinitionChange(value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a server definition" />
+                        <SelectValue placeholder="Select a server type" />
                       </SelectTrigger>
                       <SelectContent>
                         {serverDefinitions.map(definition => (
