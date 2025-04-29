@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { serverDefinitions, type ServerInstance, type ServerDefinition, type EndpointType, type Status } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
+import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -50,6 +51,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   const [selectedTab, setSelectedTab] = useState("discovery");
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [showInstanceDialog, setShowInstanceDialog] = useState(false);
+  const [showCustomServerDialog, setShowCustomServerDialog] = useState(false);
   const { toast } = useToast();
 
   // Reset when dialog opens/closes
@@ -59,6 +61,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       setSelectedTab("discovery");
       setSelectedServer(null);
       setShowInstanceDialog(false);
+      setShowCustomServerDialog(false);
     }
   }, [open]);
 
@@ -98,6 +101,16 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
+  const handleAddCustomServer = (server: ServerInstance) => {
+    onAddServers([server]);
+    toast({
+      title: "Custom server added",
+      description: `${server.name} has been added to your profile`
+    });
+    setShowCustomServerDialog(false);
+    onOpenChange(false);
+  };
+
   const filteredServers = selectedTab === "added"
     ? existingInstances.filter(server =>
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -134,6 +147,14 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 <TabsTrigger value="added">Added</TabsTrigger>
               </TabsList>
             </Tabs>
+
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => setShowCustomServerDialog(true)}
+            >
+              + Add Custom Server
+            </Button>
 
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-4">
@@ -183,6 +204,12 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         onOpenChange={setShowInstanceDialog}
         serverDefinition={selectedServer}
         onCreateInstance={handleCreateInstance}
+      />
+
+      <AddServerDialog
+        open={showCustomServerDialog}
+        onOpenChange={setShowCustomServerDialog}
+        onAddServer={handleAddCustomServer}
       />
     </>
   );
