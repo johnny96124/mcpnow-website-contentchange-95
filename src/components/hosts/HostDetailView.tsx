@@ -23,6 +23,7 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface HostDetailViewProps {
   host: Host;
@@ -190,7 +191,28 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
             <span className="text-2xl">{host.icon || '🖥️'}</span>
           </div>
           <div>
-            <h2 className="text-xl font-semibold">{host.name}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold">{host.name}</h2>
+              {host.configPath && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full" 
+                        onClick={showConfigFile}
+                      >
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      View Configuration
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <StatusIndicator 
                 status={
@@ -208,16 +230,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                       : "Disconnected"
                 } 
               />
-              {host.configPath && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-xs text-muted-foreground" 
-                  onClick={showConfigFile}
-                >
-                  View Config
-                </Button>
-              )}
             </div>
           </div>
         </div>
@@ -329,3 +341,4 @@ function Search(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
