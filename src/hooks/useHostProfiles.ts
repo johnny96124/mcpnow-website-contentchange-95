@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { hosts, profiles, type Profile, type Host } from "@/data/mockData";
+import { useState, useEffect, useCallback } from "react";
+import { hosts, profiles, type Profile, type Host, type ConnectionStatus } from "@/data/mockData";
 
 export function useHostProfiles() {
   const [hostProfiles, setHostProfiles] = useState(
@@ -13,7 +13,6 @@ export function useHostProfiles() {
   const [profileCache, setProfileCache] = useState<Record<string, Profile | null>>({});
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   
-  // Initialize profile cache only once
   useEffect(() => {
     const initialCache = profiles.reduce((acc, profile) => {
       acc[profile.id] = profile;
@@ -24,12 +23,10 @@ export function useHostProfiles() {
     setAllProfiles(profiles);
   }, []);
   
-  // Memoize profile lookup with useMemo for better performance
   const getProfileById = useCallback((profileId: string): Profile | null => {
     return profileCache[profileId] || null;
   }, [profileCache]);
   
-  // Optimize profile change handler
   const handleProfileChange = useCallback((hostId: string, profileId: string) => {
     setHostProfiles(prev => ({
       ...prev,
@@ -37,18 +34,20 @@ export function useHostProfiles() {
     }));
   }, []);
 
-  // Optimize instance addition with proper memoization
   const addInstanceToProfile = useCallback((profileId: string, instanceId: string) => {
-    const profile = profileCache[profileId];
+    // Find the profile and add the instance to it
+    const profile = getProfileById(profileId);
     if (profile) {
+      // In a real app, this would make an API call to update the profile
+      // For this demo, we'll just update the local cache
       console.log(`Added instance ${instanceId} to profile ${profileId}`);
       return profile;
     }
     return null;
-  }, [profileCache]);
+  }, [getProfileById]);
   
-  // Change this to a function that returns the host list - not a useMemo directly
   const getAvailableHosts = useCallback((): Host[] => {
+    // Map hosts to include all required properties with proper typing
     return hosts.map(host => ({
       id: host.id,
       name: host.name,
@@ -56,6 +55,7 @@ export function useHostProfiles() {
       configStatus: (host.configStatus || "unconfigured") as "configured" | "misconfigured" | "unknown",
       icon: host.icon,
       profileId: host.profileId
+      // Removed the status property since it doesn't exist on the Host interface
     }));
   }, []);
   

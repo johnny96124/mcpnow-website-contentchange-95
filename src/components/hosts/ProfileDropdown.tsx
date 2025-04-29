@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo, memo } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -25,8 +25,7 @@ interface ProfileDropdownProps {
   onDeleteProfile: (profileId: string) => void;
 }
 
-// Memo-ize the ProfileDropdown component
-export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
+export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   profiles,
   currentProfileId,
   onProfileChange,
@@ -38,14 +37,9 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
   const [newProfileName, setNewProfileName] = useState("");
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
   
-  // Memoize current profile to prevent re-renders
-  const currentProfile = useMemo(() => 
-    profiles.find(p => p.id === currentProfileId),
-    [profiles, currentProfileId]
-  );
+  const currentProfile = profiles.find(p => p.id === currentProfileId);
   
-  // Use useCallback to memoize handlers
-  const handleProfileCreate = useCallback(() => {
+  const handleProfileCreate = () => {
     if (!newProfileName.trim()) {
       toast({
         title: "Invalid profile name",
@@ -67,14 +61,14 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
         type: "success"
       });
     }
-  }, [newProfileName, onCreateProfile, onProfileChange]);
+  };
   
-  const confirmDeleteProfile = useCallback((profile: Profile) => {
+  const confirmDeleteProfile = (profile: Profile) => {
     setProfileToDelete(profile);
     setDeleteDialogOpen(true);
-  }, []);
+  };
   
-  const handleProfileDelete = useCallback(() => {
+  const handleProfileDelete = () => {
     if (profileToDelete) {
       onDeleteProfile(profileToDelete.id);
       setDeleteDialogOpen(false);
@@ -85,16 +79,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
         type: "success"
       });
     }
-  }, [profileToDelete, onDeleteProfile]);
-  
-  // Reset form state when dialog opens
-  const handleCreateDialogOpenChange = useCallback((open: boolean) => {
-    setCreateDialogOpen(open);
-    if (!open) {
-      // Reset form state when dialog closes
-      setNewProfileName("");
-    }
-  }, []);
+  };
   
   return (
     <>
@@ -151,7 +136,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
       </DropdownMenu>
       
       {/* Create Profile Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Profile</DialogTitle>
@@ -208,7 +193,4 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = memo(({
       </Dialog>
     </>
   );
-});
-
-// Add display name for React DevTools
-ProfileDropdown.displayName = "ProfileDropdown";
+};

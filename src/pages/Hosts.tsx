@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
 import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 
-// Move this outside component to prevent recreating on each render
 const mockJsonConfig = {
   "mcpServers": {
     "mcpnow": {
@@ -52,40 +51,25 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
-  // Memoize filtered hosts to prevent re-renders
-  const filteredHosts = useMemo(() => 
-    hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [hostsList, searchQuery]
-  );
-  
-  // Memoize selected host to prevent re-renders
-  const selectedHost = useMemo(() => 
-    selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null,
-    [selectedHostId, hostsList]
-  );
-  
-  const selectedProfileId = useMemo(() => 
-    selectedHost ? hostProfiles[selectedHost.id] || "" : "",
-    [selectedHost, hostProfiles]
-  );
+  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
+  const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
-  // Select the first host if none is selected
   useEffect(() => {
     if (hostsList.length > 0 && !selectedHostId) {
       setSelectedHostId(hostsList[0].id);
     }
   }, [hostsList, selectedHostId]);
 
-  // Use useCallback for event handlers to prevent recreation on each render
-  const handleCreateConfigDialog = useCallback((hostId: string) => {
+  const handleCreateConfigDialog = (hostId: string) => {
     const host = hostsList.find(h => h.id === hostId);
     if (host) {
       const defaultConfigPath = `/Users/user/.mcp/hosts/${host.name.toLowerCase().replace(/\s+/g, '-')}.json`;
       openConfigDialog(hostId, defaultConfigPath, 'http://localhost:8008/mcp', true, true, false, false, true, true);
     }
-  }, [hostsList, openConfigDialog]);
+  };
 
-  const handleUpdateConfig = useCallback((config: string, configPath: string) => {
+  const handleUpdateConfig = (config: string, configPath: string) => {
     if (configDialog.hostId) {
       setHostsList(prev => prev.map(host => host.id === configDialog.hostId ? {
         ...host,
@@ -96,93 +80,78 @@ const Hosts = () => {
       
       const host = hostsList.find(h => h.id === configDialog.hostId);
       if (host) {
-        // Optimize this by making it asynchronous
-        setTimeout(() => {
-          const profileId = handleCreateProfile(`${host.name} Profile`);
-          updateProfileInHook(host.id, profileId);
-          
-          toast({
-            title: "Configuration complete",
-            description: "Host has been configured and is ready to use.",
-            type: "success"
-          });
-        }, 0);
+        const profileId = handleCreateProfile(`${host.name} Profile`);
+        updateProfileInHook(host.id, profileId);
+        
+        toast({
+          title: "Configuration complete",
+          description: "Host has been configured and is ready to use.",
+          type: "success"
+        });
       }
     }
     resetConfigDialog();
-  }, [configDialog.hostId, hostsList, resetConfigDialog, toast, updateProfileInHook]);
+  };
 
-  const handleAddHosts = useCallback((newHosts: Host[]) => {
-    // Clone hosts to avoid mutation issues
-    const hostsToAdd = [...newHosts];
+  const handleAddHosts = (newHosts: Host[]) => {
+    const hostsWithProfiles = newHosts.map(host => {
+      const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
+      
+      return {
+        ...host,
+        profileId
+      };
+    });
+
+    setHostsList(prev => [...prev, ...hostsWithProfiles]);
     
-    // Use batch update to avoid multiple re-renders
-    setTimeout(() => {
-      const hostsWithProfiles = hostsToAdd.map(host => {
-        const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
-        
-        return {
-          ...host,
-          profileId
-        };
-      });
-  
-      setHostsList(prev => [...prev, ...hostsWithProfiles]);
-      
-      if (hostsWithProfiles.length > 0) {
-        setSelectedHostId(hostsWithProfiles[0].id);
-        
-        hostsWithProfiles.forEach(host => {
-          if (host.profileId) {
-            updateProfileInHook(host.id, host.profileId);
-          }
-        });
+    setSelectedHostId(hostsWithProfiles[0].id);
+    
+    hostsWithProfiles.forEach(host => {
+      if (host.profileId) {
+        updateProfileInHook(host.id, host.profileId);
       }
-      
-      toast({
-        title: "Hosts Added",
-        description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
-      });
-    }, 0);
-  }, [toast, updateProfileInHook]);
+    });
+    
+    toast({
+      title: "Hosts Added",
+      description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
+    });
+  };
 
-  const handleAddServersToHost = useCallback(() => {
+  const handleAddServersToHost = () => {
     toast({
       title: "Add servers",
       description: "Select servers to add to this profile"
     });
-  }, [toast]);
+  };
   
-  const handleServerStatusChange = useCallback((serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
+  const handleServerStatusChange = (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => {
     setServerInstances(prev => prev.map(server => server.id === serverId ? {
       ...server,
       status
     } : server));
-  }, []);
+  };
   
-  const handleSaveProfileChanges = useCallback(() => {
+  const handleSaveProfileChanges = () => {
     toast({
       title: "Profile Saved",
       description: "Changes to profile have been saved."
     });
-  }, [toast]);
+  };
   
-  const handleProfileChange = useCallback((profileId: string) => {
+  const handleProfileChange = (profileId: string) => {
     if (selectedHost) {
-      // Optimize by running in next tick
-      setTimeout(() => {
-        updateProfileInHook(selectedHost.id, profileId);
-        
-        toast({
-          title: "Profile Changed",
-          description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
-        });
-      }, 0);
+      updateProfileInHook(selectedHost.id, profileId);
+      
+      toast({
+        title: "Profile Changed",
+        description: `Profile has been changed to "${profilesList.find(p => p.id === profileId)?.name}"`
+      });
     }
-  }, [selectedHost, updateProfileInHook, toast, profilesList]);
+  };
   
-  // Optimize profile creation to avoid unnecessary re-renders
-  const handleCreateProfile = useCallback((profileName: string) => {
+  const handleCreateProfile = (profileName: string) => {
     const newProfileId = `profile-${Date.now()}`;
     const newProfile: Profile = {
       id: newProfileId,
@@ -193,7 +162,6 @@ const Hosts = () => {
       instances: []
     };
     
-    // Batch state update to avoid render thrashing
     setProfilesList(prev => [...prev, newProfile]);
     
     toast({
@@ -202,9 +170,9 @@ const Hosts = () => {
     });
     
     return newProfileId;
-  }, [toast]);
+  };
   
-  const handleDeleteProfile = useCallback((profileId: string) => {
+  const handleDeleteProfile = (profileId: string) => {
     if (profilesList.length <= 1) {
       toast({
         title: "Cannot delete profile",
@@ -214,25 +182,22 @@ const Hosts = () => {
       return;
     }
     
-    // Batch update for better performance
-    setTimeout(() => {
-      setProfilesList(prev => prev.filter(p => p.id !== profileId));
-      
-      if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
-        const otherProfile = profilesList.find(p => p.id !== profileId);
-        if (otherProfile) {
-          updateProfileInHook(selectedHost.id, otherProfile.id);
-        }
+    setProfilesList(prev => prev.filter(p => p.id !== profileId));
+    
+    if (selectedHost && hostProfiles[selectedHost.id] === profileId) {
+      const otherProfile = profilesList.find(p => p.id !== profileId);
+      if (otherProfile) {
+        updateProfileInHook(selectedHost.id, otherProfile.id);
       }
-      
-      toast({
-        title: "Profile Deleted",
-        description: "The profile has been deleted"
-      });
-    }, 0);
-  }, [profilesList, selectedHost, hostProfiles, toast, updateProfileInHook]);
+    }
+    
+    toast({
+      title: "Profile Deleted",
+      description: "The profile has been deleted"
+    });
+  };
   
-  const handleDeleteHost = useCallback((hostId: string) => {
+  const handleDeleteHost = (hostId: string) => {
     setHostsList(prev => prev.filter(h => h.id !== hostId));
     
     if (selectedHostId === hostId) {
@@ -244,10 +209,10 @@ const Hosts = () => {
       title: "Host Deleted",
       description: "The host has been removed successfully"
     });
-  }, [hostsList, selectedHostId, toast]);
+  };
 
-  // Optimize adding servers to profiles with batch updates
-  const handleAddServersToProfile = useCallback((servers: ServerInstance[]) => {
+  // Add a new function to handle adding servers to profiles
+  const handleAddServersToProfile = (servers: ServerInstance[]) => {
     // First, make sure we have the servers in the serverInstances state
     const newServerIds = servers.map(server => server.id);
     
@@ -256,43 +221,35 @@ const Hosts = () => {
       !serverInstances.some(existingServer => existingServer.id === server.id)
     );
     
-    // Batch updates for better performance
-    setTimeout(() => {
-      if (newServers.length > 0) {
-        setServerInstances(prev => [...prev, ...newServers]);
-      }
+    if (newServers.length > 0) {
+      setServerInstances(prev => [...prev, ...newServers]);
+    }
+    
+    // Get the selected profile
+    if (selectedProfileId) {
+      // Add the server IDs to the profile's instances
+      setProfilesList(prev => prev.map(profile => {
+        if (profile.id === selectedProfileId) {
+          // Add server IDs that aren't already in the profile
+          const updatedInstances = [
+            ...profile.instances,
+            ...newServerIds.filter(id => !profile.instances.includes(id))
+          ];
+          
+          return {
+            ...profile,
+            instances: updatedInstances
+          };
+        }
+        return profile;
+      }));
       
-      // Get the selected profile
-      if (selectedProfileId) {
-        // Add the server IDs to the profile's instances
-        setProfilesList(prev => prev.map(profile => {
-          if (profile.id === selectedProfileId) {
-            // Add server IDs that aren't already in the profile
-            const updatedInstances = [
-              ...profile.instances,
-              ...newServerIds.filter(id => !profile.instances.includes(id))
-            ];
-            
-            return {
-              ...profile,
-              instances: updatedInstances
-            };
-          }
-          return profile;
-        }));
-        
-        toast({
-          title: "Servers added",
-          description: `${servers.length} server(s) added to profile`
-        });
-      }
-    }, 0);
-  }, [serverInstances, selectedProfileId, toast]);
-
-  // Clear search handler
-  const handleClearSearch = useCallback(() => {
-    setSearchQuery("");
-  }, []);
+      toast({
+        title: "Servers added",
+        description: `${servers.length} server(s) added to profile`
+      });
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -321,7 +278,7 @@ const Hosts = () => {
         {searchQuery && (
           <button 
             className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
-            onClick={handleClearSearch}
+            onClick={() => setSearchQuery("")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -364,7 +321,7 @@ const Hosts = () => {
           ) : (
             <div className="text-center py-8 border border-dashed rounded-md">
               <p className="text-sm text-muted-foreground mb-2">No results for "{searchQuery}"</p>
-              <Button variant="link" onClick={handleClearSearch} className="text-xs">Clear search</Button>
+              <Button variant="link" onClick={() => setSearchQuery("")} className="text-xs">Clear search</Button>
             </div>
           )}
           
