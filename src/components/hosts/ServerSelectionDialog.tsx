@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { serverDefinitions, type ServerInstance, type ServerDefinition, type EndpointType, type Status } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
-import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
+import { AddServerDialog } from "@/components/servers/AddServerDialog";
 
 interface ServerSelectionDialogProps {
   open: boolean;
