@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, X } from "lucide-react";
 import { EndpointType } from "@/data/mockData";
 
+// We're restricting the schema to only allow HTTP_SSE or STDIO connection types
 const serverSchema = z.object({
   name: z.string().min(1, { message: "Server name is required" }),
   description: z.string().optional(),
@@ -59,7 +60,8 @@ export function AddServerDialog({
   onAddServer,
 }: AddServerDialogProps) {
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
-  const [selectedType, setSelectedType] = useState<EndpointType>("HTTP_SSE");
+  // Restrict type to only HTTP_SSE or STDIO
+  const [selectedType, setSelectedType] = useState<"HTTP_SSE" | "STDIO">("HTTP_SSE");
   const [headers, setHeaders] = useState<HeaderField[]>([{ key: "", value: "" }]);
   const [envVars, setEnvVars] = useState<EnvVarField[]>([{ key: "", value: "" }]);
   
@@ -73,7 +75,8 @@ export function AddServerDialog({
     },
   });
 
-  const handleTypeChange = (type: EndpointType) => {
+  // Updated handleTypeChange to use the restricted type
+  const handleTypeChange = (type: "HTTP_SSE" | "STDIO") => {
     setSelectedType(type);
     form.setValue("type", type);
     form.setValue("connectionDetails", "");
@@ -143,10 +146,14 @@ export function AddServerDialog({
       definitionId: `custom-${values.type.toLowerCase()}`,
       status: "stopped",
       connectionDetails: values.connectionDetails,
-      headers: headersObj,
       environment: environmentObj,
       enabled: true,
     };
+
+    // Add headers separately only if we're using HTTP_SSE
+    if (values.type === "HTTP_SSE" && headersObj) {
+      (newServer as any).headers = headersObj;
+    }
 
     onAddServer(newServer);
     form.reset();
@@ -221,7 +228,7 @@ export function AddServerDialog({
                   <FormControl>
                     <Select
                       value={field.value}
-                      onValueChange={(value: EndpointType) => {
+                      onValueChange={(value: "HTTP_SSE" | "STDIO") => {
                         field.onChange(value);
                         handleTypeChange(value);
                       }}
