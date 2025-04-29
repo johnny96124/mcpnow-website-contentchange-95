@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Host, Profile, ServerInstance } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServerItem } from "@/components/hosts/ServerItem";
 import { ProfileDropdown } from "@/components/hosts/ProfileDropdown";
-import { AddServerDialog } from "@/components/hosts/AddServerDialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, FileText, Settings, Trash2, PlusCircle, RefreshCw } from "lucide-react";
@@ -13,7 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 
-// Add onViewServerError to the existing interface
 interface HostDetailViewProps {
   host: Host;
   profiles: Profile[];
@@ -291,13 +290,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </TabsContent>
       </Tabs>
       
-      <AddServerDialog 
-        open={addServerDialogOpen}
-        onOpenChange={setAddServerDialogOpen}
-        onAddServers={handleAddServers}
-        existingServerIds={profileServers.map(s => s.id)}
-      />
-      
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -320,5 +312,5 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   );
 };
 
-export { HostDetailView };
+// Only export the type, not the component again
 export type { HostDetailViewProps };
