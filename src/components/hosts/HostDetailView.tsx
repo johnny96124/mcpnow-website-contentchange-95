@@ -23,7 +23,6 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 interface HostDetailViewProps {
   host: Host;
@@ -148,28 +147,17 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
             </div>
           </div>
           
-          {/* More options menu for unconfigured hosts */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">More options</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48" align="end">
-              <div className="space-y-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={handleDeleteHost}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Remove Host
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              onClick={handleDeleteHost}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              <span className="text-xs">Remove</span>
+            </Button>
+          </div>
         </div>
         
         <Card>
@@ -220,43 +208,31 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                       : "Disconnected"
                 } 
               />
-            </div>
-          </div>
-        </div>
-        
-        {/* More options menu for configured hosts */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">More options</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48" align="end">
-            <div className="space-y-1">
               {host.configPath && (
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full justify-start"
+                  className="text-xs text-muted-foreground" 
                   onClick={showConfigFile}
                 >
-                  <FileText className="h-4 w-4 mr-2" />
                   View Config
                 </Button>
               )}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-                onClick={handleDeleteHost}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remove Host
-              </Button>
             </div>
-          </PopoverContent>
-        </Popover>
+          </div>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            onClick={handleDeleteHost}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            <span className="text-xs">Remove</span>
+          </Button>
+        </div>
       </div>
       
       <Card className="overflow-hidden">
