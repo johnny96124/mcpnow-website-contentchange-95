@@ -17,18 +17,15 @@ import {
   ChevronRight,
   HelpCircle
 } from "lucide-react";
-import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
-import { Host } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
-interface HostsWelcomeProps {
+interface WelcomeProps {
+  onAddHosts: () => void;
   onSkip: () => void;
-  onAddHost: () => void;
-  unifiedHostDialogOpen: boolean;
-  setUnifiedHostDialogOpen: (open: boolean) => void;
-  onAddHosts: (hosts: Host[]) => void;
 }
 
-export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnifiedHostDialogOpen, onAddHosts }: HostsWelcomeProps) {
+const Welcome = ({ onAddHosts, onSkip }: WelcomeProps) => {
+  const { toast } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   
   const mainHostTypes = [
@@ -39,8 +36,8 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
     },
     {
       icon: <CloudCog className="h-10 w-10 text-purple-500" />,
-      name: "MCP Now",
-      description: "Server management platform for AI model deployment and configuration"
+      name: "Windsurf",
+      description: "Cloud-based development environment with seamless deployment features"
     },
     {
       icon: <Cpu className="h-10 w-10 text-green-500" />,
@@ -49,19 +46,38 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
     },
     {
       icon: <Bot className="h-10 w-10 text-amber-500" />,
-      name: "Model Hub",
-      description: "Central repository for AI models with version control and deployment tools"
+      name: "Claude",
+      description: "Advanced AI assistant with natural language understanding and reasoning"
     }
   ];
 
   const handleScan = () => {
     setIsScanning(true);
     
-    // Simulate scanning process briefly, then open dialog
+    // Simulate scanning process
     setTimeout(() => {
-      setIsScanning(false);
-      onAddHost();
-    }, 1000);
+      const success = Math.random() > 0.3; // 70% chance of success
+      
+      if (success) {
+        toast({
+          title: "Host discovered!",
+          description: "We found a local MCP Now host on your network.",
+        });
+        
+        // Redirect to add hosts dialog after successful scan
+        setTimeout(() => {
+          setIsScanning(false);
+          onAddHosts();
+        }, 1500);
+      } else {
+        toast({
+          title: "No hosts found",
+          description: "We couldn't find any hosts automatically.",
+          variant: "destructive",
+        });
+        setIsScanning(false);
+      }
+    }, 2500);
   };
 
   return (
@@ -77,31 +93,42 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
         
         <h1 className="text-4xl font-bold tracking-tight mb-2 text-teal-900 dark:text-teal-50">Welcome to MCP Now</h1>
         <p className="text-muted-foreground text-lg max-w-2xl">
-          Your central dashboard for managing model servers and profiles. Let's set up your first host to get started.
+          Easily configure and manage Model Context Protocol servers to create powerful AI applications.
         </p>
       </div>
       
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-semibold mb-4">How MCP Now works</h2>
+          <h2 className="text-2xl font-semibold mb-4">Why use MCP Now?</h2>
           <Card className="border-2 border-dashed bg-card/50 hover:bg-card/80 transition-colors">
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
-                    MCP Now helps you manage hosts, servers, and model profiles in one place.
-                    Get started by adding your first host.
+                    MCP Now helps you manage the complexity of AI model hosting and server configuration. Connect to any MCP-compatible host to streamline your AI infrastructure.
                   </p>
                   
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
+                        <Search className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Discover hosts automatically</h3>
+                        <p className="text-xs text-muted-foreground">
+                          We'll find local or network MCP hosts for you
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
                         <Server className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium">Connect your hosts</h3>
+                        <h3 className="text-sm font-medium">Centralized management</h3>
                         <p className="text-xs text-muted-foreground">
-                          Add and manage host machines that will run your model servers
+                          Organize servers with profiles for better workflow
                         </p>
                       </div>
                     </div>
@@ -111,21 +138,9 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
                         <ArrowRight className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium">Create server profiles</h3>
+                        <h3 className="text-sm font-medium">Streamlined configuration</h3>
                         <p className="text-xs text-muted-foreground">
-                          Set up profiles to organize your model servers effectively
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 p-1.5 rounded-full bg-teal-100 dark:bg-teal-900/30">
-                        <Cpu className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Deploy model servers</h3>
-                        <p className="text-xs text-muted-foreground">
-                          Deploy and manage AI models on your connected hosts
+                          Set up servers with minimal technical knowledge
                         </p>
                       </div>
                     </div>
@@ -133,7 +148,7 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-medium mb-3">Common integrations</h3>
+                  <h3 className="text-lg font-medium mb-3">Compatible platforms</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {mainHostTypes.map((type) => (
                       <HoverCard key={type.name}>
@@ -161,7 +176,7 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
                     variant="ghost" 
                     className="mt-4 w-full justify-between text-muted-foreground hover:text-foreground"
                   >
-                    View all integrations
+                    View all compatible platforms
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -181,15 +196,23 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
                     </>
                   ) : (
                     <>
-                      <Server className="h-4 w-4" />
-                      Add Your First Host
+                      <Search className="h-4 w-4" />
+                      Scan for Hosts
                     </>
                   )}
                 </Button>
                 
                 <Button 
-                  onClick={onSkip} 
+                  onClick={onAddHosts} 
                   variant="outline" 
+                  size="lg"
+                >
+                  Add Host Manually
+                </Button>
+                
+                <Button 
+                  onClick={onSkip} 
+                  variant="ghost" 
                   size="lg"
                 >
                   Skip for Now
@@ -204,20 +227,17 @@ export function HostsWelcome({ onSkip, onAddHost, unifiedHostDialogOpen, setUnif
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 p-4 rounded-lg flex items-start gap-3">
           <HelpCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-medium text-amber-800 dark:text-amber-300">Common issues</h3>
+            <h3 className="font-medium text-amber-800 dark:text-amber-300">Common setup issues</h3>
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-              Having trouble connecting to hosts? Make sure your host is running and accessible on the network.
-              Check firewall settings and ensure the correct ports are open.
+              If you're having trouble finding hosts, make sure your MCP server is running locally 
+              or check your network configuration settings. For local servers, the default endpoint 
+              is usually http://localhost:8008/mcp.
             </p>
           </div>
         </div>
       </div>
-
-      <UnifiedHostDialog 
-        open={unifiedHostDialogOpen}
-        onOpenChange={setUnifiedHostDialogOpen}
-        onAddHosts={onAddHosts}
-      />
     </div>
   );
-}
+};
+
+export default Welcome;

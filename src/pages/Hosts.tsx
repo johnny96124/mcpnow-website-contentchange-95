@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Info, X } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -11,7 +11,9 @@ import { useConfigDialog } from "@/hooks/useConfigDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
 import { serverInstances as initialServerInstances, profiles as initialProfiles } from "@/data/mockData";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
-import { HostsWelcome } from "@/components/hosts/HostsWelcome";
+import { NoSearchResults } from "@/components/hosts/NoSearchResults";
+import Welcome from "@/components/hosts/Welcome";
+import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -23,26 +25,21 @@ const mockJsonConfig = {
 };
 
 const Hosts = () => {
-  const [hasSeenWelcome, setHasSeenWelcome] = useState<boolean>(false);
-  
-  useEffect(() => {
-    // Check if user has seen the welcome screen before
-    const welcomeSeen = localStorage.getItem('hostsWelcomeSeen');
-    setHasSeenWelcome(welcomeSeen === 'true');
-  }, []);
-
-  const handleWelcomeDismiss = () => {
-    localStorage.setItem('hostsWelcomeSeen', 'true');
-    setHasSeenWelcome(true);
-  };
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(
+    localStorage.getItem('hostsOnboardingSeen') === 'true'
+  );
 
   useEffect(() => {
     const markHostsOnboardingAsSeen = () => {
       localStorage.setItem('hostsOnboardingSeen', 'true');
     };
-    markHostsOnboardingAsSeen();
-  }, []);
+    
+    if (hasSeenOnboarding) {
+      markHostsOnboardingAsSeen();
+    }
+  }, [hasSeenOnboarding]);
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [unifiedHostDialogOpen, setUnifiedHostDialogOpen] = useState(false);
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
@@ -63,6 +60,7 @@ const Hosts = () => {
 
   const { toast } = useToast();
 
+  const filteredHosts = hostsList.filter(host => host.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const selectedHost = selectedHostId ? hostsList.find(h => h.id === selectedHostId) : null;
   const selectedProfileId = selectedHost ? hostProfiles[selectedHost.id] || "" : "";
 
@@ -116,23 +114,25 @@ const Hosts = () => {
 
     setHostsList(prev => [...prev, ...hostsWithProfiles]);
     
-    setSelectedHostId(hostsWithProfiles[0].id);
+    if (hostsWithProfiles.length > 0) {
+      setSelectedHostId(hostsWithProfiles[0].id);
     
-    hostsWithProfiles.forEach(host => {
-      if (host.profileId) {
-        updateProfileInHook(host.id, host.profileId);
+      hostsWithProfiles.forEach(host => {
+        if (host.profileId) {
+          updateProfileInHook(host.id, host.profileId);
+        }
+      });
+      
+      // Mark onboarding as seen when a host is added
+      if (!hasSeenOnboarding) {
+        setHasSeenOnboarding(true);
       }
-    });
+    }
     
     toast({
       title: "Hosts Added",
       description: `Successfully added ${newHosts.length} new host${newHosts.length > 1 ? 's' : ''}`
     });
-
-    // Ensure welcome screen is dismissed after adding hosts
-    if (!hasSeenWelcome) {
-      handleWelcomeDismiss();
-    }
   };
 
   const handleAddServersToHost = () => {
@@ -227,12 +227,9 @@ const Hosts = () => {
     });
   };
 
-  // Add a new function to handle adding servers to profiles
   const handleAddServersToProfile = (servers: ServerInstance[]) => {
-    // First, make sure we have the servers in the serverInstances state
     const newServerIds = servers.map(server => server.id);
     
-    // Add any new servers that aren't already in the list
     const newServers = servers.filter(server => 
       !serverInstances.some(existingServer => existingServer.id === server.id)
     );
@@ -241,12 +238,9 @@ const Hosts = () => {
       setServerInstances(prev => [...prev, ...newServers]);
     }
     
-    // Get the selected profile
     if (selectedProfileId) {
-      // Add the server IDs to the profile's instances
       setProfilesList(prev => prev.map(profile => {
         if (profile.id === selectedProfileId) {
-          // Add server IDs that aren't already in the profile
           const updatedInstances = [
             ...profile.instances,
             ...newServerIds.filter(id => !profile.instances.includes(id))
@@ -267,16 +261,28 @@ const Hosts = () => {
     }
   };
 
-  // Show welcome screen if user hasn't seen it before
-  if (!hasSeenWelcome) {
+  const handleCompleteOnboarding = () => {
+    setHasSeenOnboarding(true);
+  };
+
+  // Updated this function to be used when clicking the "Add your First Host" button
+  const handleOpenAddHostDialog = () => {
+    setUnifiedHostDialogOpen(true);
+  };
+
+  // Render appropriate content based on state
+  if (!hasSeenOnboarding) {
     return (
-      <HostsWelcome
-        onSkip={handleWelcomeDismiss}
-        onAddHost={() => setUnifiedHostDialogOpen(true)}
-        unifiedHostDialogOpen={unifiedHostDialogOpen}
-        setUnifiedHostDialogOpen={setUnifiedHostDialogOpen}
-        onAddHosts={handleAddHosts}
+      <Welcome 
+        onAddHosts={handleOpenAddHostDialog} 
+        onSkip={handleCompleteOnboarding}
       />
+    );
+  }
+
+  if (hostsList.length === 0) {
+    return (
+      <HostsEmptyState onAddHost={handleOpenAddHostDialog} />
     );
   }
 
@@ -286,20 +292,39 @@ const Hosts = () => {
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your hosts, configure connections, and monitor server operations
+            Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
-        <Button onClick={() => setUnifiedHostDialogOpen(true)}>
+        <Button onClick={handleOpenAddHostDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add Host
         </Button>
       </div>
       
+      <div className="relative">
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search hosts..."
+          className="pl-8 w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+            onClick={() => setSearchQuery("")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      
       <div className="grid gap-6 md:grid-cols-4">
         <div className="space-y-4">
-          {hostsList.length > 0 ? (
+          {filteredHosts.length > 0 ? (
             <div className="space-y-2">
-              {hostsList.map(host => (
+              {filteredHosts.map(host => (
                 <Card 
                   key={host.id}
                   className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedHostId === host.id ? 'border-primary bg-primary/5' : ''}`}
@@ -329,10 +354,7 @@ const Hosts = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 border border-dashed rounded-md">
-              <p className="text-sm text-muted-foreground mb-2">No hosts added yet</p>
-              <Button variant="link" onClick={() => setUnifiedHostDialogOpen(true)} className="text-xs">Add your first host</Button>
-            </div>
+            <NoSearchResults query={searchQuery} onClear={() => setSearchQuery("")} entityName="hosts" />
           )}
           
           <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
