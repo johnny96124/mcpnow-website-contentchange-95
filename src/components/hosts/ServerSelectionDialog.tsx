@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,6 @@ interface ServerSelectionDialogProps {
   onAddServers: (servers: ServerInstance[]) => void;
 }
 
-// Mock data with descriptions for existing instances
 const existingInstances: Array<ServerInstance & { description?: string }> = [
   {
     id: "instance-1",
@@ -54,7 +52,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   const [showCustomServerDialog, setShowCustomServerDialog] = useState(false);
   const { toast } = useToast();
 
-  // Reset when dialog opens/closes
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
@@ -67,7 +64,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
 
   const handleServerSelect = (server: ServerDefinition | ServerInstance) => {
     if (selectedTab === "added") {
-      // If it's an existing instance, add it directly
       const serverInstance = server as ServerInstance;
       onAddServers([serverInstance]);
       toast({
@@ -76,7 +72,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       });
       onOpenChange(false);
     } else {
-      // If it's a definition, show the instance dialog
       setSelectedServer(server as ServerDefinition);
       setShowInstanceDialog(true);
     }
@@ -124,7 +119,16 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Select Server</DialogTitle>
+            <DialogTitle className="flex justify-between items-center">
+              <span>Select Server</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowCustomServerDialog(true)}
+              >
+                Add Custom
+              </Button>
+            </DialogTitle>
             <DialogDescription>
               Choose a server to add to your profile
             </DialogDescription>
@@ -147,14 +151,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 <TabsTrigger value="added">Added</TabsTrigger>
               </TabsList>
             </Tabs>
-
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={() => setShowCustomServerDialog(true)}
-            >
-              + Add Custom Server
-            </Button>
 
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-4">

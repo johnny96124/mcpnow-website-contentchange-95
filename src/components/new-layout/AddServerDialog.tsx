@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -62,8 +61,8 @@ export function AddServerDialog({
   const [selectedDefinition, setSelectedDefinition] = useState<ServerDefinition | null>(null);
   // Restrict type to only HTTP_SSE or STDIO
   const [selectedType, setSelectedType] = useState<"HTTP_SSE" | "STDIO">("HTTP_SSE");
-  const [headers, setHeaders] = useState<HeaderField[]>([{ key: "", value: "" }]);
-  const [envVars, setEnvVars] = useState<EnvVarField[]>([{ key: "", value: "" }]);
+  const [headers, setHeaders] = useState<HeaderField[]>([]);
+  const [envVars, setEnvVars] = useState<EnvVarField[]>([]);
   
   const form = useForm<ServerFormValues>({
     resolver: zodResolver(serverSchema),
@@ -80,6 +79,9 @@ export function AddServerDialog({
     setSelectedType(type);
     form.setValue("type", type);
     form.setValue("connectionDetails", "");
+    // Reset headers and envVars when changing type
+    setHeaders([]);
+    setEnvVars([]);
   };
 
   const handleAddHeader = () => {
@@ -157,15 +159,15 @@ export function AddServerDialog({
 
     onAddServer(newServer);
     form.reset();
-    setHeaders([{ key: "", value: "" }]);
-    setEnvVars([{ key: "", value: "" }]);
+    setHeaders([]);
+    setEnvVars([]);
     onOpenChange(false);
   };
 
   const resetForm = () => {
     form.reset();
-    setHeaders([{ key: "", value: "" }]);
-    setEnvVars([{ key: "", value: "" }]);
+    setHeaders([]);
+    setEnvVars([]);
   };
 
   return (
