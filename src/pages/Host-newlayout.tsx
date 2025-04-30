@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { StatusIndicator } from "@/components/status/StatusIndicator";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
+import { ManualHostDialog } from "@/components/hosts/ManualHostDialog";
 import { ConfigHighlightDialog } from "@/components/hosts/ConfigHighlightDialog";
 import { ServerListEmpty } from "@/components/hosts/ServerListEmpty";
 import { ProfileSelector } from "@/components/hosts/new-layout/ProfileSelector";
@@ -25,6 +25,7 @@ export default function HostNewLayout() {
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
   const [servers, setServers] = useState<any[]>([]);
   const [isAddHostDialogOpen, setIsAddHostDialogOpen] = useState(false);
+  const [isManualHostDialogOpen, setIsManualHostDialogOpen] = useState(false);
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const [configPath, setConfigPath] = useState("");
   const [isServerSelectionOpen, setIsServerSelectionOpen] = useState(false);
@@ -36,6 +37,19 @@ export default function HostNewLayout() {
   const [errorDetails, setErrorDetails] = useState<string>("");
   const { toast } = useToast();
   const { hostProfiles, allProfiles, getProfileById, handleProfileChange, addInstanceToProfile } = useHostProfiles();
+
+  // Listen for custom event to open manual dialog
+  useEffect(() => {
+    const handleOpenManualDialog = () => {
+      setIsManualHostDialogOpen(true);
+    };
+    
+    document.addEventListener('openManualHostDialog', handleOpenManualDialog);
+    
+    return () => {
+      document.removeEventListener('openManualHostDialog', handleOpenManualDialog);
+    };
+  }, []);
 
   // Mock hosts data for demo
   useEffect(() => {
@@ -98,6 +112,29 @@ export default function HostNewLayout() {
       title: "Host Added",
       description: `Successfully added ${newHosts.length} host${newHosts.length > 1 ? 's' : ''}`
     });
+  };
+
+  const handleAddManualHost = (newHost: any) => {
+    const updatedHosts = [...hosts, newHost];
+    setHosts(updatedHosts);
+    
+    if (updatedHosts.length === 1) {
+      setSelectedHost(updatedHosts[0]);
+      
+      // Create a default profile for the host
+      const defaultProfile = {
+        id: `profile-${updatedHosts[0].id}`,
+        name: `${updatedHosts[0].name} Profile`,
+        endpointType: "HTTP_SSE",
+        enabled: true,
+        endpoint: "http://localhost:8008",
+        instances: [],
+        description: `Default profile for ${updatedHosts[0].name}`
+      };
+      
+      setProfiles([defaultProfile]);
+      setSelectedProfile(defaultProfile);
+    }
   };
 
   const handleServerToggle = (serverId: string, enabled: boolean) => {
@@ -403,6 +440,12 @@ export default function HostNewLayout() {
         open={isAddHostDialogOpen} 
         onOpenChange={setIsAddHostDialogOpen}
         onAddHosts={handleAddHosts}
+      />
+      
+      <ManualHostDialog
+        open={isManualHostDialogOpen}
+        onOpenChange={setIsManualHostDialogOpen}
+        onAddHost={handleAddManualHost}
       />
       
       <ConfigHighlightDialog 
