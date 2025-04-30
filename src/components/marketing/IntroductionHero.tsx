@@ -1,10 +1,8 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 const IntroductionHero = () => {
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
@@ -23,16 +21,7 @@ const IntroductionHero = () => {
         duration: 0.7
       }}>
           
-          <div className="flex items-center gap-2 mb-2">
-            <img
-              src="/lovable-uploads/12d690f5-eccb-4d2a-bd53-89b67a5f847a.png"
-              alt="mcpnow logo"
-              className="h-10 w-10 rounded-lg shadow"
-            />
-            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 px-3 py-1">
-              全新发布
-            </Badge>
-          </div>
+          
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
@@ -101,6 +90,4 @@ const IntroductionHero = () => {
       </div>
     </section>;
 };
-
 export default IntroductionHero;
-
