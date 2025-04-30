@@ -36,16 +36,16 @@ const IntroductionHero = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              MCP Now: 你的 AI 指挥中心
+              告别繁琐配置
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              一站式发现、安装、管理和分享
+              一站式统一管理 MCP 生态
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            <span className="font-semibold text-blue-600">MCP Now</span> 让您能够轻松发现、安装、管理和分享强大的 AI 工具，
-            全部通过一个直观的中央界面完成，无缝融入您喜爱的应用程序，不打断创作流程。
+            <span className="font-semibold text-blue-600">MCP Now</span> 是连接AI应用与模型服务的桥梁，通过创新的聚合模式让您轻松调用多服务能力，
+            无需编辑配置文件，一键接入所有MCP服务。
           </p>
           
           <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
@@ -103,3 +103,4 @@ const IntroductionHero = () => {
 };
 
 export default IntroductionHero;
+
