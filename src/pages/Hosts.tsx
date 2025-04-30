@@ -292,10 +292,6 @@ const Hosts = () => {
             Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
-        <Button onClick={handleOpenAddHostDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Host
-        </Button>
       </div>
       
       {/* Removed search input section */}
