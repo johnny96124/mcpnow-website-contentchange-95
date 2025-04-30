@@ -1,11 +1,18 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Download } from "lucide-react";
+import { ChevronRight, Download, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose
+} from "@/components/ui/dialog";
 
 const IntroductionHero = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -55,7 +62,14 @@ const IntroductionHero = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-left">MCP 与 MCP Now 是什么关系？</h3>
+                <h3 className="font-bold text-left">
+                  <button 
+                    onClick={() => setIsModalOpen(true)}
+                    className="text-left relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none hover:text-blue-600"
+                  >
+                    MCP是什么
+                  </button>
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed">
                   MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
                   而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
@@ -90,6 +104,33 @@ const IntroductionHero = () => {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Modal Dialog */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="w-[400px] p-5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg" 
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+          hideClose={true}
+        >
+          <div className="flex items-start justify-between">
+            <h3 className="text-lg font-semibold">MCP是什么</h3>
+            <DialogClose asChild>
+              <button 
+                className="h-6 w-6 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </DialogClose>
+          </div>
+          <div className="mt-3">
+            <p className="text-base leading-relaxed [line-height:1.6]">
+              MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>;
 };
 
