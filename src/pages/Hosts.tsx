@@ -258,22 +258,6 @@ const Hosts = () => {
     }
   };
 
-  const handleDeleteServer = (serverId: string) => {
-    // Remove server from server instances
-    setServerInstances(prev => prev.filter(server => server.id !== serverId));
-    
-    // Remove server from all profiles
-    setProfilesList(prev => prev.map(profile => ({
-      ...profile,
-      instances: profile.instances.filter(id => id !== serverId)
-    })));
-    
-    toast({
-      title: "Server Deleted",
-      description: "The server has been successfully removed"
-    });
-  };
-
   const handleCompleteOnboarding = () => {
     setHasSeenOnboarding(true);
   };
@@ -382,7 +366,6 @@ const Hosts = () => {
               onCreateProfile={handleCreateProfile}
               onDeleteProfile={handleDeleteProfile}
               onAddServersToProfile={handleAddServersToProfile}
-              onDeleteServer={handleDeleteServer}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">

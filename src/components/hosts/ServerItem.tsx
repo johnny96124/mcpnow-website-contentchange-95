@@ -40,7 +40,9 @@ export const ServerItem: React.FC<ServerItemProps> = ({
   const definition = serverDefinitions.find(def => def.id === server.definitionId);
 
   const handleRemove = () => {
-    onRemoveFromProfile(server.id);
+    if (window.confirm(`Are you sure you want to remove ${server.name} from this profile?`)) {
+      onRemoveFromProfile(server.id);
+    }
   };
 
   const handleEditComplete = () => {
@@ -113,17 +115,6 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             <Wrench className="h-4 w-4" />
           </Button>
           
-          {/* New prominent delete button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-            title="Delete Server"
-            onClick={handleRemove}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -139,7 +130,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-red-600" onClick={handleRemove}>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Server
+                Remove from Profile
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
