@@ -32,16 +32,16 @@ const IntroductionHero = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              Your Command Center for the AI Universe
+              Say Goodbye to Complex Configurations
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              Discover, Install, and Manage AI Tools Effortlessly
+              One-Stop Unified Management of MCP Ecosystem
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
             <span className="font-semibold text-blue-600">MCP Now</span> is the bridge connecting AI applications with model services, 
-            allowing you to easily discover and utilize multiple services through an innovative aggregation model,
+            allowing you to easily call multiple services through an innovative aggregation model,
             without editing configuration files, with one-click access to all MCP services.
             <button 
               onClick={() => setIsModalOpen(true)}
@@ -101,7 +101,7 @@ const IntroductionHero = () => {
           </div>
           <div className="mt-3">
             <p className="text-base leading-relaxed [line-height:1.6]">
-              MCP (Model Context Protocol) is an underlying communication protocol used to standardize interfaces for different AI model services, enabling seamless integration and management of diverse AI capabilities.
+              MCP (Model Context Protocol) is an underlying communication protocol used to standardize interfaces for different AI model services.
             </p>
           </div>
         </DialogContent>

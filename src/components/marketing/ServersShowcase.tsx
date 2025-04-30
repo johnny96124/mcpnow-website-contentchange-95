@@ -81,9 +81,9 @@ const ServersShowcase = () => {
   // Content based on language
   const content = {
     en: {
-      title: "Discover a World of AI Capabilities",
+      title: "Comprehensive Coverage of Mainstream AI Services",
       subtitle: "One-stop access to all the AI services you need, without switching between multiple platforms",
-      exploreButton: "Explore the AI Universe"
+      exploreButton: "Explore More MCP Servers"
     },
     zh: {
       title: "探索与发现丰富多彩的 AI 工具生态",
