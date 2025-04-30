@@ -25,15 +25,15 @@ const IntroductionHero = () => {
           
           
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-sans">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-roboto">
               Say Goodbye to Complex Configurations
             </h1>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-sans">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-roboto">
               One-Stop Unified Management of MCP Ecosystem
             </h2>
           </div>
           
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed font-medium">
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed font-opensans">
             <span className="font-semibold text-blue-600">MCP Now</span> acts as a bridge between AI applications and model services. 
             Our innovative aggregation technology enables one-click access to all MCP services, eliminating complex configurations.
           </p>
@@ -54,8 +54,8 @@ const IntroductionHero = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-left">What's the relationship between MCP and MCP Now?</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed font-medium">
+                <h3 className="font-bold text-left font-roboto">What's the relationship between MCP and MCP Now?</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed font-opensans">
                   MCP (Model Context Protocol) is an underlying communication protocol used to standardize interfaces for different AI model services.
                   MCP Now is a desktop management tool for this protocol that allows users to easily manage and use all AI services 
                   that support the MCP protocol through a graphical interface, without having to manually handle complex configuration processes.
@@ -65,10 +65,11 @@ const IntroductionHero = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 font-opensans">
+              <Download className="mr-2 h-5 w-5" />
               Download Client
             </Button>
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" className="font-opensans">
               Learn More
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
