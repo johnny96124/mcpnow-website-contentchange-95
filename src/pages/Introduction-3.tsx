@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -115,7 +116,7 @@ const Introduction3: React.FC = () => {
     {
       before: "反复配置不同环境参数",
       after: "统一配置文件，跨环境复用",
-      icon: Server,
+      icon: ServerIcon,
       benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
     },
     {
@@ -135,7 +136,7 @@ const Introduction3: React.FC = () => {
     {
       title: "服务配置",
       description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
-      icon: Server,
+      icon: ServerIcon,
     },
     {
       title: "创建配置文件",
