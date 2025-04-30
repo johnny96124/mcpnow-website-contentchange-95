@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MoreHorizontal, Settings, BarChart2, ExternalLink } from 'lucide-react';
+import { MoreHorizontal, Settings, BarChart2, ExternalLink, Server } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
