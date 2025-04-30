@@ -1,8 +1,10 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 const IntroductionHero = () => {
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
@@ -23,17 +25,17 @@ const IntroductionHero = () => {
           
           
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              告别繁琐配置
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-sans">
+              Say Goodbye to Complex Configurations
             </h1>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              一站式统一管理 MCP 生态系统
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-sans">
+              One-Stop Unified Management of MCP Ecosystem
             </h2>
           </div>
           
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            <span className="font-semibold text-blue-600">MCP Now</span> 作为桥梁，让 AI 应用与模型服务无缝对接。
-            创新聚合技术使您一键接入所有 MCP 服务，彻底告别繁琐配置。
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed font-medium">
+            <span className="font-semibold text-blue-600">MCP Now</span> acts as a bridge between AI applications and model services. 
+            Our innovative aggregation technology enables one-click access to all MCP services, eliminating complex configurations.
           </p>
           
           <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
@@ -52,11 +54,11 @@ const IntroductionHero = () => {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-left">MCP 与 MCP Now 是什么关系？</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed">
-                  MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
-                  而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
-                  无需手动处理复杂的配置过程。
+                <h3 className="font-bold text-left">What's the relationship between MCP and MCP Now?</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed font-medium">
+                  MCP (Model Context Protocol) is an underlying communication protocol used to standardize interfaces for different AI model services.
+                  MCP Now is a desktop management tool for this protocol that allows users to easily manage and use all AI services 
+                  that support the MCP protocol through a graphical interface, without having to manually handle complex configuration processes.
                 </p>
               </div>
             </div>
@@ -64,10 +66,10 @@ const IntroductionHero = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              下载客户端
+              Download Client
             </Button>
             <Button size="lg" variant="outline">
-              了解更多
+              Learn More
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -88,4 +90,5 @@ const IntroductionHero = () => {
       </div>
     </section>;
 };
+
 export default IntroductionHero;

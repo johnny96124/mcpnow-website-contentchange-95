@@ -20,9 +20,11 @@ export default {
 		},
 		extend: {
 			fontFamily: {
+				'roboto': ['Roboto', 'sans-serif'],
+				'opensans': ['Open Sans', 'sans-serif'],
 				'montserrat': ['Montserrat', 'sans-serif'],
 				'noto': ['"Noto Sans SC"', 'sans-serif'],
-				'sans': ['Montserrat', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
+				'sans': ['Roboto', 'Open Sans', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
