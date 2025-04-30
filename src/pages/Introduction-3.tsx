@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Download, ChevronRight, ArrowRight, Server as ServerIcon, Cpu, Database, Star, Zap, CheckCircle2, XCircle, Twitter, DiscIcon, Menu, X } from "lucide-react";
+import { Download, ChevronRight, ArrowRight, Server as ServerIcon, Cpu, Database, Star, Zap, CheckCircle2, XCircle, Twitter, DiscIcon, Menu, X, Shield, Plug, ArrowsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+
 const fadeInUp = {
   initial: {
     opacity: 0,
@@ -188,15 +189,18 @@ const Introduction3: React.FC = () => {
   const keyFeatures = [{
     title: "Host 自动扫描与配置",
     description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
-    icon: <ServerIcon className="h-8 w-8 text-blue-500" />
+    icon: <Plug className="h-8 w-8 text-blue-500" />,
+    titleText: "统一接口适配"
   }, {
     title: "Server 一键安装部署",
     description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
-    icon: <Database className="h-8 w-8 text-purple-500" />
+    icon: <ArrowsUpDown className="h-8 w-8 text-purple-500" />,
+    titleText: "跨平台兼容"
   }, {
     title: "Profile 智能管理",
     description: "通过 Profile 灵活组合 Server，支持热插拔能力，无需重启即可切换",
-    icon: <Zap className="h-8 w-8 text-amber-500" />
+    icon: <Shield className="h-8 w-8 text-amber-500" />,
+    titleText: "安全管理"
   }];
   return <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 font-noto">
       <nav className={cn("sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", scrolled && "shadow-sm bg-background/80 backdrop-blur-md")}>
@@ -406,7 +410,19 @@ const Introduction3: React.FC = () => {
             <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
             once: true
           }}>
-              {keyFeatures.map((feature, idx) => {})}
+              {keyFeatures.map((feature, idx) => (
+                <motion.div
+                  key={idx}
+                  variants={fadeInUp}
+                  className="text-center"
+                >
+                  <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-blue-600 mb-2 font-montserrat">{feature.titleText}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </div>
