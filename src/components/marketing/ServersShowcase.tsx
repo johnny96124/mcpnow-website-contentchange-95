@@ -38,42 +38,42 @@ const ServersShowcase = () => {
   const mcpServers = [
     {
       name: "OpenAI Server",
-      description: "Access GPT-4 and DALL-E models",
+      description: language === "en" ? "Access GPT-4 and DALL-E models" : "访问 GPT-4 和 DALL-E 模型",
       icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
     }, 
     {
       name: "Anthropic Claude",
-      description: "High-performance Claude models",
+      description: language === "en" ? "High-performance Claude models" : "高性能 Claude 模型",
       icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
     }, 
     {
       name: "Adobe Firefly",
-      description: "Creative image generation APIs",
+      description: language === "en" ? "Creative image generation APIs" : "创意图像生成 API",
       icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
     }, 
     {
       name: "Atlassian Server",
-      description: "Multi-protocol connectivity",
+      description: language === "en" ? "Multi-protocol connectivity" : "多协议连接能力",
       icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
     }, 
     {
       name: "Airbnb Custom",
-      description: "Custom model deployment tools",
+      description: language === "en" ? "Custom model deployment tools" : "自定义模型部署工具",
       icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
     }, 
     {
       name: "Amazon Bedrock",
-      description: "Managed foundation model access",
+      description: language === "en" ? "Managed foundation model access" : "托管基础模型访问服务",
       icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
     }, 
     {
       name: "Amplitude AI",
-      description: "Analytics-focused AI models",
+      description: language === "en" ? "Analytics-focused AI models" : "分析型 AI 模型",
       icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
     }, 
     {
       name: "Discord AI",
-      description: "Social-first AI integrations",
+      description: language === "en" ? "Social-first AI integrations" : "社交优先 AI 集成",
       icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
     }
   ];
