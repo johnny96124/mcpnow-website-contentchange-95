@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/theme/language-toggle";
-import { Menu, X, Server, Download } from "lucide-react";
+import { Menu, X, Server, Download, Compass, MousePointer } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NavbarEn: React.FC = () => {
@@ -13,13 +13,14 @@ const NavbarEn: React.FC = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  // English translations only
+  // Updated English translations based on messaging framework
   const t = {
     home: "Home",
-    whatIsMcp: "What is MCP",
-    whyMcpNow: "Why MCP Now",
+    discover: "Discover & Explore",
+    why: "Why MCP Now",
+    community: "Community",
     download: "Download",
-    downloadClient: "Download Client"
+    downloadNow: "Download MCP Now"
   };
 
   return (
@@ -29,16 +30,17 @@ const NavbarEn: React.FC = () => {
           <Link to="/website-en" className="flex items-center gap-2">
             <Server className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold tracking-tight">MCP Now</span>
+            <span className="hidden md:inline-block text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Beta</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/website-en" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.home}
             </Link>
             <Link to="#what-is-mcp" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
-              {t.whatIsMcp}
+              {t.discover}
             </Link>
             <Link to="#why-mcp-now" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
-              {t.whyMcpNow}
+              {t.why}
             </Link>
             <Link to="#download" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.download}
@@ -49,7 +51,7 @@ const NavbarEn: React.FC = () => {
           <div className="hidden md:flex items-center gap-4">
             <Button variant="default" className="bg-blue-600 hover:bg-blue-700 font-roboto" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              {t.downloadClient}
+              {t.downloadNow}
             </Button>
           </div>
           <LanguageToggle />
@@ -82,14 +84,14 @@ const NavbarEn: React.FC = () => {
             className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
-            {t.whatIsMcp}
+            {t.discover}
           </Link>
           <Link 
             to="#why-mcp-now" 
             className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
-            {t.whyMcpNow}
+            {t.why}
           </Link>
           <Link 
             to="#download" 
@@ -101,7 +103,7 @@ const NavbarEn: React.FC = () => {
           <div className="pt-4 flex flex-col gap-4 border-t">
             <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700 font-roboto" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              {t.downloadClient}
+              {t.downloadNow}
             </Button>
           </div>
         </div>
