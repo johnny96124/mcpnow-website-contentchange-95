@@ -30,7 +30,6 @@ const NavbarEn: React.FC = () => {
           <Link to="/website-en" className="flex items-center gap-2">
             <Server className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold tracking-tight">MCP Now</span>
-            <span className="hidden md:inline-block text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Beta</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/website-en" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">

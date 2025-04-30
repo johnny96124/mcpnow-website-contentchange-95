@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Download, X } from "lucide-react";
+import { ChevronRight, Download, X, Compass, MousePointer, Star, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,17 +32,19 @@ const IntroductionHero = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              Say Goodbye to Complex Configurations
+              Effortlessly discover, install, manage, 
+              <br className="hidden md:inline" />
+              and share your AI tools
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              One-Stop Unified Management of MCP Ecosystem
+              Your AI Universe - Explore, Control, Create
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed font-roboto">
-            <span className="font-semibold text-blue-600">MCP Now</span> is the bridge connecting AI applications with model services, 
-            allowing you to easily call multiple services through an innovative aggregation model,
-            without editing configuration files, with one-click access to all MCP services.
+            <span className="font-semibold text-blue-600">MCP Now</span> is your command center for the AI universe. 
+            Discover, install, manage, debug, and share powerful AI tools effortlessly, all from one central hub. 
+            Seamlessly integrate them into your favorite applications without disruption.
             <button 
               onClick={() => setIsModalOpen(true)}
               className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700"
@@ -51,10 +53,42 @@ const IntroductionHero = () => {
             </button>
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <div className="flex flex-wrap gap-6 justify-center mt-4">
+            <div className="flex items-start gap-2">
+              <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/20">
+                <Compass className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold font-roboto">Discover & Explore</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans">Find new and trending MCP servers</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-2">
+              <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/20">
+                <MousePointer className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold font-roboto">One-Click Installation</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans">No complex setup required</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-2">
+              <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/20">
+                <Share2 className="h-5 w-5 text-purple-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold font-roboto">Share the Power</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans">Foster community collaboration</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 pt-8">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
               <Download className="mr-2 h-5 w-5" />
-              Download Now
+              Download MCP Now
             </Button>
             <Button size="lg" variant="outline">
               Learn More Features
@@ -74,7 +108,7 @@ const IntroductionHero = () => {
         }}>
             <img src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
             <div className="text-center mt-4 mb-6 text-sm text-gray-600 dark:text-gray-300 font-opensans">
-              MCP Now makes complex service connections simple and intuitive, managing all AI model services in one place
+              Centralized command center for all your AI tools - manage everything in one place
             </div>
           </motion.div>
         </motion.div>
