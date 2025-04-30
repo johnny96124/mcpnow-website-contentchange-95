@@ -1,18 +1,11 @@
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download, X, Compass, MousePointer, Star, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogClose
-} from "@/components/ui/dialog";
-
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 const IntroductionHero = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -45,45 +38,12 @@ const IntroductionHero = () => {
             <span className="font-semibold text-blue-600">MCP Now</span> is your command center for the AI universe. 
             Discover, install, manage, debug, and share powerful AI tools effortlessly, all from one central hub. 
             Seamlessly integrate them into your favorite applications without disruption.
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700"
-            >
+            <button onClick={() => setIsModalOpen(true)} className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700">
               What is MCP?
             </button>
           </p>
           
-          <div className="flex flex-wrap gap-8 justify-center mt-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/20">
-                <Compass className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-base font-roboto text-gray-900 dark:text-white">Discover & Explore</h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 font-opensans mt-1">Find new and trending MCP servers</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/20">
-                <MousePointer className="h-5 w-5 text-green-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-base font-roboto text-gray-900 dark:text-white">One-Click Installation</h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 font-opensans mt-1">No complex setup required</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/20">
-                <Share2 className="h-5 w-5 text-purple-600" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-base font-roboto text-gray-900 dark:text-white">Share the Power</h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 font-opensans mt-1">Foster community collaboration</p>
-              </div>
-            </div>
-          </div>
+          
           
           <div className="flex flex-col sm:flex-row gap-5 pt-8">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 font-roboto">
@@ -116,19 +76,13 @@ const IntroductionHero = () => {
 
       {/* Modal Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="w-[400px] p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg" 
-          onInteractOutside={(e) => {
-            e.preventDefault();
-          }}
-          hideClose={true}
-        >
+        <DialogContent className="w-[400px] p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg" onInteractOutside={e => {
+        e.preventDefault();
+      }} hideClose={true}>
           <div className="flex items-start justify-between">
             <h3 className="text-lg font-medium font-roboto">What is MCP</h3>
             <DialogClose asChild>
-              <button 
-                className="h-6 w-6 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Close"
-              >
+              <button className="h-6 w-6 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Close">
                 <X size={16} />
               </button>
             </DialogClose>
@@ -142,5 +96,4 @@ const IntroductionHero = () => {
       </Dialog>
     </section>;
 };
-
 export default IntroductionHero;
