@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -200,28 +199,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                 <span className="text-2xl">{host.icon || '🖥️'}</span>
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-semibold">{host.name}</h2>
-                  {host.configPath && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-full" 
-                            onClick={showConfigFile}
-                          >
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          View Configuration
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
+                <h2 className="text-xl font-semibold">{host.name}</h2>
                 <div className="flex items-center gap-2">
                   <StatusIndicator 
                     status={
@@ -250,6 +228,15 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {host.configPath && (
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={showConfigFile}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      View Config
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem 
                     className="text-red-600 cursor-pointer"
                     onClick={() => setDeleteHostDialogOpen(true)}

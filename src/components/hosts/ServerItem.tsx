@@ -1,168 +1,137 @@
 
-import React, { useState } from "react";
-import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
-import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PenLine, Info, Trash2, Server, Wrench, AlertTriangle } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ServerErrorDialog } from "./ServerErrorDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ServerDetailsDialog } from "./ServerDetailsDialog";
-import { ServerToolsList } from "@/components/discovery/ServerToolsList";
-import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
-import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
+import React from 'react';
+import { MoreHorizontal, Settings, BarChart2, ExternalLink, Server } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { StatusIndicator } from '../status/StatusIndicator';
+import { ConnectionStatus } from '@/data/mockData';
+import { Badge } from '@/components/ui/badge';
+import { serverDefinitions } from '@/data/mockData';
+import { EndpointLabel } from '@/components/status/EndpointLabel';
 
 interface ServerItemProps {
-  server: ServerInstance;
+  server: {
+    id: string;
+    name: string;
+    type?: string;
+    status: 'running' | 'stopped' | 'error' | 'connecting';
+  };
   hostConnectionStatus: ConnectionStatus;
-  load: number;
-  onStatusChange: (serverId: string, enabled: boolean) => void;
-  onRemoveFromProfile: (serverId: string) => void;
+  load?: number;
+  onStatusChange: (id: string, enabled: boolean) => void;
+  onRemoveFromProfile?: (id: string) => void;
 }
 
-export const ServerItem: React.FC<ServerItemProps> = ({
+export const ServerItem = ({
   server,
   hostConnectionStatus,
-  load,
+  load = 50,
   onStatusChange,
-  onRemoveFromProfile
-}) => {
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [toolsDialogOpen, setToolsDialogOpen] = useState(false);
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [debugDialogOpen, setDebugDialogOpen] = useState(false);
-  
-  const hasError = server.status === 'error';
-  const isDisabled = hostConnectionStatus !== "connected";
-  const definition = serverDefinitions.find(def => def.id === server.definitionId);
+  onRemoveFromProfile,
+}: ServerItemProps) => {
+  const isActive = server.status === 'running';
+  const isConnecting = server.status === 'connecting';
+  const isError = server.status === 'error';
+  const isDisabled = hostConnectionStatus !== 'connected';
 
-  const handleRemove = () => {
-    if (window.confirm(`Are you sure you want to remove ${server.name} from this profile?`)) {
-      onRemoveFromProfile(server.id);
-    }
+  const handleToggleStatus = () => {
+    onStatusChange(server.id, !isActive && !isConnecting);
   };
 
-  const handleEditComplete = () => {
-    toast({
-      title: "Instance updated",
-      description: "The instance settings have been updated successfully."
-    });
-    setEditDialogOpen(false);
+  const getServerTypeLabel = (type?: string) => {
+    const serverType = type || 'generic';
+    const definition = serverDefinitions.find(def => def.type === serverType);
+    return definition?.name || 'Generic Server';
   };
 
-  const handleRetryConnection = async (): Promise<boolean> => {
-    // Simulate connection attempt with the server
-    onStatusChange(server.id, true); // This will set the status to "connecting"
-    
-    // Simulate a network request
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const success = Math.random() > 0.3; // 70% success rate
-        onStatusChange(server.id, success); // This will set the status to "running" or "error"
-        resolve(success);
-      }, 2000);
-    });
-  };
-
-  return <tr className={hasError ? "bg-red-50/30" : ""}>
+  return (
+    <tr className="border-b last:border-0">
       <td className="p-4 align-middle">
-        <div className="flex items-center gap-2">
-          <div className="bg-muted/20 p-1.5 rounded">
+        <div className="flex items-center gap-3">
+          <div className="bg-muted/50 p-2 rounded-lg">
             <Server className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="font-medium">{server.name}</div>
-            {hasError && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 text-red-600 hover:text-red-700 hover:bg-red-50 p-0" 
-                title="Server Error" 
-                onClick={() => setErrorDialogOpen(true)}
-              >
-                <AlertTriangle className="h-3.5 w-3.5" />
-              </Button>
-            )}
+          <div>
+            <p className="font-medium">{server.name}</p>
+            <p className="text-xs text-muted-foreground">{server.id.substring(0, 8)}</p>
           </div>
         </div>
       </td>
+      
       <td className="p-4 align-middle">
-        <EndpointLabel type={definition?.type || "STDIO"} />
+        <EndpointLabel type={server.type as any || 'HTTP_SSE'} />
       </td>
+      
       <td className="p-4 align-middle">
-        {server.status}
+        <StatusIndicator 
+          status={
+            server.status === 'running' 
+              ? 'active' 
+              : server.status === 'connecting' 
+                ? 'warning' 
+                : server.status === 'error' 
+                  ? 'error' 
+                  : 'inactive'
+          } 
+          label={
+            server.status === 'running'
+              ? 'Connected'
+              : server.status === 'connecting'
+                ? 'Connecting'
+                : server.status === 'error'
+                  ? 'Error'
+                  : 'Disconnected'
+          }
+        />
       </td>
+      
       <td className="p-4 align-middle text-center">
-        <Switch checked={server.status === 'running'} onCheckedChange={enabled => onStatusChange(server.id, enabled)} disabled={isDisabled} />
+        <Switch
+          checked={isActive || isConnecting}
+          onCheckedChange={handleToggleStatus}
+          disabled={isDisabled}
+          className="data-[state=checked]:bg-blue-600"
+        />
       </td>
-
+      
       <td className="p-4 align-middle text-right">
-        <div className="flex justify-end gap-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="Server Info" onClick={() => setDetailsDialogOpen(true)}>
-            <Info className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-            title="Debug Tools"
-            onClick={() => setDebugDialogOpen(true)}
-          >
-            <Wrench className="h-4 w-4" />
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>More Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
-                <PenLine className="h-4 w-4 mr-2" />
-                Edit Instance
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              <BarChart2 className="mr-2 h-4 w-4" />
+              <span>View Metrics</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              <span>Open Dashboard</span>
+            </DropdownMenuItem>
+            {onRemoveFromProfile && (
+              <DropdownMenuItem 
+                className="cursor-pointer text-red-600"
+                onClick={() => onRemoveFromProfile(server.id)}
+              >
+                <span>Remove from Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600" onClick={handleRemove}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remove from Profile
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </td>
-      
-      <ServerErrorDialog 
-        open={errorDialogOpen} 
-        onOpenChange={setErrorDialogOpen} 
-        serverName={server.name} 
-        errorMessage="Failed to connect to server. The endpoint is not responding or is not properly configured." 
-        onRetry={handleRetryConnection}
-      />
-      
-      <ServerDetailsDialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen} server={server} />
-
-      <ServerDebugDialog open={debugDialogOpen} onOpenChange={setDebugDialogOpen} server={server} />
-
-      <AddInstanceDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        serverDefinition={definition}
-        editMode={true}
-        instanceId={server.id}
-        initialValues={{
-          name: server.name,
-          args: server.arguments?.join(' ') || '',
-          url: '',
-          env: server.environment || {},
-          headers: {},
-        }}
-        onCreateInstance={handleEditComplete}
-      />
-    </tr>;
+    </tr>
+  );
 };
