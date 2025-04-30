@@ -36,17 +36,16 @@ const IntroductionHero = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              轻松发现、管理与分享
+              MCP Now: 你的 AI 指挥中心
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              您的 AI 工具宇宙
+              一站式发现、安装、管理和分享
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            <span className="font-semibold text-blue-600">MCP Now</span> 是您的 AI 指挥中心，
-            让您能够轻松发现、安装、管理和分享强大的 AI 工具，全部通过一个直观的界面完成，
-            无缝融入您喜爱的应用程序，不打断创作流程。
+            <span className="font-semibold text-blue-600">MCP Now</span> 让您能够轻松发现、安装、管理和分享强大的 AI 工具，
+            全部通过一个直观的中央界面完成，无缝融入您喜爱的应用程序，不打断创作流程。
           </p>
           
           <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
