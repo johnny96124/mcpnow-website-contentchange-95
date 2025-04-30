@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -168,9 +167,9 @@ const Introduction: React.FC = () => {
               <img
                 src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
                 alt="MCP Now Logo"
-                className="h-8 w-8 rounded-lg shadow"
+                className="h-7 w-7 rounded-lg shadow"
               />
-              <span className="text-xl font-bold tracking-tight">MCP Now</span>
+              <span className="text-lg font-bold tracking-tight">MCP Now</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
               <Link to="/" className="text-sm font-medium text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400">
@@ -196,7 +195,7 @@ const Introduction: React.FC = () => {
         </div>
       </nav>
 
-      <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
+      <section className="relative py-16 md:py-24 overflow-hidden" id="what-is-mcp">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-10 w-56 h-56 bg-purple-500/10 rounded-full blur-3xl"></div>
@@ -204,7 +203,7 @@ const Introduction: React.FC = () => {
         
         <div className="container px-4 md:px-6">
           <motion.div
-            className="flex flex-col items-center text-center space-y-6"
+            className="flex flex-col items-center text-center space-y-5"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -215,16 +214,16 @@ const Introduction: React.FC = () => {
               <span className="ml-1.5">Introducing MCP Now</span>
             </Badge>
             
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+            <div className="space-y-3">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 Say Goodbye to Complex Configurations
               </h1>
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-blue-600">
                 One-Stop Unified Management of MCP Ecosystem
               </h2>
             </div>
             
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl">
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-3xl">
               MCP Now is the bridge connecting AI applications with model services, allowing you to easily call multiple 
               service capabilities through an innovative aggregation approach, without editing configuration files, 
               connecting to all MCP services with one click.
@@ -246,8 +245,8 @@ const Introduction: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-left">What's the relationship between MCP and MCP Now?</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
+                  <h3 className="font-medium text-left text-sm">What's the relationship between MCP and MCP Now?</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 text-left mt-1">
                     MCP (Model Context Protocol) is an underlying communication protocol used to standardize interfaces for different AI model services.
                     MCP Now is a desktop management tool for this protocol that allows users to easily manage and use all AI services 
                     that support the MCP protocol through a graphical interface, without having to manually handle complex configuration processes.
@@ -268,7 +267,7 @@ const Introduction: React.FC = () => {
             </div>
             
             <motion.div 
-              className="w-full max-w-4xl mt-8 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800"
+              className="w-full max-w-4xl mt-6 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
@@ -283,19 +282,19 @@ const Introduction: React.FC = () => {
         </div>
       </section>
 
-      <section id="why-mcp-now" className="py-20 bg-white/70 dark:bg-gray-900/50">
+      <section id="why-mcp-now" className="py-16 bg-white/70 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="text-center max-w-3xl mx-auto mb-10"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose MCP Now?</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Why Choose MCP Now?</h2>
+            <p className="text-base text-gray-600 dark:text-gray-300">
               Say goodbye to cumbersome multi-platform management, a one-stop solution for common pain points in AI development
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {painPoints.map((point, idx) => (
               <motion.div
                 key={idx}
@@ -337,9 +336,9 @@ const Introduction: React.FC = () => {
             ))}
           </div>
 
-          <div className="mt-16 max-w-5xl mx-auto">
+          <div className="mt-14 max-w-5xl mx-auto">
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               variants={staggerChildren}
               initial="initial"
               whileInView="whileInView"
@@ -363,20 +362,20 @@ const Introduction: React.FC = () => {
         </div>
       </section>
 
-      <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
+      <section id="servers" className="py-16 bg-white/50 dark:bg-gray-900/50">
         <div className="container px-4 md:px-6">
           <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="text-center max-w-3xl mx-auto mb-10"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Comprehensive Coverage of Mainstream AI Services</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Comprehensive Coverage of Mainstream AI Services</h2>
+            <p className="text-base text-gray-600 dark:text-gray-300">
               One-stop access to all the AI services you need, without platform switching
             </p>
           </motion.div>
           
           <motion.div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5 max-w-4xl mx-auto"
             variants={staggerChildren}
             initial="initial"
             whileInView="whileInView"
@@ -409,7 +408,7 @@ const Introduction: React.FC = () => {
             ))}
           </motion.div>
           
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center">
             <Button variant="outline" className="text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/discovery'}>
               Explore More MCP Servers
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -418,14 +417,14 @@ const Introduction: React.FC = () => {
         </div>
       </section>
 
-      <section id="compatibility" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
+      <section id="compatibility" className="py-16 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
         <div className="container px-4 md:px-6">
           <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="text-center max-w-3xl mx-auto mb-10"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Flexible Adaptation for Multiple Scenarios</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Flexible Adaptation for Multiple Scenarios</h2>
+            <p className="text-base text-gray-600 dark:text-gray-300">
               Configure once, use in multiple places, compatible with all your favorite development tools
             </p>
           </motion.div>
@@ -523,32 +522,32 @@ const Introduction: React.FC = () => {
           </motion.div>
           
           <motion.div 
-            className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
+            className="mt-10 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-5 border border-blue-100 dark:border-blue-900/30"
             {...fadeInUp}
           >
             <div className="text-center">
-              <h3 className="font-semibold mb-2">Not Just Flexible, But Hot-Swappable Too</h3>
-              <p className="text-gray-600 dark:text-gray-400">Switch AI services with one click without restarting applications, responding to your business needs in real-time</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* Some high-performance models may require additional warm-up time</p>
+              <h3 className="font-semibold mb-2 text-sm">Not Just Flexible, But Hot-Swappable Too</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Switch AI services with one click without restarting applications, responding to your business needs in real-time</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 italic mt-2">* Some high-performance models may require additional warm-up time</p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
+      <section id="testimonials" className="py-16 bg-white dark:bg-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="text-center max-w-3xl mx-auto mb-10"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">User Feedback & Impact</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">User Feedback & Impact</h2>
+            <p className="text-base text-gray-600 dark:text-gray-300">
               See how developers are improving their workflow efficiency with MCP Now
             </p>
           </motion.div>
 
-          <div className="flex justify-center mb-16">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          <div className="flex justify-center mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
               {impactMetrics.map((metric, idx) => (
                 <motion.div 
                   key={idx}
@@ -568,7 +567,7 @@ const Introduction: React.FC = () => {
           </div>
           
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto"
             variants={staggerChildren}
             initial="initial"
             whileInView="whileInView"
@@ -617,19 +616,19 @@ const Introduction: React.FC = () => {
         </div>
       </section>
 
-      <section id="download" className="py-20 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
+      <section id="download" className="py-16 bg-gradient-to-b from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
         <div className="container px-4 md:px-6">
           <motion.div
-            className="text-center max-w-3xl mx-auto mb-12"
+            className="text-center max-w-3xl mx-auto mb-10"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Get Started with MCP Now</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">Get Started with MCP Now</h2>
+            <p className="text-base text-gray-600 dark:text-gray-300">
               Four steps to simplify your AI development workflow
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto mb-12">
             {quickStartSteps.map((step, idx) => (
               <motion.div
                 key={idx}
@@ -661,7 +660,7 @@ const Introduction: React.FC = () => {
             ))}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
             <motion.div
               className="flex flex-col items-center text-center"
               initial={{ opacity: 0, x: -20 }}
@@ -707,26 +706,26 @@ const Introduction: React.FC = () => {
         </div>
       </section>
 
-      <footer className="py-12 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+      <footer className="py-10 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
         <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <div>
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <img
                   src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
                   alt="MCP Now Logo"
-                  className="h-8 w-8 rounded-lg shadow"
+                  className="h-7 w-7 rounded-lg shadow"
                 />
-                <span className="text-xl font-bold tracking-tight">MCP Now</span>
+                <span className="text-lg font-bold tracking-tight">MCP Now</span>
               </Link>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Modern solution for simplifying AI model management and deployment
               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Products</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="font-semibold mb-3 text-sm">Products</h4>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="#what-is-mcp" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">What is MCP</Link></li>
                 <li><Link to="#why-mcp-now" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Why MCP Now</Link></li>
                 <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Download</Link></li>
@@ -735,8 +734,8 @@ const Introduction: React.FC = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="font-semibold mb-3 text-sm">Resources</h4>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Documentation</Link></li>
                 <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Getting Started Guide</Link></li>
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">API Reference</Link></li>
@@ -745,18 +744,18 @@ const Introduction: React.FC = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">About Us</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="font-semibold mb-3 text-sm">About Us</h4>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Company</Link></li>
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Blog</Link></li>
                 <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Contact Us</Link></li>
                 <li>
-                  <div className="flex gap-4 mt-2">
+                  <div className="flex gap-3 mt-2">
                     <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                      <DiscIcon className="h-5 w-5" />
+                      <DiscIcon className="h-4 w-4" />
                     </a>
                     <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                      <Twitter className="h-5 w-5" />
+                      <Twitter className="h-4 w-4" />
                     </a>
                   </div>
                 </li>
@@ -764,14 +763,14 @@ const Introduction: React.FC = () => {
             </div>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               © 2025 MCP Now. All rights reserved.
             </p>
-            <div className="flex gap-4 mt-4 sm:mt-0">
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Privacy Policy</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Terms of Service</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Legal Information</Link>
+            <div className="flex gap-4 mt-3 sm:mt-0">
+              <Link to="#" className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Privacy Policy</Link>
+              <Link to="#" className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Terms of Service</Link>
+              <Link to="#" className="text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Legal Information</Link>
             </div>
           </div>
         </div>
