@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import Navbar from "@/components/marketing/Navbar";
 
 const fadeInUp = {
   initial: {
@@ -72,9 +73,11 @@ const cardHover = {
     }
   }
 };
+
 const Introduction3: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -87,6 +90,7 @@ const Introduction3: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [scrolled]);
+  
   const mcpServers = [
     {
       name: "OpenAI Server",
@@ -171,11 +175,13 @@ const Introduction3: React.FC = () => {
     icon: Cpu,
     benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
   }, {
+    title: "跨平台兼容",
     before: "反复配置不同环境参数",
     after: "统一配置文件，跨环境复用",
     icon: ServerIcon,
     benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
   }, {
+    title: "安全管理",
     before: "API Key 分散管理不安全",
     after: "安全加密，集中授权管理",
     icon: Database,
@@ -235,66 +241,7 @@ const Introduction3: React.FC = () => {
   ];
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 font-noto">
-      <nav className={cn("sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", scrolled && "shadow-sm bg-background/80 backdrop-blur-md")}>
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2">
-              <ServerIcon className="h-6 w-6 text-blue-600" />
-              <span className="text-xl font-extrabold tracking-tight">MCP Now</span>
-            </Link>
-            <nav className="hidden md:flex items-center gap-6">
-              <Link to="/" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                首页
-              </Link>
-              <Link to="#what-is-mcp" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                什么是 MCP
-              </Link>
-              <Link to="#why-mcp-now" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                为什么选择 MCP Now
-              </Link>
-              <Link to="#download" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                下载
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-4">
-              <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
-                <Download className="mr-2 h-4 w-4" />
-                下载客户端
-              </Button>
-            </div>
-            <ThemeToggle />
-            <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile menu */}
-        <div className={cn("md:hidden absolute top-16 inset-x-0 bg-background border-b z-50 overflow-hidden transition-all duration-300 ease-in-out", mobileMenuOpen ? "max-h-[500px]" : "max-h-0")}>
-          <div className="container py-4 space-y-4">
-            <Link to="/" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              首页
-            </Link>
-            <Link to="#what-is-mcp" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              什么是 MCP
-            </Link>
-            <Link to="#why-mcp-now" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              为什么选择 MCP Now
-            </Link>
-            <Link to="#download" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              下载
-            </Link>
-            <div className="pt-4 flex flex-col gap-4 border-t">
-              <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
-                <Download className="mr-2 h-4 w-4" />
-                下载客户端
-              </Button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
         <div className="absolute inset-0 -z-10">
@@ -405,13 +352,12 @@ const Introduction3: React.FC = () => {
               >
                 <Card className="h-full border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-6">
-                    <div className="mb-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center">
-                      <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="mb-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center flex-shrink-0">
+                        <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-blue-600 font-montserrat">{point.title}</h3>
                     </div>
-                    
-                    {point.title && (
-                      <h3 className="text-xl font-bold text-blue-600 mb-4">{point.title}</h3>
-                    )}
                     
                     <div className="space-y-4 mt-6">
                       <div className="flex items-start gap-2">
