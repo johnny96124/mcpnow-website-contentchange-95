@@ -25,6 +25,7 @@ import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogTitle, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 
 interface HostDetailViewProps {
   host: Host;
@@ -61,6 +62,8 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
+  const [deleteServerDialogOpen, setDeleteServerDialogOpen] = useState(false);
+  const [serverToDelete, setServerToDelete] = useState<ServerInstance | null>(null);
   const { toast } = useToast();
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
@@ -110,28 +113,24 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     setConfigDialogOpen(true);
   };
 
+  // Function to confirm server deletion
+  const confirmServerDelete = (server: ServerInstance) => {
+    setServerToDelete(server);
+    setDeleteServerDialogOpen(true);
+  };
+
   // Function to handle server deletion
-  const handleDeleteServer = (serverId: string) => {
-    if (window.confirm(`Are you sure you want to delete this server?`)) {
-      if (onDeleteServer) {
-        onDeleteServer(serverId);
-        
-        // Update the profile to remove the server
-        if (selectedProfile) {
-          const updatedInstances = selectedProfile.instances.filter(id => id !== serverId);
-          // Remove server from profile
-          toast({
-            title: "Server deleted",
-            description: "The server has been removed successfully",
-          });
-        }
-      } else {
-        // If no onDeleteServer callback is provided, just show a toast
-        toast({
-          title: "Server removed",
-          description: "The server has been removed from this profile",
-        });
-      }
+  const handleDeleteServer = () => {
+    if (serverToDelete && onDeleteServer) {
+      onDeleteServer(serverToDelete.id);
+      
+      toast({
+        title: "Server deleted",
+        description: "The server has been completely removed from the system",
+      });
+      
+      setDeleteServerDialogOpen(false);
+      setServerToDelete(null);
     }
   };
 
@@ -293,7 +292,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                         hostConnectionStatus={host.connectionStatus}
                         onStatusChange={handleServerStatusChange}
                         load={getServerLoad(server.id)}
-                        onRemoveFromProfile={handleDeleteServer}
+                        onRemoveFromProfile={() => confirmServerDelete(server)}
                       />
                     ))}
                   </tbody>
@@ -317,26 +316,31 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         onOpenChange={setConfigDialogOpen}
         configPath={host.configPath || ""}
       />
+
+      {/* Server deletion confirmation dialog */}
+      <Dialog open={deleteServerDialogOpen} onOpenChange={setDeleteServerDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" />
+              Delete Server
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the server "{serverToDelete?.name}"? 
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex items-center justify-between mt-4">
+            <Button variant="outline" onClick={() => setDeleteServerDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteServer}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Server
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
-function Search(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
