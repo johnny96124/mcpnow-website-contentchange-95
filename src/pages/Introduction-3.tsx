@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  Download, 
-  ChevronRight, 
-  ArrowRight, 
-  Server as ServerIcon, 
-  Cpu, 
-  Database, 
-  Star, 
-  Zap, 
-  CheckCircle2, 
-  XCircle, 
-  Twitter, 
-  DiscIcon, 
-  Menu, 
-  X, 
-  Shield, 
-  Plug, 
-  ArrowUpDown 
-} from "lucide-react";
+import { Download, ChevronRight, ArrowRight, Server as ServerIcon, Cpu, Database, Star, Zap, CheckCircle2, XCircle, Twitter, DiscIcon, Menu, X, Shield, Plug, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import Navbar from "@/components/marketing/Navbar";
-
 const fadeInUp = {
   initial: {
     opacity: 0,
@@ -73,11 +54,9 @@ const cardHover = {
     }
   }
 };
-
 const Introduction3: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -90,84 +69,77 @@ const Introduction3: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [scrolled]);
-  
-  const mcpServers = [
-    {
-      name: "OpenAI Server",
-      description: "Access GPT-4 and DALL-E models",
-      icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-    }, {
-      name: "Anthropic Claude",
-      description: "High-performance Claude models",
-      icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-    }, {
-      name: "Adobe Firefly",
-      description: "Creative image generation APIs",
-      icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-    }, {
-      name: "Atlassian Server",
-      description: "Multi-protocol connectivity",
-      icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-    }, {
-      name: "Airbnb Custom",
-      description: "Custom model deployment tools",
-      icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-    }, {
-      name: "Amazon Bedrock",
-      description: "Managed foundation model access",
-      icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
-    }, {
-      name: "Amplitude AI",
-      description: "Analytics-focused AI models",
-      icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
-    }, {
-      name: "Discord AI",
-      description: "Social-first AI integrations",
-      icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
-    }
-  ];
-  const hosts = [
-    {
-      name: "Cursor",
-      icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-    }, {
-      name: "Windurf",
-      icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-    }, {
-      name: "VSCode",
-      icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-    }, {
-      name: "JetBrains",
-      icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-    }, {
-      name: "Local Host",
-      icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-    }, {
-      name: "Cloud Host",
-      icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
-    }
-  ];
-  const testimonials = [
-    {
-      author: "Sarah Chen",
-      role: "Full-stack Developer",
-      company: "TechForward",
-      text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
-      avatar: "/placeholder.svg"
-    }, {
-      author: "Michael Rodriguez",
-      role: "ML Engineer",
-      company: "DataVision",
-      text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
-      avatar: "/placeholder.svg"
-    }, {
-      author: "Aisha Johnson",
-      role: "CTO",
-      company: "NextGen AI",
-      text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
-      avatar: "/placeholder.svg"
-    }
-  ];
+  const mcpServers = [{
+    name: "OpenAI Server",
+    description: "Access GPT-4 and DALL-E models",
+    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+  }, {
+    name: "Anthropic Claude",
+    description: "High-performance Claude models",
+    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+  }, {
+    name: "Adobe Firefly",
+    description: "Creative image generation APIs",
+    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+  }, {
+    name: "Atlassian Server",
+    description: "Multi-protocol connectivity",
+    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+  }, {
+    name: "Airbnb Custom",
+    description: "Custom model deployment tools",
+    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+  }, {
+    name: "Amazon Bedrock",
+    description: "Managed foundation model access",
+    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+  }, {
+    name: "Amplitude AI",
+    description: "Analytics-focused AI models",
+    icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+  }, {
+    name: "Discord AI",
+    description: "Social-first AI integrations",
+    icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
+  }];
+  const hosts = [{
+    name: "Cursor",
+    icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+  }, {
+    name: "Windurf",
+    icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+  }, {
+    name: "VSCode",
+    icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+  }, {
+    name: "JetBrains",
+    icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+  }, {
+    name: "Local Host",
+    icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+  }, {
+    name: "Cloud Host",
+    icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+  }];
+  const testimonials = [{
+    author: "Sarah Chen",
+    role: "Full-stack Developer",
+    company: "TechForward",
+    text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
+    avatar: "/placeholder.svg"
+  }, {
+    author: "Michael Rodriguez",
+    role: "ML Engineer",
+    company: "DataVision",
+    text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
+    avatar: "/placeholder.svg"
+  }, {
+    author: "Aisha Johnson",
+    role: "CTO",
+    company: "NextGen AI",
+    text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
+    avatar: "/placeholder.svg"
+  }];
   const painPoints = [{
     title: "统一接口适配",
     before: "多账号切换，多平台登录",
@@ -187,60 +159,53 @@ const Introduction3: React.FC = () => {
     icon: Database,
     benefit: "安全管理：集中管理所有账号和密钥，更高级别的安全保障"
   }];
-  const quickStartSteps = [
-    {
-      title: "下载安装",
-      description: "为您的操作系统下载 MCP Now 客户端并安装",
-      icon: Download
-    }, {
-      title: "服务配置",
-      description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
-      icon: ServerIcon
-    }, {
-      title: "创建配置文件",
-      description: "设置您偏好的服务器组合和参数配置",
-      icon: Database
-    }, {
-      title: "连接工具",
-      description: "将配置绑定到您喜爱的开发工具和环境",
-      icon: Cpu
-    }
-  ];
-  const impactMetrics = [
-    {
-      value: "50,000+",
-      label: "活跃开发者"
-    }, {
-      value: "120,000+",
-      label: "AI 项目部署"
-    }, {
-      value: "75%",
-      label: "开发效率提升"
-    }, {
-      value: "98.7%",
-      label: "服务可靠性"
-    }
-  ];
-  const keyFeatures = [
-    {
-      title: "Host 自动扫描与配置",
-      description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
-      icon: <Plug className="h-8 w-8 text-blue-500" />,
-      titleText: "统一接口适配"
-    }, {
-      title: "Server 一键安装部署",
-      description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
-      icon: <ArrowUpDown className="h-8 w-8 text-purple-500" />,
-      titleText: "跨平台兼容"
-    }, {
-      title: "Profile 智能管理",
-      description: "通过 Profile 灵活组合 Server，支持热插拔能力，无需重启即可切换",
-      icon: <Shield className="h-8 w-8 text-amber-500" />,
-      titleText: "安全管理"
-    }
-  ];
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 font-noto">
+  const quickStartSteps = [{
+    title: "下载安装",
+    description: "为您的操作系统下载 MCP Now 客户端并安装",
+    icon: Download
+  }, {
+    title: "服务配置",
+    description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
+    icon: ServerIcon
+  }, {
+    title: "创建配置文件",
+    description: "设置您偏好的服务器组合和参数配置",
+    icon: Database
+  }, {
+    title: "连接工具",
+    description: "将配置绑定到您喜爱的开发工具和环境",
+    icon: Cpu
+  }];
+  const impactMetrics = [{
+    value: "50,000+",
+    label: "活跃开发者"
+  }, {
+    value: "120,000+",
+    label: "AI 项目部署"
+  }, {
+    value: "75%",
+    label: "开发效率提升"
+  }, {
+    value: "98.7%",
+    label: "服务可靠性"
+  }];
+  const keyFeatures = [{
+    title: "Host 自动扫描与配置",
+    description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
+    icon: <Plug className="h-8 w-8 text-blue-500" />,
+    titleText: "统一接口适配"
+  }, {
+    title: "Server 一键安装部署",
+    description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
+    icon: <ArrowUpDown className="h-8 w-8 text-purple-500" />,
+    titleText: "跨平台兼容"
+  }, {
+    title: "Profile 智能管理",
+    description: "通过 Profile 灵活组合 Server，支持热插拔能力，无需重启即可切换",
+    icon: <Shield className="h-8 w-8 text-amber-500" />,
+    titleText: "安全管理"
+  }];
+  return <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 font-noto">
       <Navbar />
 
       <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
@@ -342,14 +307,17 @@ const Introduction3: React.FC = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {painPoints.map((point, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-              >
+            {painPoints.map((point, idx) => <motion.div key={idx} initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} viewport={{
+            once: true
+          }} transition={{
+            delay: idx * 0.1
+          }}>
                 <Card className="h-full border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-5">
@@ -382,27 +350,14 @@ const Introduction3: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </div>
 
           <div className="mt-16 max-w-5xl mx-auto">
             <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
             once: true
           }}>
-              {keyFeatures.map((feature, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={fadeInUp}
-                  className="text-center"
-                >
-                  <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-blue-600 mb-2 font-montserrat">{feature.titleText}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
-                </motion.div>
-              ))}
+              {keyFeatures.map((feature, idx) => {})}
             </motion.div>
           </div>
         </div>
@@ -793,8 +748,6 @@ const Introduction3: React.FC = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Introduction3;
