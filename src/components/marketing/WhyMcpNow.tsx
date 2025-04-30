@@ -14,25 +14,25 @@ const fadeInUp = {
 const WhyMcpNow = () => {
   const painPoints = [
     {
-      title: "Unified Interface Adaptation",
-      before: "Multiple account switching, multiple platform logins",
-      after: "One-time login, unified management of all AI services",
+      title: "统一接口适配",
+      before: "多账号切换，多平台登录",
+      after: "一次登录，统一管理所有 AI 服务",
       icon: Cpu,
-      benefit: "Unified Interface Adaptation: Use the same code to access all AI services, say goodbye to complex multi-API calls"
+      benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
     }, 
     {
-      title: "Cross-Platform Compatibility",
-      before: "Repeatedly configuring different environment parameters",
-      after: "Unified configuration files, cross-environment reuse",
+      title: "跨平台兼容",
+      before: "反复配置不同环境参数",
+      after: "统一配置文件，跨环境复用",
       icon: ServerIcon,
-      benefit: "Cross-Platform Compatibility: Seamlessly use in any development environment, from local to cloud without reconfiguration"
+      benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
     }, 
     {
-      title: "Secure Management",
-      before: "Scattered API Key management is insecure",
-      after: "Secure encryption, centralized authorization management",
+      title: "安全管理",
+      before: "API Key 分散管理不安全",
+      after: "安全加密，集中授权管理",
       icon: Database,
-      benefit: "Secure Management: Centrally manage all accounts and keys for higher level security protection"
+      benefit: "安全管理：集中管理所有账号和密钥，更高级别的安全保障"
     }
   ];
 
@@ -40,9 +40,9 @@ const WhyMcpNow = () => {
     <section id="why-mcp-now" className="py-20 bg-white/70 dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-roboto">Why Choose MCP Now?</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-opensans">
-            Say goodbye to complex multi-platform management, one-stop solution for common pain points in AI development
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">为什么选择 MCP Now?</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+            告别复杂的多平台管理，一站式解决 AI 开发中的常见痛点
           </p>
         </motion.div>
 
@@ -61,23 +61,23 @@ const WhyMcpNow = () => {
                     <div className="mb-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center flex-shrink-0">
                       <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-blue-600 font-roboto">{point.title}</h3>
+                    <h3 className="text-xl font-bold text-blue-600 font-montserrat">{point.title}</h3>
                   </div>
                   
                   <div className="space-y-4 mt-6">
                     <div className="flex items-start gap-2">
                       <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-bold font-roboto">Traditional Method</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans">{point.before}</p>
+                        <p className="font-bold">传统方式</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{point.before}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-bold font-roboto">Using MCP Now</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans">{point.after}</p>
+                        <p className="font-bold">使用 MCP Now</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{point.after}</p>
                       </div>
                     </div>
                     

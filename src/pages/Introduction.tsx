@@ -2,8 +2,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/marketing/Navbar";
-import IntroductionHero from "@/components/marketing/IntroductionHero";
-import WhyMcpNow from "@/components/marketing/WhyMcpNow";
+import IntroductionHero from "@/components/marketing/IntroductionHeroEn";
+import WhyMcpNow from "@/components/marketing/WhyMcpNowEn";
 import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
