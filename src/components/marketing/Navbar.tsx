@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/theme/language-toggle";
-import { Menu, X, Server, Download } from "lucide-react";
+import { Menu, X, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/theme/language-provider";
 
@@ -40,7 +40,11 @@ const Navbar: React.FC = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <Server className="h-6 w-6 text-blue-600" />
+            <img 
+              src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png" 
+              alt="MCP Now Logo" 
+              className="h-8 w-8 rounded-lg shadow" 
+            />
             <span className="text-xl font-bold tracking-tight">MCP Now</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
