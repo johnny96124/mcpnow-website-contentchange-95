@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,7 +5,7 @@ import {
   Download, 
   ChevronRight, 
   ArrowRight, 
-  Server, 
+  Server as ServerIcon, 
   Cpu, 
   Database, 
   Star, 
@@ -161,17 +160,12 @@ const Introduction3: React.FC = () => {
     {
       title: "Host 自动扫描与配置",
       description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
-      icon: <Server className="h-8 w-8 text-blue-500" />
+      icon: <ServerIcon className="h-8 w-8 text-blue-500" />
     },
     {
       title: "Server 一键安装部署",
       description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
       icon: <Database className="h-8 w-8 text-purple-500" />
-    },
-    {
-      title: "配置解耦与灵活组合",
-      description: "Host 与 Server 配置完全解耦，消除重复配置，提高复用效率",
-      icon: <Cpu className="h-8 w-8 text-teal-500" />
     },
     {
       title: "Profile 智能管理",
@@ -189,7 +183,7 @@ const Introduction3: React.FC = () => {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
-              <Server className="h-6 w-6 text-blue-600" />
+              <ServerIcon className="h-6 w-6 text-blue-600" />
               <span className="text-xl font-extrabold tracking-tight">MCP Now</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">
@@ -412,7 +406,7 @@ const Introduction3: React.FC = () => {
 
           <div className="mt-16 max-w-5xl mx-auto">
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+              className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16"
               variants={staggerChildren}
               initial="initial"
               whileInView="whileInView"
