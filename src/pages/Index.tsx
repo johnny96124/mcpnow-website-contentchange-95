@@ -1,16 +1,9 @@
 
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
-// Redirect to the hosts page from the index
+// Directly redirect to hosts page from index
 const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    navigate('/hosts');
-  }, [navigate]);
-
-  return null; // This won't render as we're redirecting
+  return <Navigate to="/hosts" replace />;
 };
 
 export default Index;

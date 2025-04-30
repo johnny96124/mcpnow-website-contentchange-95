@@ -3,7 +3,7 @@ import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
 import { ServerProvider } from "@/context/ServerContext";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import Dashboard from "@/pages/Dashboard";
@@ -30,7 +30,11 @@ function App() {
           <RouterProvider router={createBrowserRouter([
             {
               path: "/",
-              element: <Index />
+              element: <Navigate to="/hosts" replace />
+            },
+            {
+              path: "/index",
+              element: <Navigate to="/hosts" replace />
             },
             {
               path: "/dashboard",
