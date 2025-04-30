@@ -406,17 +406,7 @@ const Introduction3: React.FC = () => {
             <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16" variants={staggerChildren} initial="initial" whileInView="whileInView" viewport={{
             once: true
           }}>
-              {keyFeatures.map((feature, idx) => (
-                <motion.div key={idx} variants={fadeInUp} className="feature-card">
-                  <Card className="h-full border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-md transition-all duration-300">
-                    <CardContent className="p-6">
-                      <div className="mb-4">{feature.icon}</div>
-                      <h3 className="text-xl font-bold mb-2 font-montserrat">{feature.title}</h3>
-                      <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+              {keyFeatures.map((feature, idx) => {})}
             </motion.div>
           </div>
         </div>
