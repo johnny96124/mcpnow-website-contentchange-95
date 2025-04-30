@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -263,13 +264,16 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                   onDeleteProfile={onDeleteProfile}
                 />
               </div>
-              <Button 
-                onClick={() => setServerSelectionDialogOpen(true)} 
-                className="whitespace-nowrap"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Servers
-              </Button>
+              {/* Only show Add Servers button when there is at least one server */}
+              {profileServers.length > 0 && (
+                <Button 
+                  onClick={() => setServerSelectionDialogOpen(true)} 
+                  className="whitespace-nowrap"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Servers
+                </Button>
+              )}
             </div>
             
             {profileServers.length > 0 ? (
