@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,17 +22,17 @@ const Navbar: React.FC = () => {
             <span className="text-xl font-bold tracking-tight">MCP Now</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="#features" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Features
+            <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              首页
             </Link>
-            <Link to="#use-cases" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              Use Cases
+            <Link to="#what-is-mcp" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              什么是 MCP
             </Link>
-            <Link to="#faq" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              FAQ
+            <Link to="#why-mcp-now" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              为什么选择 MCP Now
             </Link>
-            <Link to="/hosts" className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700">
-              Dashboard
+            <Link to="#download" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              下载
             </Link>
           </nav>
         </div>
@@ -39,7 +40,7 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-4">
             <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              Download
+              下载客户端
             </Button>
           </div>
           <ThemeToggle />
@@ -61,37 +62,37 @@ const Navbar: React.FC = () => {
       >
         <div className="container py-4 space-y-4">
           <Link 
-            to="#features" 
+            to="/" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Features
+            首页
           </Link>
           <Link 
-            to="#use-cases" 
+            to="#what-is-mcp" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Use Cases
+            什么是 MCP
           </Link>
           <Link 
-            to="#faq" 
+            to="#why-mcp-now" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            FAQ
+            为什么选择 MCP Now
           </Link>
           <Link 
-            to="/hosts" 
-            className="block py-2 text-base font-medium text-blue-600"
+            to="#download" 
+            className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            Dashboard
+            下载
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
             <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              Download
+              下载客户端
             </Button>
           </div>
         </div>

@@ -229,17 +229,17 @@ const Introduction3: React.FC = () => {
               <span className="text-xl font-extrabold tracking-tight">MCP Now</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">
-              <Link to="#features" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                Features
+              <Link to="/" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                首页
               </Link>
-              <Link to="#use-cases" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                Use Cases
+              <Link to="#what-is-mcp" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                什么是 MCP
               </Link>
-              <Link to="#faq" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-                FAQ
+              <Link to="#why-mcp-now" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                为什么选择 MCP Now
               </Link>
-              <Link to="/hosts" className="nav-link text-sm font-medium text-blue-600 transition-colors hover:text-blue-700">
-                Dashboard
+              <Link to="#download" className="nav-link text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                下载
               </Link>
             </nav>
           </div>
@@ -247,7 +247,7 @@ const Introduction3: React.FC = () => {
             <div className="hidden md:flex items-center gap-4">
               <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
                 <Download className="mr-2 h-4 w-4" />
-                Download
+                下载客户端
               </Button>
             </div>
             <ThemeToggle />
@@ -260,22 +260,22 @@ const Introduction3: React.FC = () => {
         {/* Mobile menu */}
         <div className={cn("md:hidden absolute top-16 inset-x-0 bg-background border-b z-50 overflow-hidden transition-all duration-300 ease-in-out", mobileMenuOpen ? "max-h-[500px]" : "max-h-0")}>
           <div className="container py-4 space-y-4">
-            <Link to="#features" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              Features
+            <Link to="/" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
+              首页
             </Link>
-            <Link to="#use-cases" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              Use Cases
+            <Link to="#what-is-mcp" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
+              什么是 MCP
             </Link>
-            <Link to="#faq" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
-              FAQ
+            <Link to="#why-mcp-now" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
+              为什么选择 MCP Now
             </Link>
-            <Link to="/hosts" className="block py-2 text-base font-medium text-blue-600" onClick={() => setMobileMenuOpen(false)}>
-              Dashboard
+            <Link to="#download" className="block py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
+              下载
             </Link>
             <div className="pt-4 flex flex-col gap-4 border-t">
               <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
                 <Download className="mr-2 h-4 w-4" />
-                Download
+                下载客户端
               </Button>
             </div>
           </div>
