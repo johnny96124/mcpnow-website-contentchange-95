@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
 import { 
-  FileText, Server, Trash2, AlertTriangle, 
-  CheckCircle, Info, Plus, ChevronDown, MoreHorizontal, 
+  FileText, Server, AlertTriangle, 
+  CheckCircle, Info, Plus, ChevronDown, 
   ExternalLink, ArrowRight, Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -104,12 +104,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     return Math.floor(Math.random() * 90) + 10;
   };
 
-  const handleDeleteHost = () => {
-    if (window.confirm(`Are you sure you want to delete host ${host.name}?`)) {
-      onDeleteHost(host.id);
-    }
-  };
-
   const showConfigFile = () => {
     setConfigDialogOpen(true);
   };
@@ -149,18 +143,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                     />
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                  onClick={handleDeleteHost}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  <span className="text-xs">Remove</span>
-                </Button>
               </div>
             </div>
             
@@ -238,18 +220,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                   />
                 </div>
               </div>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-gray-400 hover:text-red-500 hover:bg-red-50/80"
-                onClick={handleDeleteHost}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                <span className="text-xs">Remove</span>
-              </Button>
             </div>
           </div>
           
