@@ -17,7 +17,6 @@ import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
-import Introduction3 from "./pages/Introduction-3";
 
 function App() {
   const queryClient = new QueryClient();
@@ -35,10 +34,6 @@ function App() {
             {
               path: "/index",
               element: <Navigate to="/" replace />
-            },
-            {
-              path: "/introduction-3",
-              element: <Introduction3 />
             },
             {
               path: "/dashboard",
