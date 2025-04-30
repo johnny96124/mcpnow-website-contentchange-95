@@ -90,15 +90,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         <EndpointLabel type={definition?.type || "STDIO"} />
       </td>
       <td className="p-4 align-middle">
-        <div className="flex items-center gap-2">
-          <StatusIndicator status={server.status === "running" ? "active" : server.status === "error" ? "error" : server.status === "connecting" ? "warning" : "inactive"} />
-          <span className="text-sm font-medium">
-            {server.status === "running" ? "Connected" : 
-             server.status === "error" ? "Error" : 
-             server.status === "connecting" ? "Connecting" : 
-             "Disconnected"}
-          </span>
-        </div>
+        <StatusIndicator status={server.status === "running" ? "active" : server.status === "error" ? "error" : server.status === "connecting" ? "warning" : "inactive"} label={server.status} />
       </td>
       <td className="p-4 align-middle text-center">
         <Switch checked={server.status === 'running'} onCheckedChange={enabled => onStatusChange(server.id, enabled)} disabled={isDisabled} />
@@ -112,24 +104,21 @@ export const ServerItem: React.FC<ServerItemProps> = ({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-500">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Server Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>More Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setEditDialogOpen(true)}>
                 <PenLine className="h-4 w-4 mr-2" />
                 Edit Instance
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 focus:bg-red-50 focus:text-red-700" 
-                onClick={handleRemove}
-              >
+              <DropdownMenuItem className="text-red-600" onClick={handleRemove}>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete Server
+                Remove from Profile
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
