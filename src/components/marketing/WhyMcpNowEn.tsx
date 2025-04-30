@@ -40,8 +40,8 @@ const WhyMcpNow = () => {
     <section id="why-mcp-now" className="py-20 bg-white/70 dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-sans">Why Choose MCP Now?</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">Why Choose MCP Now?</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-roboto">
             Say goodbye to cumbersome multi-platform management, a one-stop solution for common pain points in AI development
           </p>
         </motion.div>
@@ -61,23 +61,23 @@ const WhyMcpNow = () => {
                     <div className="mb-0 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center flex-shrink-0">
                       <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-blue-600 font-sans">{point.title}</h3>
+                    <h3 className="text-xl font-bold text-blue-600 font-montserrat">{point.title}</h3>
                   </div>
                   
                   <div className="space-y-4 mt-6">
                     <div className="flex items-start gap-2">
                       <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-bold">Traditional Method</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{point.before}</p>
+                        <p className="font-bold font-roboto">Traditional Method</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans leading-relaxed">{point.before}</p>
                       </div>
                     </div>
                     
                     <div className="flex items-start gap-2">
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-bold">Using MCP Now</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{point.after}</p>
+                        <p className="font-bold font-roboto">Using MCP Now</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 font-opensans leading-relaxed">{point.after}</p>
                       </div>
                     </div>
                     

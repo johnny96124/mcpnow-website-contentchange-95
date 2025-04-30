@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "../theme/language-provider";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -19,6 +20,8 @@ const staggerChildren = {
 };
 
 const TestimonialsSection = () => {
+  const { language } = useLanguage();
+  
   const testimonials = [
     {
       author: "Sarah Chen",
@@ -43,20 +46,50 @@ const TestimonialsSection = () => {
     }
   ];
 
-  const impactMetrics = [
-    { value: "50,000+", label: "活跃开发者" },
-    { value: "120,000+", label: "AI 项目部署" },
-    { value: "75%", label: "开发效率提升" },
-    { value: "98.7%", label: "服务可靠性" }
-  ];
+  // Impact metrics with both Chinese and English versions
+  const impactMetricsContent = {
+    zh: [
+      { value: "50,000+", label: "活跃开发者" },
+      { value: "120,000+", label: "AI 项目部署" },
+      { value: "75%", label: "开发效率提升" },
+      { value: "98.7%", label: "服务可靠性" }
+    ],
+    en: [
+      { value: "50,000+", label: "Active Developers" },
+      { value: "120,000+", label: "AI Projects Deployed" },
+      { value: "75%", label: "Development Efficiency Boost" },
+      { value: "98.7%", label: "Service Reliability" }
+    ]
+  };
+
+  // Select metrics based on language
+  const impactMetrics = impactMetricsContent[language] || impactMetricsContent.en;
+
+  // Title and subtitle based on language
+  const content = {
+    zh: {
+      title: "用户反馈与影响",
+      subtitle: "了解开发者如何通过 MCP Now 提高工作效率"
+    },
+    en: {
+      title: "User Feedback & Impact",
+      subtitle: "See how developers boost productivity with MCP Now"
+    }
+  };
+
+  const { title, subtitle } = content[language] || content.en;
+
+  // Determine font classes based on language
+  const textFont = language === "en" ? "font-roboto" : "font-noto";
+  const descriptionFont = language === "en" ? "font-opensans" : "font-noto";
 
   return (
     <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">用户反馈与影响</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            了解开发者如何通过 MCP Now 提高工作效率
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">{title}</h2>
+          <p className={`text-lg text-gray-600 dark:text-gray-300 leading-relaxed ${descriptionFont}`}>
+            {subtitle}
           </p>
         </motion.div>
 
@@ -74,7 +107,7 @@ const TestimonialsSection = () => {
                 <div className="mb-2">
                   <span className="text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400 font-montserrat">{metric.value}</span>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">{metric.label}</p>
+                <p className={`text-gray-600 dark:text-gray-400 ${textFont}`}>{metric.label}</p>
               </motion.div>
             ))}
           </div>
@@ -103,7 +136,7 @@ const TestimonialsSection = () => {
                       ))}
                     </div>
                     
-                    <p className="italic text-gray-700 dark:text-gray-300 leading-relaxed">"{testimonial.text}"</p>
+                    <p className={`italic text-gray-700 dark:text-gray-300 leading-relaxed ${descriptionFont} tracking-wide`}>"{testimonial.text}"</p>
                     
                     <div className="flex items-center pt-4">
                       <div className="mr-4">
@@ -113,7 +146,7 @@ const TestimonialsSection = () => {
                       </div>
                       <div>
                         <p className="font-bold font-montserrat">{testimonial.author}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className={`text-sm text-gray-500 dark:text-gray-400 ${textFont}`}>
                           {testimonial.role}, {testimonial.company}
                         </p>
                       </div>

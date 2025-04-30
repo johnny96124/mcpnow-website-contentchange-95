@@ -43,8 +43,8 @@ const DownloadIntroSection = () => {
           className="text-center max-w-3xl mx-auto mb-10"
           {...fadeInUp}
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-sans">Get Started with MCP Now</h2>
-          <p className="text-base text-gray-600 dark:text-gray-300">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-montserrat">Get Started with MCP Now</h2>
+          <p className="text-base text-gray-600 dark:text-gray-300 font-roboto">
             Four steps to simplify your AI development workflow
           </p>
         </motion.div>
@@ -67,8 +67,8 @@ const DownloadIntroSection = () => {
                   <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                     {idx + 1}
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
+                  <h3 className="text-lg font-semibold mb-2 font-montserrat">{step.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 font-opensans leading-relaxed">{step.description}</p>
                 </CardContent>
               </Card>
               
@@ -88,7 +88,7 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-bold mb-4 font-sans">Download Client</h3>
+            <h3 className="text-2xl font-bold mb-4 font-montserrat">Download Client</h3>
             <div className="space-y-4 w-full">
               <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
                 <Download className="mr-2 h-5 w-5" />
@@ -99,7 +99,7 @@ const DownloadIntroSection = () => {
                 Windows Version (Coming Soon)
               </Button>
             </div>
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 font-roboto">
               Current Version: 1.0.0 | Free Download
             </p>
           </motion.div>
@@ -110,8 +110,8 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-bold mb-4 font-sans">Join Community</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-300">
+            <h3 className="text-2xl font-bold mb-4 font-montserrat">Join Community</h3>
+            <p className="mb-6 text-gray-600 dark:text-gray-300 font-opensans leading-relaxed">
               Connect with other MCP Now users, get the latest updates, share your experiences.
             </p>
             <div className="flex gap-4">

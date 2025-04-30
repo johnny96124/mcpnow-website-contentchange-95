@@ -31,23 +31,23 @@ const NavbarEn: React.FC = () => {
             <span className="text-xl font-bold tracking-tight">MCP Now</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/website-en" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="/website-en" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.home}
             </Link>
-            <Link to="#what-is-mcp" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="#what-is-mcp" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.whatIsMcp}
             </Link>
-            <Link to="#why-mcp-now" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="#why-mcp-now" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.whyMcpNow}
             </Link>
-            <Link to="#download" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="#download" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground font-roboto">
               {t.download}
             </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+            <Button variant="default" className="bg-blue-600 hover:bg-blue-700 font-roboto" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
               {t.downloadClient}
             </Button>
@@ -72,34 +72,34 @@ const NavbarEn: React.FC = () => {
         <div className="container py-4 space-y-4">
           <Link 
             to="/website-en" 
-            className="block py-2 text-base font-medium"
+            className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.home}
           </Link>
           <Link 
             to="#what-is-mcp" 
-            className="block py-2 text-base font-medium"
+            className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.whatIsMcp}
           </Link>
           <Link 
             to="#why-mcp-now" 
-            className="block py-2 text-base font-medium"
+            className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.whyMcpNow}
           </Link>
           <Link 
             to="#download" 
-            className="block py-2 text-base font-medium"
+            className="block py-2 text-base font-medium font-roboto"
             onClick={() => setMobileMenuOpen(false)}
           >
             {t.download}
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
-            <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+            <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700 font-roboto" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
               {t.downloadClient}
             </Button>
