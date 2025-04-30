@@ -1,8 +1,9 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/components/theme/language-provider";
 import { Card, CardContent } from "@/components/ui/card";
+import { GitCommitHorizontal, FileJson, Code2, Workflow, PanelLeft, Braces, Terminal } from "lucide-react";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -11,140 +12,136 @@ const fadeInUp = {
   transition: { duration: 0.7 }
 };
 
+const staggerChildren = {
+  initial: { opacity: 0 },
+  whileInView: { opacity: 1 },
+  viewport: { once: true },
+  transition: { staggerChildren: 0.2 }
+};
+
+const cardHover = {
+  rest: { scale: 1, transition: { duration: 0.2 } },
+  hover: { scale: 1.05, transition: { duration: 0.3 } }
+};
+
 const CompatibilitySection = () => {
-  const hosts = [
+  const { language } = useLanguage();
+  
+  // Compatible tools data
+  const compatibleTools = [
     {
-      name: "Cursor",
-      icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
-    }, 
+      icon: GitCommitHorizontal,
+      name: language === "en" ? "Version Control Systems" : "版本控制系统",
+      description: language === "en" ? "Integrate with Git, SVN, and more" : "与 Git、SVN 等版本控制系统集成",
+    },
     {
-      name: "Windurf",
-      icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
-    }, 
+      icon: FileJson,
+      name: language === "en" ? "Configuration Files" : "配置文件",
+      description: language === "en" ? "JSON, YAML, and INI formats" : "支持 JSON、YAML 和 INI 格式",
+    },
     {
-      name: "VSCode",
-      icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
-    }, 
+      icon: Code2,
+      name: language === "en" ? "IDEs & Editors" : "IDE 和编辑器",
+      description: language === "en" ? "VS Code, IntelliJ, Sublime Text" : "支持 VS Code、IntelliJ、Sublime Text",
+    },
     {
-      name: "JetBrains",
-      icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
-    }, 
+      icon: Workflow,
+      name: language === "en" ? "CI/CD Pipelines" : "CI/CD 流程",
+      description: language === "en" ? "GitHub Actions, Jenkins, CircleCI" : "GitHub Actions、Jenkins、CircleCI",
+    },
     {
-      name: "Local Host",
-      icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
-    }, 
+      icon: PanelLeft,
+      name: language === "en" ? "Project Management" : "项目管理工具",
+      description: language === "en" ? "Jira, Asana, Trello integration" : "Jira、Asana、Trello 集成",
+    },
     {
-      name: "Cloud Host",
-      icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+      icon: Braces,
+      name: language === "en" ? "Developer Tools" : "开发者工具",
+      description: language === "en" ? "Docker, Kubernetes, AWS" : "Docker、Kubernetes、AWS",
     }
   ];
 
+  // Content based on language
+  const content = {
+    en: {
+      title: "Seamless Integration with Your Existing Workflow",
+      subtitle: "MCP Now works with your favorite tools and services out of the box",
+      tryItNow: "Try It Now"
+    },
+    zh: {
+      title: "无缝融入现有工作流程",
+      subtitle: "MCP Now 开箱即用，与你喜爱的工具和服务完美协作",
+      tryItNow: "立即尝试"
+    }
+  };
+
+  // Use English or Chinese content based on language setting
+  const { title, subtitle, tryItNow } = content[language];
+
   return (
-    <section id="compatibility" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
+    <section className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">多场景灵活适配</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            一次配置，多处使用，适配您喜爱的所有开发工具
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">{title}</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-opensans">
+            {subtitle}
           </p>
         </motion.div>
         
         <motion.div 
-          className="max-w-4xl mx-auto" 
-          initial={{ opacity: 0 }} 
-          whileInView={{ opacity: 1 }} 
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto" 
+          variants={staggerChildren} 
+          initial="initial" 
+          whileInView="whileInView" 
           viewport={{ once: true }}
         >
-          <Tabs defaultValue="development" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="development">开发环境</TabsTrigger>
-              <TabsTrigger value="hosting">主机环境</TabsTrigger>
-              <TabsTrigger value="usage">使用场景</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="development" className="p-4">
-              <div className="flex flex-wrap justify-center gap-8">
-                {hosts.slice(0, 4).map((host, idx) => (
-                  <motion.div 
-                    key={`${host.name}-${idx}`} 
-                    className="flex flex-col items-center" 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ delay: idx * 0.1 }} 
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                  >
-                    <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
-                      <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
+          {compatibleTools.map((tool, idx) => (
+            <motion.div 
+              key={idx} 
+              className="flex justify-center" 
+              variants={fadeInUp} 
+              whileHover="hover" 
+              initial="rest" 
+              animate="rest"
+              viewport={{ once: true }}
+            >
+              <motion.div variants={cardHover} className="w-full">
+                <Card className="h-full border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+                      <tool.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="font-bold font-montserrat">{host.name}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="hosting" className="p-4">
-              <div className="flex flex-wrap justify-center gap-8">
-                {hosts.slice(4, 6).map((host, idx) => (
-                  <motion.div 
-                    key={`${host.name}-${idx}`} 
-                    className="flex flex-col items-center" 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ delay: idx * 0.1 }} 
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                  >
-                    <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
-                      <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
-                    </div>
-                    <span className="font-bold font-montserrat">{host.name}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="usage" className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">开发环境</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      在 IDE 中直接调用多种 AI 模型，辅助代码编写、审查和优化
+                    <h3 className="text-lg font-bold mb-2 font-montserrat">{tool.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-opensans leading-relaxed">
+                      {tool.description}
                     </p>
                   </CardContent>
                 </Card>
-                
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">数据分析</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      为数据分析流程集成多种 AI 能力，自动化处理和可视化数据
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">内容创作</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      在内容创作过程中无缝切换不同风格和功能的 AI 模型
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </motion.div>
+            </motion.div>
+          ))}
         </motion.div>
         
-        <motion.div 
-          className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30" 
-          {...fadeInUp}
-        >
-          <div className="text-center">
-            <h3 className="font-bold mb-2 font-montserrat">不止于灵活，更有热插拔能力</h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">无需重启应用，一键切换 AI 服务，实时响应业务需求变化</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* 部分高性能模型可能需要额外预热时间</p>
+        <div className="mt-12 text-center">
+          <button className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-8 transition-colors duration-300">
+            {tryItNow}
+          </button>
+          
+          <div className="mt-4 flex flex-wrap justify-center gap-4">
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <Terminal className="h-4 w-4 mr-1" />
+              <span>{language === "en" ? "CLI Support" : "命令行支持"}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <Code2 className="h-4 w-4 mr-1" />
+              <span>{language === "en" ? "API Available" : "API 可用"}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <FileJson className="h-4 w-4 mr-1" />
+              <span>{language === "en" ? "Export/Import" : "导入/导出"}</span>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
