@@ -104,18 +104,15 @@ const CompatibilitySection = () => {
   
   // Select content based on current language
   const currentContent = content[language] || content.en;
-  
-  // Determine font classes based on language
-  const textFont = language === "en" ? "font-roboto" : "font-noto";
-  const headingFont = "font-montserrat";
-  const descriptionFont = language === "en" ? "font-opensans" : "font-noto";
 
   return (
     <section id="compatibility" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 ${headingFont}`}>{currentContent.title}</h2>
-          <p className={`text-lg text-gray-600 dark:text-gray-300 leading-relaxed ${descriptionFont}`}>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 dark:text-white font-montserrat tracking-tight">
+            {currentContent.title}
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-roboto max-w-2xl mx-auto">
             {currentContent.subtitle}
           </p>
         </motion.div>
@@ -128,9 +125,9 @@ const CompatibilitySection = () => {
         >
           <Tabs defaultValue="development" className="w-full">
             <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="development" className={textFont}>{currentContent.tabs.development}</TabsTrigger>
-              <TabsTrigger value="hosting" className={textFont}>{currentContent.tabs.hosting}</TabsTrigger>
-              <TabsTrigger value="usage" className={textFont}>{currentContent.tabs.usage}</TabsTrigger>
+              <TabsTrigger value="development" className="font-roboto text-sm font-medium">{currentContent.tabs.development}</TabsTrigger>
+              <TabsTrigger value="hosting" className="font-roboto text-sm font-medium">{currentContent.tabs.hosting}</TabsTrigger>
+              <TabsTrigger value="usage" className="font-roboto text-sm font-medium">{currentContent.tabs.usage}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="development" className="p-4">
@@ -147,7 +144,7 @@ const CompatibilitySection = () => {
                     <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
                       <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
                     </div>
-                    <span className={`font-bold ${headingFont}`}>{host.name}</span>
+                    <span className="font-medium font-montserrat text-gray-800 dark:text-gray-100">{host.name}</span>
                   </motion.div>
                 ))}
               </div>
@@ -167,7 +164,7 @@ const CompatibilitySection = () => {
                     <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
                       <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
                     </div>
-                    <span className={`font-bold ${headingFont}`}>{host.name}</span>
+                    <span className="font-medium font-montserrat text-gray-800 dark:text-gray-100">{host.name}</span>
                   </motion.div>
                 ))}
               </div>
@@ -178,8 +175,8 @@ const CompatibilitySection = () => {
                 {currentContent.usageCases.map((useCase, idx) => (
                   <Card key={idx} className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
                     <CardContent className="p-6">
-                      <h3 className={`font-bold mb-2 ${headingFont}`}>{useCase.title}</h3>
-                      <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed ${descriptionFont}`}>
+                      <h3 className="font-semibold mb-2 text-lg text-gray-800 dark:text-white font-montserrat">{useCase.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-opensans">
                         {useCase.description}
                       </p>
                     </CardContent>
@@ -195,11 +192,11 @@ const CompatibilitySection = () => {
           {...fadeInUp}
         >
           <div className="text-center">
-            <h3 className={`font-bold mb-2 ${headingFont}`}>{currentContent.hotswap.title}</h3>
-            <p className={`text-gray-600 dark:text-gray-400 leading-relaxed ${descriptionFont}`}>
+            <h3 className="font-semibold mb-3 text-xl text-gray-800 dark:text-white font-montserrat">{currentContent.hotswap.title}</h3>
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-roboto mb-3">
               {currentContent.hotswap.description}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic mt-2 font-opensans">
               {currentContent.hotswap.note}
             </p>
           </div>
