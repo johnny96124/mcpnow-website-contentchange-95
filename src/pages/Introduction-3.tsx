@@ -1,6 +1,7 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { 
   Download, 
   ChevronRight, 
@@ -36,10 +37,16 @@ const staggerChildren = {
 
 const cardHover = {
   rest: { scale: 1, transition: { duration: 0.2 } },
-  hover: { scale: 1.03, transition: { duration: 0.2 } }
+  hover: { scale: 1.05, boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", transition: { duration: 0.2 } }
 };
 
 const Introduction3: React.FC = () => {
+  const controls = useAnimation();
+
+  useEffect(() => {
+    controls.start({ opacity: 1, y: 0 });
+  }, [controls]);
+
   const mcpServers = [
     { name: "OpenAI Server", description: "Access GPT-4 and DALL-E models", icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png" },
     { name: "Anthropic Claude", description: "High-performance Claude models", icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png" },
@@ -86,7 +93,7 @@ const Introduction3: React.FC = () => {
 
   const painPoints = [
     {
-      before: "多账号切换，��平台登录",
+      before: "多账号切换，多平台登录",
       after: "一次登录，统一管理所有 AI 服务",
       icon: Cpu,
       benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
@@ -160,41 +167,6 @@ const Introduction3: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">
-      <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-950/90 dark:border-gray-800">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2">
-              <img
-                src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
-                alt="MCP Now Logo"
-                className="h-8 w-8 rounded-lg shadow"
-              />
-              <span className="text-xl font-bold tracking-tight">MCP Now</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400">
-                首页
-              </Link>
-              <Link to="#what-is-mcp" className="text-sm font-medium text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400">
-                什么是 MCP
-              </Link>
-              <Link to="#why-mcp-now" className="text-sm font-medium text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400">
-                为什么选择 MCP Now
-              </Link>
-              <Link to="#download" className="text-sm font-medium text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-200 dark:hover:text-blue-400">
-                下载
-              </Link>
-            </div>
-          </div>
-          <div>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Download className="mr-2 h-4 w-4" />
-              下载客户端
-            </Button>
-          </div>
-        </div>
-      </nav>
-
       <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -205,30 +177,45 @@ const Introduction3: React.FC = () => {
           <motion.div
             className="flex flex-col items-center text-center space-y-6"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            animate={controls}
+            transition={{ duration: 0.7, staggerChildren: 0.3 }}
           >
-            <Badge variant="outline" className="px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400">
+            <Badge variant="outline" className="px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400 animate-pulse-subtle">
               <span className="text-blue-600 font-bold mr-1.5">New</span>
               <span className="text-gray-600 dark:text-gray-300">|</span>
               <span className="ml-1.5">Introducing MCP Now</span>
             </Badge>
             
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+            <motion.div 
+              className="space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.7 }}
+            >
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
                 告别繁琐配置
               </h1>
               <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600">
                 一站式统一管理 MCP 生态系统
               </h2>
-            </div>
+            </motion.div>
             
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl">
+            <motion.p 
+              className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+            >
               MCP Now 充当 AI 应用和模型服务之间的桥梁，通过创新的聚合方式让您轻松调用多种服务能力，
               无需编辑配置文件，一键接入所有 MCP 服务。
-            </p>
+            </motion.p>
             
-            <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
+            <motion.div 
+              className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl shadow-sm hover:shadow-md transition-all duration-300"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.7 }}
+            >
               <div className="flex items-start gap-3">
                 <div className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -244,7 +231,7 @@ const Introduction3: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-left">MCP 与 MCP Now 是什么关系？</h3>
+                  <h3 className="font-semibold text-left">MCP 与 MCP Now 是什么关系？</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
                     MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
                     而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
@@ -252,24 +239,30 @@ const Introduction3: React.FC = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 pt-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.7 }}
+            >
+              <Button size="lg" variant="pulse" className="bg-blue-600 hover:bg-blue-700 px-6 py-6 text-base font-semibold">
                 <Download className="mr-2 h-5 w-5" />
                 下载客户端
               </Button>
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="border-blue-200 hover:border-blue-300 px-6 py-6 text-base font-medium">
                 了解更多
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-            </div>
+            </motion.div>
             
             <motion.div 
-              className="w-full max-w-4xl mt-8 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800"
+              className="w-full max-w-4xl mt-8 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800 hover-card"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
+              transition={{ duration: 0.7, delay: 1.0 }}
+              whileHover={{ scale: 1.02 }}
             >
               <img 
                 src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png"
@@ -287,8 +280,8 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">为什么选择 MCP Now?</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">为什么选择 MCP Now？</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               告别复杂的多平台管理，一站式解决 AI 开发中的常见痛点
             </p>
           </motion.div>
@@ -301,8 +294,9 @@ const Introduction3: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5 }}
               >
-                <Card className="h-full border-gray-200 dark:border-gray-800 overflow-hidden">
+                <Card className="h-full border-gray-200 dark:border-gray-800 overflow-hidden shadow hover:shadow-md transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="mb-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center">
                       <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -312,7 +306,7 @@ const Introduction3: React.FC = () => {
                       <div className="flex items-start gap-2">
                         <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="font-medium">传统方式</p>
+                          <p className="font-semibold">传统方式</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{point.before}</p>
                         </div>
                       </div>
@@ -320,7 +314,7 @@ const Introduction3: React.FC = () => {
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="font-medium">使用 MCP Now</p>
+                          <p className="font-semibold">使用 MCP Now</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{point.after}</p>
                         </div>
                       </div>
@@ -348,11 +342,12 @@ const Introduction3: React.FC = () => {
                   key={idx}
                   variants={fadeInUp}
                   className="text-center"
+                  whileHover={{ y: -5 }}
                 >
-                  <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center">
+                  <div className="mb-4 mx-auto bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center shadow-sm">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300">{feature.description}</p>
                 </motion.div>
               ))}
@@ -367,8 +362,8 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">全面覆盖主流 AI 服务</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">全面覆盖主流 AI 服务</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               一站式接入所有您需要的 AI 服务，无需切换多个平台
             </p>
           </motion.div>
@@ -388,17 +383,19 @@ const Introduction3: React.FC = () => {
                 animate="rest"
                 variants={cardHover}
               >
-                <Card className="h-full overflow-hidden transition-all hover:shadow-md border-gray-200 dark:border-gray-800">
+                <Card className="h-full overflow-hidden transition-all hover:shadow-md border-gray-200 dark:border-gray-800 hover-card">
                   <CardContent className="p-4">
                     <div className="flex flex-col items-center text-center">
                       <div className="mb-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                        <img 
+                        <motion.img 
                           src={server.icon}
                           alt={server.name}
                           className="w-10 h-10 object-contain"
+                          whileHover={{ rotate: 5, scale: 1.1 }}
+                          transition={{ type: "spring", stiffness: 300 }}
                         />
                       </div>
-                      <h3 className="text-sm font-medium mb-1">{server.name}</h3>
+                      <h3 className="text-sm font-semibold mb-1">{server.name}</h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{server.description}</p>
                     </div>
                   </CardContent>
@@ -408,7 +405,7 @@ const Introduction3: React.FC = () => {
           </motion.div>
           
           <div className="mt-8 text-center">
-            <Button variant="outline" className="text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/discovery'}>
+            <Button variant="outline" className="text-blue-600 hover:bg-blue-50 font-medium" onClick={() => window.location.href = '/discovery'}>
               探索更多 MCP Servers
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -422,8 +419,8 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">多场景灵活适配</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">多场景灵活适配</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               一次配置，多处使用，适配您喜爱的所有开发工具
             </p>
           </motion.div>
@@ -435,13 +432,13 @@ const Introduction3: React.FC = () => {
             viewport={{ once: true }}
           >
             <Tabs defaultValue="development" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-8">
-                <TabsTrigger value="development">开发环境</TabsTrigger>
-                <TabsTrigger value="hosting">主机环境</TabsTrigger>
-                <TabsTrigger value="usage">使用场景</TabsTrigger>
+              <TabsList className="grid grid-cols-3 mb-8 p-1 rounded-lg bg-muted">
+                <TabsTrigger value="development" className="font-medium text-sm">开发环境</TabsTrigger>
+                <TabsTrigger value="hosting" className="font-medium text-sm">主机环境</TabsTrigger>
+                <TabsTrigger value="usage" className="font-medium text-sm">使用场景</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="development" className="p-4">
+              <TabsContent value="development" className="p-4 animate-zoom-in-subtle">
                 <div className="flex flex-wrap justify-center gap-8">
                   {hosts.slice(0, 4).map((host, idx) => (
                     <motion.div
@@ -450,21 +447,22 @@ const Introduction3: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
+                      whileHover={{ scale: 1.05 }}
                     >
-                      <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
+                      <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm hover:shadow-md transition-all duration-300">
                         <img
                           src={host.icon}
                           alt={host.name}
                           className="w-14 h-14 object-contain"
                         />
                       </div>
-                      <span className="font-medium">{host.name}</span>
+                      <span className="font-semibold">{host.name}</span>
                     </motion.div>
                   ))}
                 </div>
               </TabsContent>
               
-              <TabsContent value="hosting" className="p-4">
+              <TabsContent value="hosting" className="p-4 animate-zoom-in-subtle">
                 <div className="flex flex-wrap justify-center gap-8">
                   {hosts.slice(4, 6).map((host, idx) => (
                     <motion.div
@@ -473,23 +471,24 @@ const Introduction3: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.1 }}
+                      whileHover={{ scale: 1.05 }}
                     >
-                      <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
+                      <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm hover:shadow-md transition-all duration-300">
                         <img
                           src={host.icon}
                           alt={host.name}
                           className="w-14 h-14 object-contain"
                         />
                       </div>
-                      <span className="font-medium">{host.name}</span>
+                      <span className="font-semibold">{host.name}</span>
                     </motion.div>
                   ))}
                 </div>
               </TabsContent>
               
-              <TabsContent value="usage" className="p-4">
+              <TabsContent value="usage" className="p-4 animate-zoom-in-subtle">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card className="border-gray-200 dark:border-gray-800">
+                  <Card className="border-gray-200 dark:border-gray-800 hover-card">
                     <CardContent className="p-6">
                       <h3 className="font-semibold mb-2">开发环境</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -498,7 +497,7 @@ const Introduction3: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  <Card className="border-gray-200 dark:border-gray-800">
+                  <Card className="border-gray-200 dark:border-gray-800 hover-card">
                     <CardContent className="p-6">
                       <h3 className="font-semibold mb-2">数据分析</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -507,7 +506,7 @@ const Introduction3: React.FC = () => {
                     </CardContent>
                   </Card>
                   
-                  <Card className="border-gray-200 dark:border-gray-800">
+                  <Card className="border-gray-200 dark:border-gray-800 hover-card">
                     <CardContent className="p-6">
                       <h3 className="font-semibold mb-2">内容创作</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -521,11 +520,12 @@ const Introduction3: React.FC = () => {
           </motion.div>
           
           <motion.div 
-            className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30"
+            className="mt-12 max-w-3xl mx-auto bg-blue-50/50 dark:bg-blue-900/10 rounded-lg p-6 border border-blue-100 dark:border-blue-900/30 shadow-sm"
             {...fadeInUp}
+            whileHover={{ scale: 1.01, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
           >
             <div className="text-center">
-              <h3 className="font-semibold mb-2">不止于灵活，更有热插拔能力</h3>
+              <h3 className="font-bold mb-2">不止于灵活，更有热插拔能力</h3>
               <p className="text-gray-600 dark:text-gray-400">无需重启应用，一键切换 AI 服务，实时响应业务需求变化</p>
               <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* 部分高性能模型可能需要额外预热时间</p>
             </div>
@@ -539,8 +539,8 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">用户反馈与影响</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">用户反馈与影响</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               了解开发者如何通过 MCP Now 提高工作效率
             </p>
           </motion.div>
@@ -555,11 +555,12 @@ const Introduction3: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
+                  whileHover={{ y: -5 }}
                 >
                   <div className="mb-2">
-                    <span className="text-3xl md:text-4xl font-bold text-blue-600 dark:text-blue-400">{metric.value}</span>
+                    <span className="text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400">{metric.value}</span>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400">{metric.label}</p>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">{metric.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -577,8 +578,9 @@ const Introduction3: React.FC = () => {
                 key={idx}
                 variants={fadeInUp}
                 transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5, boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }}
               >
-                <Card className="h-full border-gray-200 dark:border-gray-800">
+                <Card className="h-full border-gray-200 dark:border-gray-800 shadow-sm transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex flex-col space-y-4">
                       <div className="flex items-center space-x-1">
@@ -621,8 +623,8 @@ const Introduction3: React.FC = () => {
             className="text-center max-w-3xl mx-auto mb-12"
             {...fadeInUp}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">开始使用 MCP Now</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">开始使用 MCP Now</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
               四步上手，简化您的 AI 开发流程
             </p>
           </motion.div>
@@ -636,16 +638,17 @@ const Introduction3: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5 }}
               >
-                <Card className="h-full border-gray-200 dark:border-gray-800">
+                <Card className="h-full border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-300">
                   <CardContent className="p-6 flex flex-col items-center text-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4 shadow-sm">
                       <step.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
+                    <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
                       {idx + 1}
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
+                    <h3 className="text-lg font-bold mb-2">{step.title}</h3>
                     <p className="text-gray-600 dark:text-gray-300">{step.description}</p>
                   </CardContent>
                 </Card>
@@ -668,11 +671,11 @@ const Introduction3: React.FC = () => {
             >
               <h3 className="text-2xl font-bold mb-4">下载客户端</h3>
               <div className="space-y-4 w-full">
-                <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
+                <Button size="xl" variant="pulse" className="w-full bg-blue-600 hover:bg-blue-700 text-base font-semibold">
                   <Download className="mr-2 h-5 w-5" />
                   Mac 版本下载
                 </Button>
-                <Button size="lg" variant="outline" className="w-full" disabled>
+                <Button size="xl" variant="outline" className="w-full text-base" disabled>
                   <Download className="mr-2 h-5 w-5" />
                   Windows 版本 (即将推出)
                 </Button>
@@ -689,16 +692,24 @@ const Introduction3: React.FC = () => {
               viewport={{ once: true }}
             >
               <h3 className="text-2xl font-bold mb-4">加入社区</h3>
-              <p className="mb-6 text-gray-600 dark:text-gray-300">
+              <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
                 与其他 MCP Now 用户交流，获取最新更新，分享您的经验。
               </p>
               <div className="flex gap-4">
-                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
+                <motion.a 
+                  href="#" 
+                  className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors shadow-sm hover:shadow"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
                   <DiscIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </a>
-                <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
+                </motion.a>
+                <motion.a 
+                  href="#" 
+                  className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors shadow-sm hover:shadow"
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                >
                   <Twitter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </a>
+                </motion.a>
               </div>
             </motion.div>
           </div>
@@ -709,7 +720,7 @@ const Introduction3: React.FC = () => {
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div>
-              <Link to="/" className="flex items-center gap-2 mb-4">
+              <Link to="/" className="flex items-center gap-2 mb-4 transition-transform hover:scale-105 duration-300">
                 <img
                   src="/lovable-uploads/bbb3edcf-989e-42ed-a8dd-d5f07f4c632d.png"
                   alt="MCP Now Logo"
@@ -725,35 +736,35 @@ const Introduction3: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-4">产品</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="#what-is-mcp" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">什么是 MCP</Link></li>
-                <li><Link to="#why-mcp-now" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">为什么选择 MCP Now</Link></li>
-                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">下载</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">更新日志</Link></li>
+                <li><Link to="#what-is-mcp" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">什么是 MCP</Link></li>
+                <li><Link to="#why-mcp-now" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">为什么选择 MCP Now</Link></li>
+                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">下载</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">更新日志</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">资源</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">文档</Link></li>
-                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">入门指南</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">API 参考</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">示例</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">文档</Link></li>
+                <li><Link to="#download" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">入门指南</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">API 参考</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">示例</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">关于我们</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">公司</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">博客</Link></li>
-                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">联系我们</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">公司</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">博客</Link></li>
+                <li><Link to="#" className="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">联系我们</Link></li>
                 <li>
                   <div className="flex gap-4 mt-2">
-                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
+                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
                       <DiscIcon className="h-5 w-5" />
                     </a>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
+                    <a href="#" className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">
                       <Twitter className="h-5 w-5" />
                     </a>
                   </div>
@@ -767,9 +778,9 @@ const Introduction3: React.FC = () => {
               © 2025 MCP Now. 保留所有权利。
             </p>
             <div className="flex gap-4 mt-4 sm:mt-0">
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">隐私政策</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">服务条款</Link>
-              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">法律信息</Link>
+              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">隐私政策</Link>
+              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">服务条款</Link>
+              <Link to="#" className="text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors">法律信息</Link>
             </div>
           </div>
         </div>
