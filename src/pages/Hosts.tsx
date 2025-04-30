@@ -313,20 +313,18 @@ const Hosts = () => {
                       </div>
                       <div>
                         <p className="font-medium text-sm">{host.name}</p>
-                        <div className="flex items-center gap-1.5">
-                          <div className={`w-2 h-2 rounded-full ${
-                            host.connectionStatus === "connected" 
-                              ? 'bg-green-500' 
-                              : 'bg-neutral-400'
-                          }`} />
-                          <p className="text-xs text-muted-foreground">
-                            {host.connectionStatus === "connected" 
-                              ? "Connected" 
-                              : "Disconnected"}
-                          </p>
-                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {host.connectionStatus === "connected" 
+                            ? "Connected" 
+                            : "Disconnected"}
+                        </p>
                       </div>
                     </div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      host.connectionStatus === "connected" 
+                        ? 'bg-green-500' 
+                        : 'bg-neutral-400'
+                    }`} />
                   </CardContent>
                 </Card>
               ))}
