@@ -23,7 +23,7 @@ const IntroductionHero = () => {
           <Badge variant="outline" className="px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400">
             <span className="text-blue-600 font-bold mr-1.5">New</span>
             <span className="text-gray-600 dark:text-gray-300">|</span>
-            <span className="ml-1.5">Introducing MCP Now</span>
+            <span className="ml-1.5">MCP Now</span>
           </Badge>
           
           <div className="space-y-4">
