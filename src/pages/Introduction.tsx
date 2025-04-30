@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -308,6 +309,12 @@ const Introduction: React.FC = () => {
                     <div className="mb-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 w-12 h-12 flex items-center justify-center">
                       <point.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
+                    
+                    {idx === 0 && (
+                      <div className="mt-4 mb-2">
+                        <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">统一接口适配</h3>
+                      </div>
+                    )}
                     
                     <div className="space-y-4 mt-6">
                       <div className="flex items-start gap-2">
