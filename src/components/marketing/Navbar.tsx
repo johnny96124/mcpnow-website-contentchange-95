@@ -70,8 +70,8 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="pulse" size="lg" className="bg-blue-600 hover:bg-blue-700 group" onClick={() => window.location.href = '#download'}>
-              <Download className="mr-2 h-4 w-4 group-hover:animate-float" />
+            <Button variant="default" size="lg" className="bg-blue-600 hover:bg-blue-700 group" onClick={() => window.location.href = '#download'}>
+              <Download className="mr-2 h-4 w-4" />
               下载
             </Button>
           </div>
@@ -109,7 +109,7 @@ const Navbar: React.FC = () => {
             </Link>
           ))}
           <div className="pt-4 flex flex-col gap-4">
-            <Button variant="pulse" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
+            <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-5 w-5" />
               下载
             </Button>
