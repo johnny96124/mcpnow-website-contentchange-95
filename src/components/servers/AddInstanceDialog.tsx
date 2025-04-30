@@ -21,7 +21,7 @@ export interface InstanceFormValues {
   name: string;
   url: string;
   args: string;
-  description: string;
+  description?: string; // Made description optional
   env?: Record<string, string>;
   headers?: Record<string, string>;
   instanceId?: string;
