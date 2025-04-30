@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
   CheckCircle, Info, Plus, ChevronDown, 
-  ExternalLink, ArrowRight, Settings
+  ExternalLink, ArrowRight, Settings, MoreHorizontal, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,21 @@ import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
 
 interface HostDetailViewProps {
   host: Host;
@@ -59,6 +74,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
+  const [deleteHostDialogOpen, setDeleteHostDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const selectedProfile = profiles.find(p => p.id === selectedProfileId);
@@ -122,6 +138,11 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         onSaveProfileChanges();
       }
     }
+  };
+
+  const handleConfirmDeleteHost = () => {
+    onDeleteHost(host.id);
+    setDeleteHostDialogOpen(false);
   };
 
   if (host.configStatus === "unknown") {
@@ -221,6 +242,24 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                 </div>
               </div>
             </div>
+            <div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem 
+                    className="text-red-600 cursor-pointer"
+                    onClick={() => setDeleteHostDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Host
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           <Separator className="my-6" />
@@ -295,6 +334,26 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         onOpenChange={setConfigDialogOpen}
         configPath={host.configPath || ""}
       />
+
+      {/* Delete Host Confirmation Dialog */}
+      <Dialog open={deleteHostDialogOpen} onOpenChange={setDeleteHostDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Host</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{host.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleConfirmDeleteHost}>
+              Delete Host
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
