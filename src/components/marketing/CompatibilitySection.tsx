@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLanguage } from "../theme/language-provider";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -12,6 +13,8 @@ const fadeInUp = {
 };
 
 const CompatibilitySection = () => {
+  const { language } = useLanguage();
+  
   const hosts = [
     {
       name: "Cursor",
@@ -38,14 +41,82 @@ const CompatibilitySection = () => {
       icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
     }
   ];
+  
+  // Content for both languages
+  const content = {
+    zh: {
+      title: "多场景灵活适配",
+      subtitle: "一次配置，多处使用，适配您喜爱的所有开发工具",
+      tabs: {
+        development: "开发环境",
+        hosting: "主机环境",
+        usage: "使用场景"
+      },
+      usageCases: [
+        {
+          title: "开发环境",
+          description: "在 IDE 中直接调用多种 AI 模型，辅助代码编写、审查和优化"
+        },
+        {
+          title: "数据分析",
+          description: "为数据分析流程集成多种 AI 能力，自动化处理和可视化数据"
+        },
+        {
+          title: "内容创作",
+          description: "在内容创作过程中无缝切换不同风格和功能的 AI 模型"
+        }
+      ],
+      hotswap: {
+        title: "不止于灵活，更有热插拔能力",
+        description: "无需重启应用，一键切换 AI 服务，实时响应业务需求变化",
+        note: "* 部分高性能模型可能需要额外预热时间"
+      }
+    },
+    en: {
+      title: "Flexible Compatibility Across Platforms",
+      subtitle: "Configure once, use everywhere - works with all your favorite development tools",
+      tabs: {
+        development: "Development",
+        hosting: "Hosting",
+        usage: "Use Cases"
+      },
+      usageCases: [
+        {
+          title: "Development Environment",
+          description: "Call multiple AI models directly within your IDE to assist with code writing, review, and optimization"
+        },
+        {
+          title: "Data Analysis",
+          description: "Integrate various AI capabilities into your data analysis workflow for automated processing and visualization"
+        },
+        {
+          title: "Content Creation",
+          description: "Seamlessly switch between AI models with different styles and capabilities during content creation"
+        }
+      ],
+      hotswap: {
+        title: "Beyond Flexibility: Hot-Swapping Capability",
+        description: "Switch between AI services instantly without restarting applications, responding to changing business needs in real-time",
+        note: "* Some high-performance models may require additional warm-up time"
+      }
+    }
+  };
+  
+  // Select content based on current language
+  const currentContent = content[language] || content.en;
+  
+  // Determine font classes based on language
+  const textFont = language === "en" ? "font-roboto" : "font-noto";
+  const headingFont = "font-montserrat";
+  const descriptionFont = language === "en" ? "font-opensans" : "font-noto";
 
   return (
     <section id="compatibility" className="py-20 bg-gradient-to-b from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">多场景灵活适配</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            一次配置，多处使用，适配您喜爱的所有开发工具
+          <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 ${headingFont}`}>{currentContent.title}</h2>
+          <p className={`text-lg text-gray-600 dark:text-gray-300 leading-relaxed ${descriptionFont}`}>
+            {currentContent.subtitle}
           </p>
         </motion.div>
         
@@ -57,9 +128,9 @@ const CompatibilitySection = () => {
         >
           <Tabs defaultValue="development" className="w-full">
             <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="development">开发环境</TabsTrigger>
-              <TabsTrigger value="hosting">主机环境</TabsTrigger>
-              <TabsTrigger value="usage">使用场景</TabsTrigger>
+              <TabsTrigger value="development" className={textFont}>{currentContent.tabs.development}</TabsTrigger>
+              <TabsTrigger value="hosting" className={textFont}>{currentContent.tabs.hosting}</TabsTrigger>
+              <TabsTrigger value="usage" className={textFont}>{currentContent.tabs.usage}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="development" className="p-4">
@@ -76,7 +147,7 @@ const CompatibilitySection = () => {
                     <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
                       <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
                     </div>
-                    <span className="font-bold font-montserrat">{host.name}</span>
+                    <span className={`font-bold ${headingFont}`}>{host.name}</span>
                   </motion.div>
                 ))}
               </div>
@@ -96,7 +167,7 @@ const CompatibilitySection = () => {
                     <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
                       <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
                     </div>
-                    <span className="font-bold font-montserrat">{host.name}</span>
+                    <span className={`font-bold ${headingFont}`}>{host.name}</span>
                   </motion.div>
                 ))}
               </div>
@@ -104,32 +175,16 @@ const CompatibilitySection = () => {
             
             <TabsContent value="usage" className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">开发环境</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      在 IDE 中直接调用多种 AI 模型，辅助代码编写、审查和优化
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">数据分析</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      为数据分析流程集成多种 AI 能力，自动化处理和可视化数据
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                  <CardContent className="p-6">
-                    <h3 className="font-bold mb-2 font-montserrat">内容创作</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      在内容创作过程中无缝切换不同风格和功能的 AI 模型
-                    </p>
-                  </CardContent>
-                </Card>
+                {currentContent.usageCases.map((useCase, idx) => (
+                  <Card key={idx} className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                    <CardContent className="p-6">
+                      <h3 className={`font-bold mb-2 ${headingFont}`}>{useCase.title}</h3>
+                      <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed ${descriptionFont}`}>
+                        {useCase.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </TabsContent>
           </Tabs>
@@ -140,9 +195,13 @@ const CompatibilitySection = () => {
           {...fadeInUp}
         >
           <div className="text-center">
-            <h3 className="font-bold mb-2 font-montserrat">不止于灵活，更有热插拔能力</h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">无需重启应用，一键切换 AI 服务，实时响应业务需求变化</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* 部分高性能模型可能需要额外预热时间</p>
+            <h3 className={`font-bold mb-2 ${headingFont}`}>{currentContent.hotswap.title}</h3>
+            <p className={`text-gray-600 dark:text-gray-400 leading-relaxed ${descriptionFont}`}>
+              {currentContent.hotswap.description}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">
+              {currentContent.hotswap.note}
+            </p>
           </div>
         </motion.div>
       </div>
