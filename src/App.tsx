@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
+import Introduction from "./pages/Introduction";
 import Introduction3 from "./pages/Introduction-3";
 
 function App() {
@@ -35,6 +36,10 @@ function App() {
             {
               path: "/index",
               element: <Navigate to="/" replace />
+            },
+            {
+              path: "/introduction",
+              element: <Introduction />
             },
             {
               path: "/introduction-3",
