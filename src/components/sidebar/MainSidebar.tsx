@@ -26,7 +26,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const navigate = useNavigate();
   
   const handleLogoClick = () => {
-    navigate('/introduction-3');
+    navigate('/website-cn');
   };
   
   return (
@@ -58,7 +58,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           </NavLink>
 
           <NavLink 
-            to="/introduction-3" 
+            to="/website-cn" 
             className={({ isActive }) => 
               cn(
                 "sidebar-item text-sm", 

@@ -17,8 +17,8 @@ import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
-import Introduction from "./pages/Introduction";
-import Introduction3 from "./pages/Introduction-3";
+import WebsiteEn from "./pages/website-en";
+import WebsiteCn from "./pages/website-cn";
 import { LanguageProvider } from "./components/theme/language-provider";
 
 function App() {
@@ -40,12 +40,20 @@ function App() {
                 element: <Navigate to="/" replace />
               },
               {
+                path: "/website-en",
+                element: <WebsiteEn />
+              },
+              {
+                path: "/website-cn",
+                element: <WebsiteCn />
+              },
+              {
                 path: "/introduction",
-                element: <Introduction />
+                element: <Navigate to="/website-en" replace />
               },
               {
                 path: "/introduction-3",
-                element: <Introduction3 />
+                element: <Navigate to="/website-cn" replace />
               },
               {
                 path: "/dashboard",
