@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -193,32 +194,34 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
       <Card className="bg-white">
         <CardContent className="p-6">
           {/* Host header section */}
-          <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-muted/30 p-3 rounded-full">
                 <span className="text-2xl">{host.icon || '🖥️'}</span>
               </div>
               <div>
                 <h2 className="text-xl font-semibold">{host.name}</h2>
+                <div className="flex items-center gap-2">
+                  <StatusIndicator 
+                    status={
+                      host.connectionStatus === "connected" 
+                        ? "active" 
+                        : host.connectionStatus === "misconfigured" 
+                          ? "error" 
+                          : "inactive"
+                    } 
+                    label={
+                      host.connectionStatus === "connected" 
+                        ? "Connected" 
+                        : host.connectionStatus === "misconfigured" 
+                          ? "Misconfigured" 
+                          : "Disconnected"
+                    } 
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <StatusIndicator 
-                status={
-                  host.connectionStatus === "connected" 
-                    ? "active" 
-                    : host.connectionStatus === "misconfigured" 
-                      ? "error" 
-                      : "inactive"
-                } 
-                label={
-                  host.connectionStatus === "connected" 
-                    ? "Connected" 
-                    : host.connectionStatus === "misconfigured" 
-                      ? "Misconfigured" 
-                      : "Disconnected"
-                } 
-              />
+            <div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
