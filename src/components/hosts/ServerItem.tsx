@@ -4,7 +4,7 @@ import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mock
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PenLine, Info, Trash2, Server, Wrench, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, PenLine, Info, Trash2, Server as ServerIcon, Wrench, AlertTriangle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ServerErrorDialog } from "./ServerErrorDialog";
@@ -13,6 +13,7 @@ import { ServerDetailsDialog } from "./ServerDetailsDialog";
 import { ServerToolsList } from "@/components/discovery/ServerToolsList";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
+import { StatusIndicator } from "@/components/status/StatusIndicator";
 
 interface ServerItemProps {
   server: ServerInstance;
@@ -71,7 +72,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
       <td className="p-4 align-middle">
         <div className="flex items-center gap-2">
           <div className="bg-muted/20 p-1.5 rounded">
-            <Server className="h-4 w-4 text-muted-foreground" />
+            <ServerIcon className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-1.5">
             <div className="font-medium">{server.name}</div>
@@ -93,7 +94,21 @@ export const ServerItem: React.FC<ServerItemProps> = ({
         <EndpointLabel type={definition?.type || "STDIO"} />
       </td>
       <td className="p-4 align-middle">
-        {server.status}
+        <div className="flex items-center gap-2">
+          <StatusIndicator 
+            status={
+              server.status === 'running' 
+                ? 'active' 
+                : server.status === 'error' 
+                  ? 'error' 
+                  : server.status === 'connecting' 
+                    ? 'warning' 
+                    : 'inactive'
+            } 
+            size="sm"
+          />
+          {server.status}
+        </div>
       </td>
       <td className="p-4 align-middle text-center">
         <Switch checked={server.status === 'running'} onCheckedChange={enabled => onStatusChange(server.id, enabled)} disabled={isDisabled} />
