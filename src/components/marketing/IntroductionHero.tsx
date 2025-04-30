@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ChevronRight, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 const IntroductionHero = () => {
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
@@ -25,10 +26,10 @@ const IntroductionHero = () => {
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              告别繁琐配置
+              MCP Now: 你的 AI 指挥中心
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              一站式统一管理 MCP 生态
+              一站式发现、安装、管理和分享
             </h2>
           </div>
           
@@ -57,7 +58,7 @@ const IntroductionHero = () => {
                 <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed">
                   MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
                   而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
-                  无需手动处理复杂的配置过程。
+                  无需手动处��复杂的配置过程。
                 </p>
               </div>
             </div>
@@ -90,4 +91,5 @@ const IntroductionHero = () => {
       </div>
     </section>;
 };
+
 export default IntroductionHero;
