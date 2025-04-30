@@ -94,11 +94,15 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
     }
 
     onAddHosts(hostsToAdd);
-    toast({
-      title: "Hosts Added",
-      description: `Successfully added ${hostsToAdd.length} host${hostsToAdd.length > 1 ? 's' : ''}`,
-    });
     handleDialogOpenChange(false);
+  };
+
+  const handleAddHostManually = () => {
+    handleDialogOpenChange(false);
+    // Trigger the manual host dialog via custom event
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('openManualHostDialog'));
+    }, 100);
   };
 
   // Reset state when closing the dialog
@@ -187,15 +191,8 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button 
             variant="outline" 
-            onClick={() => {
-              handleDialogOpenChange(false);
-              // We need to communicate with parent to open the manual dialog
-              // This will be handled by the parent component
-              setTimeout(() => {
-                document.dispatchEvent(new CustomEvent('openManualHostDialog'));
-              }, 100);
-            }} 
-            className="sm:order-1 order-2"
+            onClick={handleAddHostManually}
+            className="sm:order-1 order-2 w-full"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Host Manually
