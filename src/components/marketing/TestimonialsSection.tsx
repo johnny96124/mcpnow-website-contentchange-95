@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "../theme/language-provider";
+
 const fadeInUp = {
   initial: {
     opacity: 0,
@@ -33,10 +34,12 @@ const staggerChildren = {
     staggerChildren: 0.2
   }
 };
+
 const TestimonialsSection = () => {
   const {
     language
   } = useLanguage();
+  
   const testimonials = [{
     author: "Sarah Chen",
     role: "Full-stack Developer",
@@ -57,7 +60,6 @@ const TestimonialsSection = () => {
     avatar: "/placeholder.svg"
   }];
 
-  // Impact metrics with both Chinese and English versions
   const impactMetricsContent = {
     zh: [{
       value: "50,000+",
@@ -87,13 +89,11 @@ const TestimonialsSection = () => {
     }]
   };
 
-  // Select metrics based on language
   const impactMetrics = impactMetricsContent[language] || impactMetricsContent.en;
 
-  // Title and subtitle based on language
   const content = {
     zh: {
-      title: "用户反馈与影响",
+      title: "客户评价与成果展示",
       subtitle: "了解开发者如何通过 MCP Now 提高工作效率"
     },
     en: {
@@ -106,9 +106,9 @@ const TestimonialsSection = () => {
     subtitle
   } = content[language] || content.en;
 
-  // Determine font classes based on language
   const textFont = language === "en" ? "font-roboto" : "font-noto";
   const descriptionFont = language === "en" ? "font-opensans" : "font-noto";
+  
   return <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
@@ -185,4 +185,5 @@ const TestimonialsSection = () => {
       </div>
     </section>;
 };
+
 export default TestimonialsSection;
