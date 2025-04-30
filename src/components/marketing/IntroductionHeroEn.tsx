@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download, X, Compass, MousePointer, Star, Share2 } from "lucide-react";
@@ -35,9 +36,7 @@ const IntroductionHero = () => {
           </div>
           
           <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-3xl leading-relaxed font-opensans mx-auto">
-            <span className="font-semibold text-blue-600">MCP Now</span> is your command center for the AI universe. 
-            Discover, install, manage, debug, and share powerful AI tools effortlessly, all from one central hub. 
-            Seamlessly integrate them into your favorite applications without disruption.
+            <span className="font-semibold text-blue-600">MCP Now</span> is your AI command center. Discover, manage, and share AI tools, effortlessly.
             <button onClick={() => setIsModalOpen(true)} className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700">
               What is MCP?
             </button>
