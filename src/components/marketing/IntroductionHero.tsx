@@ -36,8 +36,8 @@ const IntroductionHero = () => {
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            MCP Now 充当 AI 应用和模型服务之间的桥梁，通过创新的聚合方式让您轻松调用多种服务能力，
-            无需编辑配置文件，一键接入所有 MCP 服务。
+            <span className="font-semibold text-blue-600">MCP Now</span> 作为桥梁，让 AI 应用与模型服务无缝对接。
+            创新聚合技术使您一键接入所有 MCP 服务，彻底告别繁琐配置。
           </p>
           
           <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
