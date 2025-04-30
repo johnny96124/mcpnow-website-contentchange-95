@@ -183,7 +183,7 @@ export function AddInstanceDialog({
   if (!serverDefinition) return null;
 
   const isStdio = serverDefinition.type === 'STDIO';
-  const isCustom = !serverDefinition.isOfficial;
+  const isCustom = serverDefinition.isOfficial === false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
