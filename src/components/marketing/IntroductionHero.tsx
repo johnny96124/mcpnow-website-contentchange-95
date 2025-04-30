@@ -44,40 +44,13 @@ const IntroductionHero = () => {
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
             <span className="font-semibold text-blue-600">MCP Now</span> 是连接AI应用与模型服务的桥梁，通过创新的聚合模式让您轻松调用多服务能力，
             无需编辑配置文件，一键接入所有MCP服务。
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700"
+            >
+              MCP是什么
+            </button>
           </p>
-          
-          <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
-            <div className="flex items-start gap-3">
-              <div className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path>
-                  <path d="M4 6h.01"></path>
-                  <path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"></path>
-                  <path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"></path>
-                  <path d="M12 18h.01"></path>
-                  <path d="M17.99 11.12A6 6 0 0 1 15.01 16.89"></path>
-                  <path d="M15.01 16.89A6 6 0 0 1 8.72 11.12"></path>
-                  <path d="M17.99 11.12A6 6 0 0 0 8.72 11.12"></path>
-                  <path d="turbo 2.29 19.99"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-left">
-                  <button 
-                    onClick={() => setIsModalOpen(true)}
-                    className="text-left relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none hover:text-blue-600"
-                  >
-                    MCP是什么
-                  </button>
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1 leading-relaxed">
-                  MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
-                  而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
-                  无需手动处理复杂的配置过程。
-                </p>
-              </div>
-            </div>
-          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
