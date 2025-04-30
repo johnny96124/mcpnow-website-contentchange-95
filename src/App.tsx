@@ -17,7 +17,6 @@ import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
 import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
-import Index from "./pages/Index";
 
 function App() {
   const queryClient = new QueryClient();
@@ -30,11 +29,11 @@ function App() {
           <RouterProvider router={createBrowserRouter([
             {
               path: "/",
-              element: <Navigate to="/hosts" replace />
+              element: <DefaultLayout><Hosts /></DefaultLayout>
             },
             {
               path: "/index",
-              element: <Navigate to="/hosts" replace />
+              element: <Navigate to="/" replace />
             },
             {
               path: "/dashboard",
@@ -42,7 +41,7 @@ function App() {
             },
             {
               path: "/hosts",
-              element: <DefaultLayout><Hosts /></DefaultLayout>
+              element: <Navigate to="/" replace />
             },
             {
               path: "/hosts-new-user",
