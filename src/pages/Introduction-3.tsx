@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Download, ChevronRight, ArrowRight, Server as ServerIcon, Cpu, Database, Star, Zap, CheckCircle2, XCircle, Twitter, DiscIcon, Menu, X, Shield, Plug, ArrowsUpDown } from "lucide-react";
+import { 
+  Download, 
+  ChevronRight, 
+  ArrowRight, 
+  Server as ServerIcon, 
+  Cpu, 
+  Database, 
+  Star, 
+  Zap, 
+  CheckCircle2, 
+  XCircle, 
+  Twitter, 
+  DiscIcon, 
+  Menu, 
+  X, 
+  Shield, 
+  Plug, 
+  ArrowUpDown 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -194,7 +212,7 @@ const Introduction3: React.FC = () => {
   }, {
     title: "Server 一键安装部署",
     description: "支持多种 Server 配置方案，满足不同场景需求，一次安装多处使用",
-    icon: <ArrowsUpDown className="h-8 w-8 text-purple-500" />,
+    icon: <ArrowUpDown className="h-8 w-8 text-purple-500" />,
     titleText: "跨平台兼容"
   }, {
     title: "Profile 智能管理",
