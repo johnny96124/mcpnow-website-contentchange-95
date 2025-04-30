@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download, X, Compass, MousePointer, Star, Share2 } from "lucide-react";
@@ -30,7 +31,7 @@ const IntroductionHero = () => {
       }}>
           
           <div className="space-y-5">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight font-roboto leading-tight text-gray-900 dark:text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight font-roboto leading-tight text-gray-900 dark:text-white">
               Your AI Universe - Explore, Control, Create
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600 font-roboto">
