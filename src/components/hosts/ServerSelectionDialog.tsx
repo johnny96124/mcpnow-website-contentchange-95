@@ -152,30 +152,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle className="flex justify-between items-center text-base">
-              <span>Select Server</span>
-              <div className="space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleNavigateToDiscovery}
-                >
-                  <ExternalLink className="h-4 w-4 mr-1.5" />
-                  Discovery
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowCustomServerDialog(true)}
-                >
-                  <Plus className="h-4 w-4 mr-1.5" />
-                  Add Custom Server
-                </Button>
-              </div>
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Search for servers to add to your profile
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-bold">Search and Add Server</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -183,7 +160,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
-                placeholder="Search servers..."
+                placeholder="Search by server name, tag, or description"
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -192,6 +169,27 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 className="pl-8 text-sm"
               />
             </div>
+            
+            {!isSearching && (
+              <p className="text-muted-foreground">
+                If you cannot find the target server, you can choose to explore new servers in{" "}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary font-medium"
+                  onClick={handleNavigateToDiscovery}
+                >
+                  Discovery
+                </Button>{" "}
+                or{" "}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary font-medium"
+                  onClick={() => setShowCustomServerDialog(true)}
+                >
+                  Add Custom Server
+                </Button>.
+              </p>
+            )}
             
             {isSearching && (
               <ScrollArea className="max-h-[400px] overflow-auto pr-2">
@@ -277,25 +275,19 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                 {!hasSearchResults && (
                   <div className="text-center py-8 border border-dashed rounded-md">
                     <p className="text-sm text-muted-foreground mb-2">No servers found matching "{searchQuery}"</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setShowCustomServerDialog(true)}
-                    >
-                      <Plus className="h-4 w-4 mr-1.5" />
-                      Add Custom Server
-                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Try searching with different keywords or{" "}
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-primary"
+                        onClick={() => setShowCustomServerDialog(true)}
+                      >
+                        add a custom server
+                      </Button>
+                    </p>
                   </div>
                 )}
               </ScrollArea>
-            )}
-
-            {!isSearching && (
-              <div className="text-center py-8">
-                <p className="text-sm text-muted-foreground">
-                  Start typing to search for servers
-                </p>
-              </div>
             )}
           </div>
         </DialogContent>
