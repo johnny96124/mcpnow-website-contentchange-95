@@ -1,3 +1,4 @@
+
 import { NavLink, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard,
@@ -5,6 +6,7 @@ import {
   HelpCircle,
   BookOpen,
   Telescope,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,7 +44,7 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
       <ScrollArea className="flex-1 px-2 py-4">
         <nav className="space-y-2">
           <NavLink 
-            to="/hosts" 
+            to="/" 
             className={({ isActive }) => 
               cn(
                 "sidebar-item text-sm", 
@@ -53,6 +55,20 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           >
             <LayoutDashboard className="h-4 w-4 mr-2" />
             {!collapsed && "Dashboard"}
+          </NavLink>
+
+          <NavLink 
+            to="/introduction-3" 
+            className={({ isActive }) => 
+              cn(
+                "sidebar-item text-sm", 
+                isActive && "sidebar-item-active",
+                collapsed && "justify-center px-0"
+              )
+            }
+          >
+            <Home className="h-4 w-4 mr-2" />
+            {!collapsed && "Introduction"}
           </NavLink>
 
           <NavLink 
