@@ -62,7 +62,6 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   const [showCustomServerDialog, setShowCustomServerDialog] = useState(false);
   const { toast } = useToast();
 
-  // Reset all dialog state when dialog visibility changes
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
@@ -77,7 +76,10 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     if (selectedTab === "added") {
       const serverInstance = server as ServerInstance;
       onAddServers([serverInstance]);
-      // Close the dialog directly instead of leaving it to parent component
+      toast({
+        title: "Server added",
+        description: `${serverInstance.name} has been added to your profile`
+      });
       onOpenChange(false);
     } else {
       setSelectedServer(server as ServerDefinition);
@@ -96,21 +98,21 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     };
 
     onAddServers([newInstance]);
-    
-    // Immediately reset dialog state
+    toast({
+      title: "Server instance created",
+      description: `${newInstance.name} has been added to your profile`
+    });
     setShowInstanceDialog(false);
-    
-    // Close the main dialog
     onOpenChange(false);
   };
 
   const handleAddCustomServer = (server: ServerInstance) => {
     onAddServers([server]);
-    
-    // Immediately reset dialog state
+    toast({
+      title: "Custom server added",
+      description: `${server.name} has been added to your profile`
+    });
     setShowCustomServerDialog(false);
-    
-    // Close the main dialog
     onOpenChange(false);
   };
 
@@ -122,22 +124,9 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         server.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-  // Handler to safely handle dialog closing
-  const handleDialogChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      // Reset all state before calling the parent's onOpenChange
-      setSearchQuery("");
-      setSelectedTab("discovery");
-      setSelectedServer(null);
-      setShowInstanceDialog(false);
-      setShowCustomServerDialog(false);
-    }
-    onOpenChange(isOpen);
-  };
-
   return (
     <>
-      <Dialog open={open} onOpenChange={handleDialogChange}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center text-base">
@@ -234,34 +223,18 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         </DialogContent>
       </Dialog>
 
-      {showInstanceDialog && (
-        <AddInstanceDialog
-          open={showInstanceDialog}
-          onOpenChange={(open) => {
-            setShowInstanceDialog(open);
-            if (!open) {
-              // If instance dialog closes without submission, make sure parent dialog stays open
-              onOpenChange(true);
-            }
-          }}
-          serverDefinition={selectedServer}
-          onCreateInstance={handleCreateInstance}
-        />
-      )}
+      <AddInstanceDialog
+        open={showInstanceDialog}
+        onOpenChange={setShowInstanceDialog}
+        serverDefinition={selectedServer}
+        onCreateInstance={handleCreateInstance}
+      />
 
-      {showCustomServerDialog && (
-        <AddServerDialog
-          open={showCustomServerDialog}
-          onOpenChange={(open) => {
-            setShowCustomServerDialog(open);
-            if (!open) {
-              // If custom server dialog closes without submission, make sure parent dialog stays open
-              onOpenChange(true);
-            }
-          }}
-          onAddServer={handleAddCustomServer}
-        />
-      )}
+      <AddServerDialog
+        open={showCustomServerDialog}
+        onOpenChange={setShowCustomServerDialog}
+        onAddServer={handleAddCustomServer}
+      />
     </>
   );
 };

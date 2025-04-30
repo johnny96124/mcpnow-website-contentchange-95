@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -137,9 +138,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         onSaveProfileChanges();
       }
     }
-    
-    // Safely close the dialog after handling server addition
-    setServerSelectionDialogOpen(false);
   };
 
   const handleConfirmDeleteHost = () => {
