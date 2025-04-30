@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Download, ChevronRight, Twitter, DiscIcon, ServerIcon, Database, Cpu } from "lucide-react";
+import { Download, ChevronRight, Twitter, DiscIcon, Compass, MousePointer, Share2, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -15,24 +15,24 @@ const fadeInUp = {
 const DownloadIntroSection = () => {
   const quickStartSteps = [
     {
-      title: "Download and Install",
-      description: "Download and install the MCP Now client for your operating system",
+      title: "Discover & Install",
+      description: "Download MCP Now and explore the world of AI tools in one place",
       icon: Download,
     },
     {
-      title: "Service Configuration",
-      description: "Add the AI services you need once, enter the relevant API keys",
-      icon: ServerIcon,
+      title: "Connect Applications",
+      description: "Easily connect your favorite apps and development tools",
+      icon: Compass,
     },
     {
-      title: "Create Configuration File",
-      description: "Set up your preferred server combinations and parameter configurations",
-      icon: Database,
-    },
-    {
-      title: "Connect Tools",
-      description: "Bind configurations to your favorite development tools and environments",
+      title: "Manage & Configure",
+      description: "Create profiles and customize your AI tool configurations",
       icon: Cpu,
+    },
+    {
+      title: "Share & Collaborate",
+      description: "Share your favorite setups with friends and colleagues",
+      icon: Share2,
     },
   ];
 
@@ -43,9 +43,9 @@ const DownloadIntroSection = () => {
           className="text-center max-w-3xl mx-auto mb-10"
           {...fadeInUp}
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-montserrat">Get Started with MCP Now</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-montserrat">Unlock the MCP Ecosystem Today</h2>
           <p className="text-base text-gray-600 dark:text-gray-300 font-roboto">
-            Four steps to simplify your AI development workflow
+            Join thousands of users who have simplified their AI workflow
           </p>
         </motion.div>
         
@@ -88,19 +88,19 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-bold mb-4 font-montserrat">Download Client</h3>
+            <h3 className="text-2xl font-bold mb-4 font-montserrat">Download MCP Now</h3>
             <div className="space-y-4 w-full">
-              <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 font-roboto">
                 <Download className="mr-2 h-5 w-5" />
                 Download for Mac
               </Button>
-              <Button size="lg" variant="outline" className="w-full" disabled>
+              <Button size="lg" variant="outline" className="w-full font-roboto" disabled>
                 <Download className="mr-2 h-5 w-5" />
                 Windows Version (Coming Soon)
               </Button>
             </div>
             <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 font-roboto">
-              Current Version: 1.0.0 | Free Download
+              Current Version: 1.0.0 | Free for Everyone
             </p>
           </motion.div>
           
@@ -110,9 +110,9 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-bold mb-4 font-montserrat">Join Community</h3>
+            <h3 className="text-2xl font-bold mb-4 font-montserrat">Join Our Community</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-300 font-opensans leading-relaxed">
-              Connect with other MCP Now users, get the latest updates, share your experiences.
+              Connect with other MCP Now users, share your configurations, and stay updated with the latest features and tools.
             </p>
             <div className="flex gap-4">
               <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors">
@@ -122,6 +122,9 @@ const DownloadIntroSection = () => {
                 <Twitter className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </a>
             </div>
+            <p className="mt-6 text-sm font-medium text-blue-600 font-roboto">
+              Built on the open MCP standard, ensuring compatibility with future AI innovations
+            </p>
           </motion.div>
         </div>
       </div>

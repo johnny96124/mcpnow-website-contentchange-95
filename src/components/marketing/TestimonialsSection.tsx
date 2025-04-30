@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "../theme/language-provider";
 
@@ -27,21 +27,21 @@ const TestimonialsSection = () => {
       author: "Sarah Chen",
       role: "Full-stack Developer",
       company: "TechForward",
-      text: "MCP Now has completely transformed my AI development workflow. Now I can seamlessly switch between different models without changing my code.",
+      text: "MCP Now has completely transformed my AI workflow. I can effortlessly switch between different models without disrupting my creative process or coding flow.",
       avatar: "/placeholder.svg"
     }, 
     {
       author: "Michael Rodriguez",
       role: "ML Engineer",
       company: "DataVision",
-      text: "The ability to manage multiple MCP servers from one interface is a game-changer. I've cut my model deployment time by 70%.",
+      text: "The ability to discover and manage multiple AI tools from one interface is a game-changer. I've cut my model deployment time by 70% and can easily share configurations with my team.",
       avatar: "/placeholder.svg"
     }, 
     {
       author: "Aisha Johnson",
       role: "CTO",
       company: "NextGen AI",
-      text: "Our entire team relies on MCP Now for consistent and reliable access to our AI infrastructure. It's become an essential part of our tech stack.",
+      text: "Our entire development team relies on MCP Now for consistent access to our AI infrastructure. The centralized command center and debugging tools have become essential to our workflow.",
       avatar: "/placeholder.svg"
     }
   ];
@@ -55,10 +55,10 @@ const TestimonialsSection = () => {
       { value: "98.7%", label: "服务可靠性" }
     ],
     en: [
-      { value: "50,000+", label: "Active Developers" },
-      { value: "120,000+", label: "AI Projects Deployed" },
-      { value: "75%", label: "Development Efficiency Boost" },
-      { value: "98.7%", label: "Service Reliability" }
+      { value: "50,000+", label: "Active Users" },
+      { value: "120,000+", label: "AI Tools Connected" },
+      { value: "75%", label: "Workflow Efficiency Boost" },
+      { value: "98.7%", label: "User Satisfaction" }
     ]
   };
 
@@ -72,8 +72,8 @@ const TestimonialsSection = () => {
       subtitle: "了解开发者如何通过 MCP Now 提高工作效率"
     },
     en: {
-      title: "User Feedback & Impact",
-      subtitle: "See how developers boost productivity with MCP Now"
+      title: "Community Impact & Success Stories",
+      subtitle: "See how users are transforming their AI workflows with MCP Now"
     }
   };
 
@@ -87,6 +87,11 @@ const TestimonialsSection = () => {
     <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
+          <div className="flex justify-center mb-4">
+            <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/20">
+              <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">{title}</h2>
           <p className={`text-lg text-gray-600 dark:text-gray-300 leading-relaxed ${descriptionFont}`}>
             {subtitle}

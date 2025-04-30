@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Cpu, ServerIcon, Database, CheckCircle2, XCircle } from "lucide-react";
+import { Compass, MousePointer, Share2, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const fadeInUp = {
@@ -14,25 +14,25 @@ const fadeInUp = {
 const WhyMcpNow = () => {
   const painPoints = [
     {
-      title: "Unified Interface Adaptation",
-      before: "Multiple account switching, multi-platform logins",
-      after: "Single login, unified management of all AI services",
-      icon: Cpu,
-      benefit: "Unified interface adaptation: Use the same code to access all AI services, say goodbye to complex multiple API calls"
+      title: "Effortless Discovery",
+      before: "Manually searching and registering for multiple AI services",
+      after: "One-stop discovery and exploration of all AI tools",
+      icon: Compass,
+      benefit: "Explore a world of AI capabilities through curated lists and integrated discovery features"
     }, 
     {
-      title: "Cross-Platform Compatibility",
-      before: "Repeatedly configuring different environment parameters",
-      after: "Unified configuration files, cross-environment reuse",
-      icon: ServerIcon,
-      benefit: "Cross-platform compatibility: Seamless use in any development environment, from local to cloud without reconfiguration"
+      title: "Seamless Integration",
+      before: "Disrupted workflow when switching between tools",
+      after: "Instant hot-swap without restarting applications",
+      icon: MousePointer,
+      benefit: "Stay in your creative flow with seamless switching between AI tools directly from the system tray"
     }, 
     {
-      title: "Secure Management",
-      before: "Scattered API Key management is insecure",
-      after: "Secure encryption, centralized authorization management",
-      icon: Database,
-      benefit: "Secure management: Centralize all accounts and keys for higher level security protection"
+      title: "Community & Sharing",
+      before: "Complex configurations difficult to share with team",
+      after: "One-click sharing of your favorite AI tool setups",
+      icon: Share2,
+      benefit: "Easily share your favorite MCP server configurations with friends, colleagues, or the community"
     }
   ];
 
@@ -42,7 +42,7 @@ const WhyMcpNow = () => {
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">Why Choose MCP Now?</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-roboto">
-            Say goodbye to cumbersome multi-platform management, a one-stop solution for common pain points in AI development
+            Your AI command center, making the complex simple and unleashing the true potential of AI tools
           </p>
         </motion.div>
 
@@ -81,7 +81,9 @@ const WhyMcpNow = () => {
                       </div>
                     </div>
                     
-                    <div className="pt-4 border-t border-gray-100 dark:border-gray-800"></div>
+                    <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                      <p className="text-sm text-blue-600 font-medium mt-3 font-roboto">{point.benefit}</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Compass } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "../theme/language-provider";
@@ -81,9 +81,9 @@ const ServersShowcase = () => {
   // Content based on language
   const content = {
     en: {
-      title: "Comprehensive Coverage of Mainstream AI Services",
-      subtitle: "One-stop access to all the AI services you need, without switching between multiple platforms",
-      exploreButton: "Explore More MCP Servers"
+      title: "Effortless Discovery: Explore a World of AI Capabilities",
+      subtitle: "Find and install AI tools with a single click - no complex setup required",
+      exploreButton: "Explore More AI Tools"
     },
     zh: {
       title: "探索与发现丰富多彩的 AI 工具生态",
@@ -103,6 +103,11 @@ const ServersShowcase = () => {
     <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
+          <div className="flex justify-center mb-4">
+            <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/20">
+              <Compass className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">{title}</h2>
           <p className={`text-lg text-gray-600 dark:text-gray-300 leading-relaxed ${descriptionFont}`}>
             {subtitle}
@@ -135,6 +140,12 @@ const ServersShowcase = () => {
                     <p className={`text-xs text-gray-500 dark:text-gray-400 ${descriptionFont}`}>
                       {server.description}
                     </p>
+                    {language === "en" && (
+                      <button className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-roboto flex items-center">
+                        <span>Install</span>
+                        <ArrowRight className="ml-1 h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
