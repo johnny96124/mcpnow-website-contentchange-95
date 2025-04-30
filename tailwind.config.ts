@@ -19,6 +19,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'montserrat': ['Montserrat', 'sans-serif'],
+				'noto': ['"Noto Sans SC"', 'sans-serif'],
+				'sans': ['Montserrat', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -145,6 +150,32 @@ export default {
 						opacity: '1',
 						transform: 'scale(1)'
 					}
+				},
+				'float-up': {
+					'0%, 100%': {
+						transform: 'translateY(0)'
+					},
+					'50%': {
+						transform: 'translateY(-5px)'
+					}
+				},
+				'card-hover': {
+					'0%': {
+						transform: 'translateY(0) rotate(0)'
+					},
+					'100%': {
+						transform: 'translateY(-5px) rotate(1deg)'
+					}
+				},
+				'nav-underline': {
+					'0%': {
+						width: '0%',
+						left: '50%'
+					},
+					'100%': {
+						width: '100%',
+						left: '0%'
+					}
 				}
 			},
 			animation: {
@@ -155,7 +186,10 @@ export default {
 				'slide-in-from-right-full': 'slide-in-from-right 0.3s ease-out',
 				'slide-out-to-right-full': 'slide-out-to-right 0.3s ease-out',
 				'collapse': 'collapse-dialog 0.3s ease-in forwards',
-				'expand': 'expand-dialog 0.3s ease-out forwards'
+				'expand': 'expand-dialog 0.3s ease-out forwards',
+				'float': 'float-up 3s ease-in-out infinite',
+				'card-hover': 'card-hover 0.3s ease-out forwards',
+				'nav-underline': 'nav-underline 0.3s ease-out forwards'
 			}
 		}
 	},
