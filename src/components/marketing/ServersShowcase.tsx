@@ -1,0 +1,130 @@
+
+import React from "react";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 40 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.7 }
+};
+
+const staggerChildren = {
+  initial: { opacity: 0 },
+  whileInView: { opacity: 1 },
+  viewport: { once: true },
+  transition: { staggerChildren: 0.2 }
+};
+
+const cardHover = {
+  rest: {
+    scale: 1,
+    transition: { duration: 0.2 }
+  },
+  hover: {
+    scale: 1.03,
+    rotate: 1,
+    transition: { duration: 0.3 }
+  }
+};
+
+const ServersShowcase = () => {
+  const mcpServers = [
+    {
+      name: "OpenAI Server",
+      description: "Access GPT-4 and DALL-E models",
+      icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
+    }, 
+    {
+      name: "Anthropic Claude",
+      description: "High-performance Claude models",
+      icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
+    }, 
+    {
+      name: "Adobe Firefly",
+      description: "Creative image generation APIs",
+      icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
+    }, 
+    {
+      name: "Atlassian Server",
+      description: "Multi-protocol connectivity",
+      icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
+    }, 
+    {
+      name: "Airbnb Custom",
+      description: "Custom model deployment tools",
+      icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
+    }, 
+    {
+      name: "Amazon Bedrock",
+      description: "Managed foundation model access",
+      icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+    }, 
+    {
+      name: "Amplitude AI",
+      description: "Analytics-focused AI models",
+      icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+    }, 
+    {
+      name: "Discord AI",
+      description: "Social-first AI integrations",
+      icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
+    }
+  ];
+
+  return (
+    <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
+      <div className="container px-4 md:px-6">
+        <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">全面覆盖主流 AI 服务</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+            一站式接入所有您需要的 AI 服务，无需切换多个平台
+          </p>
+        </motion.div>
+        
+        <motion.div 
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto" 
+          variants={staggerChildren} 
+          initial="initial" 
+          whileInView="whileInView" 
+          viewport={{ once: true }}
+        >
+          {mcpServers.map((server, idx) => (
+            <motion.div 
+              key={`${server.name}-${idx}`} 
+              whileHover="hover" 
+              initial="rest" 
+              animate="rest" 
+              variants={cardHover} 
+              className="server-card"
+            >
+              <Card className="h-full overflow-hidden border-gray-200 dark:border-gray-800">
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                      <img src={server.icon} alt={server.name} className="w-10 h-10 object-contain" />
+                    </div>
+                    <h3 className="text-sm font-bold mb-1 font-montserrat">{server.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{server.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+        
+        <div className="mt-8 text-center">
+          <Button variant="outline" className="text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/discovery'}>
+            探索更多 MCP Servers
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ServersShowcase;
