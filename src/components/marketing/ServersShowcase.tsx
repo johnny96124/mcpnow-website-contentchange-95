@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "../theme/language-provider";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -32,6 +33,8 @@ const cardHover = {
 };
 
 const ServersShowcase = () => {
+  const { language } = useLanguage();
+  
   const mcpServers = [
     {
       name: "OpenAI Server",
@@ -75,13 +78,30 @@ const ServersShowcase = () => {
     }
   ];
 
+  // Content based on language
+  const content = {
+    en: {
+      title: "Comprehensive Coverage of Mainstream AI Services",
+      subtitle: "One-stop access to all the AI services you need, without switching between multiple platforms",
+      exploreButton: "Explore More MCP Servers"
+    },
+    zh: {
+      title: "全面覆盖主流 AI 服务",
+      subtitle: "一站式接入所有您需要的 AI 服务，无需切换多个平台",
+      exploreButton: "探索更多 MCP Servers"
+    }
+  };
+
+  // Use English or Chinese content based on language setting
+  const { title, subtitle, exploreButton } = content[language];
+
   return (
     <section id="servers" className="py-20 bg-white/50 dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">全面覆盖主流 AI 服务</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            一站式接入所有您需要的 AI 服务，无需切换多个平台
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">{title}</h2>
+          <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-opensans">
+            {subtitle}
           </p>
         </motion.div>
         
@@ -108,7 +128,7 @@ const ServersShowcase = () => {
                       <img src={server.icon} alt={server.name} className="w-10 h-10 object-contain" />
                     </div>
                     <h3 className="text-sm font-bold mb-1 font-montserrat">{server.name}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{server.description}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-roboto">{server.description}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -117,8 +137,8 @@ const ServersShowcase = () => {
         </motion.div>
         
         <div className="mt-8 text-center">
-          <Button variant="outline" className="text-blue-600 hover:bg-blue-50" onClick={() => window.location.href = '/discovery'}>
-            探索更多 MCP Servers
+          <Button variant="outline" className="text-blue-600 hover:bg-blue-50 font-roboto" onClick={() => window.location.href = '/discovery'}>
+            {exploreButton}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
