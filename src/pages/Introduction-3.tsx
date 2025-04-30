@@ -638,6 +638,8 @@ const Introduction3: React.FC = () => {
             </div>
           </div>
           
+          {/* Removed the div with className="text-center" here */}
+          
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
             variants={staggerChildren}
