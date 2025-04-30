@@ -1,19 +1,18 @@
 
-import React, { useState, useEffect } from "react";
-import { Search, Clock } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Search, Clock, ExternalLink, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { serverDefinitions, type ServerInstance, type ServerDefinition, type EndpointType, type Status } from "@/data/mockData";
+import { serverDefinitions, type ServerInstance, type ServerDefinition } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { AddInstanceDialog } from "@/components/servers/AddInstanceDialog";
 import { AddServerDialog } from "@/components/new-layout/AddServerDialog";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface ServerSelectionDialogProps {
   open: boolean;
@@ -56,37 +55,62 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   onAddServers,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTab, setSelectedTab] = useState("discovery");
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedServer, setSelectedServer] = useState<ServerDefinition | null>(null);
   const [showInstanceDialog, setShowInstanceDialog] = useState(false);
   const [showCustomServerDialog, setShowCustomServerDialog] = useState(false);
   const { toast } = useToast();
-
+  const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Filtered results based on search query
+  const filteredExistingInstances = searchQuery 
+    ? existingInstances.filter(server => 
+        server.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : [];
+    
+  const filteredServerDefinitions = searchQuery
+    ? serverDefinitions.filter(server => 
+        server.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : [];
+    
+  const hasSearchResults = filteredExistingInstances.length > 0 || filteredServerDefinitions.length > 0;
+  
+  // Clear state when dialog closes
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
-      setSelectedTab("discovery");
+      setIsSearching(false);
       setSelectedServer(null);
       setShowInstanceDialog(false);
       setShowCustomServerDialog(false);
+    } else {
+      // Focus search input when dialog opens
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
     }
   }, [open]);
 
-  const handleServerSelect = (server: ServerDefinition | ServerInstance) => {
-    if (selectedTab === "added") {
-      const serverInstance = server as ServerInstance;
-      onAddServers([serverInstance]);
-      toast({
-        title: "Server added",
-        description: `${serverInstance.name} has been added to your profile`
-      });
-      onOpenChange(false);
-    } else {
-      setSelectedServer(server as ServerDefinition);
-      setShowInstanceDialog(true);
-    }
+  // Handle existing instance selection
+  const handleAddExistingInstance = (instance: EnhancedServerInstance) => {
+    onAddServers([instance]);
+    toast({
+      title: "Server added",
+      description: `${instance.name} has been added to your profile`
+    });
+    onOpenChange(false);
   };
 
+  // Handle discovery server setup
+  const handleSetupServer = (server: ServerDefinition) => {
+    setSelectedServer(server);
+    setShowInstanceDialog(true);
+  };
+
+  // Handle instance creation
   const handleCreateInstance = (data: any) => {
     const newInstance: ServerInstance = {
       id: `instance-${Date.now()}`,
@@ -106,6 +130,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
+  // Handle custom server addition
   const handleAddCustomServer = (server: ServerInstance) => {
     onAddServers([server]);
     toast({
@@ -116,13 +141,11 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
     onOpenChange(false);
   };
 
-  const filteredServers = selectedTab === "added"
-    ? existingInstances.filter(server =>
-        server.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : serverDefinitions.filter(server =>
-        server.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  // Navigate to Discovery page
+  const handleNavigateToDiscovery = () => {
+    onOpenChange(false);
+    navigate("/discovery");
+  };
 
   return (
     <>
@@ -131,16 +154,27 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center text-base">
               <span>Select Server</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowCustomServerDialog(true)}
-              >
-                Add Custom
-              </Button>
+              <div className="space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleNavigateToDiscovery}
+                >
+                  <ExternalLink className="h-4 w-4 mr-1.5" />
+                  Discovery
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowCustomServerDialog(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  Add Custom Server
+                </Button>
+              </div>
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Choose a server to add to your profile
+              Search for servers to add to your profile
             </DialogDescription>
           </DialogHeader>
 
@@ -148,77 +182,121 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 placeholder="Search servers..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setIsSearching(e.target.value.length > 0);
+                }}
                 className="pl-8 text-sm"
               />
             </div>
             
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="discovery" className="text-xs">Discovery</TabsTrigger>
-                <TabsTrigger value="added" className="text-xs">Added</TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                {filteredServers.map((server) => {
-                  const definition = selectedTab === "added" ? 
-                    serverDefinitions.find(def => def.id === server.definitionId) : 
-                    null;
-                  const isAddedTab = selectedTab === "added";
-                  
-                  return (
-                    <div
-                      key={server.id}
-                      className="flex items-start space-x-4 p-4 border rounded-lg hover:border-primary hover:bg-accent/5 cursor-pointer transition-colors"
-                      onClick={() => handleServerSelect(server)}
-                    >
-                      <ServerLogo name={server.name} className="flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-sm truncate">{server.name}</h4>
-                          {isAddedTab ? (
-                            <EndpointLabel 
-                              type={definition?.type || 'Custom'} 
-                            />
-                          ) : (
-                            <EndpointLabel 
-                              type={(server as ServerDefinition).type} 
-                            />
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {isAddedTab ? (
-                            <div className="flex flex-col space-y-1">
-                              {(server as EnhancedServerInstance).description && (
-                                <span>{(server as EnhancedServerInstance).description}</span>
-                              )}
-                              {(server as EnhancedServerInstance).addedAt && (
-                                <span className="flex items-center">
-                                  <Clock className="h-3 w-3 mr-1" /> 
-                                  Added on {format((server as EnhancedServerInstance).addedAt!, "MMM dd, yyyy")}
-                                </span>
-                              )}
+            {isSearching && (
+              <ScrollArea className="max-h-[400px] overflow-auto pr-2">
+                {filteredExistingInstances.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium mb-2">Added Servers</h3>
+                    <div className="space-y-2">
+                      {filteredExistingInstances.map((instance) => (
+                        <div
+                          key={instance.id}
+                          className="flex items-start justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-start space-x-4">
+                            <ServerLogo name={instance.name} className="flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm truncate">{instance.name}</h4>
+                                <EndpointLabel 
+                                  type={serverDefinitions.find(def => def.id === instance.definitionId)?.type || 'Custom'} 
+                                />
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                <div className="flex flex-col space-y-1">
+                                  {instance.description && (
+                                    <span>{instance.description}</span>
+                                  )}
+                                  {instance.addedAt && (
+                                    <span className="flex items-center">
+                                      <Clock className="h-3 w-3 mr-1" /> 
+                                      Added on {format(instance.addedAt, "MMM dd, yyyy")}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          ) : (
-                            <span>{(server as ServerDefinition).description}</span>
-                          )}
+                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="secondary"
+                            onClick={() => handleAddExistingInstance(instance)}
+                          >
+                            Add
+                          </Button>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  );
-                })}
-
-                {filteredServers.length === 0 && (
-                  <div className="text-center py-8 border border-dashed rounded-md">
-                    <p className="text-sm text-muted-foreground">No servers found</p>
                   </div>
                 )}
+
+                {filteredServerDefinitions.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Discovery Results</h3>
+                    <div className="space-y-2">
+                      {filteredServerDefinitions.map((server) => (
+                        <div
+                          key={server.id}
+                          className="flex items-start justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-start space-x-4">
+                            <ServerLogo name={server.name} className="flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm truncate">{server.name}</h4>
+                                <EndpointLabel type={server.type} />
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                {server.description}
+                              </p>
+                            </div>
+                          </div>
+                          <Button 
+                            size="sm"
+                            onClick={() => handleSetupServer(server)}
+                          >
+                            Setup
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {!hasSearchResults && (
+                  <div className="text-center py-8 border border-dashed rounded-md">
+                    <p className="text-sm text-muted-foreground mb-2">No servers found matching "{searchQuery}"</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowCustomServerDialog(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-1.5" />
+                      Add Custom Server
+                    </Button>
+                  </div>
+                )}
+              </ScrollArea>
+            )}
+
+            {!isSearching && (
+              <div className="text-center py-8">
+                <p className="text-sm text-muted-foreground">
+                  Start typing to search for servers
+                </p>
               </div>
-            </ScrollArea>
+            )}
           </div>
         </DialogContent>
       </Dialog>
