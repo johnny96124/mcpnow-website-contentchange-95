@@ -6,7 +6,7 @@ import {
   Download, 
   ChevronRight, 
   ArrowRight, 
-  ServerIcon, 
+  Server, 
   Cpu, 
   Database, 
   Star, 
@@ -14,13 +14,16 @@ import {
   CheckCircle2,
   XCircle,
   Twitter,
-  DiscIcon
+  DiscIcon,
+  Menu, 
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -43,6 +46,7 @@ const cardHover = {
 
 const Introduction3: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,7 +116,7 @@ const Introduction3: React.FC = () => {
     {
       before: "反复配置不同环境参数",
       after: "统一配置文件，跨环境复用",
-      icon: ServerIcon,
+      icon: Server,
       benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
     },
     {
@@ -132,7 +136,7 @@ const Introduction3: React.FC = () => {
     {
       title: "服务配置",
       description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
-      icon: ServerIcon,
+      icon: Server,
     },
     {
       title: "创建配置文件",
@@ -157,7 +161,7 @@ const Introduction3: React.FC = () => {
     {
       title: "Host 自动扫描与配置",
       description: "自动识别本地和远程 Host，一键完成连接配置，无需手动设置",
-      icon: <ServerIcon className="h-8 w-8 text-blue-500" />
+      icon: <Server className="h-8 w-8 text-blue-500" />
     },
     {
       title: "Server 一键安装部署",
@@ -855,7 +859,3 @@ const Introduction3: React.FC = () => {
 };
 
 export default Introduction3;
-
-import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
