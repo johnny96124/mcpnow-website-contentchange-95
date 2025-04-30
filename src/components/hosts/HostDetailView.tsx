@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { 
   FileText, Server, AlertTriangle, 
   CheckCircle, Info, Plus, ChevronDown, 
-  ExternalLink, ArrowRight, Settings
+  ExternalLink, ArrowRight, Settings, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +40,7 @@ interface HostDetailViewProps {
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
   onAddServersToProfile?: (servers: ServerInstance[]) => void;
+  onDeleteServer?: (serverId: string) => void; // New prop for server deletion
 }
 
 export const HostDetailView: React.FC<HostDetailViewProps> = ({
@@ -55,7 +56,8 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   onSaveProfileChanges,
   onCreateProfile,
   onDeleteProfile,
-  onAddServersToProfile
+  onAddServersToProfile,
+  onDeleteServer = () => {} // Default empty function if not provided
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
@@ -106,6 +108,31 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
 
   const showConfigFile = () => {
     setConfigDialogOpen(true);
+  };
+
+  // Function to handle server deletion
+  const handleDeleteServer = (serverId: string) => {
+    if (window.confirm(`Are you sure you want to delete this server?`)) {
+      if (onDeleteServer) {
+        onDeleteServer(serverId);
+        
+        // Update the profile to remove the server
+        if (selectedProfile) {
+          const updatedInstances = selectedProfile.instances.filter(id => id !== serverId);
+          // Remove server from profile
+          toast({
+            title: "Server deleted",
+            description: "The server has been removed successfully",
+          });
+        }
+      } else {
+        // If no onDeleteServer callback is provided, just show a toast
+        toast({
+          title: "Server removed",
+          description: "The server has been removed from this profile",
+        });
+      }
+    }
   };
 
   const handleAddServers = (servers: ServerInstance[]) => {
@@ -266,12 +293,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
                         hostConnectionStatus={host.connectionStatus}
                         onStatusChange={handleServerStatusChange}
                         load={getServerLoad(server.id)}
-                        onRemoveFromProfile={(serverId) => {
-                          toast({
-                            title: "Server removed",
-                            description: `${server.name} has been removed from this profile`,
-                          });
-                        }}
+                        onRemoveFromProfile={handleDeleteServer}
                       />
                     ))}
                   </tbody>
