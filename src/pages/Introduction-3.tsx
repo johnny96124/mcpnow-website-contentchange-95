@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -87,7 +86,7 @@ const Introduction3: React.FC = () => {
 
   const painPoints = [
     {
-      before: "多账号切换，多平台登录",
+      before: "多账号切换，��平台登录",
       after: "一次登录，统一管理所有 AI 服务",
       icon: Cpu,
       benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
@@ -220,13 +219,13 @@ const Introduction3: React.FC = () => {
                 告别繁琐配置
               </h1>
               <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600">
-                一站式统一管理 MCP 生态
+                一站式统一管理 MCP 生态系统
               </h2>
             </div>
             
             <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl">
-              MCP Now 是连接AI应用与模型服务的桥梁，通过创新的聚合模式让您轻松调用多服务能力，
-              无需编辑配置文件，一键接入所有MCP服务。
+              MCP Now 充当 AI 应用和模型服务之间的桥梁，通过创新的聚合方式让您轻松调用多种服务能力，
+              无需编辑配置文件，一键接入所有 MCP 服务。
             </p>
             
             <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
@@ -241,14 +240,14 @@ const Introduction3: React.FC = () => {
                     <path d="M17.99 11.12A6 6 0 0 1 15.01 16.89"></path>
                     <path d="M15.01 16.89A6 6 0 0 1 8.72 11.12"></path>
                     <path d="M17.99 11.12A6 6 0 0 0 8.72 11.12"></path>
-                    <path d="M turbo 2.29 19.99"></path>
+                    <path d="turbo 2.29 19.99"></path>
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium text-left">MCP与MCP Now是什么关系？</h3>
+                  <h3 className="font-medium text-left">MCP 与 MCP Now 是什么关系？</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 text-left mt-1">
                     MCP (Model Context Protocol) 是一种底层通信协议，用于统一不同AI模型服务的接口标准。
-                    而MCP Now则是这个协议的桌面管理工具，它让用户可以通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
+                    而MCP Now则是这个协议的桌面管理工具，它让用户通过图形界面轻松管理和使用所有支持MCP协议的AI服务，
                     无需手动处理复杂的配置过程。
                   </p>
                 </div>
@@ -290,7 +289,7 @@ const Introduction3: React.FC = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">为什么选择 MCP Now?</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              告别繁琐的多平台管理，一站式解决 AI 开发中的常见痛点
+              告别复杂的多平台管理，一站式解决 AI 开发中的常见痛点
             </p>
           </motion.div>
 
@@ -370,7 +369,7 @@ const Introduction3: React.FC = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">全面覆盖主流 AI 服务</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              一站式接入所有您需要的 AI 服务，无需多平台切换
+              一站式接入所有您需要的 AI 服务，无需切换多个平台
             </p>
           </motion.div>
           
@@ -527,7 +526,7 @@ const Introduction3: React.FC = () => {
           >
             <div className="text-center">
               <h3 className="font-semibold mb-2">不止于灵活，更有热插拔能力</h3>
-              <p className="text-gray-600 dark:text-gray-400">无需重启应用，一键切换 AI 服务，实时响应您的业务需求变化</p>
+              <p className="text-gray-600 dark:text-gray-400">无需重启应用，一键切换 AI 服务，实时响应业务需求变化</p>
               <p className="text-sm text-gray-500 dark:text-gray-500 italic mt-2">* 部分高性能模型可能需要额外预热时间</p>
             </div>
           </motion.div>
@@ -542,7 +541,7 @@ const Introduction3: React.FC = () => {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">用户反馈与影响</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              看看开发者们如何通过 MCP Now 提升他们的工作效率
+              了解开发者如何通过 MCP Now 提高工作效率
             </p>
           </motion.div>
 
