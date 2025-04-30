@@ -1,8 +1,10 @@
+
 import React from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+
 const IntroductionHero = () => {
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
@@ -21,19 +23,30 @@ const IntroductionHero = () => {
         duration: 0.7
       }}>
           
+          <div className="flex items-center gap-2 mb-2">
+            <img
+              src="/lovable-uploads/12d690f5-eccb-4d2a-bd53-89b67a5f847a.png"
+              alt="mcpnow logo"
+              className="h-10 w-10 rounded-lg shadow"
+            />
+            <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 px-3 py-1">
+              全新发布
+            </Badge>
+          </div>
           
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight font-montserrat">
-              告别繁琐配置
+              轻松发现、管理与分享
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-blue-600 font-montserrat">
-              一站式统一管理 MCP 生态系统
+              您的 AI 工具宇宙
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed">
-            <span className="font-semibold text-blue-600">MCP Now</span> 作为桥梁，让 AI 应用与模型服务无缝对接。
-            创新聚合技术使您一键接入所有 MCP 服务，彻底告别繁琐配置。
+            <span className="font-semibold text-blue-600">MCP Now</span> 是您的 AI 指挥中心，
+            让您能够轻松发现、安装、管理和分享强大的 AI 工具，全部通过一个直观的界面完成，
+            无缝融入您喜爱的应用程序，不打断创作流程。
           </p>
           
           <div className="bg-white/80 dark:bg-gray-800/50 p-4 rounded-lg border border-blue-100 dark:border-blue-900/30 max-w-xl">
@@ -64,10 +77,11 @@ const IntroductionHero = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              下载客户端
+              <Download className="mr-2 h-5 w-5" />
+              立即下载体验
             </Button>
             <Button size="lg" variant="outline">
-              了解更多
+              了解更多功能
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -88,4 +102,5 @@ const IntroductionHero = () => {
       </div>
     </section>;
 };
+
 export default IntroductionHero;

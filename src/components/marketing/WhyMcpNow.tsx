@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Cpu, ServerIcon, Database, CheckCircle2, XCircle } from "lucide-react";
+import { Cpu, ServerIcon, Database, CheckCircle2, XCircle, Share2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const fadeInUp = {
@@ -14,25 +14,25 @@ const fadeInUp = {
 const WhyMcpNow = () => {
   const painPoints = [
     {
-      title: "统一接口适配",
-      before: "多账号切换，多平台登录",
-      after: "一次登录，统一管理所有 AI 服务",
-      icon: Cpu,
-      benefit: "统一接口适配：使用同一套代码访问所有 AI 服务，告别繁琐的多 API 调用"
-    }, 
-    {
-      title: "跨平台兼容",
-      before: "反复配置不同环境参数",
-      after: "统一配置文件，跨环境复用",
+      title: "轻松发现与安装",
+      before: "手动搜索、注册多个 AI 服务",
+      after: "一站式发现与一键安装各类 AI 工具",
       icon: ServerIcon,
-      benefit: "跨平台兼容：在任何开发环境中无缝使用，从本地到云端无需重新配置"
+      benefit: "探索丰富的 AI 工具生态：轻松找到并安装各种支持 MCP 协议的 AI 工具与服务"
     }, 
     {
-      title: "安全管理",
-      before: "API Key 分散管理不安全",
-      after: "安全加密，集中授权管理",
-      icon: Database,
-      benefit: "安全管理：集中管理所有账号和密钥，更高级别的安全保障"
+      title: "无缝工作流集成",
+      before: "切换服务打断思路与创作流程",
+      after: "实时热切换，无需重启应用程序",
+      icon: Cpu,
+      benefit: "提升创作效率：在不中断工作流程的情况下，轻松切换或组合使用多种 AI 工具"
+    }, 
+    {
+      title: "社区共享与协作",
+      before: "复杂配置难以分享给团队成员",
+      after: "一键分享您的 AI 工具与配置方案",
+      icon: Share2,
+      benefit: "促进团队协作：轻松与同事、朋友或社区分享您喜爱的 AI 工具组合与设置"
     }
   ];
 
@@ -42,7 +42,7 @@ const WhyMcpNow = () => {
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">为什么选择 MCP Now?</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            告别复杂的多平台管理，一站式解决 AI 开发中的常见痛点
+            您的 AI 指挥中心，让复杂变简单，释放 AI 工具的真正潜力
           </p>
         </motion.div>
 

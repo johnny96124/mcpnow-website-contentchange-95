@@ -86,9 +86,9 @@ const ServersShowcase = () => {
       exploreButton: "Explore More MCP Servers"
     },
     zh: {
-      title: "全面覆盖主流 AI 服务",
-      subtitle: "一站式接入所有您需要的 AI 服务，无需切换多个平台",
-      exploreButton: "探索更多 MCP Servers"
+      title: "探索与发现丰富多彩的 AI 工具生态",
+      subtitle: "一站式发现、安装和管理所有你需要的 AI 服务，轻松融入现有工作流程",
+      exploreButton: "探索更多 AI 工具"
     }
   };
 

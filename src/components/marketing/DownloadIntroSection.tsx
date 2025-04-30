@@ -1,7 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Download, ChevronRight, Twitter, DiscIcon, Cpu, Database, ServerIcon } from "lucide-react";
+import { Download, ChevronRight, Twitter, DiscIcon, Cpu, Database, ServerIcon, Share2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -16,23 +16,23 @@ const DownloadIntroSection = () => {
   const quickStartSteps = [
     {
       title: "下载安装",
-      description: "为您的操作系统下载 MCP Now 客户端并安装",
+      description: "一键下载并安装 MCP Now，轻松启动您的 AI 探索之旅",
       icon: Download
     }, 
     {
-      title: "服务配置",
-      description: "一次性添加您需要的 AI 服务，填入相关 API 密钥",
+      title: "发现 AI 工具",
+      description: "浏览并一键安装您感兴趣的 AI 服务和工具",
       icon: ServerIcon
     }, 
     {
       title: "创建配置文件",
-      description: "设置您偏好的服务器组合和参数配置",
+      description: "根据不同场景定制您的 AI 工具组合与设置",
       icon: Database
     }, 
     {
-      title: "连接工具",
-      description: "将配置绑定到您喜爱的开发工具和环境",
-      icon: Cpu
+      title: "分享与协作",
+      description: "与团队和社区分享您的发现和配置方案",
+      icon: Share2
     }
   ];
 
@@ -42,7 +42,7 @@ const DownloadIntroSection = () => {
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">开始使用 MCP Now</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            四步上手，简化您的 AI 开发流程
+            四步上手，畅享无缝 AI 体验
           </p>
         </motion.div>
         
@@ -86,7 +86,7 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }} 
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-extrabold mb-4 font-montserrat">下载客户端</h3>
+            <h3 className="text-2xl font-extrabold mb-4 font-montserrat">立即体验 MCP Now</h3>
             <div className="space-y-4 w-full">
               <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
                 <Download className="mr-2 h-5 w-5" />
@@ -108,9 +108,9 @@ const DownloadIntroSection = () => {
             whileInView={{ opacity: 1, x: 0 }} 
             viewport={{ once: true }}
           >
-            <h3 className="text-2xl font-extrabold mb-4 font-montserrat">加入社区</h3>
+            <h3 className="text-2xl font-extrabold mb-4 font-montserrat">加入 MCP Now 社区</h3>
             <p className="mb-6 text-gray-600 dark:text-gray-300 leading-relaxed">
-              与其他 MCP Now 用户交流，获取最新更新，分享您的经验。
+              与全球 AI 爱好者交流心得，分享您的配置，共同探索 AI 的无限可能。
             </p>
             <div className="flex gap-4">
               <a href="#" className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 transition-colors hover:scale-110 duration-300">
