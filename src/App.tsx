@@ -1,4 +1,3 @@
-
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,6 +18,7 @@ import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
 import Introduction from "./pages/Introduction";
 import Introduction3 from "./pages/Introduction-3";
+import { LanguageProvider } from "./components/theme/language-provider";
 
 function App() {
   const queryClient = new QueryClient();

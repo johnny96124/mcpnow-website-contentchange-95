@@ -2,16 +2,38 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { LanguageToggle } from "@/components/theme/language-toggle";
 import { Menu, X, Server, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/theme/language-provider";
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { language } = useLanguage();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  // Translations
+  const translations = {
+    zh: {
+      home: "首页",
+      whatIsMcp: "什么是 MCP",
+      whyMcpNow: "为什么选择 MCP Now",
+      download: "下载",
+      downloadClient: "下载客户端"
+    },
+    en: {
+      home: "Home",
+      whatIsMcp: "What is MCP",
+      whyMcpNow: "Why MCP Now",
+      download: "Download",
+      downloadClient: "Download Client"
+    }
+  };
+
+  const t = translations[language];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -23,16 +45,16 @@ const Navbar: React.FC = () => {
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              首页
+              {t.home}
             </Link>
             <Link to="#what-is-mcp" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              什么是 MCP
+              {t.whatIsMcp}
             </Link>
             <Link to="#why-mcp-now" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              为什么选择 MCP Now
+              {t.whyMcpNow}
             </Link>
             <Link to="#download" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              下载
+              {t.download}
             </Link>
           </nav>
         </div>
@@ -40,10 +62,10 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-4">
             <Button variant="default" className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              下载客户端
+              {t.downloadClient}
             </Button>
           </div>
-          <ThemeToggle />
+          <LanguageToggle />
           <button
             className="md:hidden"
             onClick={toggleMobileMenu}
@@ -66,33 +88,33 @@ const Navbar: React.FC = () => {
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            首页
+            {t.home}
           </Link>
           <Link 
             to="#what-is-mcp" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            什么是 MCP
+            {t.whatIsMcp}
           </Link>
           <Link 
             to="#why-mcp-now" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            为什么选择 MCP Now
+            {t.whyMcpNow}
           </Link>
           <Link 
             to="#download" 
             className="block py-2 text-base font-medium"
             onClick={() => setMobileMenuOpen(false)}
           >
-            下载
+            {t.download}
           </Link>
           <div className="pt-4 flex flex-col gap-4 border-t">
             <Button variant="default" className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '#download'}>
               <Download className="mr-2 h-4 w-4" />
-              下载客户端
+              {t.downloadClient}
             </Button>
           </div>
         </div>
