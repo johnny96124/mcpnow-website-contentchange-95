@@ -19,10 +19,6 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'],
-				heading: ['Montserrat', 'Noto Sans SC', 'sans-serif'],
-			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -149,35 +145,7 @@ export default {
 						opacity: '1',
 						transform: 'scale(1)'
 					}
-				},
-        'pulse-subtle': {
-          '0%, 100%': {
-            transform: 'scale(1)',
-            opacity: '1'
-          },
-          '50%': {
-            transform: 'scale(1.05)',
-            opacity: '0.9'
-          }
-        },
-        'float': {
-          '0%, 100%': {
-            transform: 'translateY(0)'
-          },
-          '50%': {
-            transform: 'translateY(-5px)'
-          }
-        },
-        'zoom-in-subtle': {
-          from: {
-            transform: 'scale(0.95)',
-            opacity: '0.8'
-          },
-          to: {
-            transform: 'scale(1)',
-            opacity: '1'
-          }
-        }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -187,10 +155,7 @@ export default {
 				'slide-in-from-right-full': 'slide-in-from-right 0.3s ease-out',
 				'slide-out-to-right-full': 'slide-out-to-right 0.3s ease-out',
 				'collapse': 'collapse-dialog 0.3s ease-in forwards',
-				'expand': 'expand-dialog 0.3s ease-out forwards',
-        'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
-        'float': 'float 3s ease-in-out infinite',
-        'zoom-in-subtle': 'zoom-in-subtle 0.3s ease-out forwards'
+				'expand': 'expand-dialog 0.3s ease-out forwards'
 			}
 		}
 	},
