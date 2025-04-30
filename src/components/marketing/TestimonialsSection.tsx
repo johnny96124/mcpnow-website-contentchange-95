@@ -44,19 +44,19 @@ const TestimonialsSection = () => {
   ];
 
   const impactMetrics = [
-    { value: "50,000+", label: "活跃开发者" },
-    { value: "120,000+", label: "AI 项目部署" },
-    { value: "75%", label: "开发效率提升" },
-    { value: "98.7%", label: "服务可靠性" }
+    { value: "50,000+", label: "Active Developers" },
+    { value: "120,000+", label: "AI Project Deployments" },
+    { value: "75%", label: "Development Efficiency Increase" },
+    { value: "98.7%", label: "Service Reliability" }
   ];
 
   return (
     <section id="testimonials" className="py-20 bg-white dark:bg-gray-900">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center max-w-3xl mx-auto mb-12" {...fadeInUp}>
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">用户反馈与影响</h2>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-4 font-montserrat">Community Impact & Success Stories</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-            了解开发者如何通过 MCP Now 提高工作效率
+            See how developers are accelerating innovation with MCP Now
           </p>
         </motion.div>
 

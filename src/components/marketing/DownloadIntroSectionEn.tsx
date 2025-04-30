@@ -43,9 +43,9 @@ const DownloadIntroSection = () => {
           className="text-center max-w-3xl mx-auto mb-10"
           {...fadeInUp}
         >
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-sans">Get Started with MCP Now</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 font-sans">Unlock the MCP Ecosystem Today</h2>
           <p className="text-base text-gray-600 dark:text-gray-300">
-            Four steps to simplify your AI development workflow
+            Future-proof your AI workflow in just four simple steps
           </p>
         </motion.div>
         

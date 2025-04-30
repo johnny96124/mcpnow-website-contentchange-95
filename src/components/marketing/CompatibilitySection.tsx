@@ -64,7 +64,7 @@ const CompatibilitySection = () => {
   // Content based on language
   const content = {
     en: {
-      title: "Seamless Integration with Your Existing Workflow",
+      title: "Stay in Your Creative Flow",
       subtitle: "MCP Now works with your favorite tools and services out of the box",
       tryItNow: "Try It Now"
     },
