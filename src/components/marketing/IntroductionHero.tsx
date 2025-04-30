@@ -73,12 +73,7 @@ const IntroductionHero = () => {
           duration: 0.7,
           delay: 0.3
         }}>
-            <figure className="w-full">
-              <img src="/lovable-uploads/4f683003-c59d-41a3-a5c3-c4effc018d81.png" alt="MCP Now 简化集成示意图" className="w-full h-auto object-cover" />
-              <figcaption className="py-3 text-center text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
-                MCP Now 让复杂的服务连接变得简单直观，一站式管理所有AI模型服务
-              </figcaption>
-            </figure>
+            <img src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
           </motion.div>
         </motion.div>
       </div>
