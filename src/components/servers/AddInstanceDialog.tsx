@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -16,19 +17,25 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { ServerDefinition } from "@/data/mockData";
 
-interface AddInstanceDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  serverDefinition: ServerDefinition | null;
-  onCreateInstance: (data: any) => void;
-  initialData?: any;
-}
-
-interface FormData {
+export interface InstanceFormValues {
   name: string;
   url: string;
   args: string;
   description: string;
+  env?: Record<string, string>;
+  headers?: Record<string, string>;
+  instanceId?: string;
+}
+
+interface AddInstanceDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  serverDefinition: ServerDefinition | null;
+  onCreateInstance: (data: InstanceFormValues, selectedHosts?: string[]) => void;
+  initialValues?: InstanceFormValues;
+  editMode?: boolean;
+  instanceId?: string;
+  availableHosts?: any[];
 }
 
 export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
@@ -36,13 +43,19 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
   onOpenChange,
   serverDefinition,
   onCreateInstance,
-  initialData
+  initialValues,
+  editMode = false,
+  instanceId,
+  availableHosts
 }) => {
-  const [formData, setFormData] = useState<FormData>({
-    name: initialData?.name || "",
-    url: initialData?.url || "",
-    args: initialData?.args || "",
-    description: initialData?.description || "",
+  const [formData, setFormData] = useState<InstanceFormValues>({
+    name: initialValues?.name || "",
+    url: initialValues?.url || "",
+    args: initialValues?.args || "",
+    description: initialValues?.description || "",
+    env: initialValues?.env || {},
+    headers: initialValues?.headers || {},
+    instanceId: instanceId
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -51,7 +64,13 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
   };
 
   const handleSave = () => {
-    onCreateInstance(formData);
+    if (availableHosts && availableHosts.length > 0) {
+      // If availableHosts is provided, pass an empty array as selectedHosts
+      // In a real implementation, you would collect selected hosts from the UI
+      onCreateInstance(formData, []);
+    } else {
+      onCreateInstance(formData);
+    }
   };
 
   if (!serverDefinition) return null;
@@ -68,7 +87,7 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
         </DialogClose>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Configure {serverDefinition.name}
+            {editMode ? `Edit ${serverDefinition.name}` : `Configure ${serverDefinition.name}`}
             {isCustom && <Badge variant="outline">Custom</Badge>}
           </DialogTitle>
         </DialogHeader>
@@ -129,7 +148,7 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!formData.name || (!isStdio && !formData.url)}>
-            Create Instance
+            {editMode ? "Update" : "Create"} Instance
           </Button>
         </DialogFooter>
       </DialogContent>
