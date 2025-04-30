@@ -20,9 +20,11 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'montserrat': ['Montserrat', 'sans-serif'],
-				'noto': ['"Noto Sans SC"', 'sans-serif'],
-				'sans': ['Montserrat', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
+				'montserrat': ['Montserrat', 'system-ui', 'sans-serif'],
+				'noto': ['"Noto Sans SC"', 'system-ui', 'sans-serif'],
+				'sans': ['Roboto', 'Open Sans', 'system-ui', 'sans-serif'],
+				'roboto': ['Roboto', 'system-ui', 'sans-serif'],
+				'opensans': ['Open Sans', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
