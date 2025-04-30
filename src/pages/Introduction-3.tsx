@@ -394,7 +394,7 @@ const Introduction3: React.FC = () => {
                       </div>
                       
                       <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                        <p className="font-medium text-blue-600 dark:text-blue-400">{point.benefit}</p>
+                        
                       </div>
                     </div>
                   </CardContent>
