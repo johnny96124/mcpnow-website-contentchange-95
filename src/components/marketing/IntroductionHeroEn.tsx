@@ -36,9 +36,8 @@ const IntroductionHero = () => {
           </div>
           
           <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-3xl leading-relaxed font-opensans mx-auto">
-            <span className="font-semibold text-blue-600">MCP Now</span> is your command center for AI tools. 
-            Discover, install, manage, and share powerful AI tools from one central hub. 
-            Integrate them seamlessly into your applications.
+            <span className="font-semibold text-blue-600">MCP Now</span> is your central hub for AI tools. 
+            Discover, manage, and integrate powerful AI capabilities with ease.
             <button onClick={() => setIsModalOpen(true)} className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700">
               What is MCP?
             </button>
