@@ -19,6 +19,7 @@ import NewUserTrayPopup from "./pages/NewUserTrayPopup";
 import HostsNewUser from "./pages/HostsNewUser";
 import WebsiteEn from "./pages/website-en";
 import WebsiteCn from "./pages/website-cn";
+import FileNavigator from "./pages/FileNavigator";
 import { LanguageProvider } from "./components/theme/language-provider";
 
 function App() {
@@ -94,6 +95,10 @@ function App() {
               {
                 path: "/tray-new-user",
                 element: <NewUserTrayPopup />
+              },
+              {
+                path: "/file-navigator",
+                element: <DefaultLayout><FileNavigator /></DefaultLayout>
               },
               {
                 path: "*",
