@@ -5,8 +5,10 @@ import { ChevronRight, Download, X, Compass, MousePointer, Star, Share2 } from "
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+
 const IntroductionHero = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
   return <section className="relative py-20 md:py-28 overflow-hidden" id="what-is-mcp">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -26,32 +28,28 @@ const IntroductionHero = () => {
           
           <div className="space-y-5">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight font-roboto leading-tight text-gray-900 dark:text-white">
-              Your AI Universe - Explore, Control, Create
+              One App to Rule All Your MCP Setups
             </h1>
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-blue-600 font-roboto">
-              Effortlessly discover, install, manage, 
-              <br className="hidden md:inline" />
-              and share your AI tools
+              Discover. Manage. Share.
             </h2>
           </div>
           
           <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-3xl leading-relaxed font-opensans mx-auto">
-            <span className="font-semibold text-blue-600">MCP Now</span> is your central hub for AI tools. 
-            Discover, manage, and integrate powerful AI capabilities with ease.
+            <span className="font-semibold text-blue-600">MCP Now</span> is a desktop app that lets you discover, manage, and share MCP servers in 
+            one place — simplifying configs and enabling instant switching.
             <button onClick={() => setIsModalOpen(true)} className="ml-2 relative inline-block after:content-[''] after:absolute after:w-full after:h-0.5 after:bg-blue-600 after:bottom-0 after:left-0 focus:outline-none text-blue-600 hover:text-blue-700">
               What is MCP?
             </button>
           </p>
           
-          
-          
           <div className="flex flex-col sm:flex-row gap-5 pt-8">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 font-roboto">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 font-roboto flex items-center">
               <Download className="mr-2 h-5 w-5" />
               Download MCP Now
             </Button>
-            <Button size="lg" variant="outline" className="font-roboto">
-              Learn More Features
+            <Button size="lg" variant="outline" className="font-roboto flex items-center">
+              Product Manuals
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -66,10 +64,7 @@ const IntroductionHero = () => {
           duration: 0.7,
           delay: 0.3
         }}>
-            <img src="/lovable-uploads/3debc8dc-96ad-462c-8379-a4b4e08a889b.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
-            <div className="text-center mt-5 mb-6 text-base text-gray-700 dark:text-gray-300 font-opensans">
-              Centralized command center for all your AI tools - manage everything in one place
-            </div>
+            <img src="/lovable-uploads/1af94d9b-4348-4966-8772-8037b4c69f62.png" alt="MCP Now Dashboard" className="w-full h-auto object-cover" />
           </motion.div>
         </motion.div>
       </div>
@@ -96,4 +91,5 @@ const IntroductionHero = () => {
       </Dialog>
     </section>;
 };
+
 export default IntroductionHero;
