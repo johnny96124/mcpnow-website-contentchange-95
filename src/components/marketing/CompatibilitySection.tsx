@@ -1,9 +1,9 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "../theme/language-provider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -39,6 +39,18 @@ const CompatibilitySection = () => {
     {
       name: "Cloud Host",
       icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
+    },
+    {
+      name: "Amplitude",
+      icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
+    },
+    {
+      name: "Discord",
+      icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
+    },
+    {
+      name: "1Password",
+      icon: "/lovable-uploads/2edef556-b3cc-440b-90c0-af33a7a3730f.png"
     }
   ];
   
@@ -47,25 +59,6 @@ const CompatibilitySection = () => {
     zh: {
       title: "多场景灵活适配",
       subtitle: "一次配置，多处使用，适配您喜爱的所有开发工具",
-      tabs: {
-        development: "开发环境",
-        hosting: "主机环境",
-        usage: "使用场景"
-      },
-      usageCases: [
-        {
-          title: "开发环境",
-          description: "在 IDE 中直接调用多种 AI 模型，辅助代码编写、审查和优化"
-        },
-        {
-          title: "数据分析",
-          description: "为数据分析流程集成多种 AI 能力，自动化处理和可视化数据"
-        },
-        {
-          title: "内容创作",
-          description: "在内容创作过程中无缝切换不同风格和功能的 AI 模型"
-        }
-      ],
       hotswap: {
         title: "不止于灵活，更有热插拔能力",
         description: "无需重启应用，一键切换 AI 服务，实时响应业务需求变化",
@@ -75,25 +68,6 @@ const CompatibilitySection = () => {
     en: {
       title: "Flexible Compatibility Across Platforms",
       subtitle: "Configure once, use everywhere - works with all your favorite development tools",
-      tabs: {
-        development: "Development",
-        hosting: "Hosting",
-        usage: "Use Cases"
-      },
-      usageCases: [
-        {
-          title: "Development Environment",
-          description: "Call multiple AI models directly within your IDE to assist with code writing, review, and optimization"
-        },
-        {
-          title: "Data Analysis",
-          description: "Integrate various AI capabilities into your data analysis workflow for automated processing and visualization"
-        },
-        {
-          title: "Content Creation",
-          description: "Seamlessly switch between AI models with different styles and capabilities during content creation"
-        }
-      ],
       hotswap: {
         title: "Beyond Flexibility: Hot-Swapping Capability",
         description: "Switch between AI services instantly without restarting applications, responding to changing business needs in real-time",
@@ -118,73 +92,37 @@ const CompatibilitySection = () => {
         </motion.div>
         
         <motion.div 
-          className="max-w-4xl mx-auto" 
+          className="max-w-5xl mx-auto relative" 
           initial={{ opacity: 0 }} 
           whileInView={{ opacity: 1 }} 
           viewport={{ once: true }}
         >
-          <Tabs defaultValue="development" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-8">
-              <TabsTrigger value="development" className="font-roboto text-sm font-medium">{currentContent.tabs.development}</TabsTrigger>
-              <TabsTrigger value="hosting" className="font-roboto text-sm font-medium">{currentContent.tabs.hosting}</TabsTrigger>
-              <TabsTrigger value="usage" className="font-roboto text-sm font-medium">{currentContent.tabs.usage}</TabsTrigger>
-            </TabsList>
+          {/* 水平滚动区域 */}
+          <div className="relative w-full overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-12 z-10 bg-gradient-to-r from-white to-transparent dark:from-gray-950 dark:to-transparent pointer-events-none"></div>
             
-            <TabsContent value="development" className="p-4">
-              <div className="flex flex-wrap justify-center gap-8">
-                {hosts.slice(0, 4).map((host, idx) => (
+            <div className="w-full overflow-x-auto py-8 scrollbar-none">
+              <div className="inline-flex gap-10 animate-scroll">
+                {[...hosts, ...hosts].map((host, idx) => (
                   <motion.div 
-                    key={`${host.name}-${idx}`} 
-                    className="flex flex-col items-center" 
+                    key={idx} 
+                    className="flex flex-col items-center mx-2"
                     initial={{ opacity: 0, y: 10 }} 
                     animate={{ opacity: 1, y: 0 }} 
-                    transition={{ delay: idx * 0.1 }} 
+                    transition={{ delay: (idx % hosts.length) * 0.1 }} 
                     whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
                   >
-                    <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
-                      <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
+                    <div className="p-5 rounded-lg bg-gray-50 dark:bg-gray-800 mb-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                      <img src={host.icon} alt={host.name} className="w-16 h-16 object-contain" />
                     </div>
                     <span className="font-medium font-montserrat text-gray-800 dark:text-gray-100">{host.name}</span>
                   </motion.div>
                 ))}
               </div>
-            </TabsContent>
+            </div>
             
-            <TabsContent value="hosting" className="p-4">
-              <div className="flex flex-wrap justify-center gap-8">
-                {hosts.slice(4, 6).map((host, idx) => (
-                  <motion.div 
-                    key={`${host.name}-${idx}`} 
-                    className="flex flex-col items-center" 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ delay: idx * 0.1 }} 
-                    whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
-                  >
-                    <div className="p-4 rounded-full bg-gray-50 dark:bg-gray-800 mb-3 shadow-sm">
-                      <img src={host.icon} alt={host.name} className="w-14 h-14 object-contain" />
-                    </div>
-                    <span className="font-medium font-montserrat text-gray-800 dark:text-gray-100">{host.name}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="usage" className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentContent.usageCases.map((useCase, idx) => (
-                  <Card key={idx} className="border-gray-200 dark:border-gray-800 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                    <CardContent className="p-6">
-                      <h3 className="font-semibold mb-2 text-lg text-gray-800 dark:text-white font-montserrat">{useCase.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-opensans">
-                        {useCase.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
+            <div className="absolute right-0 top-0 bottom-0 w-12 z-10 bg-gradient-to-l from-white to-transparent dark:from-gray-950 dark:to-transparent pointer-events-none"></div>
+          </div>
         </motion.div>
         
         <motion.div 
@@ -202,6 +140,24 @@ const CompatibilitySection = () => {
           </div>
         </motion.div>
       </div>
+
+      <style jsx>{`
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-50% - 1rem)); }
+        }
+        .animate-scroll {
+          animation: scroll 30s linear infinite;
+          min-width: fit-content;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-none {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </section>
   );
 };

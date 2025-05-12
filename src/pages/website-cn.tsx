@@ -6,6 +6,7 @@ import IntroductionHero from "@/components/marketing/IntroductionHero";
 import WhyMcpNow from "@/components/marketing/WhyMcpNow";
 import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
+import CentralHubSection from "@/components/marketing/CentralHubSection";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 import DownloadIntroSection from "@/components/marketing/DownloadIntroSection";
 import IntroFooter from "@/components/marketing/IntroFooter";
@@ -18,6 +19,7 @@ const WebsiteCn: React.FC = () => {
       <WhyMcpNow />
       <ServersShowcase />
       <CompatibilitySection />
+      <CentralHubSection />
       <TestimonialsSection />
       <DownloadIntroSection />
       <IntroFooter />
