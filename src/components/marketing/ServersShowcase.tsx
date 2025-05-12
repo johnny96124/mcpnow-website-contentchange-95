@@ -37,43 +37,43 @@ const ServersShowcase = () => {
   
   const mcpServers = [
     {
-      name: "OpenAI Server",
-      description: language === "en" ? "Access GPT-4 and DALL-E models" : "访问 GPT-4 和 DALL-E 模型",
+      name: "AWS KB Retrieval",
+      description: language === "en" ? "Retrieval from AWS Knowledge Base using Bedrock Agent Runtime" : "使用 Bedrock Agent 运行时检索 AWS 知识库",
       icon: "/lovable-uploads/888ae2df-5f1b-4ce5-8d4e-6517d4432938.png"
     }, 
     {
-      name: "Anthropic Claude",
-      description: language === "en" ? "High-performance Claude models" : "高性能 Claude 模型",
+      name: "Brave Search",
+      description: language === "en" ? "Web and local search using Brave's Search API" : "使用 Brave 的搜索 API 进行网络和本地搜索",
       icon: "/lovable-uploads/b23d1c2f-49a2-46c2-9fd2-45c26c3686bb.png"
     }, 
     {
-      name: "Adobe Firefly",
-      description: language === "en" ? "Creative image generation APIs" : "创意图像生成 API",
+      name: "EverArt",
+      description: language === "en" ? "AI image generation using various models" : "使用各种模型的 AI 图像生成",
       icon: "/lovable-uploads/73160045-4ba5-4ffa-a980-50e0b33b3517.png"
     }, 
     {
-      name: "Atlassian Server",
-      description: language === "en" ? "Multi-protocol connectivity" : "多协议连接能力",
+      name: "Everything",
+      description: language === "en" ? "Reference / test server with prompts, resources, and tools" : "带有提示、资源和工具的参考/测试服务器",
       icon: "/lovable-uploads/223666e0-b3d5-4b6e-9f8f-c85eea51d4ab.png"
     }, 
     {
-      name: "Airbnb Custom",
-      description: language === "en" ? "Custom model deployment tools" : "自定义模型部署工具",
+      name: "Fetch",
+      description: language === "en" ? "Web content fetching and conversion for efficient LLM usage" : "用于高效 LLM 使用的网络内容获取和转换",
       icon: "/lovable-uploads/5ebbe2a4-57d7-4db0-98c4-34fc93af0c58.png"
     }, 
     {
-      name: "Amazon Bedrock",
-      description: language === "en" ? "Managed foundation model access" : "托管基础模型访问服务",
+      name: "Filesystem",
+      description: language === "en" ? "Secure file operations with configurable access controls" : "具有可配置访问控制的安全文件操作",
       icon: "/lovable-uploads/5f93fbdd-00d5-49db-862d-e4b247e975d7.png"
     }, 
     {
-      name: "Amplitude AI",
-      description: language === "en" ? "Analytics-focused AI models" : "分析型 AI 模型",
+      name: "Git",
+      description: language === "en" ? "Tools to read, search, and manipulate Git repositories" : "用于读取、搜索和操作 Git 仓库的工具",
       icon: "/lovable-uploads/4fecf049-ca5f-4955-a38c-4506556886d2.png"
     }, 
     {
-      name: "Discord AI",
-      description: language === "en" ? "Social-first AI integrations" : "社交优先 AI 集成",
+      name: "GitHub",
+      description: language === "en" ? "Repository management, file operations, and GitHub API integration" : "仓库管理、文件操作和 GitHub API 集成",
       icon: "/lovable-uploads/60892b6e-18d9-4bbc-869b-df9d6adecf7d.png"
     }
   ];
@@ -81,14 +81,14 @@ const ServersShowcase = () => {
   // Content based on language
   const content = {
     en: {
-      title: "Effortless Discovery: Explore a World of AI Capabilities",
-      subtitle: "Find and install AI tools with a single click - no complex setup required",
-      exploreButton: "Explore More AI Tools"
+      title: "Discover MCP Server Ecosystem",
+      subtitle: "Access a growing collection of specialized MCP servers for every development need",
+      exploreButton: "Explore More MCP Servers"
     },
     zh: {
-      title: "探索与发现丰富多彩的 AI 工具生态",
-      subtitle: "一站式发现、安装和管理所有你需要的 AI 服务，轻松融入现有工作流程",
-      exploreButton: "探索更多 AI 工具"
+      title: "探索 MCP 服务器生态系统",
+      subtitle: "访问不断增长的专业 MCP 服务器集合，满足各种开发需求",
+      exploreButton: "探索更多 MCP 服务器"
     }
   };
 
