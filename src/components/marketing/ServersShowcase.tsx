@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, RotateCw, Compass } from "lucide-react";
@@ -178,11 +177,10 @@ const ServersShowcase = () => {
       setKey(prev => prev + 1);
       setIsRefreshing(false);
       
-      // Show toast notification
+      // Show toast notification - fixed the options to match the type
       toast({
         title: language === "en" ? "Servers Refreshed" : "服务器已刷新",
         description: language === "en" ? "Discover new MCP servers" : "发现新的 MCP 服务器",
-        duration: 2000,
       });
     }, 600); // Short delay for exit animations
   };
