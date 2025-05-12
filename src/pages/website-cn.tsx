@@ -12,6 +12,7 @@ import IntroFooter from "@/components/marketing/IntroFooter";
 import ServerDiscoverySection from "@/components/marketing/ServerDiscoverySection";
 import ShareServersSection from "@/components/marketing/ShareServersSection";
 import DebugToolsSection from "@/components/marketing/DebugToolsSection";
+import CentralHubSection from "@/components/marketing/CentralHubSection";
 
 const WebsiteCn: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const WebsiteCn: React.FC = () => {
       <WhyMcpNow />
       <ServersShowcase />
       <ServerDiscoverySection />
+      <CentralHubSection />
       <ShareServersSection />
       <DebugToolsSection />
       <CompatibilitySection />
