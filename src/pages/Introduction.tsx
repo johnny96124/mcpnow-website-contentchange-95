@@ -8,8 +8,8 @@ import IntroductionHero from "@/components/marketing/IntroductionHero";
 import IntroductionHeroEn from "@/components/marketing/IntroductionHeroEn";
 import WhyMcpNow from "@/components/marketing/WhyMcpNow";
 import WhyMcpNowEn from "@/components/marketing/WhyMcpNowEn";
-import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
+import ServersShowcase from "@/components/marketing/ServersShowcase";
 import ServerDiscoverySection from "@/components/marketing/ServerDiscoverySection";
 import CentralHubSection from "@/components/marketing/CentralHubSection";
 import ShareServersSection from "@/components/marketing/ShareServersSection";
@@ -28,8 +28,8 @@ const Introduction: React.FC = () => {
       {isEnglish ? <NavbarEn /> : <Navbar />}
       {isEnglish ? <IntroductionHeroEn /> : <IntroductionHero />}
       {isEnglish ? <WhyMcpNowEn /> : <WhyMcpNow />}
-      <ServersShowcase />
       <CompatibilitySection />
+      <ServersShowcase />
       {isEnglish && (
         <>
           <ServerDiscoverySection />

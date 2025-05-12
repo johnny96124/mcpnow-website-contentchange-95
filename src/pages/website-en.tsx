@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import NavbarEn from "@/components/marketing/NavbarEn";
 import IntroductionHero from "@/components/marketing/IntroductionHeroEn";
 import WhyMcpNow from "@/components/marketing/WhyMcpNowEn";
-import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
+import ServersShowcase from "@/components/marketing/ServersShowcase";
 import ServerDiscoverySection from "@/components/marketing/ServerDiscoverySection";
 import CentralHubSection from "@/components/marketing/CentralHubSection";
 import ShareServersSection from "@/components/marketing/ShareServersSection";
@@ -19,8 +19,8 @@ const WebsiteEn: React.FC = () => {
       <NavbarEn />
       <IntroductionHero />
       <WhyMcpNow />
-      <ServersShowcase />
       <CompatibilitySection />
+      <ServersShowcase />
       <ServerDiscoverySection />
       <CentralHubSection />
       <ShareServersSection />

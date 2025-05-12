@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/marketing/Navbar";
 import IntroductionHero from "@/components/marketing/IntroductionHero";
 import WhyMcpNow from "@/components/marketing/WhyMcpNow";
-import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
+import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CentralHubSection from "@/components/marketing/CentralHubSection";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 import DownloadIntroSection from "@/components/marketing/DownloadIntroSection";
@@ -17,8 +17,8 @@ const WebsiteCn: React.FC = () => {
       <Navbar />
       <IntroductionHero />
       <WhyMcpNow />
-      <ServersShowcase />
       <CompatibilitySection />
+      <ServersShowcase />
       <CentralHubSection />
       <TestimonialsSection />
       <DownloadIntroSection />
