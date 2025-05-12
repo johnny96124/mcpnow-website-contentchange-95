@@ -188,7 +188,7 @@ const ServersShowcase = () => {
     setDisplayedServers(getRandomServers());
   }, []);
 
-  // Handle refresh button click with enhanced animation timing
+  // Handle refresh button click with reduced animation timing
   const handleRefresh = () => {
     if (isRefreshing) return;
     
@@ -198,12 +198,12 @@ const ServersShowcase = () => {
       setKey(prev => prev + 1);
       setIsRefreshing(false);
       
-      // Show toast notification - fixed the options to match the type
+      // Show toast notification
       toast({
         title: language === "en" ? "Servers Refreshed" : "服务器已刷新",
         description: language === "en" ? "Discover new MCP servers" : "发现新的 MCP 服务器",
       });
-    }, 800); // Slightly longer delay for more dramatic exit animations
+    }, 400); // Reduced from 800ms to 400ms for faster refresh
   };
 
   // Content based on language
