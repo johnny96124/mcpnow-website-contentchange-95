@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, RotateCw, Compass } from "lucide-react";
@@ -244,7 +245,8 @@ const ServersShowcase = () => {
           </p>
         </motion.div>
         
-        <div className="mb-8 text-center">
+        {/* Button controls moved to a single line - both refresh and explore buttons together */}
+        <div className="mb-8 text-center flex justify-center items-center gap-4 flex-wrap">
           <Button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -257,6 +259,15 @@ const ServersShowcase = () => {
               className={`h-4 w-4 mr-2 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} 
             />
             {refreshButton}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className={`text-blue-600 hover:bg-blue-50 ${textFont} hover:scale-105 transition-transform`} 
+            onClick={() => window.location.href = '/discovery'}
+          >
+            {exploreButton}
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
         
@@ -334,16 +345,7 @@ const ServersShowcase = () => {
           </motion.div>
         </AnimatePresence>
         
-        <div className="mt-8 text-center">
-          <Button 
-            variant="outline" 
-            className={`text-blue-600 hover:bg-blue-50 ${textFont} hover:scale-105 transition-transform`} 
-            onClick={() => window.location.href = '/discovery'}
-          >
-            {exploreButton}
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </div>
+        {/* Removed the bottom explore button since it's now in the top control area */}
       </div>
     </section>
   );
