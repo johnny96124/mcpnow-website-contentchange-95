@@ -41,33 +41,32 @@ const DebugToolsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            {/* Image stack with parallel borders */}
-            <div className="relative">
+            {/* Stacked images with parallel borders */}
+            <div className="relative w-full max-w-2xl mx-auto py-8">
               {/* Top image (Debug Tools) */}
-              <div className="relative z-10 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 translate-y-[-20px] translate-x-[-20px] w-[80%]">
+              <div className="absolute z-20 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border-2 border-gray-200 dark:border-gray-700 w-[80%] mx-auto left-0 right-0 top-0">
                 <img 
                   src="/lovable-uploads/ab829005-91a6-40c6-bcce-34cc0fc662b5.png" 
                   alt="Debug Tools Interface" 
                   className="w-full h-auto rounded-lg"
                 />
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl"></div>
-                <div className="absolute -top-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
               </div>
               
               {/* Bottom image (Dashboard) */}
-              <div className="absolute top-0 left-0 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 translate-y-[20px] translate-x-[20px] w-[80%]">
+              <div className="absolute z-10 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border-2 border-gray-200 dark:border-gray-700 w-[80%] mx-auto left-0 right-0 top-28">
                 <img 
                   src="/lovable-uploads/b9cf11be-8114-47da-94f0-3b4d1cddb3e9.png" 
                   alt="Dashboard Interface" 
-                  className="w-full h-auto rounded-lg opacity-95"
+                  className="w-full h-auto rounded-lg"
                 />
-                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-purple-500/10 rounded-full blur-3xl"></div>
-                <div className="absolute -top-4 -left-4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
               </div>
+              
+              {/* Spacer to ensure container has proper height */}
+              <div className="invisible h-[500px]"></div>
             </div>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-4xl mx-auto mt-24">
             {features.map((feature, idx) => (
               <motion.div 
                 key={idx} 
