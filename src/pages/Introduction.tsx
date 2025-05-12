@@ -10,6 +10,9 @@ import WhyMcpNow from "@/components/marketing/WhyMcpNow";
 import WhyMcpNowEn from "@/components/marketing/WhyMcpNowEn";
 import ServersShowcase from "@/components/marketing/ServersShowcase";
 import CompatibilitySection from "@/components/marketing/CompatibilitySection";
+import ServerDiscoverySection from "@/components/marketing/ServerDiscoverySection";
+import CentralHubSection from "@/components/marketing/CentralHubSection";
+import ShareServersSection from "@/components/marketing/ShareServersSection";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 import DownloadIntroSection from "@/components/marketing/DownloadIntroSection";
 import DownloadIntroSectionEn from "@/components/marketing/DownloadIntroSectionEn";
@@ -27,6 +30,13 @@ const Introduction: React.FC = () => {
       {isEnglish ? <WhyMcpNowEn /> : <WhyMcpNow />}
       <ServersShowcase />
       <CompatibilitySection />
+      {isEnglish && (
+        <>
+          <ServerDiscoverySection />
+          <CentralHubSection />
+          <ShareServersSection />
+        </>
+      )}
       <TestimonialsSection />
       {isEnglish ? <DownloadIntroSectionEn /> : <DownloadIntroSection />}
       {isEnglish ? <IntroFooterEn /> : <IntroFooter />}
