@@ -9,10 +9,6 @@ import CompatibilitySection from "@/components/marketing/CompatibilitySection";
 import TestimonialsSection from "@/components/marketing/TestimonialsSection";
 import DownloadIntroSection from "@/components/marketing/DownloadIntroSection";
 import IntroFooter from "@/components/marketing/IntroFooter";
-import ServerDiscoverySection from "@/components/marketing/ServerDiscoverySection";
-import ShareServersSection from "@/components/marketing/ShareServersSection";
-import DebugToolsSection from "@/components/marketing/DebugToolsSection";
-import CentralHubSection from "@/components/marketing/CentralHubSection";
 
 const WebsiteCn: React.FC = () => {
   return (
@@ -21,10 +17,6 @@ const WebsiteCn: React.FC = () => {
       <IntroductionHero />
       <WhyMcpNow />
       <ServersShowcase />
-      <ServerDiscoverySection />
-      <CentralHubSection />
-      <ShareServersSection />
-      <DebugToolsSection />
       <CompatibilitySection />
       <TestimonialsSection />
       <DownloadIntroSection />
