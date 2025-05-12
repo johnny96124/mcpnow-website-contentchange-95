@@ -35,7 +35,7 @@ const ServerDiscoverySection = () => {
       <div className="container px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <motion.div
-            className="relative mt-10 md:mt-0 order-2 md:order-1 max-w-[70%] mx-auto md:mx-0"
+            className="relative mt-10 md:mt-0 order-2 md:order-1 mx-auto md:mx-0"
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
