@@ -32,36 +32,57 @@ const cardHover = {
   }
 };
 
-// Animation variants for server cards when refreshing
+// Enhanced animation variants for server cards with more dramatic effects
 const cardVariants = {
-  hidden: { 
+  hidden: (i) => ({ 
     opacity: 0, 
-    y: 20, 
-    rotate: -5, 
-    scale: 0.8 
-  },
-  visible: i => ({ 
+    y: 50,
+    x: i % 2 === 0 ? -20 : 20,
+    rotate: i % 2 === 0 ? -8 : 8,
+    scale: 0.8
+  }),
+  visible: (i) => ({ 
     opacity: 1, 
-    y: 0, 
+    y: 0,
+    x: 0,
     rotate: 0,
     scale: 1,
     transition: { 
       delay: i * 0.1,
-      duration: 0.5,
+      duration: 0.6,
       type: "spring",
-      stiffness: 100
+      stiffness: 100,
+      damping: 10
     } 
   }),
-  exit: i => ({ 
-    opacity: 0, 
-    y: -20, 
-    rotate: 5,
-    scale: 0.8,
+  exit: (i) => ({ 
+    opacity: 0,
+    y: -30,
+    x: i % 2 === 0 ? -30 : 30,
+    rotate: i % 2 === 0 ? -12 : 12,
+    scale: 0.6,
     transition: { 
       delay: i * 0.05,
-      duration: 0.3
+      duration: 0.4,
+      ease: "easeInOut"
     } 
   })
+};
+
+// New shimmer animation for cards
+const shimmer = {
+  hidden: {
+    backgroundPosition: "200% 0",
+    opacity: 0.8
+  },
+  visible: {
+    backgroundPosition: "0% 0",
+    opacity: 1,
+    transition: {
+      duration: 1.5,
+      ease: "easeOut"
+    }
+  }
 };
 
 const ServersShowcase = () => {
@@ -167,7 +188,7 @@ const ServersShowcase = () => {
     setDisplayedServers(getRandomServers());
   }, []);
 
-  // Handle refresh button click
+  // Handle refresh button click with enhanced animation timing
   const handleRefresh = () => {
     if (isRefreshing) return;
     
@@ -182,7 +203,7 @@ const ServersShowcase = () => {
         title: language === "en" ? "Servers Refreshed" : "服务器已刷新",
         description: language === "en" ? "Discover new MCP servers" : "发现新的 MCP 服务器",
       });
-    }, 600); // Short delay for exit animations
+    }, 800); // Slightly longer delay for more dramatic exit animations
   };
 
   // Content based on language
@@ -223,14 +244,18 @@ const ServersShowcase = () => {
           </p>
         </motion.div>
         
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <Button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className={`bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-800/40 ${textFont} transition-all`}
+            className={`bg-blue-100 text-blue-600 hover:bg-blue-200 dark:bg-blue-900/20 dark:text-blue-400 
+              dark:hover:bg-blue-800/40 ${textFont} transition-all transform hover:scale-105
+              ${isRefreshing ? 'animate-pulse' : ''}`}
             variant="outline"
           >
-            <RotateCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RotateCw 
+              className={`h-4 w-4 mr-2 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} 
+            />
             {refreshButton}
           </Button>
         </div>
@@ -239,35 +264,69 @@ const ServersShowcase = () => {
           <motion.div 
             key={key}
             className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { 
+                opacity: 1,
+                transition: { 
+                  staggerChildren: 0.1,
+                  delayChildren: 0.2
+                }
+              }
+            }}
           >
             {displayedServers.map((server, idx) => (
               <motion.div 
                 key={`${server.name}-${key}-${idx}`}
                 custom={idx}
                 variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                whileHover="hover"
+                whileHover={{
+                  scale: 1.05,
+                  rotate: idx % 2 === 0 ? -2 : 2,
+                  y: -5,
+                  transition: { duration: 0.3 }
+                }}
                 className="server-card"
               >
-                <Card className="h-full overflow-hidden border-gray-200 dark:border-gray-800">
+                <Card className="h-full overflow-hidden border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="mb-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <motion.div 
+                      className="flex flex-col items-center text-center"
+                      variants={shimmer}
+                      initial="hidden"
+                      animate="visible"
+                      style={{
+                        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
+                        backgroundSize: "200% 100%"
+                      }}
+                    >
+                      <motion.div 
+                        className="mb-3 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20"
+                        whileHover={{ 
+                          rotate: [0, -5, 5, -5, 0],
+                          scale: 1.1,
+                          transition: { duration: 0.5 }
+                        }}
+                      >
                         <img src={server.icon} alt={server.name} className="w-10 h-10 object-contain" />
-                      </div>
+                      </motion.div>
                       <h3 className="text-sm font-bold mb-1 font-montserrat">{server.name}</h3>
                       <p className={`text-xs text-gray-500 dark:text-gray-400 line-clamp-2 ${descriptionFont}`}>
                         {server.description}
                       </p>
                       {language === "en" && (
-                        <button className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-roboto flex items-center">
+                        <motion.button 
+                          className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-roboto flex items-center"
+                          whileHover={{ x: 3 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
                           <span>Install</span>
                           <ArrowRight className="ml-1 h-3 w-3" />
-                        </button>
+                        </motion.button>
                       )}
-                    </div>
+                    </motion.div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -278,11 +337,11 @@ const ServersShowcase = () => {
         <div className="mt-8 text-center">
           <Button 
             variant="outline" 
-            className={`text-blue-600 hover:bg-blue-50 ${textFont}`} 
+            className={`text-blue-600 hover:bg-blue-50 ${textFont} hover:scale-105 transition-transform`} 
             onClick={() => window.location.href = '/discovery'}
           >
             {exploreButton}
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </div>
