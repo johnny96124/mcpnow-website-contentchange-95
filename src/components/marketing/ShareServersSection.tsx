@@ -43,11 +43,13 @@ const ShareServersSection = () => {
             transition={{ duration: 0.7 }}
           >
             <div className="relative bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <img 
-                src="/lovable-uploads/d51c0e76-46bc-489c-ace9-0d4fad50c089.png" 
-                alt="Share Profile Interface" 
-                className="w-full h-auto rounded-lg"
-              />
+              <div className="w-[40%] h-[40%] mx-auto">
+                <img 
+                  src="/lovable-uploads/d51c0e76-46bc-489c-ace9-0d4fad50c089.png" 
+                  alt="Share Profile Interface" 
+                  className="w-full h-auto rounded-lg"
+                />
+              </div>
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl"></div>
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
             </div>
