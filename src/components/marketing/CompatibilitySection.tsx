@@ -141,23 +141,26 @@ const CompatibilitySection = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
-        @keyframes scroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(-50% - 1rem)); }
-        }
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
-          min-width: fit-content;
-        }
-        .scrollbar-none::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-none {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+      {/* Remove the JSX attribute and use regular style tag */}
+      <style>
+        {`
+          @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 1rem)); }
+          }
+          .animate-scroll {
+            animation: scroll 30s linear infinite;
+            min-width: fit-content;
+          }
+          .scrollbar-none::-webkit-scrollbar {
+            display: none;
+          }
+          .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}
+      </style>
     </section>
   );
 };
