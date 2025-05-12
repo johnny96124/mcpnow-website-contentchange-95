@@ -81,13 +81,13 @@ const ServersShowcase = () => {
   // Content based on language
   const content = {
     en: {
-      title: "Unleash the Power of MCP Servers",
-      subtitle: "Supercharge your development with our cutting-edge MCP server ecosystem",
+      title: "Discover the Ultimate MCP Server Marketplace",
+      subtitle: "Explore our curated collection of powerful third-party MCP servers to enhance your development workflow",
       exploreButton: "Explore More MCP Servers"
     },
     zh: {
-      title: "释放 MCP 服务器的强大力量",
-      subtitle: "借助我们尖端的 MCP 服务器生态系统，为您的开发工作提供超强动力",
+      title: "探索终极 MCP 服务器应用市场",
+      subtitle: "浏览我们精心策划的强大第三方 MCP 服务器集合，提升您的开发工作流程",
       exploreButton: "探索更多 MCP 服务器"
     }
   };
