@@ -24,7 +24,7 @@ const ShareServersSection = () => {
     },
     {
       title: "Privacy-First Encryption",
-      description: "Share configurations securely with end-to-end encryption. We never store or access your private data.",
+      description: "Encrypt and share your server configs with a URL link safely and easily. Only the authorized recipient can decrypt the shared configs.",
       icon: Lock
     }
   ];
