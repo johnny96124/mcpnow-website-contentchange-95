@@ -36,7 +36,7 @@ const CentralHubSection = () => {
       <div className="container px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <motion.div className="order-2 md:order-1 space-y-6" {...fadeInUp}>
-            <Badge className="bg-blue-100 hover:bg-blue-100 text-blue-700 border-transparent px-3 py-1 mb-2">
+            <Badge className="bg-blue-100 hover:bg-blue-100 text-blue-700 border-transparent px-3.5 py-1.5 mb-2 text-sm">
               Manage
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-montserrat mb-6">
