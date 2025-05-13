@@ -25,21 +25,17 @@ const Introduction: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 font-noto">
-      {isEnglish ? <NavbarEn /> : <Navbar />}
-      {isEnglish ? <IntroductionHeroEn /> : <IntroductionHero />}
-      {isEnglish ? <WhyMcpNowEn /> : <WhyMcpNow />}
+      <NavbarEn />
+      <IntroductionHeroEn />
+      <WhyMcpNowEn />
       <CompatibilitySection />
       <ServersShowcase />
-      {isEnglish && (
-        <>
-          <ServerDiscoverySection />
-          <CentralHubSection />
-          <ShareServersSection />
-        </>
-      )}
+      <ServerDiscoverySection />
+      <CentralHubSection />
+      <ShareServersSection />
       <TestimonialsSection />
-      {isEnglish ? <DownloadIntroSectionEn /> : <DownloadIntroSection />}
-      {isEnglish ? <IntroFooterEn /> : <IntroFooter />}
+      <DownloadIntroSectionEn />
+      <IntroFooterEn />
     </div>
   );
 };
