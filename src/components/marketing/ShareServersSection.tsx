@@ -2,7 +2,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Share2, MessageSquare, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -34,9 +33,6 @@ const ShareServersSection = () => {
     <section className="py-20 bg-white dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
         <motion.div className="text-center mb-16" {...fadeInUp}>
-          <Badge className="bg-blue-100 hover:bg-blue-100 text-blue-700 border-transparent px-3.5 py-1.5 mb-2 text-sm">
-            Share
-          </Badge>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-montserrat mb-6">
             Share and Launch MCP Servers in Seconds
           </h2>
