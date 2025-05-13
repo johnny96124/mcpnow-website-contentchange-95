@@ -1,8 +1,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Share2, MessageSquare } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Share2, MessageSquare, Lock } from "lucide-react";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -22,6 +21,11 @@ const ShareServersSection = () => {
       title: "One-Step Import",
       description: "Import shared setups instantly. All configs are preloaded and ready to run.",
       icon: MessageSquare
+    },
+    {
+      title: "Privacy-First Encryption",
+      description: "Share configurations securely with end-to-end encryption. We never store or access your private data.",
+      icon: Lock
     }
   ];
 
