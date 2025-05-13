@@ -33,13 +33,6 @@ const ShareServersSection = () => {
   return (
     <section className="py-20 bg-white dark:bg-gray-900/50">
       <div className="container px-4 md:px-6">
-        <motion.div className="text-center mb-16" {...fadeInUp}>
-          <Badge variant="default" className="px-3.5 py-1.5 text-sm font-medium mb-4">Share</Badge>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-montserrat mb-6">
-            Share and Launch MCP Servers in Seconds
-          </h2>
-        </motion.div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Image Column */}
           <motion.div
@@ -62,6 +55,13 @@ const ShareServersSection = () => {
           
           {/* Content Column */}
           <div className="space-y-10 order-1 md:order-2">
+            <div>
+              <Badge variant="default" className="px-3.5 py-1.5 text-sm font-medium mb-4">Share</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-montserrat mb-6">
+                Share and Launch MCP Servers in Seconds
+              </h2>
+            </div>
+            
             {features.map((feature, idx) => (
               <motion.div 
                 key={idx} 
