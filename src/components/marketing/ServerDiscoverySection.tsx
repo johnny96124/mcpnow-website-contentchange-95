@@ -2,7 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Compass, Settings, MousePointer } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 40 },
@@ -55,6 +55,7 @@ const ServerDiscoverySection = () => {
           </motion.div>
           
           <motion.div className="space-y-6 order-1 md:order-2" {...fadeInUp}>
+            <Badge variant="default" className="px-3.5 py-1.5 text-sm font-medium mb-4">Discover</Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight font-montserrat mb-6">
               The Fastest Way to Find and Run the MCP Servers You Need
             </h2>
