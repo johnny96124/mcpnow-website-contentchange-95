@@ -34,44 +34,46 @@ const ShareServersSection = () => {
           </h2>
         </motion.div>
 
-        <div className="flex flex-col items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Image Column */}
           <motion.div
-            className="mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="order-2 md:order-1"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
             <div className="relative bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-              <div className="w-[40%] h-[40%] mx-auto">
-                <img 
-                  src="/lovable-uploads/d51c0e76-46bc-489c-ace9-0d4fad50c089.png" 
-                  alt="Share Profile Interface" 
-                  className="w-full h-auto rounded-lg"
-                />
-              </div>
+              <img 
+                src="/lovable-uploads/d51c0e76-46bc-489c-ace9-0d4fad50c089.png" 
+                alt="Share Profile Interface" 
+                className="w-full h-auto rounded-lg"
+              />
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-3xl"></div>
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
             </div>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-4xl mx-auto">
+          {/* Content Column */}
+          <div className="space-y-10 order-1 md:order-2">
             {features.map((feature, idx) => (
               <motion.div 
                 key={idx} 
-                className="flex flex-col items-center text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                className="flex items-start"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.2 }}
+                transition={{ delay: idx * 0.2, duration: 0.7 }}
               >
-                <div className="mb-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 h-16 w-16 flex items-center justify-center">
-                  <feature.icon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div className="mr-4 p-3 rounded-full bg-blue-100 dark:bg-blue-900/20 h-14 w-14 flex items-center justify-center flex-shrink-0">
+                  <feature.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 font-montserrat">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 font-opensans leading-relaxed">
-                  {feature.description}
-                </p>
+                <div>
+                  <h3 className="text-xl font-bold mb-2 font-montserrat">{feature.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 font-opensans leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </div>
