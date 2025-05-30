@@ -177,6 +177,7 @@ export const useChatHistory = () => {
     createNewChat,
     selectChat,
     sendMessage,
-    updateSession
+    updateSession,
+    addMessage
   };
 };
