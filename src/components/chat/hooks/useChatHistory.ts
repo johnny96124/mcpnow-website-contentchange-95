@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ChatSession, Message, ToolInvocation } from '../types/chat';
 
@@ -75,23 +74,60 @@ export const useChatHistory = () => {
       return updated;
     });
 
-    if (currentSession?.id === sessionId) {
-      setCurrentSession(prev => prev ? { ...prev, ...updates, updatedAt: Date.now() } : null);
-    }
-  }, [currentSession, saveChatHistory]);
+    // 如果更新的是当前会话，也要更新 currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        return { ...prev, ...updates, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
 
   const addMessage = useCallback((sessionId: string, message: Message) => {
-    const updates: Partial<ChatSession> = {
-      messages: currentSession ? [...currentSession.messages, message] : [message]
-    };
+    console.log('Adding message to session:', sessionId, message);
+    
+    setChatSessions(prev => {
+      const session = prev.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found:', sessionId);
+        return prev;
+      }
 
-    // Update title if this is the first user message
-    if (message.role === 'user' && currentSession?.messages.length === 0) {
-      updates.title = generateTitle(message.content);
-    }
+      const updatedMessages = [...session.messages, message];
+      const updates: Partial<ChatSession> = {
+        messages: updatedMessages
+      };
 
-    updateSession(sessionId, updates);
-  }, [currentSession, updateSession]);
+      // Update title if this is the first user message
+      if (message.role === 'user' && session.messages.length === 0) {
+        updates.title = generateTitle(message.content);
+      }
+
+      const updatedSession = { ...session, ...updates, updatedAt: Date.now() };
+      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
+      
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // 同时更新 currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        const updatedMessages = [...prev.messages, message];
+        const updates: Partial<ChatSession> = {
+          messages: updatedMessages
+        };
+
+        // Update title if this is the first user message
+        if (message.role === 'user' && prev.messages.length === 0) {
+          updates.title = generateTitle(message.content);
+        }
+
+        return { ...prev, ...updates, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory, generateTitle]);
 
   const simulateAIResponse = useCallback(async (userMessage: string, selectedServers: string[]): Promise<Message> => {
     // Simulate AI processing with tool invocations

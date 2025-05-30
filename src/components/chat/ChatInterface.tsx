@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -55,6 +56,7 @@ export const ChatInterface = () => {
   const handleSendMessage = async (content: string) => {
     if (!currentSession || selectedServers.length === 0 || isSending) return;
     
+    console.log('Sending message:', content);
     setIsSending(true);
 
     // 添加用户消息
@@ -65,15 +67,28 @@ export const ChatInterface = () => {
       timestamp: Date.now()
     };
 
+    console.log('Adding user message:', userMessage);
     addMessage(currentSession.id, userMessage);
 
     try {
       // 生成AI回复（包含工具调用确认）
+      console.log('Generating AI response...');
       const aiMessage = await simulateAIResponseWithTools(content, selectedServers);
       
       // 如果用户确认了工具调用，则添加AI消息
       if (aiMessage) {
+        console.log('Adding AI message:', aiMessage);
         addMessage(currentSession.id, aiMessage);
+      } else {
+        console.log('AI message was null, user may have cancelled tool calls');
+        // 添加一个简单的取消消息
+        const cancelMessage: Message = {
+          id: `msg-${Date.now()}`,
+          role: 'assistant',
+          content: '操作已取消。',
+          timestamp: Date.now()
+        };
+        addMessage(currentSession.id, cancelMessage);
       }
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -110,6 +125,9 @@ export const ChatInterface = () => {
       </div>
     );
   }
+
+  console.log('Current session:', currentSession);
+  console.log('Current messages:', currentSession?.messages);
 
   return (
     <div className="flex h-full bg-background">
