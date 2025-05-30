@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
 import { ChatSession, Message } from './types/chat';
+import { ToolConfirmDialog } from './MessageThread/ToolConfirmDialog';
 
 export const ChatInterface = () => {
   const { servers, profiles, getConnectedServers } = useMCPServers();
@@ -22,7 +22,16 @@ export const ChatInterface = () => {
     addMessage,
     isLoading 
   } = useChatHistory();
-  const { streamingMessageId, simulateAIResponseWithTools } = useStreamingChat();
+  const { 
+    streamingMessageId, 
+    simulateAIResponseWithTools,
+    showToolConfirm,
+    pendingToolCalls,
+    pendingUserMessage,
+    handleToolConfirm,
+    handleToolCancel,
+    setShowToolConfirm
+  } = useStreamingChat();
   
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
@@ -59,9 +68,13 @@ export const ChatInterface = () => {
     addMessage(currentSession.id, userMessage);
 
     try {
-      // 生成AI回复（包含工具调用）
+      // 生成AI回复（包含工具调用确认）
       const aiMessage = await simulateAIResponseWithTools(content, selectedServers);
-      addMessage(currentSession.id, aiMessage);
+      
+      // 如果用户确认了工具调用，则添加AI消息
+      if (aiMessage) {
+        addMessage(currentSession.id, aiMessage);
+      }
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -199,6 +212,15 @@ export const ChatInterface = () => {
           />
         </div>
       </div>
+
+      {/* Tool Confirmation Dialog */}
+      <ToolConfirmDialog
+        open={showToolConfirm}
+        onOpenChange={setShowToolConfirm}
+        onConfirm={handleToolConfirm}
+        toolCalls={pendingToolCalls}
+        userMessage={pendingUserMessage}
+      />
     </div>
   );
 };

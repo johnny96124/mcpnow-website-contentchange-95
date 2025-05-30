@@ -2,8 +2,20 @@
 import { useState, useCallback } from 'react';
 import { Message, ToolInvocation } from '../types/chat';
 
+interface ToolCall {
+  toolName: string;
+  serverId: string;
+  serverName: string;
+  request: any;
+}
+
 export const useStreamingChat = () => {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [pendingToolCalls, setPendingToolCalls] = useState<ToolCall[]>([]);
+  const [showToolConfirm, setShowToolConfirm] = useState(false);
+  const [pendingUserMessage, setPendingUserMessage] = useState<string>('');
+  const [pendingSelectedServers, setPendingSelectedServers] = useState<string[]>([]);
+  const [toolConfirmResolver, setToolConfirmResolver] = useState<((confirmed: boolean) => void) | null>(null);
 
   const simulateToolInvocation = useCallback(async (
     toolName: string, 
@@ -75,10 +87,40 @@ export const useStreamingChat = () => {
     return invocation;
   }, []);
 
+  const requestToolConfirmation = useCallback((
+    toolCalls: ToolCall[], 
+    userMessage: string, 
+    selectedServers: string[]
+  ): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setPendingToolCalls(toolCalls);
+      setPendingUserMessage(userMessage);
+      setPendingSelectedServers(selectedServers);
+      setShowToolConfirm(true);
+      setToolConfirmResolver(() => resolve);
+    });
+  }, []);
+
+  const handleToolConfirm = useCallback(() => {
+    if (toolConfirmResolver) {
+      toolConfirmResolver(true);
+      setToolConfirmResolver(null);
+    }
+    setShowToolConfirm(false);
+  }, [toolConfirmResolver]);
+
+  const handleToolCancel = useCallback(() => {
+    if (toolConfirmResolver) {
+      toolConfirmResolver(false);
+      setToolConfirmResolver(null);
+    }
+    setShowToolConfirm(false);
+  }, [toolConfirmResolver]);
+
   const simulateAIResponseWithTools = useCallback(async (
     userMessage: string,
     selectedServers: string[]
-  ): Promise<Message> => {
+  ): Promise<Message | null> => {
     const messageId = `msg-${Date.now()}`;
     setStreamingMessageId(messageId);
 
@@ -117,14 +159,30 @@ export const useStreamingChat = () => {
       });
     }
 
+    // 准备工具调用列表进行确认
+    const toolCalls: ToolCall[] = toolsToUse.map(tool => ({
+      toolName: tool.name,
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: tool.request
+    }));
+
+    // 请求用户确认工具调用
+    const confirmed = await requestToolConfirmation(toolCalls, userMessage, selectedServers);
+    
+    if (!confirmed) {
+      setStreamingMessageId(null);
+      return null; // 用户取消了工具调用
+    }
+
     // 执行工具调用
     const toolInvocations: ToolInvocation[] = [];
-    for (const tool of toolsToUse) {
+    for (const toolCall of toolCalls) {
       const invocation = await simulateToolInvocation(
-        tool.name,
-        selectedServers[0],
-        `服务器 ${selectedServers[0]}`,
-        tool.request
+        toolCall.toolName,
+        toolCall.serverId,
+        toolCall.serverName,
+        toolCall.request
       );
       toolInvocations.push(invocation);
     }
@@ -166,10 +224,22 @@ export const useStreamingChat = () => {
 
     setStreamingMessageId(null);
     return message;
-  }, [simulateToolInvocation]);
+  }, [simulateToolInvocation, requestToolConfirmation]);
 
   return {
     streamingMessageId,
-    simulateAIResponseWithTools
+    simulateAIResponseWithTools,
+    showToolConfirm,
+    pendingToolCalls,
+    pendingUserMessage,
+    handleToolConfirm,
+    handleToolCancel,
+    setShowToolConfirm: (show: boolean) => {
+      setShowToolConfirm(show);
+      if (!show && toolConfirmResolver) {
+        toolConfirmResolver(false);
+        setToolConfirmResolver(null);
+      }
+    }
   };
 };
