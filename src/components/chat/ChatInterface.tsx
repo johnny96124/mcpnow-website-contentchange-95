@@ -9,6 +9,7 @@ import { MessageThread } from './MessageThread/MessageThread';
 import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
+import { useStreamingChat } from './hooks/useStreamingChat';
 import { ChatSession, Message } from './types/chat';
 
 export const ChatInterface = () => {
@@ -18,13 +19,15 @@ export const ChatInterface = () => {
     currentSession, 
     createNewChat, 
     selectChat, 
-    sendMessage,
+    addMessage,
     isLoading 
   } = useChatHistory();
+  const { streamingMessageId, simulateAIResponseWithTools } = useStreamingChat();
   
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   const connectedServers = getConnectedServers();
   
@@ -41,12 +44,39 @@ export const ChatInterface = () => {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!currentSession || selectedServers.length === 0) return;
+    if (!currentSession || selectedServers.length === 0 || isSending) return;
     
-    await sendMessage(currentSession.id, content, selectedServers);
+    setIsSending(true);
+
+    // 添加用户消息
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content,
+      timestamp: Date.now()
+    };
+
+    addMessage(currentSession.id, userMessage);
+
+    try {
+      // 生成AI回复（包含工具调用）
+      const aiMessage = await simulateAIResponseWithTools(content, selectedServers);
+      addMessage(currentSession.id, aiMessage);
+    } catch (error) {
+      console.error('Failed to get AI response:', error);
+      const errorMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: '抱歉，处理您的请求时遇到了错误，请稍后重试。',
+        timestamp: Date.now()
+      };
+      addMessage(currentSession.id, errorMessage);
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  const canSendMessage = selectedServers.length > 0 && !isLoading;
+  const canSendMessage = selectedServers.length > 0 && !isSending;
 
   if (connectedServers.length === 0) {
     return (
@@ -55,13 +85,13 @@ export const ChatInterface = () => {
           <div className="flex justify-center mb-4">
             <MessageSquare className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">No MCP Servers Connected</h3>
+          <h3 className="text-lg font-semibold mb-2">暂无MCP服务器连接</h3>
           <p className="text-muted-foreground mb-4">
-            Connect at least one MCP server to start chatting with AI.
+            请先连接至少一个MCP服务器才能开始与AI对话。
           </p>
           <Button variant="outline" onClick={() => window.location.href = '/servers'}>
             <Zap className="h-4 w-4 mr-2" />
-            Manage Servers
+            管理服务器
           </Button>
         </Card>
       </div>
@@ -91,7 +121,7 @@ export const ChatInterface = () => {
           <div className="p-4 border-b">
             <Button onClick={handleNewChat} className="w-full">
               <MessageSquare className="h-4 w-4 mr-2" />
-              New Chat
+              新建对话
             </Button>
           </div>
 
@@ -120,16 +150,16 @@ export const ChatInterface = () => {
             </Button>
             <div>
               <h2 className="font-semibold">
-                {currentSession?.title || 'New Chat'}
+                {currentSession?.title || '新建对话'}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {selectedServers.length} server{selectedServers.length !== 1 ? 's' : ''} selected
+                已选择 {selectedServers.length} 个服务器
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-blue-500" />
-            <span className="text-sm text-muted-foreground">AI Assistant</span>
+            <span className="text-sm text-muted-foreground">AI助手</span>
           </div>
         </div>
 
@@ -138,15 +168,16 @@ export const ChatInterface = () => {
           {currentSession ? (
             <MessageThread
               messages={currentSession.messages}
-              isLoading={isLoading}
+              isLoading={isSending}
+              streamingMessageId={streamingMessageId}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Welcome to AI Chat</h3>
+                <h3 className="text-lg font-semibold mb-2">欢迎使用AI对话</h3>
                 <p className="text-muted-foreground">
-                  Start a new conversation to begin chatting with AI
+                  开始新的对话来与AI助手交流
                 </p>
               </div>
             </div>
@@ -160,8 +191,8 @@ export const ChatInterface = () => {
             disabled={!canSendMessage}
             placeholder={
               selectedServers.length === 0 
-                ? "Select an MCP server to start chatting..."
-                : "Type your message..."
+                ? "请先选择MCP服务器..."
+                : "输入您的消息..."
             }
             selectedServers={selectedServers}
             servers={connectedServers}

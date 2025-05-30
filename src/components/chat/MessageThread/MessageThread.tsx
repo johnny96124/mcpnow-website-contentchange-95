@@ -2,18 +2,20 @@
 import React, { useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserMessage } from './UserMessage';
-import { AIMessage } from './AIMessage';
+import { StreamingAIMessage } from './StreamingAIMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { Message } from '../types/chat';
 
 interface MessageThreadProps {
   messages: Message[];
   isLoading: boolean;
+  streamingMessageId?: string | null;
 }
 
 export const MessageThread: React.FC<MessageThreadProps> = ({
   messages,
   isLoading,
+  streamingMessageId,
 }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -30,7 +32,11 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
           message.role === 'user' ? (
             <UserMessage key={message.id} message={message} />
           ) : (
-            <AIMessage key={message.id} message={message} />
+            <StreamingAIMessage 
+              key={message.id} 
+              message={message} 
+              isStreaming={message.id === streamingMessageId}
+            />
           )
         ))}
         
