@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle, ExternalLink, Info, Loader2, Server, UsersRound, Download, X, Database, HelpCircle, ChevronDown, ChevronUp, Computer, Settings2, Layers } from 'lucide-react';
+import { CheckCircle, ExternalLink, Info, Loader2, Server, UsersRound, Download, X, Database, HelpCircle, ChevronDown, ChevronUp, Computer, Settings2, Layers, MessageSquare, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -287,7 +287,7 @@ const Dashboard = () => {
 
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-4">Status</h2>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-4">
           <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
@@ -376,6 +376,32 @@ const Dashboard = () => {
               <Button asChild className="w-full">
                 <Link to="/servers">
                   View All
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+
+          <Card className="overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200 border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle className="text-lg font-medium">AI Chat</CardTitle>
+                <CardDescription>Chat with AI using MCP servers</CardDescription>
+              </div>
+              <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </CardHeader>
+            <CardContent className="space-y-4 flex-1">
+              <div className="flex items-center justify-center flex-col py-4">
+                <Bot className="h-12 w-12 text-blue-500 mb-2" />
+                <p className="text-sm text-center text-muted-foreground">
+                  Start an AI conversation with your connected MCP servers
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="pt-2 mt-auto border-t">
+              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <Link to="/ai-chat">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Start Chat
                 </Link>
               </Button>
             </CardFooter>

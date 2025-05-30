@@ -6,7 +6,8 @@ import {
   HelpCircle,
   BookOpen,
   Telescope,
-  Home
+  Home,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,20 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           >
             <Telescope className="h-4 w-4 mr-2" />
             {!collapsed && "Discovery"}
+          </NavLink>
+
+          <NavLink 
+            to="/ai-chat" 
+            className={({ isActive }) => 
+              cn(
+                "sidebar-item text-sm", 
+                isActive && "sidebar-item-active",
+                collapsed && "justify-center px-0"
+              )
+            }
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            {!collapsed && "AI Chat"}
           </NavLink>
 
           <NavLink 

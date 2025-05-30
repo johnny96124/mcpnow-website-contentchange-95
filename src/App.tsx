@@ -12,6 +12,7 @@ import Servers from "@/pages/Servers";
 import Profiles from "@/pages/Profiles";
 import Discovery from "@/pages/Discovery";
 import Settings from "@/pages/Settings";
+import AIChat from "@/pages/AIChat";
 import HostNewLayout from "./pages/Host-newlayout";
 import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
@@ -83,6 +84,10 @@ function App() {
               {
                 path: "/settings",
                 element: <DefaultLayout><Settings /></DefaultLayout>
+              },
+              {
+                path: "/ai-chat",
+                element: <DefaultLayout><AIChat /></DefaultLayout>
               },
               {
                 path: "/host-new",
