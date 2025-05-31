@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CirclePlus, PlusCircle, Trash2, Terminal, Info, Search, Edit, Wrench, X } from "lucide-react";
+import { CirclePlus, PlusCircle, Trash2, Terminal, Info, Search, Edit, Wrench, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
@@ -159,6 +159,11 @@ const Servers = () => {
   };
 
   const handleEditServer = (definition: ServerDefinition) => {
+    setSelectedDefinition(definition);
+    setEditServerOpen(true);
+  };
+
+  const handleConfigureServer = (definition: ServerDefinition) => {
     setSelectedDefinition(definition);
     setEditServerOpen(true);
   };
@@ -355,9 +360,26 @@ const Servers = () => {
         return <Card key={definition.id} className="overflow-hidden flex flex-col">
                 <CardHeader className="pb-2 bg-secondary/30">
                   <div className="flex items-center justify-between">
-                    <div className="space-y-1">
+                    <div className="space-y-1 flex-1">
                       <CardTitle className="flex items-center gap-2">
-                        {truncateText(definition.name)}
+                        <span>{truncateText(definition.name)}</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => handleConfigureServer(definition)}
+                              >
+                                <Settings className="h-3.5 w-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Configure Server</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                         <div className="flex items-center gap-1">
                           <EndpointLabel type={definition.type} />
                           {isCustom && <Badge variant="outline" className="text-gray-600 border-gray-300 rounded-md">
