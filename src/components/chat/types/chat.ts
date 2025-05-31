@@ -57,6 +57,7 @@ export interface Message {
   attachments?: MessageAttachment[];
   errorMessage?: string;
   currentToolIndex?: number; // 当前显示的工具索引
+  rating?: 'positive' | 'negative' | null; // 新增评分属性
 }
 
 export interface ChatSession {

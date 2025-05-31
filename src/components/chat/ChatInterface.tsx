@@ -213,6 +213,12 @@ export const ChatInterface = () => {
     console.log(`Message ${messageId} rated as:`, rating);
   };
 
+  // 修正：处理删除消息 - 修改函数签名以匹配期望的参数
+  const handleDeleteMessage = (messageId: string) => {
+    if (!currentSession) return;
+    deleteMessage(currentSession.id, messageId);
+  };
+
   const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
     let currentIndex = 0;
     const words = fullContent.split('');
@@ -545,7 +551,7 @@ export const ChatInterface = () => {
               isLoading={false}
               streamingMessageId={streamingMessageId}
               onUpdateMessage={handleToolAction}
-              onDeleteMessage={deleteMessage}
+              onDeleteMessage={handleDeleteMessage}
               onEditMessage={handleEditMessage}
               onRegenerateMessage={handleRegenerateMessage}
               onRateMessage={handleRateMessage}
