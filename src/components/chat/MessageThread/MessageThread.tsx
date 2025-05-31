@@ -11,7 +11,7 @@ interface MessageThreadProps {
   messages: Message[];
   isLoading: boolean;
   streamingMessageId?: string | null;
-  onUpdateMessage?: (messageId: string, toolId: string, action: 'run' | 'cancel') => void;
+  onUpdateMessage?: (messageId: string, action: 'run' | 'cancel') => void;
   onDeleteMessage?: (messageId: string) => void;
 }
 
