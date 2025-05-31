@@ -191,7 +191,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                             )}
                             
                             {isCompleted && (
-                              <Badge variant="default" className="text-xs bg-green-100 text-green-700">
+                              <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100 hover:text-green-700">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 完成
                               </Badge>
