@@ -111,25 +111,39 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，包含初始内容和pending工具调用
+      // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
-      const initialContent = '我理解您的请求';
       const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
 
       const aiMessage: Message = {
         id: aiMessageId,
         role: 'assistant',
-        content: initialContent,
-        timestamp: Date.now(),
-        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-        toolCallStatus: 'pending'
+        content: '',
+        timestamp: Date.now()
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
       addMessage(sessionId, aiMessage);
 
-      // 模拟流式文字生成
+      // 先完成流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
+      
+      // 文字生成完成后，添加工具调用
+      const pendingToolCalls = generatePendingToolCalls(content, selectedServers);
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls,
+        toolCallStatus: 'pending'
+      };
+
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
+      );
+      
+      if (currentSession) {
+        updateMessage(sessionId, aiMessageId, messageWithTools);
+      }
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -150,25 +164,28 @@ export const ChatInterface = () => {
     let currentIndex = 0;
     const words = fullContent.split('');
     
-    const streamInterval = setInterval(() => {
-      if (currentIndex < words.length) {
-        const partialContent = words.slice(0, currentIndex + 1).join('');
-        
-        setCurrentMessages(prev => 
-          prev.map(msg => 
-            msg.id === messageId ? { ...msg, content: partialContent } : msg
-          )
-        );
-        
-        if (currentSession) {
-          updateMessage(sessionId, messageId, { content: partialContent });
+    return new Promise<void>((resolve) => {
+      const streamInterval = setInterval(() => {
+        if (currentIndex < words.length) {
+          const partialContent = words.slice(0, currentIndex + 1).join('');
+          
+          setCurrentMessages(prev => 
+            prev.map(msg => 
+              msg.id === messageId ? { ...msg, content: partialContent } : msg
+            )
+          );
+          
+          if (currentSession) {
+            updateMessage(sessionId, messageId, { content: partialContent });
+          }
+          
+          currentIndex++;
+        } else {
+          clearInterval(streamInterval);
+          resolve();
         }
-        
-        currentIndex++;
-      } else {
-        clearInterval(streamInterval);
-      }
-    }, 50); // 每50ms添加一个字符
+      }, 25); // 从50ms减少到25ms，双倍速度
+    });
   };
 
   const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
