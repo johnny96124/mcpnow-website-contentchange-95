@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -61,19 +62,18 @@ export const ChatInterface = () => {
   }, [currentSession]);
 
   const handleNewChat = () => {
-    // Save current messages to session if any exist
+    // 如果当前有消息但没有保存到会话中，先保存到新会话
     if (currentMessages.length > 0 && !currentSession) {
       const newSession = createNewChat(selectedServers, selectedProfile);
-      // Add all current messages to the new session
+      // 将当前所有消息添加到新会话中
       currentMessages.forEach(message => {
         addMessage(newSession.id, message);
       });
-      selectChat(newSession.id);
-    } else {
-      // Clear current messages and create empty state
-      setCurrentMessages([]);
-      selectChat(''); // Clear current session
     }
+    
+    // 清空当前会话和消息，开始新的对话
+    selectChat(''); // 清除当前会话选择
+    setCurrentMessages([]); // 清空当前消息
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
@@ -100,6 +100,14 @@ export const ChatInterface = () => {
       }
     }
 
+    // 如果当前没有会话，创建一个新会话
+    let sessionId = currentSession?.id;
+    if (!sessionId) {
+      const newSession = createNewChat(selectedServers, selectedProfile);
+      sessionId = newSession.id;
+      selectChat(sessionId);
+    }
+
     // 添加用户消息
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
@@ -110,9 +118,7 @@ export const ChatInterface = () => {
     };
 
     setCurrentMessages(prev => [...prev, userMessage]);
-    if (currentSession) {
-      addMessage(currentSession.id, userMessage);
-    }
+    addMessage(sessionId, userMessage);
 
     try {
       // 创建AI助手消息，包含待处理的工具调用
@@ -126,9 +132,7 @@ export const ChatInterface = () => {
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
-      if (currentSession) {
-        addMessage(currentSession.id, aiMessage);
-      }
+      addMessage(sessionId, aiMessage);
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -139,9 +143,7 @@ export const ChatInterface = () => {
         timestamp: Date.now()
       };
       setCurrentMessages(prev => [...prev, errorMessage]);
-      if (currentSession) {
-        addMessage(currentSession.id, errorMessage);
-      }
+      addMessage(sessionId, errorMessage);
     } finally {
       setIsSending(false);
     }
