@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
