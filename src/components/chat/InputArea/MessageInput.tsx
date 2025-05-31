@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Server, Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { MCPServer } from '../types/chat';
+import { ToolControlPopover } from './ToolControlPopover';
 
 interface AttachedFile {
   id: string;
@@ -168,11 +168,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
-          className="min-h-[80px] max-h-[200px] resize-none pr-20"
+          className="min-h-[80px] max-h-[200px] resize-none pr-28"
           style={{ height: 'auto' }}
         />
         
         <div className="absolute bottom-2 right-2 flex gap-1">
+          <ToolControlPopover
+            servers={servers}
+            selectedServers={selectedServers}
+            disabled={disabled}
+          />
+          
           <Button
             variant="ghost"
             size="icon"
