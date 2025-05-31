@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server } from 'lucide-react';
+import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -74,6 +73,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const isCompleted = message.toolCallStatus === 'completed';
   const isExecuting = message.toolCallStatus === 'executing';
   const isCancelled = message.toolCallStatus === 'cancelled';
+  const isFailed = message.toolCallStatus === 'failed';
 
   return (
     <div 
@@ -123,16 +123,29 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
         
         {/* 工具调用区域 - 只在有工具调用时显示 */}
         {pendingCalls.length > 0 && (
-          <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+          <div className={`rounded-lg p-4 border ${
+            isFailed 
+              ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
+              : 'bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800'
+          }`}>
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Wrench className="h-4 w-4 text-purple-500" />
-                    <span className="font-medium text-sm">MCP工具调用</span>
+                    {isFailed ? (
+                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                    ) : (
+                      <Wrench className="h-4 w-4 text-purple-500" />
+                    )}
+                    <span className="font-medium text-sm">
+                      {isFailed ? 'MCP工具调用失败' : 'MCP工具调用'}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    这将帮助您了解相关信息，以便更好地回答您的问题。
+                    {isFailed 
+                      ? '工具执行过程中遇到了问题，请查看详细错误信息。'
+                      : '这将帮助您了解相关信息，以便更好地回答您的问题。'
+                    }
                   </p>
                 </div>
                 
@@ -157,11 +170,28 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                     </Button>
                   </div>
                 )}
+
+                {isFailed && (
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      size="sm"
+                      onClick={() => handleToolAction('run')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Play className="h-4 w-4 mr-1" />
+                      重试
+                    </Button>
+                  </div>
+                )}
               </div>
 
-              {/* 简化的工具详情 - 只显示一个汇总的工具调用 */}
+              {/* 简化的工具详情 */}
               <div className="space-y-2">
-                <Card className="border-purple-200 dark:border-purple-800">
+                <Card className={`${
+                  isFailed 
+                    ? 'border-red-200 dark:border-red-800'
+                    : 'border-purple-200 dark:border-purple-800'
+                }`}>
                   <Collapsible 
                     open={expandedTools.has(`${message.id}-summary`)} 
                     onOpenChange={() => toggleExpanded(`${message.id}-summary`)}
@@ -171,7 +201,11 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
-                              <Wrench className="h-4 w-4 text-purple-500" />
+                              {isFailed ? (
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                              ) : (
+                                <Wrench className="h-4 w-4 text-purple-500" />
+                              )}
                               <span className="font-medium text-sm">
                                 {pendingCalls[0]?.toolName || 'analyze_request'}
                               </span>
@@ -203,6 +237,13 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                 已取消
                               </Badge>
                             )}
+
+                            {isFailed && (
+                              <Badge variant="outline" className="text-xs bg-red-100 text-red-700 border-red-200">
+                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                失败
+                              </Badge>
+                            )}
                           </div>
                           
                           <Button variant="ghost" size="sm" className="h-auto p-1">
@@ -226,6 +267,17 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                             </pre>
                           </div>
                         </div>
+
+                        {isFailed && message.errorMessage && (
+                          <div>
+                            <h4 className="text-xs font-medium text-red-600 mb-2">错误信息</h4>
+                            <div className="bg-red-50 dark:bg-red-950/50 rounded border border-red-200 p-2">
+                              <div className="text-xs text-red-700 dark:text-red-300">
+                                {message.errorMessage}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {isCompleted && (
                           <div>

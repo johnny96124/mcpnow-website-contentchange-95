@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -243,12 +242,23 @@ export const ChatInterface = () => {
         content: '正在执行工具调用，请稍候...'
       });
       
-      // 模拟工具执行
+      // 模拟工具执行，包括可能的失败情况
       setTimeout(() => {
-        updateMessageInline({ 
-          toolCallStatus: 'completed',
-          content: '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档，我找到了与您问题相关的信息。经过内容分析，我理解了您的具体需求。最后，我为您生成了一个综合性的总结。\n\n如果您需要更多详细信息或有其他问题，请随时告诉我。'
-        });
+        // 随机模拟成功或失败（30% 失败率）
+        const shouldFail = Math.random() < 0.3;
+        
+        if (shouldFail) {
+          updateMessageInline({ 
+            toolCallStatus: 'failed',
+            content: '抱歉，工具调用执行失败。可能的原因包括：\n\n• 服务器连接超时\n• 权限不足\n• 参数格式错误\n• 服务暂时不可用\n\n请稍后重试，或者尝试修改您的请求。',
+            errorMessage: '连接超时: 无法连接到MCP服务器'
+          });
+        } else {
+          updateMessageInline({ 
+            toolCallStatus: 'completed',
+            content: '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档，我找到了与您问题相关的信息。经过内容分析，我理解了您的具体需求。最后，我为您生成了一个综合性的总结。\n\n如果您需要更多详细信息或有其他问题，请随时告诉我。'
+          });
+        }
       }, 3000);
     }
   };
