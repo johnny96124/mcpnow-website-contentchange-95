@@ -13,6 +13,8 @@ interface MessageThreadProps {
   streamingMessageId?: string | null;
   onUpdateMessage?: (messageId: string, action: 'run' | 'cancel') => void;
   onDeleteMessage?: (messageId: string) => void;
+  onConfirmTool?: (messageId: string, toolIndex: number) => void;
+  onCancelExecution?: (messageId: string) => void;
 }
 
 export const MessageThread: React.FC<MessageThreadProps> = ({
@@ -21,6 +23,8 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   streamingMessageId,
   onUpdateMessage,
   onDeleteMessage,
+  onConfirmTool,
+  onCancelExecution,
 }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -75,6 +79,8 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   isStreaming={message.id === streamingMessageId}
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
                   onToolAction={onUpdateMessage}
+                  onConfirmTool={onConfirmTool}
+                  onCancelExecution={onCancelExecution}
                 />
               );
             }

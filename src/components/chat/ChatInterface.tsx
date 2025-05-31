@@ -213,6 +213,38 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleConfirmTool = (messageId: string, toolName: string) => {
+    const updateMessageInline = (updates: Partial<Message>) => {
+      setCurrentMessages(prev => 
+        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
+      );
+      if (currentSession) {
+        updateMessage(currentSession.id, messageId, updates);
+      }
+    };
+
+    updateMessageInline({ 
+      toolCallStatus: 'completed',
+      content: `工具调用 ${toolName} 成功！`
+    });
+  };
+
+  const handleCancelExecution = (messageId: string) => {
+    const updateMessageInline = (updates: Partial<Message>) => {
+      setCurrentMessages(prev => 
+        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
+      );
+      if (currentSession) {
+        updateMessage(currentSession.id, messageId, updates);
+      }
+    };
+
+    updateMessageInline({ 
+      toolCallStatus: 'cancelled',
+      content: '工具调用已被取消。'
+    });
+  };
+
   const canSendMessage = selectedServers.length > 0 && !isSending;
 
   if (connectedServers.length === 0) {
@@ -313,6 +345,8 @@ export const ChatInterface = () => {
               isLoading={isSending}
               streamingMessageId={streamingMessageId}
               onUpdateMessage={handleToolAction}
+              onConfirmTool={handleConfirmTool}
+              onCancelExecution={handleCancelExecution}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
