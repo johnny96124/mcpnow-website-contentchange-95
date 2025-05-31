@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Check, ChevronDown, Server, Users, Loader2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Check, ChevronDown, Server, Users, Loader2, CheckCircle, XCircle, AlertTriangle, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +12,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MCPServer, MCPProfile } from '../types/chat';
+import { EditServerDialog } from '@/components/servers/EditServerDialog';
+import { serverDefinitions, ServerDefinition } from '@/data/mockData';
+import { useToast } from '@/hooks/use-toast';
 
 interface ServerSelectorProps {
   servers: MCPServer[];
@@ -39,6 +41,9 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
 }) => {
   const [connectionStates, setConnectionStates] = useState<ServerConnectionState>({});
   const [isConnecting, setIsConnecting] = useState(false);
+  const [editServerOpen, setEditServerOpen] = useState(false);
+  const [selectedServerForEdit, setSelectedServerForEdit] = useState<ServerDefinition | null>(null);
+  const { toast } = useToast();
 
   // 当选择的服务器发生变化时，尝试连接
   useEffect(() => {
@@ -107,6 +112,30 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
       onServersChange(profile.serverIds);
       onProfileChange(profileId);
     }
+  };
+
+  const handleServerConfig = (serverId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Find the server definition based on the server ID
+    const serverDefinition = serverDefinitions.find(def => 
+      servers.find(s => s.id === serverId && s.name === def.name)
+    );
+    
+    if (serverDefinition) {
+      setSelectedServerForEdit(serverDefinition);
+      setEditServerOpen(true);
+    }
+  };
+
+  const handleUpdateServer = (data: any) => {
+    // Handle server update logic here
+    toast({
+      title: "Server Updated",
+      description: `Server configuration has been updated successfully.`
+    });
+    setEditServerOpen(false);
   };
 
   const getDisplayText = () => {
@@ -231,15 +260,27 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
                     </div>
                   </div>
                   
-                  {/* 只为选中的服务器显示连接状态 */}
-                  {isSelected && connectionStatus && (
-                    <div className="flex items-center gap-2 ml-2">
-                      {getConnectionStatusIcon(server.id)}
-                      <span className="text-xs text-muted-foreground">
-                        {getConnectionStatusText(server.id)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 ml-2">
+                    {/* 只为选中的服务器显示连接状态 */}
+                    {isSelected && connectionStatus && (
+                      <div className="flex items-center gap-2">
+                        {getConnectionStatusIcon(server.id)}
+                        <span className="text-xs text-muted-foreground">
+                          {getConnectionStatusText(server.id)}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* 配置按钮 */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                      onClick={(e) => handleServerConfig(server.id, e)}
+                    >
+                      <Settings className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </DropdownMenuItem>
               );
             })}
@@ -275,14 +316,26 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
                     </Badge>
                   </div>
                   
-                  {connectionStatus && (
-                    <div className="flex items-center gap-1">
-                      {getConnectionStatusIcon(serverId)}
-                      <span className="text-xs text-muted-foreground">
-                        {getConnectionStatusText(serverId)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {connectionStatus && (
+                      <div className="flex items-center gap-1">
+                        {getConnectionStatusIcon(serverId)}
+                        <span className="text-xs text-muted-foreground">
+                          {getConnectionStatusText(serverId)}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* 配置按钮 */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                      onClick={(e) => handleServerConfig(serverId, e)}
+                    >
+                      <Settings className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
               ) : null;
             })}
@@ -296,6 +349,14 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
           )}
         </div>
       )}
+      
+      {/* Edit Server Dialog */}
+      <EditServerDialog
+        open={editServerOpen}
+        onOpenChange={setEditServerOpen}
+        serverDefinition={selectedServerForEdit}
+        onUpdateServer={handleUpdateServer}
+      />
     </div>
   );
 };
