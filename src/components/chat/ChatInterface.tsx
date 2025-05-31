@@ -62,16 +62,6 @@ export const ChatInterface = () => {
   }, [currentSession]);
 
   const handleNewChat = () => {
-    // 如果当前有未保存的消息，先保存到新会话
-    if (currentMessages.length > 0 && !currentSession) {
-      const newSession = createNewChat(selectedServers, selectedProfile);
-      
-      // 将当前消息添加到新会话
-      currentMessages.forEach(message => {
-        addMessage(newSession.id, message);
-      });
-    }
-    
     // 清空当前会话和消息，开始新的对话
     selectChat(''); // 清除当前会话选择
     setCurrentMessages([]); // 清空当前消息
@@ -119,35 +109,22 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 后台分析并生成工具调用队列
+      // 生成所有需要的工具调用队列
       const toolQueue = generateToolQueue(content, selectedServers);
       
-      if (toolQueue.length > 0) {
-        // 如果需要工具调用，直接创建带工具队列的AI消息
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-ai`,
-          role: 'assistant',
-          content: `我需要调用 ${toolQueue.length} 个工具来处理您的请求。请确认是否执行第一个工具：${toolQueue[0].toolName}`,
-          timestamp: Date.now(),
-          toolQueue,
-          currentToolIndex: 0,
-          toolCallStatus: 'pending_first'
-        };
+      // 创建AI助手消息，包含工具调用队列
+      const aiMessage: Message = {
+        id: `msg-${Date.now()}-ai`,
+        role: 'assistant',
+        content: '正在分析您的请求并准备调用相关工具...',
+        timestamp: Date.now(),
+        toolQueue,
+        currentToolIndex: 0,
+        toolCallStatus: 'pending_first'
+      };
 
-        setCurrentMessages(prev => [...prev, aiMessage]);
-        addMessage(sessionId, aiMessage);
-      } else {
-        // 没有工具调用，生成普通AI回复
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-ai`,
-          role: 'assistant',
-          content: `我理解您的请求"${content}"。这是一个普通的AI回复，不需要调用任何工具。`,
-          timestamp: Date.now()
-        };
-
-        setCurrentMessages(prev => [...prev, aiMessage]);
-        addMessage(sessionId, aiMessage);
-      }
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      addMessage(sessionId, aiMessage);
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -194,9 +171,13 @@ export const ChatInterface = () => {
       });
     }
 
-    // 如果没有特定工具，返回空数组（不需要工具调用）
+    // 如果没有特定工具，添加默认分析工具
     if (toolsToUse.length === 0) {
-      return [];
+      toolsToUse.push({
+        name: 'analyze_request',
+        request: { message: userMessage },
+        description: '分析用户请求并提供相应的响应'
+      });
     }
 
     return toolsToUse.map(tool => ({
@@ -255,12 +236,11 @@ export const ChatInterface = () => {
         
         if (nextIndex < message.toolQueue.length) {
           // 还有更多工具需要执行
-          const nextTool = message.toolQueue[nextIndex];
           updateMessageInline({ 
             toolQueue: completedQueue,
             currentToolIndex: nextIndex,
             toolCallStatus: 'pending_next',
-            content: `工具 ${currentTool.toolName} 执行完成。请确认是否执行下一个工具：${nextTool.toolName}`
+            content: `工具 ${currentTool.toolName} 执行完成。准备执行下一个工具：${message.toolQueue[nextIndex].toolName}`
           });
         } else {
           // 所有工具都执行完成
