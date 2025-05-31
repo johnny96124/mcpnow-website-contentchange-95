@@ -112,10 +112,12 @@ export const useStreamingChat = () => {
     // 如果需要工具调用，先添加工具调用消息
     if (toolsToUse.length > 0) {
       const pendingCalls: PendingToolCall[] = toolsToUse.map(tool => ({
+        id: `tool-${Date.now()}-${Math.random()}`,
         toolName: tool.name,
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
-        request: tool.request
+        request: tool.request,
+        status: 'pending'
       }));
 
       const toolCallMessage: Message = {
