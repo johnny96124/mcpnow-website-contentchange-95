@@ -86,8 +86,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
       onMouseLeave={() => setShowActions(false)}
     >
       <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src="/lovable-uploads/28a44396-b42e-441d-99e7-1e2a713be56a.png" alt="MCP Now Logo" />
-        <AvatarFallback className="bg-green-100 text-green-600">
+        <AvatarImage src="/lovable-uploads/4128f88c-639d-47a2-baf6-4288709b348a.png" alt="MCP Now Logo" />
+        <AvatarFallback className="bg-blue-100 text-blue-600">
           <Bot className="h-4 w-4" />
         </AvatarFallback>
       </Avatar>
