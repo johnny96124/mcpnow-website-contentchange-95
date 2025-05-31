@@ -9,7 +9,7 @@ import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
-import { ChatSession, Message, MessageAttachment } from './types/chat';
+import { ChatSession, Message, MessageAttachment, SequentialToolExecution } from './types/chat';
 
 interface AttachedFile {
   id: string;
@@ -111,14 +111,23 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，包含待处理的工具调用
+      // 生成待执行的工具列表
+      const toolsToExecute = generatePendingToolCalls(content, selectedServers);
+      
+      // 创建顺序工具执行的AI消息
+      const sequentialExecution: SequentialToolExecution = {
+        tools: toolsToExecute,
+        currentIndex: 0,
+        completedTools: [],
+        status: 'waiting_confirmation'
+      };
+
       const aiMessage: Message = {
         id: `msg-${Date.now()}-ai`,
         role: 'assistant',
-        content: '正在分析您的请求并准备调用相关工具...',
+        content: `准备执行 ${toolsToExecute.length} 个工具调用。需要您逐个确认每个工具的执行。`,
         timestamp: Date.now(),
-        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-        toolCallStatus: 'pending'
+        sequentialExecution
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
@@ -213,7 +222,7 @@ export const ChatInterface = () => {
     }
   };
 
-  const handleConfirmTool = (messageId: string, toolName: string) => {
+  const handleConfirmTool = (messageId: string, toolIndex: number) => {
     const updateMessageInline = (updates: Partial<Message>) => {
       setCurrentMessages(prev => 
         prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
@@ -223,9 +232,42 @@ export const ChatInterface = () => {
       }
     };
 
-    updateMessageInline({ 
-      toolCallStatus: 'completed',
-      content: `工具调用 ${toolName} 成功！`
+    // 获取当前消息
+    const currentMessage = currentMessages.find(msg => msg.id === messageId);
+    if (!currentMessage?.sequentialExecution) return;
+
+    const { tools, currentIndex, completedTools } = currentMessage.sequentialExecution;
+    const currentTool = tools[currentIndex];
+
+    // 模拟工具执行
+    const mockToolResult = {
+      id: `tool-${Date.now()}`,
+      toolName: currentTool.toolName,
+      serverId: currentTool.serverId,
+      serverName: currentTool.serverName,
+      request: currentTool.request,
+      response: { success: true, data: `${currentTool.toolName} 执行结果` },
+      status: 'success' as const,
+      timestamp: Date.now(),
+      duration: 1500
+    };
+
+    const newCompletedTools = [...completedTools, mockToolResult];
+    const nextIndex = currentIndex + 1;
+    const isLastTool = nextIndex >= tools.length;
+
+    const updatedSequentialExecution: SequentialToolExecution = {
+      tools,
+      currentIndex: nextIndex,
+      completedTools: newCompletedTools,
+      status: isLastTool ? 'completed' : 'waiting_confirmation'
+    };
+
+    updateMessageInline({
+      sequentialExecution: updatedSequentialExecution,
+      content: isLastTool 
+        ? '所有工具调用已完成！基于执行结果，我已经为您处理了请求。'
+        : `工具 ${currentTool.toolName} 执行完成。准备执行下一个工具。`
     });
   };
 
@@ -239,9 +281,17 @@ export const ChatInterface = () => {
       }
     };
 
-    updateMessageInline({ 
-      toolCallStatus: 'cancelled',
-      content: '工具调用已被取消。'
+    const currentMessage = currentMessages.find(msg => msg.id === messageId);
+    if (!currentMessage?.sequentialExecution) return;
+
+    const updatedSequentialExecution: SequentialToolExecution = {
+      ...currentMessage.sequentialExecution,
+      status: 'cancelled'
+    };
+
+    updateMessageInline({
+      sequentialExecution: updatedSequentialExecution,
+      content: '工具调用序列已被取消。'
     });
   };
 
