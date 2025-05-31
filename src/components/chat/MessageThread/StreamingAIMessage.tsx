@@ -127,13 +127,12 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Wrench className="h-4 w-4 text-purple-500" />
-                    <span className="font-medium text-sm">MCP工具调用</span>
-                    {isCompleted && (
-                      <Badge variant="default" className="text-xs bg-green-100 text-green-700">
-                        调用完成
-                      </Badge>
+                    {isExecuting ? (
+                      <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
+                    ) : (
+                      <Wrench className="h-4 w-4 text-purple-500" />
                     )}
+                    <span className="font-medium text-sm">MCP工具调用</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     这将帮助您了解相关信息，以便更好地回答您的问题。
@@ -175,7 +174,11 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
-                              <Wrench className="h-4 w-4 text-purple-500" />
+                              {isExecuting ? (
+                                <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
+                              ) : (
+                                <Wrench className="h-4 w-4 text-purple-500" />
+                              )}
                               <span className="font-medium text-sm">
                                 {pendingCalls[0]?.toolName || 'analyze_request'}
                               </span>
