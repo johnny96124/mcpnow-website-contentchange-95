@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -42,6 +41,7 @@ export const ChatInterface = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [pendingToolQueue, setPendingToolQueue] = useState<any[]>([]);
 
   const connectedServers = getConnectedServers();
   
@@ -65,6 +65,7 @@ export const ChatInterface = () => {
     // 清空当前会话和消息，开始新的对话
     selectChat(''); // 清除当前会话选择
     setCurrentMessages([]); // 清空当前消息
+    setPendingToolQueue([]); // 清空待执行工具队列
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
@@ -77,15 +78,12 @@ export const ChatInterface = () => {
     const attachments: MessageAttachment[] = [];
     if (attachedFiles && attachedFiles.length > 0) {
       for (const attachedFile of attachedFiles) {
-        // In a real app, you would upload the file to a server here
-        // For now, we'll just create a mock attachment object
         const attachment: MessageAttachment = {
           id: attachedFile.id,
           name: attachedFile.file.name,
           size: attachedFile.file.size,
           type: attachedFile.file.type,
           preview: attachedFile.preview,
-          // url would be set after uploading to server
         };
         attachments.push(attachment);
       }
@@ -129,21 +127,13 @@ export const ChatInterface = () => {
       // 先完成流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
-      // 文字生成完成后，添加工具调用
-      const pendingToolCalls = generatePendingToolCalls(content, selectedServers);
-      const messageWithTools: Partial<Message> = {
-        pendingToolCalls,
-        toolCallStatus: 'pending'
-      };
-
-      setCurrentMessages(prev => 
-        prev.map(msg => 
-          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
-        )
-      );
+      // 文字生成完成后，开始逐个添加工具调用消息
+      const toolsToCall = generateToolsForMessage(content, selectedServers);
+      setPendingToolQueue(toolsToCall);
       
-      if (currentSession) {
-        updateMessage(sessionId, aiMessageId, messageWithTools);
+      // 添加第一个工具调用消息
+      if (toolsToCall.length > 0) {
+        await addNextToolCall(sessionId, toolsToCall[0], 0);
       }
 
     } catch (error) {
@@ -159,6 +149,99 @@ export const ChatInterface = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  const addNextToolCall = async (sessionId: string, toolCall: any, index: number) => {
+    // 添加工具调用消息
+    const toolMessageId = `msg-${Date.now()}-tool-${index}`;
+    const toolMessage: Message = {
+      id: toolMessageId,
+      role: 'tool_call',
+      content: `我需要调用 ${toolCall.toolName} 工具来${getToolDescription(toolCall.toolName)}。`,
+      timestamp: Date.now(),
+      pendingToolCalls: [toolCall],
+      toolCallStatus: 'pending'
+    };
+
+    setCurrentMessages(prev => [...prev, toolMessage]);
+    addMessage(sessionId, toolMessage);
+  };
+
+  const getToolDescription = (toolName: string): string => {
+    const descriptions = {
+      'search_documents': '搜索相关文档',
+      'analyze_content': '分析内容',
+      'generate_summary': '生成摘要',
+      'get_figma_data': '获取Figma设计数据'
+    };
+    return descriptions[toolName] || '执行相关操作';
+  };
+
+  const generateToolsForMessage = (userMessage: string, selectedServers: string[]) => {
+    const tools = [];
+    
+    // 根据用户消息内容决定需要调用哪些工具
+    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
+      tools.push({
+        toolName: 'get_figma_data',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          nodeId: '630-5984',
+          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+        }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
+      tools.push({
+        toolName: 'search_documents',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          query: userMessage.substring(0, 50),
+          filters: { type: 'relevant' }
+        }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('分析') || userMessage.toLowerCase().includes('理解')) {
+      tools.push({
+        toolName: 'analyze_content',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          content: userMessage,
+          analysis_type: 'comprehensive'
+        }
+      });
+    }
+
+    // 如果没有特定的工具需求，默认使用搜索和分析
+    if (tools.length === 0) {
+      tools.push(
+        {
+          toolName: 'search_documents',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            query: userMessage.substring(0, 50),
+            filters: { type: 'relevant' }
+          }
+        },
+        {
+          toolName: 'analyze_content',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            content: userMessage,
+            analysis_type: 'comprehensive'
+          }
+        }
+      );
+    }
+
+    return tools;
   };
 
   const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
@@ -189,40 +272,7 @@ export const ChatInterface = () => {
     });
   };
 
-  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    // 生成3个工具调用示例
-    return [
-      {
-        toolName: 'search_documents',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          query: userMessage.substring(0, 50),
-          filters: { type: 'relevant' }
-        }
-      },
-      {
-        toolName: 'analyze_content',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          content: userMessage,
-          analysis_type: 'comprehensive'
-        }
-      },
-      {
-        toolName: 'generate_summary',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          source: 'user_query',
-          context: userMessage
-        }
-      }
-    ];
-  };
-
-  const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
+  const handleToolAction = async (messageId: string, action: 'run' | 'cancel') => {
     const updateMessageInline = (updates: Partial<Message>) => {
       setCurrentMessages(prev => 
         prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
@@ -235,8 +285,11 @@ export const ChatInterface = () => {
     if (action === 'cancel') {
       updateMessageInline({ 
         toolCallStatus: 'cancelled',
-        content: '工具调用已被取消。如果您还有其他问题，请随时告诉我。'
+        content: '工具调用已被取消。'
       });
+      
+      // 取消后不再添加后续工具调用，清空队列
+      setPendingToolQueue([]);
     } else if (action === 'run') {
       updateMessageInline({ 
         toolCallStatus: 'executing',
@@ -244,11 +297,41 @@ export const ChatInterface = () => {
       });
       
       // 模拟工具执行
-      setTimeout(() => {
+      setTimeout(async () => {
         updateMessageInline({ 
           toolCallStatus: 'completed',
-          content: '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档，我找到了与您问题相关的信息。经过内容分析，我理解了您的具体需求。最后，我为您生成了一个综合性的总结。\n\n如果您需要更多详细信息或有其他问题，请随时告诉我。'
+          content: '工具调用执行完成！获取到了相关信息。'
         });
+
+        // 检查是否还有待执行的工具
+        const currentToolIndex = pendingToolQueue.findIndex(tool => 
+          currentMessages.some(msg => 
+            msg.pendingToolCalls?.some(call => call.toolName === tool.toolName)
+          )
+        );
+        
+        const nextToolIndex = currentToolIndex + 1;
+        if (nextToolIndex < pendingToolQueue.length && currentSession) {
+          // 等待一小段时间后添加下一个工具调用
+          setTimeout(() => {
+            addNextToolCall(currentSession.id, pendingToolQueue[nextToolIndex], nextToolIndex);
+          }, 1000);
+        } else if (nextToolIndex >= pendingToolQueue.length && currentSession) {
+          // 所有工具都执行完毕，添加最终的AI回复
+          setTimeout(() => {
+            const finalMessageId = `msg-${Date.now()}-final`;
+            const finalMessage: Message = {
+              id: finalMessageId,
+              role: 'assistant',
+              content: '基于所有工具调用的结果，我现在可以为您提供完整的回答：\n\n通过多个工具的协作，我已经收集了所需的信息。如果您需要更多详细信息或有其他问题，请随时告诉我。',
+              timestamp: Date.now()
+            };
+            
+            setCurrentMessages(prev => [...prev, finalMessage]);
+            addMessage(currentSession.id, finalMessage);
+            setPendingToolQueue([]); // 清空队列
+          }, 1000);
+        }
       }, 3000);
     }
   };
