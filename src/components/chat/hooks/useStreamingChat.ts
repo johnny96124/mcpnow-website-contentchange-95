@@ -1,9 +1,21 @@
 
 import { useState, useCallback } from 'react';
-import { Message, ToolInvocation, PendingToolCall } from '../types/chat';
+import { Message, ToolInvocation } from '../types/chat';
+
+interface ToolCall {
+  toolName: string;
+  serverId: string;
+  serverName: string;
+  request: any;
+}
 
 export const useStreamingChat = () => {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [pendingToolCalls, setPendingToolCalls] = useState<ToolCall[]>([]);
+  const [showToolConfirm, setShowToolConfirm] = useState(false);
+  const [pendingUserMessage, setPendingUserMessage] = useState<string>('');
+  const [pendingSelectedServers, setPendingSelectedServers] = useState<string[]>([]);
+  const [toolConfirmResolver, setToolConfirmResolver] = useState<((confirmed: boolean) => void) | null>(null);
 
   const simulateToolInvocation = useCallback(async (
     toolName: string, 
@@ -75,13 +87,43 @@ export const useStreamingChat = () => {
     return invocation;
   }, []);
 
-  const generateAIResponseWithInlineTools = useCallback(async (
+  const requestToolConfirmation = useCallback((
+    toolCalls: ToolCall[], 
+    userMessage: string, 
+    selectedServers: string[]
+  ): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setPendingToolCalls(toolCalls);
+      setPendingUserMessage(userMessage);
+      setPendingSelectedServers(selectedServers);
+      setShowToolConfirm(true);
+      setToolConfirmResolver(() => resolve);
+    });
+  }, []);
+
+  const handleToolConfirm = useCallback(() => {
+    if (toolConfirmResolver) {
+      toolConfirmResolver(true);
+      setToolConfirmResolver(null);
+    }
+    setShowToolConfirm(false);
+  }, [toolConfirmResolver]);
+
+  const handleToolCancel = useCallback(() => {
+    if (toolConfirmResolver) {
+      toolConfirmResolver(false);
+      setToolConfirmResolver(null);
+    }
+    setShowToolConfirm(false);
+  }, [toolConfirmResolver]);
+
+  const simulateAIResponseWithTools = useCallback(async (
     userMessage: string,
-    selectedServers: string[],
-    sessionId: string,
-    addMessage: (sessionId: string, message: Message) => void,
-    updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => void
-  ): Promise<void> => {
+    selectedServers: string[]
+  ): Promise<Message | null> => {
+    const messageId = `msg-${Date.now()}`;
+    setStreamingMessageId(messageId);
+
     // 分析用户消息，决定使用哪些工具
     const toolsToUse: Array<{ name: string; request: any }> = [];
 
@@ -89,7 +131,7 @@ export const useStreamingChat = () => {
       toolsToUse.push({
         name: 'get_figma_data',
         request: {
-          nodeId: '630-5984',
+          nodeId: '177-3082',
           fileKey: 'NuM4uOURmTCLfqltMzDJH'
         }
       });
@@ -109,51 +151,95 @@ export const useStreamingChat = () => {
       });
     }
 
-    // 如果需要工具调用，先添加工具调用消息
-    if (toolsToUse.length > 0) {
-      const pendingCalls: PendingToolCall[] = toolsToUse.map(tool => ({
-        toolName: tool.name,
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: tool.request
-      }));
-
-      const toolCallMessage: Message = {
-        id: `msg-${Date.now()}-tool`,
-        role: 'tool_call',
-        content: `好的，我将使用 MCP 工具来获取您提供的 Figma 链接中指定节点（node-id=${pendingCalls[0]?.request?.nodeId}）的数据。`,
-        timestamp: Date.now(),
-        pendingToolCalls: pendingCalls,
-        toolCallStatus: 'pending'
-      };
-
-      addMessage(sessionId, toolCallMessage);
-      
-      // 监听工具调用状态变化，当状态变为 completed 时，添加 AI 回复
-      // 这里我们模拟一个简单的延迟来等待用户操作
-      // 在实际实现中，你需要监听 updateMessage 的调用
-    } else {
-      // 没有工具调用，直接生成普通AI回复
-      const messageId = `msg-${Date.now()}`;
-      setStreamingMessageId(messageId);
-
-      const aiMessage: Message = {
-        id: messageId,
-        role: 'assistant',
-        content: `我理解您的请求"${userMessage}"。这是一个模拟的AI回复，展示了如何处理不需要工具调用的对话。`,
-        timestamp: Date.now()
-      };
-
-      // 模拟流式响应延迟
-      setTimeout(() => {
-        addMessage(sessionId, aiMessage);
-        setStreamingMessageId(null);
-      }, 1000);
+    // 如果没有匹配的工具，添加一个默认工具
+    if (toolsToUse.length === 0) {
+      toolsToUse.push({
+        name: 'analyze_content',
+        request: { content: userMessage }
+      });
     }
-  }, [simulateToolInvocation]);
+
+    // 准备工具调用列表进行确认
+    const toolCalls: ToolCall[] = toolsToUse.map(tool => ({
+      toolName: tool.name,
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: tool.request
+    }));
+
+    // 请求用户确认工具调用
+    const confirmed = await requestToolConfirmation(toolCalls, userMessage, selectedServers);
+    
+    if (!confirmed) {
+      setStreamingMessageId(null);
+      return null; // 用户取消了工具调用
+    }
+
+    // 执行工具调用
+    const toolInvocations: ToolInvocation[] = [];
+    for (const toolCall of toolCalls) {
+      const invocation = await simulateToolInvocation(
+        toolCall.toolName,
+        toolCall.serverId,
+        toolCall.serverName,
+        toolCall.request
+      );
+      toolInvocations.push(invocation);
+    }
+
+    // 基于工具结果生成AI回复
+    let aiResponse = `我已经处理了您的请求"${userMessage}"。\n\n`;
+    
+    if (toolInvocations.some(t => t.status === 'success')) {
+      aiResponse += '通过调用MCP工具，我获取了以下信息：\n\n';
+      
+      toolInvocations.forEach(invocation => {
+        if (invocation.status === 'success') {
+          switch (invocation.toolName) {
+            case 'get_figma_data':
+              aiResponse += `🎨 **Figma设计分析**：\n获取到设计文件"${invocation.response?.metadata?.name}"，包含${invocation.response?.nodes?.length || 0}个设计节点。\n\n`;
+              break;
+            case 'read_file':
+              aiResponse += `📁 **文件读取**：\n成功读取文件内容，大小为${invocation.response?.size || 0}字节。\n\n`;
+              break;
+            case 'search':
+              aiResponse += `🔍 **搜索结果**：\n找到${invocation.response?.total || 0}个相关结果。\n\n`;
+              break;
+            default:
+              aiResponse += `⚙️ **${invocation.toolName}**：\n操作已成功完成。\n\n`;
+          }
+        }
+      });
+    }
+
+    aiResponse += '如果您需要更多信息或有其他问题，请随时告诉我。';
+
+    const message: Message = {
+      id: messageId,
+      role: 'assistant',
+      content: aiResponse,
+      timestamp: Date.now(),
+      toolInvocations
+    };
+
+    setStreamingMessageId(null);
+    return message;
+  }, [simulateToolInvocation, requestToolConfirmation]);
 
   return {
     streamingMessageId,
-    generateAIResponseWithInlineTools
+    simulateAIResponseWithTools,
+    showToolConfirm,
+    pendingToolCalls,
+    pendingUserMessage,
+    handleToolConfirm,
+    handleToolCancel,
+    setShowToolConfirm: (show: boolean) => {
+      setShowToolConfirm(show);
+      if (!show && toolConfirmResolver) {
+        toolConfirmResolver(false);
+        setToolConfirmResolver(null);
+      }
+    }
   };
 };

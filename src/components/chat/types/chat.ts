@@ -26,21 +26,12 @@ export interface ToolInvocation {
   error?: string;
 }
 
-export interface PendingToolCall {
-  toolName: string;
-  serverId: string;
-  serverName: string;
-  request: any;
-}
-
 export interface Message {
   id: string;
-  role: 'user' | 'assistant' | 'tool_call';
+  role: 'user' | 'assistant';
   content: string;
   timestamp: number;
   toolInvocations?: ToolInvocation[];
-  pendingToolCalls?: PendingToolCall[];
-  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected';
 }
 
 export interface ChatSession {

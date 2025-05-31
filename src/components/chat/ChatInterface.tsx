@@ -11,6 +11,7 @@ import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
 import { ChatSession, Message } from './types/chat';
+import { ToolConfirmDialog } from './MessageThread/ToolConfirmDialog';
 
 export const ChatInterface = () => {
   const { servers, profiles, getConnectedServers } = useMCPServers();
@@ -20,12 +21,17 @@ export const ChatInterface = () => {
     createNewChat, 
     selectChat, 
     addMessage,
-    updateMessage,
     isLoading 
   } = useChatHistory();
   const { 
     streamingMessageId, 
-    generateAIResponseWithInlineTools
+    simulateAIResponseWithTools,
+    showToolConfirm,
+    pendingToolCalls,
+    pendingUserMessage,
+    handleToolConfirm,
+    handleToolCancel,
+    setShowToolConfirm
   } = useStreamingChat();
   
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
@@ -60,7 +66,7 @@ export const ChatInterface = () => {
       selectChat(sessionToUse.id);
     }
 
-    // 立即添加用户消息
+    // 添加用户消息
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
@@ -72,15 +78,25 @@ export const ChatInterface = () => {
     addMessage(sessionToUse.id, userMessage);
 
     try {
-      // 生成AI回复（内联工具调用）
-      console.log('Generating AI response with inline tools...');
-      await generateAIResponseWithInlineTools(
-        content, 
-        selectedServers, 
-        sessionToUse.id,
-        addMessage,
-        updateMessage
-      );
+      // 生成AI回复（包含工具调用确认）
+      console.log('Generating AI response...');
+      const aiMessage = await simulateAIResponseWithTools(content, selectedServers);
+      
+      // 如果用户确认了工具调用，则添加AI消息
+      if (aiMessage) {
+        console.log('Adding AI message:', aiMessage);
+        addMessage(sessionToUse.id, aiMessage);
+      } else {
+        console.log('AI message was null, user may have cancelled tool calls');
+        // 添加一个简单的取消消息
+        const cancelMessage: Message = {
+          id: `msg-${Date.now()}`,
+          role: 'assistant',
+          content: '操作已取消。',
+          timestamp: Date.now()
+        };
+        addMessage(sessionToUse.id, cancelMessage);
+      }
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -192,7 +208,6 @@ export const ChatInterface = () => {
               messages={currentSession.messages}
               isLoading={isSending}
               streamingMessageId={streamingMessageId}
-              onUpdateMessage={(messageId, updates) => updateMessage(currentSession.id, messageId, updates)}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -222,6 +237,15 @@ export const ChatInterface = () => {
           />
         </div>
       </div>
+
+      {/* Tool Confirmation Dialog */}
+      <ToolConfirmDialog
+        open={showToolConfirm}
+        onOpenChange={setShowToolConfirm}
+        onConfirm={handleToolConfirm}
+        toolCalls={pendingToolCalls}
+        userMessage={pendingUserMessage}
+      />
     </div>
   );
 };

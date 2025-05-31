@@ -129,43 +129,6 @@ export const useChatHistory = () => {
     });
   }, [saveChatHistory, generateTitle]);
 
-  const updateMessage = useCallback((sessionId: string, messageId: string, updates: Partial<Message>) => {
-    console.log('Updating message:', messageId, updates);
-    
-    setChatSessions(prev => {
-      const session = prev.find(s => s.id === sessionId);
-      if (!session) {
-        console.error('Session not found:', sessionId);
-        return prev;
-      }
-
-      const updatedMessages = session.messages.map(msg => 
-        msg.id === messageId ? { ...msg, ...updates } : msg
-      );
-
-      const updatedSession = { 
-        ...session, 
-        messages: updatedMessages, 
-        updatedAt: Date.now() 
-      };
-      
-      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
-      saveChatHistory(updated);
-      return updated;
-    });
-
-    // 同时更新 currentSession
-    setCurrentSession(prev => {
-      if (prev && prev.id === sessionId) {
-        const updatedMessages = prev.messages.map(msg => 
-          msg.id === messageId ? { ...msg, ...updates } : msg
-        );
-        return { ...prev, messages: updatedMessages, updatedAt: Date.now() };
-      }
-      return prev;
-    });
-  }, [saveChatHistory]);
-
   const simulateAIResponse = useCallback(async (userMessage: string, selectedServers: string[]): Promise<Message> => {
     // Simulate AI processing with tool invocations
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -249,8 +212,8 @@ export const useChatHistory = () => {
     isLoading,
     createNewChat,
     selectChat,
+    sendMessage,
     updateSession,
-    addMessage,
-    updateMessage
+    addMessage
   };
 };
