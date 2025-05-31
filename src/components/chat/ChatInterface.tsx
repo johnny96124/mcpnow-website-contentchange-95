@@ -178,6 +178,46 @@ export const ChatInterface = () => {
     });
   };
 
+  // 新增：处理消息编辑并重新生成
+  const handleEditAndRegenerate = (messageId: string, newContent: string) => {
+    if (!currentSession) return;
+    
+    // 找到这条用户消息的索引
+    const messageIndex = currentMessages.findIndex(msg => msg.id === messageId);
+    if (messageIndex === -1) return;
+    
+    // 更新用户消息内容
+    const updatedMessage: Partial<Message> = { content: newContent };
+    setCurrentMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId ? { ...msg, ...updatedMessage } : msg
+      )
+    );
+    updateMessage(currentSession.id, messageId, updatedMessage);
+    
+    // 删除这条用户消息之后的所有消息（包括AI回复）
+    const messagesToKeep = currentMessages.slice(0, messageIndex + 1);
+    const messagesToDelete = currentMessages.slice(messageIndex + 1);
+    
+    // 更新当前消息列表，只保留到编辑的用户消息为止
+    setCurrentMessages(messagesToKeep.map(msg => 
+      msg.id === messageId ? { ...msg, content: newContent } : msg
+    ));
+    
+    // 从数据库中删除后续消息
+    messagesToDelete.forEach(msg => {
+      deleteMessage(currentSession.id, msg.id);
+    });
+    
+    // 基于新的用户消息内容重新生成AI回复
+    handleSendMessage(newContent);
+    
+    toast({
+      title: "正在重新生成",
+      description: "基于修改后的消息重新生成AI回复",
+    });
+  };
+
   // 修复：处理消息重新生成
   const handleRegenerateMessage = (messageId: string) => {
     if (!currentSession) return;
@@ -566,6 +606,7 @@ export const ChatInterface = () => {
               onUpdateMessage={handleToolAction}
               onDeleteMessage={handleDeleteMessage}
               onEditMessage={handleEditMessage}
+              onEditAndRegenerate={handleEditAndRegenerate}
               onRegenerateMessage={handleRegenerateMessage}
               onRateMessage={handleRateMessage}
             />

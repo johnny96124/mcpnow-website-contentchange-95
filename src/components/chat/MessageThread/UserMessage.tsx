@@ -18,9 +18,15 @@ interface UserMessageProps {
   message: Message;
   onDelete?: () => void;
   onEdit?: (newContent: string) => void;
+  onEditAndRegenerate?: (newContent: string) => void;
 }
 
-export const UserMessage: React.FC<UserMessageProps> = ({ message, onDelete, onEdit }) => {
+export const UserMessage: React.FC<UserMessageProps> = ({ 
+  message, 
+  onDelete, 
+  onEdit, 
+  onEditAndRegenerate 
+}) => {
   const [showActions, setShowActions] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
@@ -31,8 +37,13 @@ export const UserMessage: React.FC<UserMessageProps> = ({ message, onDelete, onE
   };
 
   const handleSaveEdit = () => {
-    if (onEdit && editContent.trim() !== message.content) {
-      onEdit(editContent.trim());
+    if (editContent.trim() !== message.content && editContent.trim()) {
+      // 如果内容有变化，触发编辑并重新生成
+      if (onEditAndRegenerate) {
+        onEditAndRegenerate(editContent.trim());
+      } else if (onEdit) {
+        onEdit(editContent.trim());
+      }
     }
     setIsEditing(false);
   };

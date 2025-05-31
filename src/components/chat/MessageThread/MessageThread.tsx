@@ -14,6 +14,7 @@ interface MessageThreadProps {
   onUpdateMessage?: (messageId: string, action: 'run' | 'cancel', toolId?: string) => void;
   onDeleteMessage?: (messageId: string) => void;
   onEditMessage?: (messageId: string, newContent: string) => void;
+  onEditAndRegenerate?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string) => void;
   onRateMessage?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
 }
@@ -25,6 +26,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   onUpdateMessage,
   onDeleteMessage,
   onEditMessage,
+  onEditAndRegenerate,
   onRegenerateMessage,
   onRateMessage,
 }) => {
@@ -72,6 +74,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   message={message}
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
                   onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
+                  onEditAndRegenerate={onEditAndRegenerate ? (newContent) => onEditAndRegenerate(message.id, newContent) : undefined}
                 />
               );
             } else {
