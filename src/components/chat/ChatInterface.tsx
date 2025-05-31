@@ -21,6 +21,8 @@ export const ChatInterface = () => {
     selectChat, 
     addMessage,
     updateMessage,
+    deleteSession,
+    deleteMessage,
     isLoading 
   } = useChatHistory();
   const { 
@@ -32,6 +34,7 @@ export const ChatInterface = () => {
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
 
   const connectedServers = getConnectedServers();
   
@@ -42,9 +45,29 @@ export const ChatInterface = () => {
     }
   }, [connectedServers, selectedServers]);
 
+  // Update current messages when session changes
+  useEffect(() => {
+    if (currentSession) {
+      setCurrentMessages(currentSession.messages);
+    } else {
+      setCurrentMessages([]);
+    }
+  }, [currentSession]);
+
   const handleNewChat = () => {
-    const newSession = createNewChat(selectedServers, selectedProfile);
-    selectChat(newSession.id);
+    // Save current messages to session if any exist
+    if (currentMessages.length > 0 && !currentSession) {
+      const newSession = createNewChat(selectedServers, selectedProfile);
+      // Add all current messages to the new session
+      currentMessages.forEach(message => {
+        addMessage(newSession.id, message);
+      });
+      selectChat(newSession.id);
+    } else {
+      // Clear current messages and create empty state
+      setCurrentMessages([]);
+      selectChat(''); // Clear current session
+    }
   };
 
   const handleSendMessage = async (content: string) => {
@@ -53,14 +76,7 @@ export const ChatInterface = () => {
     console.log('Sending message:', content);
     setIsSending(true);
 
-    // If no current session exists, create one
-    let sessionToUse = currentSession;
-    if (!sessionToUse) {
-      sessionToUse = createNewChat(selectedServers, selectedProfile);
-      selectChat(sessionToUse.id);
-    }
-
-    // 立即添加用户消息
+    // 立即添加用户消息到当前显示
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
@@ -68,19 +84,18 @@ export const ChatInterface = () => {
       timestamp: Date.now()
     };
 
-    console.log('Adding user message:', userMessage);
-    addMessage(sessionToUse.id, userMessage);
+    console.log('Adding user message to current display:', userMessage);
+    setCurrentMessages(prev => [...prev, userMessage]);
+
+    // 如果有当前会话，也添加到会话中
+    if (currentSession) {
+      addMessage(currentSession.id, userMessage);
+    }
 
     try {
       // 生成AI回复（内联工具调用）
       console.log('Generating AI response with inline tools...');
-      await generateAIResponseWithInlineTools(
-        content, 
-        selectedServers, 
-        sessionToUse.id,
-        addMessage,
-        updateMessage
-      );
+      await generateAIResponseWithInlineToolsInline(content, selectedServers);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -89,9 +104,112 @@ export const ChatInterface = () => {
         content: '抱歉，处理您的请求时遇到了错误，请稍后重试。',
         timestamp: Date.now()
       };
-      addMessage(sessionToUse.id, errorMessage);
+      setCurrentMessages(prev => [...prev, errorMessage]);
+      if (currentSession) {
+        addMessage(currentSession.id, errorMessage);
+      }
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const generateAIResponseWithInlineToolsInline = async (
+    userMessage: string,
+    selectedServers: string[]
+  ) => {
+    // 分析用户消息，决定使用哪些工具
+    const toolsToUse: Array<{ name: string; request: any }> = [];
+
+    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
+      toolsToUse.push({
+        name: 'get_figma_data',
+        request: {
+          nodeId: '630-5984',
+          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+        }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
+      toolsToUse.push({
+        name: 'read_file',
+        request: { path: '/example/config.json' }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
+      toolsToUse.push({
+        name: 'search',
+        request: { query: userMessage.substring(0, 50) }
+      });
+    }
+
+    // 总是添加工具调用，即使没有特定工具
+    if (toolsToUse.length === 0) {
+      toolsToUse.push({
+        name: 'analyze_request',
+        request: { message: userMessage }
+      });
+    }
+
+    const pendingCalls = toolsToUse.map(tool => ({
+      toolName: tool.name,
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: tool.request
+    }));
+
+    const toolCallMessage: Message = {
+      id: `msg-${Date.now()}-tool`,
+      role: 'tool_call',
+      content: `好的，我将使用 MCP 工具来处理您的请求。`,
+      timestamp: Date.now(),
+      pendingToolCalls: pendingCalls,
+      toolCallStatus: 'pending'
+    };
+
+    setCurrentMessages(prev => [...prev, toolCallMessage]);
+    if (currentSession) {
+      addMessage(currentSession.id, toolCallMessage);
+    }
+  };
+
+  const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
+    const updateMessageInline = (updates: Partial<Message>) => {
+      setCurrentMessages(prev => 
+        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
+      );
+      if (currentSession) {
+        updateMessage(currentSession.id, messageId, updates);
+      }
+    };
+
+    if (action === 'cancel') {
+      updateMessageInline({ 
+        toolCallStatus: 'rejected'
+      });
+    } else if (action === 'run') {
+      updateMessageInline({ 
+        toolCallStatus: 'executing'
+      });
+      // 模拟工具执行
+      setTimeout(() => {
+        updateMessageInline({ 
+          toolCallStatus: 'completed'
+        });
+        
+        // 添加AI回复
+        const aiMessage: Message = {
+          id: `msg-${Date.now()}-ai`,
+          role: 'assistant',
+          content: '工具执行完成！基于工具调用的结果，我已经为您处理了请求。',
+          timestamp: Date.now()
+        };
+        setCurrentMessages(prev => [...prev, aiMessage]);
+        if (currentSession) {
+          addMessage(currentSession.id, aiMessage);
+        }
+      }, 2000);
     }
   };
 
@@ -117,8 +235,7 @@ export const ChatInterface = () => {
     );
   }
 
-  console.log('Current session:', currentSession);
-  console.log('Current messages:', currentSession?.messages);
+  console.log('Current messages:', currentMessages);
 
   return (
     <div className="flex h-full bg-background">
@@ -153,6 +270,8 @@ export const ChatInterface = () => {
               sessions={chatSessions}
               currentSessionId={currentSession?.id}
               onSelectChat={selectChat}
+              onDeleteSession={deleteSession}
+              onDeleteMessage={deleteMessage}
             />
           </div>
         </div>
@@ -187,12 +306,12 @@ export const ChatInterface = () => {
 
         {/* Message Thread */}
         <div className="flex-1 overflow-hidden">
-          {currentSession && currentSession.messages.length > 0 ? (
+          {currentMessages.length > 0 ? (
             <MessageThread
-              messages={currentSession.messages}
+              messages={currentMessages}
               isLoading={isSending}
               streamingMessageId={streamingMessageId}
-              onUpdateMessage={(messageId, updates) => updateMessage(currentSession.id, messageId, updates)}
+              onUpdateMessage={handleToolAction}
             />
           ) : (
             <div className="flex items-center justify-center h-full">

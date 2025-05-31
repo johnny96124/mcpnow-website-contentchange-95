@@ -1,60 +1,135 @@
 
-import React from 'react';
-import { MessageSquare, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageSquare, Clock, Trash2, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ChatSession } from '../types/chat';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ChatHistoryProps {
   sessions: ChatSession[];
   currentSessionId?: string;
   onSelectChat: (sessionId: string) => void;
+  onDeleteSession: (sessionId: string) => void;
+  onDeleteMessage: (sessionId: string, messageId: string) => void;
 }
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   sessions,
   currentSessionId,
   onSelectChat,
+  onDeleteSession,
+  onDeleteMessage,
 }) => {
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    type: 'session' | 'message';
+    sessionId: string;
+    messageId?: string;
+    title: string;
+  }>({
+    open: false,
+    type: 'session',
+    sessionId: '',
+    title: ''
+  });
+
+  const handleDeleteSession = (sessionId: string, sessionTitle: string) => {
+    setDeleteDialog({
+      open: true,
+      type: 'session',
+      sessionId,
+      title: sessionTitle
+    });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.type === 'session') {
+      onDeleteSession(deleteDialog.sessionId);
+    } else if (deleteDialog.type === 'message' && deleteDialog.messageId) {
+      onDeleteMessage(deleteDialog.sessionId, deleteDialog.messageId);
+    }
+    setDeleteDialog({ ...deleteDialog, open: false });
+  };
+
   if (sessions.length === 0) {
     return (
       <div className="p-4 text-center">
         <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No chat history yet</p>
+        <p className="text-sm text-muted-foreground">暂无对话历史</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-2 space-y-1">
-        {sessions.map((session) => (
-          <Button
-            key={session.id}
-            variant={session.id === currentSessionId ? "secondary" : "ghost"}
-            className="w-full justify-start h-auto p-3 text-left"
-            onClick={() => onSelectChat(session.id)}
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                <span className="font-medium truncate text-sm">
-                  {session.title}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>
-                  {formatDistanceToNow(session.updatedAt, { addSuffix: true })}
-                </span>
-                <span>•</span>
-                <span>{session.messages.length} messages</span>
+    <>
+      <ScrollArea className="h-full">
+        <div className="p-2 space-y-1">
+          {sessions.map((session) => (
+            <div 
+              key={session.id}
+              className="group relative"
+            >
+              <Button
+                variant={session.id === currentSessionId ? "secondary" : "ghost"}
+                className="w-full justify-start h-auto p-3 text-left pr-10"
+                onClick={() => onSelectChat(session.id)}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                    <span className="font-medium truncate text-sm">
+                      {session.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span>
+                      {formatDistanceToNow(session.updatedAt, { addSuffix: true })}
+                    </span>
+                    <span>•</span>
+                    <span>{session.messages.length} 条消息</span>
+                  </div>
+                </div>
+              </Button>
+              
+              <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <MoreVertical className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteSession(session.id, session.title)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      删除对话
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-          </Button>
-        ))}
-      </div>
-    </ScrollArea>
+          ))}
+        </div>
+      </ScrollArea>
+
+      <DeleteConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        title="删除对话"
+        description={`确定要删除对话"${deleteDialog.title}"吗？此操作无法撤销。`}
+        onConfirm={confirmDelete}
+      />
+    </>
   );
 };

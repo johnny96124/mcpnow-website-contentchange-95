@@ -243,6 +243,52 @@ export const useChatHistory = () => {
     }
   }, [currentSession, addMessage, simulateAIResponse]);
 
+  const deleteSession = useCallback((sessionId: string) => {
+    setChatSessions(prev => {
+      const updated = prev.filter(session => session.id !== sessionId);
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // If deleting current session, clear it
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        return null;
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
+
+  const deleteMessage = useCallback((sessionId: string, messageId: string) => {
+    setChatSessions(prev => {
+      const session = prev.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found:', sessionId);
+        return prev;
+      }
+
+      const updatedMessages = session.messages.filter(msg => msg.id !== messageId);
+      const updatedSession = { 
+        ...session, 
+        messages: updatedMessages, 
+        updatedAt: Date.now() 
+      };
+      
+      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // Also update currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        const updatedMessages = prev.messages.filter(msg => msg.id !== messageId);
+        return { ...prev, messages: updatedMessages, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
+
   return {
     chatSessions,
     currentSession,
@@ -251,6 +297,8 @@ export const useChatHistory = () => {
     selectChat,
     updateSession,
     addMessage,
-    updateMessage
+    updateMessage,
+    deleteSession,
+    deleteMessage
   };
 };
