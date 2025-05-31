@@ -30,9 +30,12 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
   const [expandedServers, setExpandedServers] = useState<Set<string>>(new Set());
   const [toolStates, setToolStates] = useState<Record<string, boolean>>({});
 
-  // Enhanced tool data with more realistic examples
+  // Updated tool data matching the second image
   const getServerTools = (serverId: string): Tool[] => {
     const mockTools: Record<string, Tool[]> = {
+      'PostgresTool-DevDB': [],
+      'GitHub Copilot': [],
+      'Local File Assistant': [],
       'filesystem': [
         { 
           id: 'read_file', 
@@ -54,27 +57,6 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
           enabled: true, 
           description: '列出目录内容',
           category: 'file_operations'
-        },
-        { 
-          id: 'create_directory', 
-          name: 'create_directory', 
-          enabled: false, 
-          description: '创建新目录',
-          category: 'file_operations'
-        },
-        { 
-          id: 'delete_file', 
-          name: 'delete_file', 
-          enabled: false, 
-          description: '删除文件',
-          category: 'file_operations'
-        },
-        { 
-          id: 'move_file', 
-          name: 'move_file', 
-          enabled: true, 
-          description: '移动或重命名文件',
-          category: 'file_operations'
         }
       ],
       'mcp-now': [
@@ -95,14 +77,14 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
         { 
           id: 'printEnv', 
           name: 'printEnv', 
-          enabled: false, 
+          enabled: true, 
           description: '打印环境变量',
           category: 'system'
         },
         { 
           id: 'longRunningOperation', 
           name: 'longRunningOperation', 
-          enabled: false, 
+          enabled: true, 
           description: '执行长时间运行的操作',
           category: 'async'
         },
@@ -130,7 +112,7 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
         { 
           id: 'getResourceReference', 
           name: 'getResourceReference', 
-          enabled: false, 
+          enabled: true, 
           description: '获取资源引用',
           category: 'resource'
         },
@@ -144,62 +126,16 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
         { 
           id: 'download_figma_images', 
           name: 'download_figma_images', 
-          enabled: false, 
+          enabled: true, 
           description: '下载Figma图片',
           category: 'design'
-        }
-      ],
-      'database': [
+        },
         { 
-          id: 'query_data', 
-          name: 'query_data', 
+          id: 'browser_close', 
+          name: 'browser_close', 
           enabled: true, 
-          description: '查询数据库数据',
-          category: 'database'
-        },
-        { 
-          id: 'insert_record', 
-          name: 'insert_record', 
-          enabled: false, 
-          description: '插入新记录',
-          category: 'database'
-        },
-        { 
-          id: 'update_record', 
-          name: 'update_record', 
-          enabled: false, 
-          description: '更新记录',
-          category: 'database'
-        },
-        { 
-          id: 'delete_record', 
-          name: 'delete_record', 
-          enabled: false, 
-          description: '删除记录',
-          category: 'database'
-        }
-      ],
-      'web-scraper': [
-        { 
-          id: 'scrape_page', 
-          name: 'scrape_page', 
-          enabled: true, 
-          description: '抓取网页内容',
-          category: 'web'
-        },
-        { 
-          id: 'extract_links', 
-          name: 'extract_links', 
-          enabled: true, 
-          description: '提取页面链接',
-          category: 'web'
-        },
-        { 
-          id: 'take_screenshot', 
-          name: 'take_screenshot', 
-          enabled: false, 
-          description: '截取网页截图',
-          category: 'web'
+          description: '关闭浏览器',
+          category: 'browser'
         }
       ]
     };
@@ -264,13 +200,20 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
       'media': 'bg-indigo-100 text-indigo-700',
       'resource': 'bg-gray-100 text-gray-700',
       'design': 'bg-red-100 text-red-700',
-      'database': 'bg-emerald-100 text-emerald-700',
-      'web': 'bg-cyan-100 text-cyan-700'
+      'browser': 'bg-cyan-100 text-cyan-700'
     };
     return colors[category || ''] || 'bg-gray-100 text-gray-700';
   };
 
-  const selectedServerList = servers.filter(server => selectedServers.includes(server.id));
+  // Create mock servers to match the image
+  const mockServers = [
+    { id: 'PostgresTool-DevDB', name: 'PostgresTool-DevDB', type: 'STDIO' as const, status: 'connected' as const, enabled: true },
+    { id: 'GitHub Copilot', name: 'GitHub Copilot', type: 'STDIO' as const, status: 'connected' as const, enabled: true },
+    { id: 'Local File Assistant', name: 'Local File Assistant', type: 'STDIO' as const, status: 'connected' as const, enabled: true },
+    { id: 'mcp-now', name: 'mcp-now', type: 'STDIO' as const, status: 'connected' as const, enabled: true }
+  ];
+
+  const selectedServerList = mockServers;
 
   return (
     <Popover>
@@ -279,7 +222,7 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          disabled={disabled || selectedServers.length === 0}
+          disabled={disabled}
           title="工具控制"
         >
           <Settings className="h-4 w-4" />
@@ -290,113 +233,107 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">工具控制</h4>
             <Badge variant="secondary" className="text-xs">
-              {selectedServers.length} 个服务器
+              {selectedServerList.length} 个服务器
             </Badge>
           </div>
           
-          {selectedServerList.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground text-sm">
-              请先选择MCP服务器
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {selectedServerList.map(server => {
-                const tools = getServerTools(server.id);
-                const enabledCount = getEnabledToolCount(server.id);
-                const isExpanded = expandedServers.has(server.id);
-                
-                return (
-                  <div key={server.id} className="border rounded-lg p-2">
-                    <div 
-                      className="flex items-center justify-between cursor-pointer hover:bg-muted/50 rounded p-1"
-                      onClick={() => toggleServer(server.id)}
-                    >
-                      <div className="flex items-center gap-2">
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                        <span className="font-medium text-sm">{server.name}</span>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {enabledCount}/{tools.length}
-                      </Badge>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {selectedServerList.map(server => {
+              const tools = getServerTools(server.id);
+              const enabledCount = getEnabledToolCount(server.id);
+              const isExpanded = expandedServers.has(server.id);
+              
+              return (
+                <div key={server.id} className="border rounded-lg p-2">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer hover:bg-muted/50 rounded p-1"
+                    onClick={() => toggleServer(server.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      <span className="font-medium text-sm">{server.name}</span>
                     </div>
-                    
-                    {isExpanded && (
-                      <div className="mt-2 space-y-2">
-                        <Separator />
-                        
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">批量操作</span>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleAllServerTools(server.id, true);
-                              }}
-                            >
-                              全开
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleAllServerTools(server.id, false);
-                              }}
-                            >
-                              全关
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          {tools.map(tool => {
-                            const isEnabled = getToolState(server.id, tool.id);
-                            return (
-                              <div key={tool.id} className="flex items-center justify-between py-1 hover:bg-muted/30 rounded px-1">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <span className="text-xs font-mono bg-muted px-1 rounded flex-shrink-0">
-                                    {tool.name.charAt(0).toUpperCase()}
-                                  </span>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="text-sm font-medium truncate" title={tool.name}>
-                                      {tool.name}
-                                    </div>
-                                    {tool.description && (
-                                      <div className="text-xs text-muted-foreground truncate" title={tool.description}>
-                                        {tool.description}
-                                      </div>
-                                    )}
-                                    {tool.category && (
-                                      <div className={`text-xs px-1 rounded mt-1 inline-block ${getCategoryColor(tool.category)}`}>
-                                        {tool.category}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                <Switch
-                                  checked={isEnabled}
-                                  onCheckedChange={() => toggleTool(server.id, tool.id)}
-                                  className="scale-75 flex-shrink-0"
-                                />
-                              </div>
-                            );
-                          })}
+                    <Badge variant="outline" className="text-xs">
+                      {enabledCount}/{tools.length}
+                    </Badge>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div className="mt-2 space-y-2">
+                      <Separator />
+                      
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">批量操作</span>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleAllServerTools(server.id, true);
+                            }}
+                          >
+                            全开
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleAllServerTools(server.id, false);
+                            }}
+                          >
+                            全关
+                          </Button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      
+                      <div className="space-y-1">
+                        {tools.map(tool => {
+                          const isEnabled = getToolState(server.id, tool.id);
+                          return (
+                            <div key={tool.id} className="flex items-center justify-between py-1 hover:bg-muted/30 rounded px-1">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-xs font-mono bg-muted px-1 rounded flex-shrink-0">
+                                  {tool.name.charAt(0).toUpperCase()}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-sm font-medium truncate" title={tool.name}>
+                                    {tool.name}
+                                  </div>
+                                  {tool.description && (
+                                    <div className="text-xs text-muted-foreground truncate" title={tool.description}>
+                                      {tool.description}
+                                    </div>
+                                  )}
+                                  {tool.category && (
+                                    <div className={`text-xs px-1 rounded mt-1 inline-block ${getCategoryColor(tool.category)}`}>
+                                      {tool.category}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <Switch
+                                checked={isEnabled}
+                                onCheckedChange={() => toggleTool(server.id, tool.id)}
+                                className="scale-75 flex-shrink-0"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </PopoverContent>
     </Popover>
