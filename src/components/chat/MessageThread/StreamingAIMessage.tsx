@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -150,12 +149,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                     <span className="font-medium text-sm">
                       {isFailed ? 'MCP工具调用失败' : 'MCP工具调用'}
                     </span>
-                    <Badge variant="outline" className="text-xs">
-                      {message.currentToolIndex !== undefined ? 
-                        `${message.currentToolIndex + 1}/${pendingCalls.length}` : 
-                        `${pendingCalls.filter(t => t.status === 'completed').length}/${pendingCalls.length}`
-                      }
-                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {isFailed 
@@ -164,21 +157,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                     }
                   </p>
                 </div>
-                
-                {/* 全局取消按钮 */}
-                {pendingCalls.some(tool => tool.status === 'pending') && (
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleToolAction('cancel')}
-                      className="text-gray-600 hover:text-gray-800"
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      取消所有
-                    </Button>
-                  </div>
-                )}
               </div>
 
               {/* 按顺序显示工具 */}
@@ -200,9 +178,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               <div className="flex items-center gap-2">
                                 <Wrench className="h-4 w-4 text-purple-500" />
                                 <span className="font-medium text-sm">{tool.toolName}</span>
-                                <div className="text-xs text-muted-foreground">
-                                  #{tool.order + 1}
-                                </div>
                               </div>
                               
                               <Badge variant="outline" className="text-xs flex items-center gap-1">
