@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -86,6 +86,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
       onMouseLeave={() => setShowActions(false)}
     >
       <Avatar className="h-8 w-8 flex-shrink-0">
+        <AvatarImage src="/lovable-uploads/28a44396-b42e-441d-99e7-1e2a713be56a.png" alt="MCP Now Logo" />
         <AvatarFallback className="bg-green-100 text-green-600">
           <Bot className="h-4 w-4" />
         </AvatarFallback>
