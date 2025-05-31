@@ -12,6 +12,7 @@ interface Tool {
   id: string;
   name: string;
   enabled: boolean;
+  description?: string;
   category?: string;
 }
 
@@ -29,25 +30,177 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
   const [expandedServers, setExpandedServers] = useState<Set<string>>(new Set());
   const [toolStates, setToolStates] = useState<Record<string, boolean>>({});
 
-  // Mock tool data - in real implementation, this would come from the MCP servers
+  // Enhanced tool data with more realistic examples
   const getServerTools = (serverId: string): Tool[] => {
     const mockTools: Record<string, Tool[]> = {
       'filesystem': [
-        { id: 'read_file', name: 'read_file', enabled: true },
-        { id: 'write_file', name: 'write_file', enabled: true },
-        { id: 'list_directory', name: 'list_directory', enabled: true }
+        { 
+          id: 'read_file', 
+          name: 'read_file', 
+          enabled: true, 
+          description: '读取文件内容',
+          category: 'file_operations'
+        },
+        { 
+          id: 'write_file', 
+          name: 'write_file', 
+          enabled: true, 
+          description: '写入文件内容',
+          category: 'file_operations'
+        },
+        { 
+          id: 'list_directory', 
+          name: 'list_directory', 
+          enabled: true, 
+          description: '列出目录内容',
+          category: 'file_operations'
+        },
+        { 
+          id: 'create_directory', 
+          name: 'create_directory', 
+          enabled: false, 
+          description: '创建新目录',
+          category: 'file_operations'
+        },
+        { 
+          id: 'delete_file', 
+          name: 'delete_file', 
+          enabled: false, 
+          description: '删除文件',
+          category: 'file_operations'
+        },
+        { 
+          id: 'move_file', 
+          name: 'move_file', 
+          enabled: true, 
+          description: '移动或重命名文件',
+          category: 'file_operations'
+        }
       ],
       'mcp-now': [
-        { id: 'echo', name: 'echo', enabled: true },
-        { id: 'add', name: 'add', enabled: true },
-        { id: 'printEnv', name: 'printEnv', enabled: true },
-        { id: 'longRunningOperation', name: 'longRunningOperation', enabled: true },
-        { id: 'sampleLLM', name: 'sampleLLM', enabled: true },
-        { id: 'getTinyImage', name: 'getTinyImage', enabled: true },
-        { id: 'annotatedMessage', name: 'annotatedMessage', enabled: true },
-        { id: 'getResourceReference', name: 'getResourceReference', enabled: true },
-        { id: 'get_figma_data', name: 'get_figma_data', enabled: true },
-        { id: 'download_figma_images', name: 'download_figma_images', enabled: true }
+        { 
+          id: 'echo', 
+          name: 'echo', 
+          enabled: true, 
+          description: '回显输入的文本',
+          category: 'utility'
+        },
+        { 
+          id: 'add', 
+          name: 'add', 
+          enabled: true, 
+          description: '数学加法运算',
+          category: 'math'
+        },
+        { 
+          id: 'printEnv', 
+          name: 'printEnv', 
+          enabled: false, 
+          description: '打印环境变量',
+          category: 'system'
+        },
+        { 
+          id: 'longRunningOperation', 
+          name: 'longRunningOperation', 
+          enabled: false, 
+          description: '执行长时间运行的操作',
+          category: 'async'
+        },
+        { 
+          id: 'sampleLLM', 
+          name: 'sampleLLM', 
+          enabled: true, 
+          description: '调用示例LLM',
+          category: 'ai'
+        },
+        { 
+          id: 'getTinyImage', 
+          name: 'getTinyImage', 
+          enabled: true, 
+          description: '获取小图片',
+          category: 'media'
+        },
+        { 
+          id: 'annotatedMessage', 
+          name: 'annotatedMessage', 
+          enabled: true, 
+          description: '创建带注释的消息',
+          category: 'utility'
+        },
+        { 
+          id: 'getResourceReference', 
+          name: 'getResourceReference', 
+          enabled: false, 
+          description: '获取资源引用',
+          category: 'resource'
+        },
+        { 
+          id: 'get_figma_data', 
+          name: 'get_figma_data', 
+          enabled: true, 
+          description: '获取Figma设计数据',
+          category: 'design'
+        },
+        { 
+          id: 'download_figma_images', 
+          name: 'download_figma_images', 
+          enabled: false, 
+          description: '下载Figma图片',
+          category: 'design'
+        }
+      ],
+      'database': [
+        { 
+          id: 'query_data', 
+          name: 'query_data', 
+          enabled: true, 
+          description: '查询数据库数据',
+          category: 'database'
+        },
+        { 
+          id: 'insert_record', 
+          name: 'insert_record', 
+          enabled: false, 
+          description: '插入新记录',
+          category: 'database'
+        },
+        { 
+          id: 'update_record', 
+          name: 'update_record', 
+          enabled: false, 
+          description: '更新记录',
+          category: 'database'
+        },
+        { 
+          id: 'delete_record', 
+          name: 'delete_record', 
+          enabled: false, 
+          description: '删除记录',
+          category: 'database'
+        }
+      ],
+      'web-scraper': [
+        { 
+          id: 'scrape_page', 
+          name: 'scrape_page', 
+          enabled: true, 
+          description: '抓取网页内容',
+          category: 'web'
+        },
+        { 
+          id: 'extract_links', 
+          name: 'extract_links', 
+          enabled: true, 
+          description: '提取页面链接',
+          category: 'web'
+        },
+        { 
+          id: 'take_screenshot', 
+          name: 'take_screenshot', 
+          enabled: false, 
+          description: '截取网页截图',
+          category: 'web'
+        }
       ]
     };
     return mockTools[serverId] || [];
@@ -71,6 +224,7 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
       ...prev,
       [key]: !prev[key]
     }));
+    console.log(`Tool ${toolId} from server ${serverId} ${!getToolState(serverId, toolId) ? 'enabled' : 'disabled'}`);
   };
 
   const toggleAllServerTools = (serverId: string, enabled: boolean) => {
@@ -80,16 +234,40 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
       updates[`${serverId}-${tool.id}`] = enabled;
     });
     setToolStates(prev => ({ ...prev, ...updates }));
+    console.log(`All tools for server ${serverId} ${enabled ? 'enabled' : 'disabled'}`);
   };
 
   const getToolState = (serverId: string, toolId: string): boolean => {
     const key = `${serverId}-${toolId}`;
-    return toolStates[key] ?? true; // Default to enabled
+    if (toolStates.hasOwnProperty(key)) {
+      return toolStates[key];
+    }
+    // Use default state from tool definition
+    const tools = getServerTools(serverId);
+    const tool = tools.find(t => t.id === toolId);
+    return tool?.enabled ?? true;
   };
 
   const getEnabledToolCount = (serverId: string): number => {
     const tools = getServerTools(serverId);
     return tools.filter(tool => getToolState(serverId, tool.id)).length;
+  };
+
+  const getCategoryColor = (category?: string): string => {
+    const colors: Record<string, string> = {
+      'file_operations': 'bg-blue-100 text-blue-700',
+      'utility': 'bg-green-100 text-green-700',
+      'math': 'bg-purple-100 text-purple-700',
+      'system': 'bg-orange-100 text-orange-700',
+      'async': 'bg-yellow-100 text-yellow-700',
+      'ai': 'bg-pink-100 text-pink-700',
+      'media': 'bg-indigo-100 text-indigo-700',
+      'resource': 'bg-gray-100 text-gray-700',
+      'design': 'bg-red-100 text-red-700',
+      'database': 'bg-emerald-100 text-emerald-700',
+      'web': 'bg-cyan-100 text-cyan-700'
+    };
+    return colors[category || ''] || 'bg-gray-100 text-gray-700';
   };
 
   const selectedServerList = servers.filter(server => selectedServers.includes(server.id));
@@ -107,7 +285,7 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
           <Settings className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-96 p-0" align="end">
         <div className="p-4">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">工具控制</h4>
@@ -130,7 +308,7 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
                 return (
                   <div key={server.id} className="border rounded-lg p-2">
                     <div 
-                      className="flex items-center justify-between cursor-pointer"
+                      className="flex items-center justify-between cursor-pointer hover:bg-muted/50 rounded p-1"
                       onClick={() => toggleServer(server.id)}
                     >
                       <div className="flex items-center gap-2">
@@ -179,21 +357,38 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
                         </div>
                         
                         <div className="space-y-1">
-                          {tools.map(tool => (
-                            <div key={tool.id} className="flex items-center justify-between py-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-mono bg-muted px-1 rounded">
-                                  {tool.name.charAt(0).toUpperCase()}
-                                </span>
-                                <span className="text-sm">{tool.name}</span>
+                          {tools.map(tool => {
+                            const isEnabled = getToolState(server.id, tool.id);
+                            return (
+                              <div key={tool.id} className="flex items-center justify-between py-1 hover:bg-muted/30 rounded px-1">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <span className="text-xs font-mono bg-muted px-1 rounded flex-shrink-0">
+                                    {tool.name.charAt(0).toUpperCase()}
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-sm font-medium truncate" title={tool.name}>
+                                      {tool.name}
+                                    </div>
+                                    {tool.description && (
+                                      <div className="text-xs text-muted-foreground truncate" title={tool.description}>
+                                        {tool.description}
+                                      </div>
+                                    )}
+                                    {tool.category && (
+                                      <div className={`text-xs px-1 rounded mt-1 inline-block ${getCategoryColor(tool.category)}`}>
+                                        {tool.category}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <Switch
+                                  checked={isEnabled}
+                                  onCheckedChange={() => toggleTool(server.id, tool.id)}
+                                  className="scale-75 flex-shrink-0"
+                                />
                               </div>
-                              <Switch
-                                checked={getToolState(server.id, tool.id)}
-                                onCheckedChange={() => toggleTool(server.id, tool.id)}
-                                className="scale-75"
-                              />
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
