@@ -73,6 +73,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const isRejected = message.toolCallStatus === 'rejected';
   const isCompleted = message.toolCallStatus === 'completed';
   const isExecuting = message.toolCallStatus === 'executing';
+  const isCancelled = message.toolCallStatus === 'cancelled';
 
   return (
     <div 
@@ -181,7 +182,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               服务器 {pendingCalls[0]?.serverId || 'postgres-dev'}
                             </Badge>
 
-                            {/* 只在这里显示状态 - 加载中或完成 */}
+                            {/* 状态标签 */}
                             {isExecuting && (
                               <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-700">
                                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -193,6 +194,13 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               <Badge variant="default" className="text-xs bg-green-100 text-green-700">
                                 <CheckCircle className="h-3 w-3 mr-1" />
                                 完成
+                              </Badge>
+                            )}
+                            
+                            {isCancelled && (
+                              <Badge variant="outline" className="text-xs bg-red-100 text-red-700 border-red-200">
+                                <X className="h-3 w-3 mr-1" />
+                                已取消
                               </Badge>
                             )}
                           </div>

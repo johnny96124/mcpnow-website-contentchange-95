@@ -176,7 +176,7 @@ export const ChatInterface = () => {
 
     if (action === 'cancel') {
       updateMessageInline({ 
-        toolCallStatus: 'rejected',
+        toolCallStatus: 'cancelled',
         content: '工具调用已被取消。'
       });
     } else if (action === 'run') {

@@ -1,4 +1,3 @@
-
 export interface MCPServer {
   id: string;
   name: string;
@@ -40,7 +39,7 @@ export interface Message {
   timestamp: number;
   toolInvocations?: ToolInvocation[];
   pendingToolCalls?: PendingToolCall[];
-  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected';
+  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled';
 }
 
 export interface ChatSession {
