@@ -9,7 +9,13 @@ import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
-import { ChatSession, Message } from './types/chat';
+import { ChatSession, Message, MessageAttachment } from './types/chat';
+
+interface AttachedFile {
+  id: string;
+  file: File;
+  preview?: string;
+}
 
 export const ChatInterface = () => {
   const { servers, profiles, getConnectedServers } = useMCPServers();
@@ -70,18 +76,37 @@ export const ChatInterface = () => {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
     if (selectedServers.length === 0 || isSending) return;
     
-    console.log('Sending message:', content);
+    console.log('Sending message:', content, 'with attachments:', attachedFiles);
     setIsSending(true);
+
+    // Process attachments
+    const attachments: MessageAttachment[] = [];
+    if (attachedFiles && attachedFiles.length > 0) {
+      for (const attachedFile of attachedFiles) {
+        // In a real app, you would upload the file to a server here
+        // For now, we'll just create a mock attachment object
+        const attachment: MessageAttachment = {
+          id: attachedFile.id,
+          name: attachedFile.file.name,
+          size: attachedFile.file.size,
+          type: attachedFile.file.type,
+          preview: attachedFile.preview,
+          // url would be set after uploading to server
+        };
+        attachments.push(attachment);
+      }
+    }
 
     // 添加用户消息
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
       content,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      attachments: attachments.length > 0 ? attachments : undefined
     };
 
     setCurrentMessages(prev => [...prev, userMessage]);

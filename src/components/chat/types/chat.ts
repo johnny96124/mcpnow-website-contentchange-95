@@ -1,3 +1,4 @@
+
 export interface MCPServer {
   id: string;
   name: string;
@@ -32,6 +33,15 @@ export interface PendingToolCall {
   request: any;
 }
 
+export interface MessageAttachment {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url?: string;
+  preview?: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'tool_call';
@@ -40,6 +50,7 @@ export interface Message {
   toolInvocations?: ToolInvocation[];
   pendingToolCalls?: PendingToolCall[];
   toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled';
+  attachments?: MessageAttachment[];
 }
 
 export interface ChatSession {
