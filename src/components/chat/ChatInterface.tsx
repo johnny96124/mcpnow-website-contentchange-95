@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -187,50 +186,114 @@ export const ChatInterface = () => {
   };
 
   const generateSequentialToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
-    // 生成3个按顺序执行的工具调用
-    const tools = [
-      {
-        id: `tool-${Date.now()}-1`,
-        toolName: 'search_documents',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          query: userMessage.substring(0, 50),
-          filters: { type: 'relevant' }
+    // 50% 几率使用多服务器调用
+    const useMultipleServers = Math.random() < 0.5;
+    const availableServers = selectedServers.length > 1 ? selectedServers : connectedServers.map(s => s.id);
+    
+    if (useMultipleServers && availableServers.length > 1) {
+      // 多服务器场景：从不同服务器调用工具
+      const tools = [
+        {
+          id: `tool-${Date.now()}-1`,
+          toolName: 'search_documents',
+          serverId: availableServers[0],
+          serverName: `服务器 ${availableServers[0]}`,
+          request: { 
+            query: userMessage.substring(0, 50),
+            filters: { type: 'relevant' }
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
         },
-        status: 'pending' as const,
-        order: 0,
-        visible: true // 第一个工具立即可见
-      },
-      {
-        id: `tool-${Date.now()}-2`,
-        toolName: 'analyze_content',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          content: userMessage,
-          analysis_type: 'comprehensive'
+        {
+          id: `tool-${Date.now()}-2`,
+          toolName: 'get_weather_data',
+          serverId: availableServers[1] || availableServers[0],
+          serverName: `服务器 ${availableServers[1] || availableServers[0]}`,
+          request: { 
+            location: 'Shanghai',
+            format: 'detailed'
+          },
+          status: 'pending' as const,
+          order: 1,
+          visible: false
         },
-        status: 'pending' as const,
-        order: 1,
-        visible: false // 第二个工具先隐藏
-      },
-      {
-        id: `tool-${Date.now()}-3`,
-        toolName: 'generate_summary',
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
-        request: { 
-          source: 'user_query',
-          context: userMessage
+        {
+          id: `tool-${Date.now()}-3`,
+          toolName: 'analyze_content',
+          serverId: availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0],
+          serverName: `服务器 ${availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0]}`,
+          request: { 
+            content: userMessage,
+            analysis_type: 'comprehensive'
+          },
+          status: 'pending' as const,
+          order: 2,
+          visible: false
         },
-        status: 'pending' as const,
-        order: 2,
-        visible: false // 第三个工具先隐藏
-      }
-    ];
+        {
+          id: `tool-${Date.now()}-4`,
+          toolName: 'generate_summary',
+          serverId: availableServers[0],
+          serverName: `服务器 ${availableServers[0]}`,
+          request: { 
+            source: 'multi_tool_analysis',
+            context: userMessage
+          },
+          status: 'pending' as const,
+          order: 3,
+          visible: false
+        }
+      ];
 
-    return tools;
+      return tools;
+    } else {
+      // 单服务器场景（原有逻辑）
+      const tools = [
+        {
+          id: `tool-${Date.now()}-1`,
+          toolName: 'search_documents',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            query: userMessage.substring(0, 50),
+            filters: { type: 'relevant' }
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        },
+        {
+          id: `tool-${Date.now()}-2`,
+          toolName: 'analyze_content',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            content: userMessage,
+            analysis_type: 'comprehensive'
+          },
+          status: 'pending' as const,
+          order: 1,
+          visible: false
+        },
+        {
+          id: `tool-${Date.now()}-3`,
+          toolName: 'generate_summary',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            source: 'user_query',
+            context: userMessage
+          },
+          status: 'pending' as const,
+          order: 2,
+          visible: false
+        }
+      ];
+
+      return tools;
+    }
   };
 
   const handleToolAction = (messageId: string, action: 'run' | 'cancel', toolId?: string) => {
