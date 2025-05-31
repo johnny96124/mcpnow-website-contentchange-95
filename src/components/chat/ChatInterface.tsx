@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
-import { ChatSession, Message, ToolInvocation } from './types/chat';
+import { ChatSession, Message } from './types/chat';
 
 export const ChatInterface = () => {
   const { servers, profiles, getConnectedServers } = useMCPServers();
@@ -92,9 +93,9 @@ export const ChatInterface = () => {
     }
 
     try {
-      // 生成AI回复（包含工具调用）
-      console.log('Generating AI response with tools...');
-      await generateAIResponseWithToolsInline(content, selectedServers);
+      // 生成AI回复（内联工具调用）
+      console.log('Generating AI response with inline tools...');
+      await generateAIResponseWithInlineToolsInline(content, selectedServers);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -112,7 +113,7 @@ export const ChatInterface = () => {
     }
   };
 
-  const generateAIResponseWithToolsInline = async (
+  const generateAIResponseWithInlineToolsInline = async (
     userMessage: string,
     selectedServers: string[]
   ) => {
@@ -121,7 +122,7 @@ export const ChatInterface = () => {
 
     if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
       toolsToUse.push({
-        name: 'analyze_content',
+        name: 'get_figma_data',
         request: {
           nodeId: '630-5984',
           fileKey: 'NuM4uOURmTCLfqltMzDJH'
@@ -143,38 +144,33 @@ export const ChatInterface = () => {
       });
     }
 
-    // 总是添加至少一个工具
+    // 总是添加工具调用，即使没有特定工具
     if (toolsToUse.length === 0) {
       toolsToUse.push({
-        name: 'analyze_content',
+        name: 'analyze_request',
         request: { message: userMessage }
       });
     }
 
-    // 创建工具调用信息
-    const toolInvocations: ToolInvocation[] = toolsToUse.map(tool => ({
-      id: `tool-${Date.now()}-${Math.random()}`,
+    const pendingCalls = toolsToUse.map(tool => ({
       toolName: tool.name,
       serverId: selectedServers[0],
       serverName: `服务器 ${selectedServers[0]}`,
-      request: tool.request,
-      response: null,
-      status: 'pending',
-      timestamp: Date.now()
+      request: tool.request
     }));
 
-    // 创建AI助手消息，包含工具调用
-    const aiMessage: Message = {
-      id: `msg-${Date.now()}-ai`,
-      role: 'assistant',
+    const toolCallMessage: Message = {
+      id: `msg-${Date.now()}-tool`,
+      role: 'tool_call',
       content: `好的，我将使用 MCP 工具来处理您的请求。`,
       timestamp: Date.now(),
-      toolInvocations: toolInvocations
+      pendingToolCalls: pendingCalls,
+      toolCallStatus: 'pending'
     };
 
-    setCurrentMessages(prev => [...prev, aiMessage]);
+    setCurrentMessages(prev => [...prev, toolCallMessage]);
     if (currentSession) {
-      addMessage(currentSession.id, aiMessage);
+      addMessage(currentSession.id, toolCallMessage);
     }
   };
 
