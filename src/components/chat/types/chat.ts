@@ -33,15 +33,6 @@ export interface PendingToolCall {
   request: any;
 }
 
-export interface ToolQueueItem {
-  toolName: string;
-  serverId: string;
-  serverName: string;
-  request: any;
-  description: string;
-  status: 'pending' | 'executing' | 'completed' | 'cancelled';
-}
-
 export interface MessageAttachment {
   id: string;
   name: string;
@@ -58,9 +49,7 @@ export interface Message {
   timestamp: number;
   toolInvocations?: ToolInvocation[];
   pendingToolCalls?: PendingToolCall[];
-  toolQueue?: ToolQueueItem[];
-  currentToolIndex?: number;
-  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled' | 'pending_first' | 'pending_next' | 'all_completed';
+  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled';
   attachments?: MessageAttachment[];
 }
 
