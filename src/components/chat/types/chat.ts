@@ -42,13 +42,6 @@ export interface MessageAttachment {
   preview?: string;
 }
 
-export interface SequentialToolExecution {
-  tools: PendingToolCall[];
-  currentIndex: number;
-  completedTools: ToolInvocation[];
-  status: 'waiting_confirmation' | 'executing' | 'completed' | 'cancelled';
-}
-
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'tool_call';
@@ -57,7 +50,6 @@ export interface Message {
   toolInvocations?: ToolInvocation[];
   pendingToolCalls?: PendingToolCall[];
   toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled';
-  sequentialExecution?: SequentialToolExecution;
   attachments?: MessageAttachment[];
 }
 

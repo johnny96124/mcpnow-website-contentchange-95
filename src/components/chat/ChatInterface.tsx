@@ -9,7 +9,7 @@ import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
-import { ChatSession, Message, MessageAttachment, SequentialToolExecution } from './types/chat';
+import { ChatSession, Message, MessageAttachment } from './types/chat';
 
 interface AttachedFile {
   id: string;
@@ -111,23 +111,14 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 生成待执行的工具列表
-      const toolsToExecute = generatePendingToolCalls(content, selectedServers);
-      
-      // 创建顺序工具执行的AI消息
-      const sequentialExecution: SequentialToolExecution = {
-        tools: toolsToExecute,
-        currentIndex: 0,
-        completedTools: [],
-        status: 'waiting_confirmation'
-      };
-
+      // 创建AI助手消息，包含待处理的工具调用
       const aiMessage: Message = {
         id: `msg-${Date.now()}-ai`,
         role: 'assistant',
-        content: `准备执行 ${toolsToExecute.length} 个工具调用。需要您逐个确认每个工具的执行。`,
+        content: '正在分析您的请求并准备调用相关工具...',
         timestamp: Date.now(),
-        sequentialExecution
+        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
+        toolCallStatus: 'pending'
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
@@ -149,35 +140,44 @@ export const ChatInterface = () => {
   };
 
   const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    // 为了演示，创建一个包含3个工具调用的固定案例
-    const toolsToUse = [
-      {
-        name: 'search_documents',
-        request: {
-          query: userMessage.substring(0, 50),
-          category: 'general'
-        }
-      },
-      {
-        name: 'analyze_content',
-        request: {
-          content: userMessage,
-          analysis_type: 'semantic'
-        }
-      },
-      {
-        name: 'generate_summary',
-        request: {
-          source: 'analysis_result',
-          format: 'markdown'
-        }
-      }
-    ];
+    const toolsToUse: Array<{ name: string; request: any }> = [];
 
-    return toolsToUse.map((tool, index) => ({
+    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
+      toolsToUse.push({
+        name: 'get_figma_data',
+        request: {
+          nodeId: '630-5984',
+          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+        }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
+      toolsToUse.push({
+        name: 'read_file',
+        request: { path: '/example/config.json' }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
+      toolsToUse.push({
+        name: 'search',
+        request: { query: userMessage.substring(0, 50) }
+      });
+    }
+
+    // 总是添加工具调用，即使没有特定工具
+    if (toolsToUse.length === 0) {
+      toolsToUse.push({
+        name: 'analyze_request',
+        request: { message: userMessage }
+      });
+    }
+
+    return toolsToUse.map(tool => ({
       toolName: tool.name,
       serverId: selectedServers[0],
-      serverName: `MCP服务器 ${selectedServers[0]}`,
+      serverName: `服务器 ${selectedServers[0]}`,
       request: tool.request
     }));
   };
@@ -211,79 +211,6 @@ export const ChatInterface = () => {
         });
       }, 2000);
     }
-  };
-
-  const handleConfirmTool = (messageId: string, toolIndex: number) => {
-    const updateMessageInline = (updates: Partial<Message>) => {
-      setCurrentMessages(prev => 
-        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
-      );
-      if (currentSession) {
-        updateMessage(currentSession.id, messageId, updates);
-      }
-    };
-
-    // 获取当前消息
-    const currentMessage = currentMessages.find(msg => msg.id === messageId);
-    if (!currentMessage?.sequentialExecution) return;
-
-    const { tools, currentIndex, completedTools } = currentMessage.sequentialExecution;
-    const currentTool = tools[currentIndex];
-
-    // 模拟工具执行
-    const mockToolResult = {
-      id: `tool-${Date.now()}`,
-      toolName: currentTool.toolName,
-      serverId: currentTool.serverId,
-      serverName: currentTool.serverName,
-      request: currentTool.request,
-      response: { success: true, data: `${currentTool.toolName} 执行结果` },
-      status: 'success' as const,
-      timestamp: Date.now(),
-      duration: 1500
-    };
-
-    const newCompletedTools = [...completedTools, mockToolResult];
-    const nextIndex = currentIndex + 1;
-    const isLastTool = nextIndex >= tools.length;
-
-    const updatedSequentialExecution: SequentialToolExecution = {
-      tools,
-      currentIndex: nextIndex,
-      completedTools: newCompletedTools,
-      status: isLastTool ? 'completed' : 'waiting_confirmation'
-    };
-
-    updateMessageInline({
-      sequentialExecution: updatedSequentialExecution,
-      content: isLastTool 
-        ? '所有工具调用已完成！基于执行结果，我已经为您处理了请求。'
-        : `工具 ${currentTool.toolName} 执行完成。准备执行下一个工具。`
-    });
-  };
-
-  const handleCancelExecution = (messageId: string) => {
-    const updateMessageInline = (updates: Partial<Message>) => {
-      setCurrentMessages(prev => 
-        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
-      );
-      if (currentSession) {
-        updateMessage(currentSession.id, messageId, updates);
-      }
-    };
-
-    const currentMessage = currentMessages.find(msg => msg.id === messageId);
-    if (!currentMessage?.sequentialExecution) return;
-
-    const updatedSequentialExecution: SequentialToolExecution = {
-      ...currentMessage.sequentialExecution,
-      status: 'cancelled'
-    };
-
-    updateMessageInline({
-      sequentialExecution: updatedSequentialExecution,
-      content: '工具调用序列已被取消。'
-    });
   };
 
   const canSendMessage = selectedServers.length > 0 && !isSending;
@@ -386,8 +313,6 @@ export const ChatInterface = () => {
               isLoading={isSending}
               streamingMessageId={streamingMessageId}
               onUpdateMessage={handleToolAction}
-              onConfirmTool={handleConfirmTool}
-              onCancelExecution={handleCancelExecution}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
