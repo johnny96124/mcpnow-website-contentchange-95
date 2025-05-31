@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Settings, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,113 +29,66 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
   const [expandedServers, setExpandedServers] = useState<Set<string>>(new Set());
   const [toolStates, setToolStates] = useState<Record<string, boolean>>({});
 
-  // Updated tool data matching the second image
+  // 根据图片中的工具名称更新工具数据
   const getServerTools = (serverId: string): Tool[] => {
     const mockTools: Record<string, Tool[]> = {
-      'PostgresTool-DevDB': [],
-      'GitHub Copilot': [],
-      'Local File Assistant': [],
+      'PostgresTool-DevDB': [
+        { id: 'query_database', name: 'query_database', enabled: true, description: '数据库查询', category: 'database' },
+        { id: 'create_table', name: 'create_table', enabled: true, description: '创建数据表', category: 'database' },
+        { id: 'insert_data', name: 'insert_data', enabled: true, description: '插入数据', category: 'database' }
+      ],
+      'GitHub Copilot': [
+        { id: 'code_completion', name: 'code_completion', enabled: true, description: '代码补全', category: 'ai' },
+        { id: 'code_review', name: 'code_review', enabled: true, description: '代码审查', category: 'ai' },
+        { id: 'generate_tests', name: 'generate_tests', enabled: true, description: '生成测试', category: 'ai' }
+      ],
+      'Local File Assistant': [
+        { id: 'read_file', name: 'read_file', enabled: true, description: '读取文件', category: 'file_operations' },
+        { id: 'write_file', name: 'write_file', enabled: true, description: '写入文件', category: 'file_operations' },
+        { id: 'list_directory', name: 'list_directory', enabled: true, description: '列出目录', category: 'file_operations' }
+      ],
       'filesystem': [
-        { 
-          id: 'read_file', 
-          name: 'read_file', 
-          enabled: true, 
-          description: '读取文件内容',
-          category: 'file_operations'
-        },
-        { 
-          id: 'write_file', 
-          name: 'write_file', 
-          enabled: true, 
-          description: '写入文件内容',
-          category: 'file_operations'
-        },
-        { 
-          id: 'list_directory', 
-          name: 'list_directory', 
-          enabled: true, 
-          description: '列出目录内容',
-          category: 'file_operations'
-        }
+        { id: 'read_file', name: 'read_file', enabled: true, description: '读取文件内容', category: 'file_operations' },
+        { id: 'write_file', name: 'write_file', enabled: true, description: '写入文件内容', category: 'file_operations' },
+        { id: 'list_directory', name: 'list_directory', enabled: true, description: '列出目录内容', category: 'file_operations' }
       ],
       'mcp-now': [
-        { 
-          id: 'echo', 
-          name: 'echo', 
-          enabled: true, 
-          description: '回显输入的文本',
-          category: 'utility'
-        },
-        { 
-          id: 'add', 
-          name: 'add', 
-          enabled: true, 
-          description: '数学加法运算',
-          category: 'math'
-        },
-        { 
-          id: 'printEnv', 
-          name: 'printEnv', 
-          enabled: true, 
-          description: '打印环境变量',
-          category: 'system'
-        },
-        { 
-          id: 'longRunningOperation', 
-          name: 'longRunningOperation', 
-          enabled: true, 
-          description: '执行长时间运行的操作',
-          category: 'async'
-        },
-        { 
-          id: 'sampleLLM', 
-          name: 'sampleLLM', 
-          enabled: true, 
-          description: '调用示例LLM',
-          category: 'ai'
-        },
-        { 
-          id: 'getTinyImage', 
-          name: 'getTinyImage', 
-          enabled: true, 
-          description: '获取小图片',
-          category: 'media'
-        },
-        { 
-          id: 'annotatedMessage', 
-          name: 'annotatedMessage', 
-          enabled: true, 
-          description: '创建带注释的消息',
-          category: 'utility'
-        },
-        { 
-          id: 'getResourceReference', 
-          name: 'getResourceReference', 
-          enabled: true, 
-          description: '获取资源引用',
-          category: 'resource'
-        },
-        { 
-          id: 'get_figma_data', 
-          name: 'get_figma_data', 
-          enabled: true, 
-          description: '获取Figma设计数据',
-          category: 'design'
-        },
-        { 
-          id: 'download_figma_images', 
-          name: 'download_figma_images', 
-          enabled: true, 
-          description: '下载Figma图片',
-          category: 'design'
-        },
-        { 
-          id: 'browser_close', 
-          name: 'browser_close', 
-          enabled: true, 
-          description: '关闭浏览器',
-          category: 'browser'
-        }
+        { id: 'get_figma_data', name: 'get_figma_data', enabled: true, description: '获取Figma设计数据', category: 'design' },
+        { id: 'download_figma_images', name: 'download_figma_images', enabled: true, description: '下载Figma图片', category: 'design' },
+        { id: 'browser_close', name: 'browser_close', enabled: true, description: '关闭浏览器', category: 'browser' },
+        { id: 'browser_resize', name: 'browser_resize', enabled: true, description: '调整浏览器大小', category: 'browser' },
+        { id: 'browser_console_messages', name: 'browser_console_messages', enabled: true, description: '浏览器控制台消息', category: 'browser' },
+        { id: 'browser_handle_dialog', name: 'browser_handle_dialog', enabled: true, description: '处理浏览器对话框', category: 'browser' },
+        { id: 'browser_file_upload', name: 'browser_file_upload', enabled: true, description: '浏览器文件上传', category: 'browser' },
+        { id: 'browser_install', name: 'browser_install', enabled: true, description: '浏览器安装', category: 'browser' },
+        { id: 'browser_press_key', name: 'browser_press_key', enabled: true, description: '浏览器按键', category: 'browser' },
+        { id: 'browser_navigate', name: 'browser_navigate', enabled: true, description: '浏览器导航', category: 'browser' },
+        { id: 'browser_navigate_back', name: 'browser_navigate_back', enabled: true, description: '浏览器后退', category: 'browser' },
+        { id: 'browser_navigate_forward', name: 'browser_navigate_forward', enabled: true, description: '浏览器前进', category: 'browser' },
+        { id: 'browser_network_requests', name: 'browser_network_requests', enabled: true, description: '浏览器网络请求', category: 'browser' },
+        { id: 'browser_pdf_save', name: 'browser_pdf_save', enabled: true, description: '保存PDF', category: 'browser' },
+        { id: 'browser_take_screenshot', name: 'browser_take_screenshot', enabled: true, description: '截图', category: 'browser' },
+        { id: 'browser_snapshot', name: 'browser_snapshot', enabled: true, description: '快照', category: 'browser' },
+        { id: 'browser_click', name: 'browser_click', enabled: true, description: '浏览器点击', category: 'browser' },
+        { id: 'browser_drag', name: 'browser_drag', enabled: true, description: '浏览器拖拽', category: 'browser' },
+        { id: 'browser_hover', name: 'browser_hover', enabled: true, description: '浏览器悬停', category: 'browser' },
+        { id: 'browser_type', name: 'browser_type', enabled: true, description: '浏览器输入', category: 'browser' },
+        { id: 'browser_select_option', name: 'browser_select_option', enabled: true, description: '选择选项', category: 'browser' },
+        { id: 'browser_tab_list', name: 'browser_tab_list', enabled: true, description: '标签页列表', category: 'browser' },
+        { id: 'browser_tab_new', name: 'browser_tab_new', enabled: true, description: '新建标签页', category: 'browser' },
+        { id: 'browser_tab_select', name: 'browser_tab_select', enabled: true, description: '选择标签页', category: 'browser' },
+        { id: 'browser_tab_close', name: 'browser_tab_close', enabled: true, description: '关闭标签页', category: 'browser' },
+        { id: 'browser_generate_playwright_test', name: 'browser_generate_playwright_test', enabled: true, description: '生成Playwright测试', category: 'testing' },
+        { id: 'browser_wait_for', name: 'browser_wait_for', enabled: true, description: '等待元素', category: 'browser' },
+        { id: 'sequentialthinking', name: 'sequentialthinking', enabled: true, description: '顺序思考', category: 'ai' },
+        { id: 'echo', name: 'echo', enabled: true, description: '回显', category: 'utility' },
+        { id: 'add', name: 'add', enabled: true, description: '加法运算', category: 'math' },
+        { id: 'printEnv', name: 'printEnv', enabled: true, description: '打印环境变量', category: 'system' },
+        { id: 'longRunningOperation', name: 'longRunningOperation', enabled: true, description: '长时间运行操作', category: 'async' },
+        { id: 'sampleLLM', name: 'sampleLLM', enabled: true, description: '示例LLM', category: 'ai' },
+        { id: 'getTinyImage', name: 'getTinyImage', enabled: true, description: '获取小图片', category: 'media' },
+        { id: 'annotatedMessage', name: 'annotatedMessage', enabled: true, description: '带注释消息', category: 'utility' },
+        { id: 'getResourceReference', name: 'getResourceReference', enabled: true, description: '获取资源引用', category: 'resource' }
       ]
     };
     return mockTools[serverId] || [];
