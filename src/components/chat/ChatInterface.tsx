@@ -178,19 +178,32 @@ export const ChatInterface = () => {
     });
   };
 
-  // 新增：处理消息重新生成
+  // 修复：处理消息重新生成
   const handleRegenerateMessage = (messageId: string) => {
     if (!currentSession) return;
     
-    // 找到这条消息之前的最后一条用户消息
+    // 找到这条AI消息的索引
     const messageIndex = currentMessages.findIndex(msg => msg.id === messageId);
-    const userMessages = currentMessages.slice(0, messageIndex).filter(msg => msg.role === 'user');
+    if (messageIndex === -1) return;
     
-    if (userMessages.length > 0) {
-      const lastUserMessage = userMessages[userMessages.length - 1];
-      // 重新发送最后一条用户消息
-      handleSendMessage(lastUserMessage.content);
-    }
+    // 找到这条AI消息之前的最后一条用户消息
+    const messagesBeforeAI = currentMessages.slice(0, messageIndex);
+    const lastUserMessage = messagesBeforeAI.reverse().find(msg => msg.role === 'user');
+    
+    if (!lastUserMessage) return;
+    
+    // 删除从AI消息开始的所有后续消息
+    const newMessages = currentMessages.slice(0, messageIndex);
+    setCurrentMessages(newMessages);
+    
+    // 从数据库中也删除这些消息
+    const messagesToDelete = currentMessages.slice(messageIndex);
+    messagesToDelete.forEach(msg => {
+      deleteMessage(currentSession.id, msg.id);
+    });
+    
+    // 重新发送最后一条用户消息
+    handleSendMessage(lastUserMessage.content);
     
     toast({
       title: "正在重新生成",
