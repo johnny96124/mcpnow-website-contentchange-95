@@ -112,11 +112,11 @@ export const ChatInterface = () => {
       // 生成所有需要的工具调用队列
       const toolQueue = generateToolQueue(content, selectedServers);
       
-      // 创建AI助手消息，包含工具调用队列
+      // 直接创建AI助手消息，包含工具调用队列，状态设为pending_first以立即显示工具确认
       const aiMessage: Message = {
         id: `msg-${Date.now()}-ai`,
         role: 'assistant',
-        content: '正在分析您的请求并准备调用相关工具...',
+        content: '需要调用以下工具来处理您的请求：',
         timestamp: Date.now(),
         toolQueue,
         currentToolIndex: 0,
