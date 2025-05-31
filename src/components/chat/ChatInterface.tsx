@@ -6,9 +6,11 @@ import { ServerSelector } from './ServerSelector/ServerSelector';
 import { ChatHistory } from './ChatHistory/ChatHistory';
 import { MessageThread } from './MessageThread/MessageThread';
 import { MessageInput } from './InputArea/MessageInput';
+import { ConversationExport } from './ConversationExport';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
+import { useToast } from '@/hooks/use-toast';
 import { ChatSession, Message, MessageAttachment, PendingToolCall } from './types/chat';
 
 interface AttachedFile {
@@ -35,6 +37,7 @@ export const ChatInterface = () => {
     streamingMessageId, 
     generateAIResponseWithInlineTools
   } = useStreamingChat();
+  const { toast } = useToast();
   
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
@@ -155,6 +158,59 @@ export const ChatInterface = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  // 新增：处理消息编辑
+  const handleEditMessage = (messageId: string, newContent: string) => {
+    if (!currentSession) return;
+    
+    const updatedMessage: Partial<Message> = { content: newContent };
+    setCurrentMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId ? { ...msg, ...updatedMessage } : msg
+      )
+    );
+    updateMessage(currentSession.id, messageId, updatedMessage);
+    
+    toast({
+      title: "消息已更新",
+      description: "消息内容已成功修改",
+    });
+  };
+
+  // 新增：处理消息重新生成
+  const handleRegenerateMessage = (messageId: string) => {
+    if (!currentSession) return;
+    
+    // 找到这条消息之前的最后一条用户消息
+    const messageIndex = currentMessages.findIndex(msg => msg.id === messageId);
+    const userMessages = currentMessages.slice(0, messageIndex).filter(msg => msg.role === 'user');
+    
+    if (userMessages.length > 0) {
+      const lastUserMessage = userMessages[userMessages.length - 1];
+      // 重新发送最后一条用户消息
+      handleSendMessage(lastUserMessage.content);
+    }
+    
+    toast({
+      title: "正在重新生成",
+      description: "AI正在重新生成回答",
+    });
+  };
+
+  // 新增：处理消息评分
+  const handleRateMessage = (messageId: string, rating: 'positive' | 'negative' | null) => {
+    if (!currentSession) return;
+    
+    const updatedMessage: Partial<Message> = { rating };
+    setCurrentMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId ? { ...msg, ...updatedMessage } : msg
+      )
+    );
+    updateMessage(currentSession.id, messageId, updatedMessage);
+    
+    console.log(`Message ${messageId} rated as:`, rating);
   };
 
   const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
@@ -468,8 +524,16 @@ export const ChatInterface = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-blue-500" />
-            <span className="text-sm text-muted-foreground">AI助手</span>
+            {/* 新增：导出功能 */}
+            <ConversationExport
+              messages={currentMessages}
+              sessionTitle={currentSession?.title}
+            />
+            
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-blue-500" />
+              <span className="text-sm text-muted-foreground">AI助手</span>
+            </div>
           </div>
         </div>
 
@@ -481,6 +545,10 @@ export const ChatInterface = () => {
               isLoading={false}
               streamingMessageId={streamingMessageId}
               onUpdateMessage={handleToolAction}
+              onDeleteMessage={deleteMessage}
+              onEditMessage={handleEditMessage}
+              onRegenerateMessage={handleRegenerateMessage}
+              onRateMessage={handleRateMessage}
             />
           ) : (
             <div className="flex items-center justify-center h-full">

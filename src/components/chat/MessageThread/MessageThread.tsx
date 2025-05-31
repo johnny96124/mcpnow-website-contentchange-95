@@ -11,8 +11,11 @@ interface MessageThreadProps {
   messages: Message[];
   isLoading: boolean;
   streamingMessageId?: string | null;
-  onUpdateMessage?: (messageId: string, action: 'run' | 'cancel') => void;
+  onUpdateMessage?: (messageId: string, action: 'run' | 'cancel', toolId?: string) => void;
   onDeleteMessage?: (messageId: string) => void;
+  onEditMessage?: (messageId: string, newContent: string) => void;
+  onRegenerateMessage?: (messageId: string) => void;
+  onRateMessage?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
 }
 
 export const MessageThread: React.FC<MessageThreadProps> = ({
@@ -21,6 +24,9 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   streamingMessageId,
   onUpdateMessage,
   onDeleteMessage,
+  onEditMessage,
+  onRegenerateMessage,
+  onRateMessage,
 }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -65,6 +71,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   key={message.id} 
                   message={message}
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
+                  onEdit={onEditMessage ? (newContent) => onEditMessage(message.id, newContent) : undefined}
                 />
               );
             } else {
@@ -74,7 +81,9 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   message={message} 
                   isStreaming={message.id === streamingMessageId}
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
+                  onRegenerate={onRegenerateMessage ? () => onRegenerateMessage(message.id) : undefined}
                   onToolAction={onUpdateMessage}
+                  onRating={onRateMessage}
                 />
               );
             }

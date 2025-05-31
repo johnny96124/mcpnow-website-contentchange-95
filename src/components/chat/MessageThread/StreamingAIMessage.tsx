@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,20 +13,26 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Message } from '../types/chat';
+import { MessageActions } from './MessageActions';
+import { MessageRating } from './MessageRating';
 import { formatDistanceToNow } from 'date-fns';
 
 interface StreamingAIMessageProps {
   message: Message;
   isStreaming?: boolean;
   onDelete?: () => void;
+  onRegenerate?: () => void;
   onToolAction?: (messageId: string, action: 'run' | 'cancel', toolId?: string) => void;
+  onRating?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
 }
 
 export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({ 
   message, 
   isStreaming = false,
   onDelete,
-  onToolAction
+  onRegenerate,
+  onToolAction,
+  onRating
 }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [showActions, setShowActions] = useState(false);
@@ -96,26 +103,42 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
             )}
           </div>
           
-          {onDelete && (
-            <div className={`transition-opacity ${showActions ? 'opacity-100' : 'opacity-0'}`}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6">
-                    <MoreVertical className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={onDelete}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    删除消息
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {/* 新增的消息操作按钮 */}
+            <MessageActions
+              content={message.content}
+              messageId={message.id}
+              onRegenerate={onRegenerate}
+              isUserMessage={false}
+            />
+            
+            {/* 新增的评分组件 */}
+            <MessageRating
+              messageId={message.id}
+              onRating={onRating}
+            />
+            
+            {onDelete && (
+              <div className={`transition-opacity ${showActions ? 'opacity-100' : 'opacity-0'}`}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <MoreVertical className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={onDelete}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      删除消息
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* AI 回复内容 */}
@@ -159,7 +182,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                 </div>
               </div>
 
-              {/* 按顺序显示工具 */}
               <div className="space-y-3">
                 {visibleTools
                   .sort((a, b) => a.order - b.order)
@@ -185,7 +207,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                 {tool.serverName}
                               </Badge>
 
-                              {/* 状态标签 */}
                               {tool.status === 'executing' && (
                                 <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-700">
                                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -223,7 +244,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                             </div>
                             
                             <div className="flex items-center gap-2">
-                              {/* 单个工具的操作按钮 */}
                               {tool.status === 'pending' && (
                                 <div className="flex gap-2">
                                   <Button
