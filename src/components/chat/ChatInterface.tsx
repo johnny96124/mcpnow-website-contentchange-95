@@ -160,6 +160,59 @@ export const ChatInterface = () => {
     }
   };
 
+  // 专门用于基于编辑后的用户消息重新生成AI回复的函数
+  const generateAIResponseForEditedMessage = async (content: string, sessionId: string) => {
+    setIsSending(true);
+    
+    try {
+      // 创建AI助手消息，开始流式生成
+      const aiMessageId = `msg-${Date.now()}-ai`;
+      const fullContent = `基于您修改后的请求"${content}"，我重新为您分析并提供回答。让我调用相关工具来获取最新的信息...`;
+
+      const aiMessage: Message = {
+        id: aiMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now()
+      };
+
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      addMessage(sessionId, aiMessage);
+
+      // 先完成流式文字生成
+      await simulateStreamingText(sessionId, aiMessageId, fullContent);
+      
+      // 文字生成完成后，生成工具调用序列
+      const toolCalls = generateSequentialToolCalls(content, selectedServers);
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls: toolCalls,
+        toolCallStatus: 'pending',
+        currentToolIndex: 0
+      };
+
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
+      );
+      
+      updateMessage(sessionId, aiMessageId, messageWithTools);
+
+    } catch (error) {
+      console.error('Failed to get AI response:', error);
+      const errorMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: '抱歉，处理您的请求时遇到了错误，请稍后重试。',
+        timestamp: Date.now()
+      };
+      setCurrentMessages(prev => [...prev, errorMessage]);
+      addMessage(sessionId, errorMessage);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   // 新增：处理消息编辑
   const handleEditMessage = (messageId: string, newContent: string) => {
     if (!currentSession) return;
@@ -179,14 +232,16 @@ export const ChatInterface = () => {
   };
 
   // 新增：处理消息编辑并重新生成
-  const handleEditAndRegenerate = (messageId: string, newContent: string) => {
+  const handleEditAndRegenerate = async (messageId: string, newContent: string) => {
     if (!currentSession) return;
+    
+    console.log('开始编辑并重新生成:', messageId, newContent);
     
     // 找到这条用户消息的索引
     const messageIndex = currentMessages.findIndex(msg => msg.id === messageId);
     if (messageIndex === -1) return;
     
-    // 更新用户消息内容
+    // 首先更新用户消息内容
     const updatedMessage: Partial<Message> = { content: newContent };
     setCurrentMessages(prev => 
       prev.map(msg => 
@@ -196,26 +251,29 @@ export const ChatInterface = () => {
     updateMessage(currentSession.id, messageId, updatedMessage);
     
     // 删除这条用户消息之后的所有消息（包括AI回复）
-    const messagesToKeep = currentMessages.slice(0, messageIndex + 1);
     const messagesToDelete = currentMessages.slice(messageIndex + 1);
+    console.log('要删除的消息:', messagesToDelete);
     
-    // 更新当前消息列表，只保留到编辑的用户消息为止
-    setCurrentMessages(messagesToKeep.map(msg => 
+    // 先从当前状态中删除后续消息
+    const messagesToKeep = currentMessages.slice(0, messageIndex + 1).map(msg => 
       msg.id === messageId ? { ...msg, content: newContent } : msg
-    ));
+    );
+    setCurrentMessages(messagesToKeep);
     
     // 从数据库中删除后续消息
     messagesToDelete.forEach(msg => {
       deleteMessage(currentSession.id, msg.id);
     });
     
-    // 基于新的用户消息内容重新生成AI回复
-    handleSendMessage(newContent);
-    
     toast({
       title: "正在重新生成",
       description: "基于修改后的消息重新生成AI回复",
     });
+    
+    // 等待一小段时间确保删除操作完成，然后重新生成AI回复
+    setTimeout(() => {
+      generateAIResponseForEditedMessage(newContent, currentSession.id);
+    }, 100);
   };
 
   // 修复：处理消息重新生成
