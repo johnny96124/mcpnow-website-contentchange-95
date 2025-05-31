@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -76,15 +77,12 @@ export const ChatInterface = () => {
     const attachments: MessageAttachment[] = [];
     if (attachedFiles && attachedFiles.length > 0) {
       for (const attachedFile of attachedFiles) {
-        // In a real app, you would upload the file to a server here
-        // For now, we'll just create a mock attachment object
         const attachment: MessageAttachment = {
           id: attachedFile.id,
           name: attachedFile.file.name,
           size: attachedFile.file.size,
           type: attachedFile.file.type,
           preview: attachedFile.preview,
-          // url would be set after uploading to server
         };
         attachments.push(attachment);
       }
@@ -111,14 +109,18 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，包含待处理的工具调用
+      // 生成所有需要的工具调用队列
+      const toolQueue = generateToolQueue(content, selectedServers);
+      
+      // 创建AI助手消息，包含工具调用队列
       const aiMessage: Message = {
         id: `msg-${Date.now()}-ai`,
         role: 'assistant',
         content: '正在分析您的请求并准备调用相关工具...',
         timestamp: Date.now(),
-        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-        toolCallStatus: 'pending'
+        toolQueue,
+        currentToolIndex: 0,
+        toolCallStatus: 'pending_first'
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
@@ -139,8 +141,8 @@ export const ChatInterface = () => {
     }
   };
 
-  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    const toolsToUse: Array<{ name: string; request: any }> = [];
+  const generateToolQueue = (userMessage: string, selectedServers: string[]) => {
+    const toolsToUse: Array<{ name: string; request: any; description: string }> = [];
 
     if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
       toolsToUse.push({
@@ -148,29 +150,33 @@ export const ChatInterface = () => {
         request: {
           nodeId: '630-5984',
           fileKey: 'NuM4uOURmTCLfqltMzDJH'
-        }
+        },
+        description: '获取 Figma 设计节点的详细信息'
       });
     }
 
     if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
       toolsToUse.push({
         name: 'read_file',
-        request: { path: '/example/config.json' }
+        request: { path: '/example/config.json' },
+        description: '读取指定路径的文件内容'
       });
     }
 
     if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
       toolsToUse.push({
         name: 'search',
-        request: { query: userMessage.substring(0, 50) }
+        request: { query: userMessage.substring(0, 50) },
+        description: '执行搜索操作以获取相关信息'
       });
     }
 
-    // 总是添加工具调用，即使没有特定工具
+    // 如果没有特定工具，添加默认分析工具
     if (toolsToUse.length === 0) {
       toolsToUse.push({
         name: 'analyze_request',
-        request: { message: userMessage }
+        request: { message: userMessage },
+        description: '分析用户请求并提供相应的响应'
       });
     }
 
@@ -178,7 +184,9 @@ export const ChatInterface = () => {
       toolName: tool.name,
       serverId: selectedServers[0],
       serverName: `服务器 ${selectedServers[0]}`,
-      request: tool.request
+      request: tool.request,
+      description: tool.description,
+      status: 'pending' as const
     }));
   };
 
@@ -192,23 +200,56 @@ export const ChatInterface = () => {
       }
     };
 
+    const message = currentMessages.find(msg => msg.id === messageId);
+    if (!message || !message.toolQueue) return;
+
+    const currentIndex = message.currentToolIndex || 0;
+    const currentTool = message.toolQueue[currentIndex];
+
     if (action === 'cancel') {
+      // 取消当前工具调用
+      const updatedQueue = [...message.toolQueue];
+      updatedQueue[currentIndex] = { ...currentTool, status: 'cancelled' };
+      
       updateMessageInline({ 
+        toolQueue: updatedQueue,
         toolCallStatus: 'cancelled',
-        content: '工具调用已被取消。'
+        content: `工具调用已被取消：${currentTool.toolName}`
       });
     } else if (action === 'run') {
+      // 执行当前工具
+      const updatedQueue = [...message.toolQueue];
+      updatedQueue[currentIndex] = { ...currentTool, status: 'executing' };
+      
       updateMessageInline({ 
+        toolQueue: updatedQueue,
         toolCallStatus: 'executing',
-        content: '正在执行工具调用...'
+        content: `正在执行工具：${currentTool.toolName}...`
       });
       
       // 模拟工具执行
       setTimeout(() => {
-        updateMessageInline({ 
-          toolCallStatus: 'completed',
-          content: '工具执行完成！基于工具调用的结果，我已经为您处理了请求。以下是获取到的信息：\n\n根据 Figma 数据分析，该节点是一个设计组件，尺寸为 375x812，背景色为白色。这为前端开发提供了准确的设计规范。'
-        });
+        const completedQueue = [...updatedQueue];
+        completedQueue[currentIndex] = { ...currentTool, status: 'completed' };
+        
+        const nextIndex = currentIndex + 1;
+        
+        if (nextIndex < message.toolQueue.length) {
+          // 还有更多工具需要执行
+          updateMessageInline({ 
+            toolQueue: completedQueue,
+            currentToolIndex: nextIndex,
+            toolCallStatus: 'pending_next',
+            content: `工具 ${currentTool.toolName} 执行完成。准备执行下一个工具：${message.toolQueue[nextIndex].toolName}`
+          });
+        } else {
+          // 所有工具都执行完成
+          updateMessageInline({ 
+            toolQueue: completedQueue,
+            toolCallStatus: 'all_completed',
+            content: '所有工具执行完成！基于工具调用的结果，我已经为您处理了请求。\n\n根据执行结果，获取到了相关信息并完成了处理。'
+          });
+        }
       }, 2000);
     }
   };
