@@ -133,18 +133,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                       <Wrench className="h-4 w-4 text-purple-500" />
                     )}
                     <span className="font-medium text-sm">MCP工具调用</span>
-                    {isExecuting && (
-                      <Badge variant="outline" className="text-xs flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        执行中
-                      </Badge>
-                    )}
-                    {isCompleted && (
-                      <Badge variant="default" className="text-xs bg-green-100 text-green-700">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        完成
-                      </Badge>
-                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     这将帮助您了解相关信息，以便更好地回答您的问题。
@@ -200,6 +188,13 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               <Server className="h-3 w-3" />
                               服务器 {pendingCalls[0]?.serverId || 'postgres-dev'}
                             </Badge>
+
+                            {isCompleted && (
+                              <Badge variant="default" className="text-xs bg-green-100 text-green-700">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                完成
+                              </Badge>
+                            )}
                           </div>
                           
                           <Button variant="ghost" size="sm" className="h-auto p-1">
