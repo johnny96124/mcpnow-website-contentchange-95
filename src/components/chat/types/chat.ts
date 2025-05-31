@@ -40,7 +40,7 @@ export interface Message {
   timestamp: number;
   toolInvocations?: ToolInvocation[];
   pendingToolCalls?: PendingToolCall[];
-  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled';
+  toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected';
 }
 
 export interface ChatSession {
