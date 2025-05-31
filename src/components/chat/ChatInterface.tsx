@@ -111,7 +111,7 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 第一步：创建AI助手消息，先进行流式文字生成
+      // 创建AI助手消息，包含初始内容和pending工具调用
       const aiMessageId = `msg-${Date.now()}-ai`;
       const initialContent = '我理解您的请求';
       const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
@@ -120,7 +120,9 @@ export const ChatInterface = () => {
         id: aiMessageId,
         role: 'assistant',
         content: initialContent,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
+        toolCallStatus: 'pending'
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
@@ -128,21 +130,6 @@ export const ChatInterface = () => {
 
       // 模拟流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
-
-      // 第二步：在文字生成完成后，添加工具调用消息
-      setTimeout(async () => {
-        const toolCallMessage: Message = {
-          id: `msg-${Date.now()}-tool`,
-          role: 'assistant',
-          content: '现在我将调用相关的MCP工具来获取您所需的信息：',
-          timestamp: Date.now(),
-          pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-          toolCallStatus: 'pending'
-        };
-
-        setCurrentMessages(prev => [...prev, toolCallMessage]);
-        addMessage(sessionId, toolCallMessage);
-      }, 1500);
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
