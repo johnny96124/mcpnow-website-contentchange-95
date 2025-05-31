@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -31,6 +30,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const [displayedContent, setDisplayedContent] = useState('');
   const [showActions, setShowActions] = useState(false);
   const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
+  const [visibleToolsCount, setVisibleToolsCount] = useState(0);
 
   useEffect(() => {
     if (isStreaming) {
@@ -39,6 +39,17 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
       setDisplayedContent(message.content);
     }
   }, [message, isStreaming]);
+
+  // 控制工具的渐进式显示
+  useEffect(() => {
+    const pendingCalls = message.pendingToolCalls || [];
+    if (pendingCalls.length > visibleToolsCount) {
+      const timer = setTimeout(() => {
+        setVisibleToolsCount(pendingCalls.length);
+      }, 500); // 延迟500ms显示新工具
+      return () => clearTimeout(timer);
+    }
+  }, [message.pendingToolCalls, visibleToolsCount]);
 
   const streamText = () => {
     let index = 0;
@@ -70,6 +81,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
 
   const pendingCalls = message.pendingToolCalls || [];
   const hasToolCalls = pendingCalls.length > 0;
+  const visibleTools = pendingCalls.slice(0, visibleToolsCount);
 
   const getToolStatusIcon = (tool: PendingToolCall) => {
     switch (tool.status) {
@@ -182,7 +194,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                     <Wrench className="h-4 w-4 text-purple-500" />
                     <span className="font-medium text-sm">MCP工具调用</span>
                     <Badge variant="outline" className="text-xs">
-                      {pendingCalls.length} 个工具
+                      {visibleTools.length} / {pendingCalls.length} 个工具
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -191,10 +203,10 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                 </div>
               </div>
 
-              {/* 工具列表 */}
+              {/* 工具列表 - 只显示当前可见的工具 */}
               <div className="space-y-2">
-                {pendingCalls.map((tool) => (
-                  <Card key={tool.id} className="border-purple-200 dark:border-purple-800">
+                {visibleTools.map((tool, index) => (
+                  <Card key={tool.id} className="border-purple-200 dark:border-purple-800 animate-fade-in">
                     <Collapsible 
                       open={expandedTools.has(tool.id)} 
                       onOpenChange={() => toggleExpanded(tool.id)}

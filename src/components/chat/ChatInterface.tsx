@@ -174,7 +174,7 @@ export const ChatInterface = () => {
   };
 
   const generateMultipleToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
-    // 生成多个工具调用
+    // 只生成第一个工具调用，其他的会在前一个完成后动态添加
     return [
       {
         id: `tool-${Date.now()}-1`,
@@ -186,30 +186,60 @@ export const ChatInterface = () => {
           filters: { type: 'relevant' }
         },
         status: 'pending'
-      },
+      }
+    ];
+  };
+
+  const addNextToolCall = (sessionId: string, messageId: string, completedToolIndex: number) => {
+    const nextTools = [
       {
-        id: `tool-${Date.now()}-2`,
+        id: `tool-${Date.now()}-${completedToolIndex + 2}`,
         toolName: 'analyze_content',
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
         request: { 
-          content: userMessage,
+          content: '分析内容',
           analysis_type: 'comprehensive'
         },
         status: 'pending'
       },
       {
-        id: `tool-${Date.now()}-3`,
+        id: `tool-${Date.now()}-${completedToolIndex + 3}`,
         toolName: 'generate_summary',
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
         request: { 
           source: 'user_query',
-          context: userMessage
+          context: '生成摘要'
         },
         status: 'pending'
       }
     ];
+
+    // 只添加下一个工具，如果还有的话
+    if (completedToolIndex < 2) { // 总共3个工具，索引0,1,2
+      const nextTool = nextTools[completedToolIndex];
+      
+      setCurrentMessages(prev => 
+        prev.map(msg => {
+          if (msg.id === messageId && msg.pendingToolCalls) {
+            return {
+              ...msg,
+              pendingToolCalls: [...msg.pendingToolCalls, nextTool]
+            };
+          }
+          return msg;
+        })
+      );
+
+      if (currentSession) {
+        const message = currentSession.messages.find(m => m.id === messageId);
+        if (message && message.pendingToolCalls) {
+          const updatedToolCalls = [...message.pendingToolCalls, nextTool];
+          updateMessage(sessionId, messageId, { pendingToolCalls: updatedToolCalls });
+        }
+      }
+    }
   };
 
   const handleToolAction = (messageId: string, toolId: string, action: 'run' | 'cancel') => {
@@ -266,6 +296,17 @@ export const ChatInterface = () => {
               timestamp: new Date().toISOString()
             }
           });
+
+          // 工具完成后，添加下一个工具（如果有的话）
+          if (currentSession) {
+            const message = currentSession.messages.find(m => m.id === messageId);
+            if (message && message.pendingToolCalls) {
+              const completedToolIndex = message.pendingToolCalls.findIndex(tool => tool.id === toolId);
+              setTimeout(() => {
+                addNextToolCall(currentSession.id, messageId, completedToolIndex);
+              }, 1000); // 延迟1秒后添加下一个工具
+            }
+          }
         }
       }, 3000);
     }
