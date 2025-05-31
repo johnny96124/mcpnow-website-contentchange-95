@@ -127,11 +127,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    {isExecuting ? (
-                      <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
-                    ) : (
-                      <Wrench className="h-4 w-4 text-purple-500" />
-                    )}
+                    <Wrench className="h-4 w-4 text-purple-500" />
                     <span className="font-medium text-sm">MCP工具调用</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -174,11 +170,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
-                              {isExecuting ? (
-                                <Loader2 className="h-4 w-4 text-purple-500 animate-spin" />
-                              ) : (
-                                <Wrench className="h-4 w-4 text-purple-500" />
-                              )}
+                              <Wrench className="h-4 w-4 text-purple-500" />
                               <span className="font-medium text-sm">
                                 {pendingCalls[0]?.toolName || 'analyze_request'}
                               </span>
@@ -189,6 +181,14 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               服务器 {pendingCalls[0]?.serverId || 'postgres-dev'}
                             </Badge>
 
+                            {/* 只在这里显示状态 - 加载中或完成 */}
+                            {isExecuting && (
+                              <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-700">
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                执行中
+                              </Badge>
+                            )}
+                            
                             {isCompleted && (
                               <Badge variant="default" className="text-xs bg-green-100 text-green-700">
                                 <CheckCircle className="h-3 w-3 mr-1" />
