@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -76,7 +75,7 @@ export const ChatInterface = () => {
     console.log('Sending message:', content);
     setIsSending(true);
 
-    // 立即添加用户消息到当前显示
+    // 添加用户消息
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
@@ -84,18 +83,27 @@ export const ChatInterface = () => {
       timestamp: Date.now()
     };
 
-    console.log('Adding user message to current display:', userMessage);
     setCurrentMessages(prev => [...prev, userMessage]);
-
-    // 如果有当前会话，也添加到会话中
     if (currentSession) {
       addMessage(currentSession.id, userMessage);
     }
 
     try {
-      // 生成AI回复（内联工具调用）
-      console.log('Generating AI response with inline tools...');
-      await generateAIResponseWithInlineToolsInline(content, selectedServers);
+      // 创建AI助手消息，包含待处理的工具调用
+      const aiMessage: Message = {
+        id: `msg-${Date.now()}-ai`,
+        role: 'assistant',
+        content: '正在分析您的请求并准备调用相关工具...',
+        timestamp: Date.now(),
+        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
+        toolCallStatus: 'pending'
+      };
+
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      if (currentSession) {
+        addMessage(currentSession.id, aiMessage);
+      }
+
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -113,11 +121,7 @@ export const ChatInterface = () => {
     }
   };
 
-  const generateAIResponseWithInlineToolsInline = async (
-    userMessage: string,
-    selectedServers: string[]
-  ) => {
-    // 分析用户消息，决定使用哪些工具
+  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
     const toolsToUse: Array<{ name: string; request: any }> = [];
 
     if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
@@ -152,26 +156,12 @@ export const ChatInterface = () => {
       });
     }
 
-    const pendingCalls = toolsToUse.map(tool => ({
+    return toolsToUse.map(tool => ({
       toolName: tool.name,
       serverId: selectedServers[0],
       serverName: `服务器 ${selectedServers[0]}`,
       request: tool.request
     }));
-
-    const toolCallMessage: Message = {
-      id: `msg-${Date.now()}-tool`,
-      role: 'tool_call',
-      content: `好的，我将使用 MCP 工具来处理您的请求。`,
-      timestamp: Date.now(),
-      pendingToolCalls: pendingCalls,
-      toolCallStatus: 'pending'
-    };
-
-    setCurrentMessages(prev => [...prev, toolCallMessage]);
-    if (currentSession) {
-      addMessage(currentSession.id, toolCallMessage);
-    }
   };
 
   const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
@@ -186,29 +176,21 @@ export const ChatInterface = () => {
 
     if (action === 'cancel') {
       updateMessageInline({ 
-        toolCallStatus: 'rejected'
+        toolCallStatus: 'rejected',
+        content: '工具调用已被取消。'
       });
     } else if (action === 'run') {
       updateMessageInline({ 
-        toolCallStatus: 'executing'
+        toolCallStatus: 'executing',
+        content: '正在执行工具调用...'
       });
+      
       // 模拟工具执行
       setTimeout(() => {
         updateMessageInline({ 
-          toolCallStatus: 'completed'
+          toolCallStatus: 'completed',
+          content: '工具执行完成！基于工具调用的结果，我已经为您处理了请求。以下是获取到的信息：\n\n根据 Figma 数据分析，该节点是一个设计组件，尺寸为 375x812，背景色为白色。这为前端开发提供了准确的设计规范。'
         });
-        
-        // 添加AI回复
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-ai`,
-          role: 'assistant',
-          content: '工具执行完成！基于工具调用的结果，我已经为您处理了请求。',
-          timestamp: Date.now()
-        };
-        setCurrentMessages(prev => [...prev, aiMessage]);
-        if (currentSession) {
-          addMessage(currentSession.id, aiMessage);
-        }
       }, 2000);
     }
   };

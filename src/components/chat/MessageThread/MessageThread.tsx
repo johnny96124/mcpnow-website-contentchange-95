@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserMessage } from './UserMessage';
 import { StreamingAIMessage } from './StreamingAIMessage';
-import { ToolCallMessage } from './ToolCallMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { DeleteConfirmDialog } from '../ChatHistory/DeleteConfirmDialog';
 import { Message } from '../types/chat';
@@ -40,12 +39,6 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
-    if (onUpdateMessage) {
-      onUpdateMessage(messageId, action);
-    }
-  };
-
   const handleDeleteMessage = (messageId: string, content: string) => {
     setDeleteDialog({
       open: true,
@@ -74,15 +67,6 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
                 />
               );
-            } else if (message.role === 'tool_call') {
-              return (
-                <ToolCallMessage 
-                  key={message.id} 
-                  message={message}
-                  onToolAction={handleToolAction}
-                  onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
-                />
-              );
             } else {
               return (
                 <StreamingAIMessage 
@@ -90,6 +74,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   message={message} 
                   isStreaming={message.id === streamingMessageId}
                   onDelete={onDeleteMessage ? () => handleDeleteMessage(message.id, message.content) : undefined}
+                  onToolAction={onUpdateMessage}
                 />
               );
             }
