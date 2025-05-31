@@ -1,3 +1,4 @@
+
 export interface MCPServer {
   id: string;
   name: string;
@@ -26,10 +27,14 @@ export interface ToolInvocation {
 }
 
 export interface PendingToolCall {
+  id: string;
   toolName: string;
   serverId: string;
   serverName: string;
   request: any;
+  status: 'pending' | 'executing' | 'completed' | 'cancelled' | 'failed';
+  order: number; // 执行顺序
+  visible: boolean; // 是否显示
 }
 
 export interface MessageAttachment {
@@ -51,6 +56,7 @@ export interface Message {
   toolCallStatus?: 'pending' | 'executing' | 'completed' | 'rejected' | 'cancelled' | 'failed';
   attachments?: MessageAttachment[];
   errorMessage?: string;
+  currentToolIndex?: number; // 当前显示的工具索引
 }
 
 export interface ChatSession {
