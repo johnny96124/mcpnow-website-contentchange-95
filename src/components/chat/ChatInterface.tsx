@@ -61,19 +61,9 @@ export const ChatInterface = () => {
   }, [currentSession]);
 
   const handleNewChat = () => {
-    // Save current messages to session if any exist
-    if (currentMessages.length > 0 && !currentSession) {
-      const newSession = createNewChat(selectedServers, selectedProfile);
-      // Add all current messages to the new session
-      currentMessages.forEach(message => {
-        addMessage(newSession.id, message);
-      });
-      selectChat(newSession.id);
-    } else {
-      // Clear current messages and create empty state
-      setCurrentMessages([]);
-      selectChat(''); // Clear current session
-    }
+    // Clear current messages and session to start fresh
+    setCurrentMessages([]);
+    selectChat(''); // Clear current session
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
