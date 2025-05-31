@@ -111,18 +111,38 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，包含待处理的工具调用
+      // 第一步：创建AI助手消息，先进行流式文字生成
+      const aiMessageId = `msg-${Date.now()}-ai`;
+      const initialContent = '我理解您的请求';
+      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+
       const aiMessage: Message = {
-        id: `msg-${Date.now()}-ai`,
+        id: aiMessageId,
         role: 'assistant',
-        content: '正在分析您的请求并准备调用相关工具...',
-        timestamp: Date.now(),
-        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-        toolCallStatus: 'pending'
+        content: initialContent,
+        timestamp: Date.now()
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
       addMessage(sessionId, aiMessage);
+
+      // 模拟流式文字生成
+      await simulateStreamingText(sessionId, aiMessageId, fullContent);
+
+      // 第二步：在文字生成完成后，添加工具调用消息
+      setTimeout(async () => {
+        const toolCallMessage: Message = {
+          id: `msg-${Date.now()}-tool`,
+          role: 'assistant',
+          content: '现在我将调用相关的MCP工具来获取您所需的信息：',
+          timestamp: Date.now(),
+          pendingToolCalls: generatePendingToolCalls(content, selectedServers),
+          toolCallStatus: 'pending'
+        };
+
+        setCurrentMessages(prev => [...prev, toolCallMessage]);
+        addMessage(sessionId, toolCallMessage);
+      }, 1500);
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -139,47 +159,62 @@ export const ChatInterface = () => {
     }
   };
 
-  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    const toolsToUse: Array<{ name: string; request: any }> = [];
-
-    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
-      toolsToUse.push({
-        name: 'get_figma_data',
-        request: {
-          nodeId: '630-5984',
-          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+  const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
+    let currentIndex = 0;
+    const words = fullContent.split('');
+    
+    const streamInterval = setInterval(() => {
+      if (currentIndex < words.length) {
+        const partialContent = words.slice(0, currentIndex + 1).join('');
+        
+        setCurrentMessages(prev => 
+          prev.map(msg => 
+            msg.id === messageId ? { ...msg, content: partialContent } : msg
+          )
+        );
+        
+        if (currentSession) {
+          updateMessage(sessionId, messageId, { content: partialContent });
         }
-      });
-    }
+        
+        currentIndex++;
+      } else {
+        clearInterval(streamInterval);
+      }
+    }, 50); // 每50ms添加一个字符
+  };
 
-    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
-      toolsToUse.push({
-        name: 'read_file',
-        request: { path: '/example/config.json' }
-      });
-    }
-
-    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
-      toolsToUse.push({
-        name: 'search',
-        request: { query: userMessage.substring(0, 50) }
-      });
-    }
-
-    // 总是添加工具调用，即使没有特定工具
-    if (toolsToUse.length === 0) {
-      toolsToUse.push({
-        name: 'analyze_request',
-        request: { message: userMessage }
-      });
-    }
-
-    return toolsToUse.map(tool => ({
-      toolName: tool.name,
-      serverId: selectedServers[0],
-      serverName: `服务器 ${selectedServers[0]}`,
-      request: tool.request
-    }));
+  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
+    // 生成3个工具调用示例
+    return [
+      {
+        toolName: 'search_documents',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          query: userMessage.substring(0, 50),
+          filters: { type: 'relevant' }
+        }
+      },
+      {
+        toolName: 'analyze_content',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          content: userMessage,
+          analysis_type: 'comprehensive'
+        }
+      },
+      {
+        toolName: 'generate_summary',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          source: 'user_query',
+          context: userMessage
+        }
+      }
+    ];
   };
 
   const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
@@ -195,21 +230,21 @@ export const ChatInterface = () => {
     if (action === 'cancel') {
       updateMessageInline({ 
         toolCallStatus: 'cancelled',
-        content: '工具调用已被取消。'
+        content: '工具调用已被取消。如果您还有其他问题，请随时告诉我。'
       });
     } else if (action === 'run') {
       updateMessageInline({ 
         toolCallStatus: 'executing',
-        content: '正在执行工具调用...'
+        content: '正在执行工具调用，请稍候...'
       });
       
       // 模拟工具执行
       setTimeout(() => {
         updateMessageInline({ 
           toolCallStatus: 'completed',
-          content: '工具执行完成！基于工具调用的结果，我已经为您处理了请求。以下是获取到的信息：\n\n根据 Figma 数据分析，该节点是一个设计组件，尺寸为 375x812，背景色为白色。这为前端开发提供了准确的设计规范。'
+          content: '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档，我找到了与您问题相关的信息。经过内容分析，我理解了您的具体需求。最后，我为您生成了一个综合性的总结。\n\n如果您需要更多详细信息或有其他问题，请随时告诉我。'
         });
-      }, 2000);
+      }, 3000);
     }
   };
 
