@@ -22,6 +22,7 @@ export const ChatInterface = () => {
     updateMessage,
     deleteSession,
     deleteMessage,
+    renameSession,
     isLoading 
   } = useChatHistory();
   const { 
@@ -254,6 +255,7 @@ export const ChatInterface = () => {
               onSelectChat={selectChat}
               onDeleteSession={deleteSession}
               onDeleteMessage={deleteMessage}
+              onRenameSession={renameSession}
             />
           </div>
         </div>

@@ -1,14 +1,23 @@
 
 import React, { useState } from 'react';
-import { MessageSquare, Clock, Trash2, MoreVertical } from 'lucide-react';
+import { MessageSquare, Clock, Trash2, MoreVertical, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ChatSession } from '../types/chat';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,6 +28,7 @@ interface ChatHistoryProps {
   onSelectChat: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onDeleteMessage: (sessionId: string, messageId: string) => void;
+  onRenameSession?: (sessionId: string, newTitle: string) => void;
 }
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
@@ -27,6 +37,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
   onSelectChat,
   onDeleteSession,
   onDeleteMessage,
+  onRenameSession,
 }) => {
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -41,12 +52,33 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
     title: ''
   });
 
+  const [renameDialog, setRenameDialog] = useState<{
+    open: boolean;
+    sessionId: string;
+    currentTitle: string;
+    newTitle: string;
+  }>({
+    open: false,
+    sessionId: '',
+    currentTitle: '',
+    newTitle: ''
+  });
+
   const handleDeleteSession = (sessionId: string, sessionTitle: string) => {
     setDeleteDialog({
       open: true,
       type: 'session',
       sessionId,
       title: sessionTitle
+    });
+  };
+
+  const handleRenameSession = (sessionId: string, currentTitle: string) => {
+    setRenameDialog({
+      open: true,
+      sessionId,
+      currentTitle,
+      newTitle: currentTitle
     });
   };
 
@@ -57,6 +89,13 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
       onDeleteMessage(deleteDialog.sessionId, deleteDialog.messageId);
     }
     setDeleteDialog({ ...deleteDialog, open: false });
+  };
+
+  const confirmRename = () => {
+    if (onRenameSession && renameDialog.newTitle.trim()) {
+      onRenameSession(renameDialog.sessionId, renameDialog.newTitle.trim());
+    }
+    setRenameDialog({ ...renameDialog, open: false });
   };
 
   if (sessions.length === 0) {
@@ -109,6 +148,12 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
+                      onClick={() => handleRenameSession(session.id, session.title)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      重命名对话
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       onClick={() => handleDeleteSession(session.id, session.title)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
@@ -130,6 +175,37 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
         description={`确定要删除对话"${deleteDialog.title}"吗？此操作无法撤销。`}
         onConfirm={confirmDelete}
       />
+
+      <Dialog open={renameDialog.open} onOpenChange={(open) => setRenameDialog({ ...renameDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>重命名对话</DialogTitle>
+            <DialogDescription>
+              为对话设置一个新的标题
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={renameDialog.newTitle}
+              onChange={(e) => setRenameDialog({ ...renameDialog, newTitle: e.target.value })}
+              placeholder="输入新的对话标题"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  confirmRename();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRenameDialog({ ...renameDialog, open: false })}>
+              取消
+            </Button>
+            <Button onClick={confirmRename} disabled={!renameDialog.newTitle.trim()}>
+              确认重命名
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

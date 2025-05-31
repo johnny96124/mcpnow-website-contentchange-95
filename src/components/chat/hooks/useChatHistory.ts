@@ -83,6 +83,10 @@ export const useChatHistory = () => {
     });
   }, [saveChatHistory]);
 
+  const renameSession = useCallback((sessionId: string, newTitle: string) => {
+    updateSession(sessionId, { title: newTitle });
+  }, [updateSession]);
+
   const addMessage = useCallback((sessionId: string, message: Message) => {
     console.log('Adding message to session:', sessionId, message);
     
@@ -296,6 +300,7 @@ export const useChatHistory = () => {
     createNewChat,
     selectChat,
     updateSession,
+    renameSession,
     addMessage,
     updateMessage,
     deleteSession,
