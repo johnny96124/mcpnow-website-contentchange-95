@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Bot, Zap } from 'lucide-react';
+import { MessageSquare, Bot, Zap, Settings } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ServerSelector } from './ServerSelector/ServerSelector';
@@ -11,6 +10,11 @@ import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
 import { ChatSession, Message, MessageAttachment, PendingToolCall } from './types/chat';
+import { ServerStatusMonitor } from './ServerMonitoring/ServerStatusMonitor';
+import { ToolManagementPanel } from './ServerMonitoring/ToolManagementPanel';
+import { ServerDebugDialog } from './ServerMonitoring/ServerDebugDialog';
+import { useToolManagement } from './hooks/useToolManagement';
+import { useServerMonitoring } from './hooks/useServerMonitoring';
 
 interface AttachedFile {
   id: string;
@@ -37,14 +41,49 @@ export const ChatInterface = () => {
     generateAIResponseWithInlineTools
   } = useStreamingChat();
   
+  // New monitoring and tool management hooks
+  const {
+    tools,
+    toggleTool,
+    toggleAllToolsForServer,
+    toggleToolsByCategory,
+    resetToDefault,
+    getEnabledTools
+  } = useToolManagement();
+  
+  const {
+    serverInfo,
+    serverMessages,
+    isHealthChecking,
+    performHealthCheck,
+    initializeServer,
+    addServerMessage
+  } = useServerMonitoring();
+  
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [debugServerId, setDebugServerId] = useState<string | null>(null);
+  const [showAdvancedPanel, setShowAdvancedPanel] = useState(false);
 
   const connectedServers = getConnectedServers();
   
+  // Initialize server monitoring for connected servers
+  useEffect(() => {
+    connectedServers.forEach(server => {
+      if (!serverInfo[server.id]) {
+        initializeServer(server.id, {
+          name: server.name,
+          type: server.type,
+          status: server.status,
+          configuration: { serverId: server.id, type: server.type }
+        });
+      }
+    });
+  }, [connectedServers, serverInfo, initializeServer]);
+
   // Auto-select first connected server if none selected
   useEffect(() => {
     if (connectedServers.length > 0 && selectedServers.length === 0) {
@@ -69,7 +108,17 @@ export const ChatInterface = () => {
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
     if (selectedServers.length === 0 || isSending) return;
     
+    // Filter tools based on enabled state
+    const enabledTools = getEnabledTools().filter(tool => 
+      selectedServers.includes(tool.serverId)
+    );
+    
+    if (enabledTools.length === 0) {
+      console.warn('No enabled tools available for selected servers');
+    }
+    
     console.log('Sending message:', content, 'with attachments:', attachedFiles);
+    console.log('Enabled tools:', enabledTools);
     setIsSending(true);
 
     // Process attachments
@@ -340,6 +389,24 @@ export const ChatInterface = () => {
     );
   }
 
+  const handleOpenDebug = (serverId: string) => {
+    setDebugServerId(serverId);
+  };
+
+  const handleCloseDebug = () => {
+    setDebugServerId(null);
+  };
+
+  const handleServerHealthCheck = async (serverId: string) => {
+    const result = await performHealthCheck(serverId);
+    addServerMessage(serverId, {
+      type: result ? 'response' : 'error',
+      content: result ? 'Manual health check successful' : 'Manual health check failed',
+      data: { manual: true, success: result }
+    });
+    return result;
+  };
+
   console.log('Current messages:', currentMessages);
 
   return (
@@ -360,6 +427,43 @@ export const ChatInterface = () => {
               onProfileChange={setSelectedProfile}
             />
           </div>
+
+          {/* Server Status Monitor */}
+          <div className="p-4 border-b">
+            <ServerStatusMonitor
+              servers={connectedServers}
+              onHealthCheck={handleServerHealthCheck}
+              onOpenDebug={handleOpenDebug}
+              isHealthChecking={isHealthChecking}
+            />
+          </div>
+
+          {/* Advanced Tools Panel Toggle */}
+          <div className="p-4 border-b">
+            <Button
+              variant="ghost"
+              onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
+              className="w-full justify-start"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              {showAdvancedPanel ? '隐藏高级工具' : '显示高级工具'}
+            </Button>
+          </div>
+
+          {/* Tool Management Panel */}
+          {showAdvancedPanel && (
+            <div className="px-4 pb-4 border-b">
+              <ToolManagementPanel
+                servers={connectedServers}
+                tools={tools}
+                onToggleTool={toggleTool}
+                onToggleAllToolsForServer={toggleAllToolsForServer}
+                onToggleToolsByCategory={toggleToolsByCategory}
+                onResetToDefault={resetToDefault}
+                collapsed={false}
+              />
+            </div>
+          )}
 
           {/* New Chat Button */}
           <div className="p-4 border-b">
@@ -447,6 +551,15 @@ export const ChatInterface = () => {
           />
         </div>
       </div>
+
+      {/* Server Debug Dialog */}
+      <ServerDebugDialog
+        open={!!debugServerId}
+        onOpenChange={handleCloseDebug}
+        serverInfo={debugServerId ? serverInfo[debugServerId] : null}
+        messages={debugServerId ? serverMessages[debugServerId] || [] : []}
+        onHealthCheck={() => debugServerId ? handleServerHealthCheck(debugServerId) : Promise.resolve(false)}
+      />
     </div>
   );
 };

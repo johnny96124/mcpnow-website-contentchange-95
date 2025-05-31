@@ -1,16 +1,46 @@
-
 export interface MCPServer {
   id: string;
   name: string;
   type: 'STDIO' | 'SSE';
   status: 'connected' | 'disconnected' | 'starting';
   enabled: boolean;
+  lastHealthCheck?: number;
+  responseTime?: number;
+  errorMessage?: string;
+}
+
+export interface MCPTool {
+  id: string;
+  name: string;
+  description?: string;
+  serverId: string;
+  enabled: boolean;
+  category?: string;
 }
 
 export interface MCPProfile {
   id: string;
   name: string;
   serverIds: string[];
+}
+
+export interface ServerConnectionInfo {
+  id: string;
+  name: string;
+  type: 'STDIO' | 'SSE';
+  status: 'connected' | 'disconnected' | 'starting';
+  responseTime?: number;
+  lastHealthCheck?: number;
+  configuration: any;
+  errorMessage?: string;
+}
+
+export interface ServerMessage {
+  id: string;
+  timestamp: number;
+  type: 'request' | 'response' | 'error';
+  content: string;
+  data?: any;
 }
 
 export interface ToolInvocation {
