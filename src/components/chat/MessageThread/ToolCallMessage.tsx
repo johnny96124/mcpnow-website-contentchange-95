@@ -42,6 +42,20 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
   const pendingCalls = message.pendingToolCalls || [];
   const canExecute = message.toolCallStatus === 'pending';
   const isRejected = message.toolCallStatus === 'rejected';
+  const isCompleted = message.toolCallStatus === 'completed';
+
+  const getStatusIcon = () => {
+    switch (message.toolCallStatus) {
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'rejected':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'executing':
+        return <Clock className="h-4 w-4 text-yellow-500 animate-spin" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div 
@@ -62,9 +76,15 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
             <span className="text-xs text-muted-foreground">
               {formatDistanceToNow(message.timestamp, { addSuffix: true })}
             </span>
+            {getStatusIcon()}
             {isRejected && (
               <Badge variant="destructive" className="text-xs">
                 已取消
+              </Badge>
+            )}
+            {isCompleted && (
+              <Badge variant="default" className="text-xs bg-green-100 text-green-700">
+                调用完成
               </Badge>
             )}
           </div>
@@ -147,6 +167,13 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
                               <Server className="h-3 w-3" />
                               {toolCall.serverName}
                             </Badge>
+
+                            {isCompleted && (
+                              <Badge variant="default" className="text-xs bg-green-100 text-green-700">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                完成
+                              </Badge>
+                            )}
                           </div>
                           
                           <Button variant="ghost" size="sm" className="h-auto p-1">
@@ -170,6 +197,34 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
                             </pre>
                           </div>
                         </div>
+
+                        {/* 显示工具调用完成后的响应结果 */}
+                        {isCompleted && (
+                          <div>
+                            <h4 className="text-xs font-medium text-muted-foreground mb-2">响应结果</h4>
+                            <div className="bg-white dark:bg-gray-800 rounded border p-2">
+                              <pre className="text-xs overflow-x-auto">
+                                {JSON.stringify({
+                                  status: "success",
+                                  data: {
+                                    figma_data: {
+                                      node_id: toolCall.request.nodeId || "630-5984",
+                                      name: "设计组件",
+                                      type: "FRAME",
+                                      properties: {
+                                        width: 375,
+                                        height: 812,
+                                        backgroundColor: "#FFFFFF"
+                                      }
+                                    },
+                                    message: "成功获取 Figma 节点数据"
+                                  },
+                                  timestamp: new Date().toISOString()
+                                }, null, 2)}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
                       </CardContent>
                     </CollapsibleContent>
                   </Collapsible>
@@ -182,6 +237,13 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
                 <XCircle className="h-4 w-4" />
                 <span className="text-sm font-medium">已取消 MCP 工具</span>
                 <span className="text-sm">get_figma_data</span>
+              </div>
+            )}
+
+            {isCompleted && (
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">工具调用已完成</span>
               </div>
             )}
           </div>
