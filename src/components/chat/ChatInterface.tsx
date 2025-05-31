@@ -9,7 +9,7 @@ import { MessageInput } from './InputArea/MessageInput';
 import { useChatHistory } from './hooks/useChatHistory';
 import { useMCPServers } from './hooks/useMCPServers';
 import { useStreamingChat } from './hooks/useStreamingChat';
-import { ChatSession, Message, MessageAttachment } from './types/chat';
+import { ChatSession, Message, MessageAttachment, PendingToolCall } from './types/chat';
 
 interface AttachedFile {
   id: string;
@@ -76,15 +76,12 @@ export const ChatInterface = () => {
     const attachments: MessageAttachment[] = [];
     if (attachedFiles && attachedFiles.length > 0) {
       for (const attachedFile of attachedFiles) {
-        // In a real app, you would upload the file to a server here
-        // For now, we'll just create a mock attachment object
         const attachment: MessageAttachment = {
           id: attachedFile.id,
           name: attachedFile.file.name,
           size: attachedFile.file.size,
           type: attachedFile.file.type,
           preview: attachedFile.preview,
-          // url would be set after uploading to server
         };
         attachments.push(attachment);
       }
@@ -115,35 +112,23 @@ export const ChatInterface = () => {
       const aiMessageId = `msg-${Date.now()}-ai`;
       const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
 
+      // 生成多个工具调用
+      const pendingToolCalls = generateMultipleToolCalls(content, selectedServers);
+
       const aiMessage: Message = {
         id: aiMessageId,
         role: 'assistant',
         content: '',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        pendingToolCalls,
+        toolCallStatus: 'pending'
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
       addMessage(sessionId, aiMessage);
 
-      // 先完成流式文字生成
+      // 流式生成文字内容
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
-      
-      // 文字生成完成后，添加工具调用
-      const pendingToolCalls = generatePendingToolCalls(content, selectedServers);
-      const messageWithTools: Partial<Message> = {
-        pendingToolCalls,
-        toolCallStatus: 'pending'
-      };
-
-      setCurrentMessages(prev => 
-        prev.map(msg => 
-          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
-        )
-      );
-      
-      if (currentSession) {
-        updateMessage(sessionId, aiMessageId, messageWithTools);
-      }
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -184,79 +169,102 @@ export const ChatInterface = () => {
           clearInterval(streamInterval);
           resolve();
         }
-      }, 25); // 从50ms减少到25ms，双倍速度
+      }, 25);
     });
   };
 
-  const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    // 生成3个工具调用示例
+  const generateMultipleToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
+    // 生成多个工具调用
     return [
       {
+        id: `tool-${Date.now()}-1`,
         toolName: 'search_documents',
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
         request: { 
           query: userMessage.substring(0, 50),
           filters: { type: 'relevant' }
-        }
+        },
+        status: 'pending'
       },
       {
+        id: `tool-${Date.now()}-2`,
         toolName: 'analyze_content',
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
         request: { 
           content: userMessage,
           analysis_type: 'comprehensive'
-        }
+        },
+        status: 'pending'
       },
       {
+        id: `tool-${Date.now()}-3`,
         toolName: 'generate_summary',
         serverId: selectedServers[0],
         serverName: `服务器 ${selectedServers[0]}`,
         request: { 
           source: 'user_query',
           context: userMessage
-        }
+        },
+        status: 'pending'
       }
     ];
   };
 
-  const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
-    const updateMessageInline = (updates: Partial<Message>) => {
+  const handleToolAction = (messageId: string, toolId: string, action: 'run' | 'cancel') => {
+    const updateToolInMessage = (toolUpdates: Partial<PendingToolCall>) => {
       setCurrentMessages(prev => 
-        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
+        prev.map(msg => {
+          if (msg.id === messageId && msg.pendingToolCalls) {
+            return {
+              ...msg,
+              pendingToolCalls: msg.pendingToolCalls.map(tool =>
+                tool.id === toolId ? { ...tool, ...toolUpdates } : tool
+              )
+            };
+          }
+          return msg;
+        })
       );
+
       if (currentSession) {
-        updateMessage(currentSession.id, messageId, updates);
+        const message = currentSession.messages.find(m => m.id === messageId);
+        if (message && message.pendingToolCalls) {
+          const updatedToolCalls = message.pendingToolCalls.map(tool =>
+            tool.id === toolId ? { ...tool, ...toolUpdates } : tool
+          );
+          updateMessage(currentSession.id, messageId, { pendingToolCalls: updatedToolCalls });
+        }
       }
     };
 
     if (action === 'cancel') {
-      updateMessageInline({ 
-        toolCallStatus: 'cancelled',
-        content: '工具调用已被取消。如果您还有其他问题，请随时告诉我。'
-      });
+      updateToolInMessage({ status: 'cancelled' });
     } else if (action === 'run') {
-      updateMessageInline({ 
-        toolCallStatus: 'executing',
-        content: '正在执行工具调用，请稍候...'
-      });
+      updateToolInMessage({ status: 'executing' });
       
-      // 模拟工具执行，包括可能的失败情况
+      // 模拟工具执行
       setTimeout(() => {
-        // 随机模拟成功或失败（30% 失败率）
-        const shouldFail = Math.random() < 0.3;
+        const shouldFail = Math.random() < 0.3; // 30% 失败率
         
         if (shouldFail) {
-          updateMessageInline({ 
-            toolCallStatus: 'failed',
-            content: '抱歉，工具调用执行失败。可能的原因包括：\n\n• 服务器连接超时\n• 权限不足\n• 参数格式错误\n• 服务暂时不可用\n\n请稍后重试，或者尝试修改您的请求。',
+          updateToolInMessage({ 
+            status: 'failed',
             errorMessage: '连接超时: 无法连接到MCP服务器'
           });
         } else {
-          updateMessageInline({ 
-            toolCallStatus: 'completed',
-            content: '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档，我找到了与您问题相关的信息。经过内容分析，我理解了您的具体需求。最后，我为您生成了一个综合性的总结。\n\n如果您需要更多详细信息或有其他问题，请随时告诉我。'
+          updateToolInMessage({ 
+            status: 'completed',
+            response: {
+              status: "success",
+              data: {
+                analysis: "工具执行完成",
+                action: "data_retrieved",
+                confidence: 0.95
+              },
+              timestamp: new Date().toISOString()
+            }
           });
         }
       }, 3000);
@@ -394,37 +402,4 @@ export const ChatInterface = () => {
       </div>
     </div>
   );
-};
-
-const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-  // 生成3个工具调用示例
-  return [
-    {
-      toolName: 'search_documents',
-      serverId: selectedServers[0],
-      serverName: `服务器 ${selectedServers[0]}`,
-      request: { 
-        query: userMessage.substring(0, 50),
-        filters: { type: 'relevant' }
-      }
-    },
-    {
-      toolName: 'analyze_content',
-      serverId: selectedServers[0],
-      serverName: `服务器 ${selectedServers[0]}`,
-      request: { 
-        content: userMessage,
-        analysis_type: 'comprehensive'
-      }
-    },
-    {
-      toolName: 'generate_summary',
-      serverId: selectedServers[0],
-      serverName: `服务器 ${selectedServers[0]}`,
-      request: { 
-        source: 'user_query',
-        context: userMessage
-      }
-    }
-  ];
 };

@@ -1,3 +1,4 @@
+
 export interface MCPServer {
   id: string;
   name: string;
@@ -26,10 +27,14 @@ export interface ToolInvocation {
 }
 
 export interface PendingToolCall {
+  id: string;
   toolName: string;
   serverId: string;
   serverName: string;
   request: any;
+  status: 'pending' | 'executing' | 'completed' | 'cancelled' | 'failed';
+  response?: any;
+  errorMessage?: string;
 }
 
 export interface MessageAttachment {
