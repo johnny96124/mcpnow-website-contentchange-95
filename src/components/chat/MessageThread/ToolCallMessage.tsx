@@ -1,24 +1,33 @@
 
 import React, { useState } from 'react';
-import { Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server } from 'lucide-react';
+import { Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, MoreVertical, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Message } from '../types/chat';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ToolCallMessageProps {
   message: Message;
   onToolAction: (messageId: string, action: 'run' | 'cancel') => void;
+  onDelete?: () => void;
 }
 
 export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({ 
   message, 
-  onToolAction 
+  onToolAction,
+  onDelete 
 }) => {
   const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
+  const [showActions, setShowActions] = useState(false);
 
   const toggleExpanded = (toolId: string) => {
     const newExpanded = new Set(expandedTools);
@@ -35,7 +44,11 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
   const isRejected = message.toolCallStatus === 'rejected';
 
   return (
-    <div className="flex gap-3 animate-fade-in">
+    <div 
+      className="flex gap-3 animate-fade-in group"
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
+    >
       <Avatar className="h-8 w-8 flex-shrink-0">
         <AvatarFallback className="bg-purple-100 text-purple-600">
           <Wrench className="h-4 w-4" />
@@ -43,15 +56,38 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
       </Avatar>
       
       <div className="flex-1 space-y-3 max-w-none">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">MCP工具调用</span>
-          <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-          </span>
-          {isRejected && (
-            <Badge variant="destructive" className="text-xs">
-              已取消
-            </Badge>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-sm">MCP工具调用</span>
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+            </span>
+            {isRejected && (
+              <Badge variant="destructive" className="text-xs">
+                已取消
+              </Badge>
+            )}
+          </div>
+          
+          {onDelete && (
+            <div className={`transition-opacity ${showActions ? 'opacity-100' : 'opacity-0'}`}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={onDelete}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    删除消息
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
         </div>
         
