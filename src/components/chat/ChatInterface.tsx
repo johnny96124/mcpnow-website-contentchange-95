@@ -149,44 +149,35 @@ export const ChatInterface = () => {
   };
 
   const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
-    const toolsToUse: Array<{ name: string; request: any }> = [];
-
-    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
-      toolsToUse.push({
-        name: 'get_figma_data',
+    // 为了演示，创建一个包含3个工具调用的固定案例
+    const toolsToUse = [
+      {
+        name: 'search_documents',
         request: {
-          nodeId: '630-5984',
-          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+          query: userMessage.substring(0, 50),
+          category: 'general'
         }
-      });
-    }
+      },
+      {
+        name: 'analyze_content',
+        request: {
+          content: userMessage,
+          analysis_type: 'semantic'
+        }
+      },
+      {
+        name: 'generate_summary',
+        request: {
+          source: 'analysis_result',
+          format: 'markdown'
+        }
+      }
+    ];
 
-    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
-      toolsToUse.push({
-        name: 'read_file',
-        request: { path: '/example/config.json' }
-      });
-    }
-
-    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
-      toolsToUse.push({
-        name: 'search',
-        request: { query: userMessage.substring(0, 50) }
-      });
-    }
-
-    // 总是添加工具调用，即使没有特定工具
-    if (toolsToUse.length === 0) {
-      toolsToUse.push({
-        name: 'analyze_request',
-        request: { message: userMessage }
-      });
-    }
-
-    return toolsToUse.map(tool => ({
+    return toolsToUse.map((tool, index) => ({
       toolName: tool.name,
       serverId: selectedServers[0],
-      serverName: `服务器 ${selectedServers[0]}`,
+      serverName: `MCP服务器 ${selectedServers[0]}`,
       request: tool.request
     }));
   };
