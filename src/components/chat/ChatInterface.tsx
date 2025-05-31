@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -185,13 +186,13 @@ export const ChatInterface = () => {
           query: userMessage.substring(0, 50),
           filters: { type: 'relevant' }
         },
-        status: 'pending'
+        status: 'pending' as const
       }
     ];
   };
 
   const addNextToolCall = (sessionId: string, messageId: string, completedToolIndex: number) => {
-    const nextTools = [
+    const nextTools: PendingToolCall[] = [
       {
         id: `tool-${Date.now()}-${completedToolIndex + 2}`,
         toolName: 'analyze_content',
@@ -201,7 +202,7 @@ export const ChatInterface = () => {
           content: '分析内容',
           analysis_type: 'comprehensive'
         },
-        status: 'pending'
+        status: 'pending' as const
       },
       {
         id: `tool-${Date.now()}-${completedToolIndex + 3}`,
@@ -212,7 +213,7 @@ export const ChatInterface = () => {
           source: 'user_query',
           context: '生成摘要'
         },
-        status: 'pending'
+        status: 'pending' as const
       }
     ];
 
