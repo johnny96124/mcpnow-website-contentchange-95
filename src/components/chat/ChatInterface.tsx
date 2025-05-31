@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -62,15 +61,6 @@ export const ChatInterface = () => {
   }, [currentSession]);
 
   const handleNewChat = () => {
-    // 如果当前有消息但没有保存到会话中，先保存到新会话
-    if (currentMessages.length > 0 && !currentSession) {
-      const newSession = createNewChat(selectedServers, selectedProfile);
-      // 将当前所有消息添加到新会话中
-      currentMessages.forEach(message => {
-        addMessage(newSession.id, message);
-      });
-    }
-    
     // 清空当前会话和消息，开始新的对话
     selectChat(''); // 清除当前会话选择
     setCurrentMessages([]); // 清空当前消息
