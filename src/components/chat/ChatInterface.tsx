@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -349,7 +350,7 @@ export const ChatInterface = () => {
           {currentMessages.length > 0 ? (
             <MessageThread
               messages={currentMessages}
-              isLoading={isSending}
+              isLoading={false}
               streamingMessageId={streamingMessageId}
               onUpdateMessage={handleToolAction}
             />
@@ -383,4 +384,37 @@ export const ChatInterface = () => {
       </div>
     </div>
   );
+};
+
+const generatePendingToolCalls = (userMessage: string, selectedServers: string[]) => {
+  // 生成3个工具调用示例
+  return [
+    {
+      toolName: 'search_documents',
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: { 
+        query: userMessage.substring(0, 50),
+        filters: { type: 'relevant' }
+      }
+    },
+    {
+      toolName: 'analyze_content',
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: { 
+        content: userMessage,
+        analysis_type: 'comprehensive'
+      }
+    },
+    {
+      toolName: 'generate_summary',
+      serverId: selectedServers[0],
+      serverName: `服务器 ${selectedServers[0]}`,
+      request: { 
+        source: 'user_query',
+        context: userMessage
+      }
+    }
+  ];
 };
