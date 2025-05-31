@@ -111,7 +111,7 @@ export const ChatInterface = () => {
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，先只有文字内容
+      // 创建AI助手消息，包含初始内容和pending工具调用
       const aiMessageId = `msg-${Date.now()}-ai`;
       const initialContent = '我理解您的请求';
       const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
@@ -120,35 +120,16 @@ export const ChatInterface = () => {
         id: aiMessageId,
         role: 'assistant',
         content: initialContent,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        pendingToolCalls: generatePendingToolCalls(content, selectedServers),
+        toolCallStatus: 'pending'
       };
 
       setCurrentMessages(prev => [...prev, aiMessage]);
       addMessage(sessionId, aiMessage);
 
-      // 先进行流式文字生成
+      // 模拟流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
-
-      // 文字生成完成后，再添加工具调用相关内容
-      setTimeout(() => {
-        const updatedMessage: Message = {
-          ...aiMessage,
-          content: fullContent,
-          pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-          toolCallStatus: 'pending'
-        };
-
-        setCurrentMessages(prev => 
-          prev.map(msg => msg.id === aiMessageId ? updatedMessage : msg)
-        );
-        
-        if (currentSession) {
-          updateMessage(sessionId, aiMessageId, {
-            pendingToolCalls: generatePendingToolCalls(content, selectedServers),
-            toolCallStatus: 'pending'
-          });
-        }
-      }, 500); // 文字生成完成后延迟500ms显示工具调用
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
