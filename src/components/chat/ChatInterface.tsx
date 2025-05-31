@@ -54,18 +54,10 @@ export const ChatInterface = () => {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (selectedServers.length === 0 || isSending) return;
+    if (!currentSession || selectedServers.length === 0 || isSending) return;
     
     console.log('Sending message:', content);
     setIsSending(true);
-
-    // 如果没有当前会话，自动创建一个新会话
-    let sessionToUse = currentSession;
-    if (!sessionToUse) {
-      console.log('No current session, creating new one');
-      sessionToUse = createNewChat(selectedServers, selectedProfile);
-      selectChat(sessionToUse.id);
-    }
 
     // 添加用户消息
     const userMessage: Message = {
@@ -76,7 +68,7 @@ export const ChatInterface = () => {
     };
 
     console.log('Adding user message:', userMessage);
-    addMessage(sessionToUse.id, userMessage);
+    addMessage(currentSession.id, userMessage);
 
     try {
       // 生成AI回复（包含工具调用确认）
@@ -86,7 +78,7 @@ export const ChatInterface = () => {
       // 如果用户确认了工具调用，则添加AI消息
       if (aiMessage) {
         console.log('Adding AI message:', aiMessage);
-        addMessage(sessionToUse.id, aiMessage);
+        addMessage(currentSession.id, aiMessage);
       } else {
         console.log('AI message was null, user may have cancelled tool calls');
         // 添加一个简单的取消消息
@@ -96,7 +88,7 @@ export const ChatInterface = () => {
           content: '操作已取消。',
           timestamp: Date.now()
         };
-        addMessage(sessionToUse.id, cancelMessage);
+        addMessage(currentSession.id, cancelMessage);
       }
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -106,7 +98,7 @@ export const ChatInterface = () => {
         content: '抱歉，处理您的请求时遇到了错误，请稍后重试。',
         timestamp: Date.now()
       };
-      addMessage(sessionToUse.id, errorMessage);
+      addMessage(currentSession.id, errorMessage);
     } finally {
       setIsSending(false);
     }
@@ -204,7 +196,7 @@ export const ChatInterface = () => {
 
         {/* Message Thread */}
         <div className="flex-1 overflow-hidden">
-          {currentSession && currentSession.messages.length > 0 ? (
+          {currentSession ? (
             <MessageThread
               messages={currentSession.messages}
               isLoading={isSending}
