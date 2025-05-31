@@ -251,30 +251,20 @@ export const ToolControlPopover: React.FC<ToolControlPopoverProps> = ({
                           const isEnabled = getToolState(server.id, tool.id);
                           return (
                             <div key={tool.id} className="flex items-center justify-between py-1 hover:bg-muted/30 rounded px-1">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <span className="text-xs font-mono bg-muted px-1 rounded flex-shrink-0">
-                                  {tool.name.charAt(0).toUpperCase()}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-sm font-medium truncate" title={tool.name}>
-                                    {tool.name}
-                                  </div>
-                                  {tool.description && (
-                                    <div className="text-xs text-muted-foreground truncate" title={tool.description}>
-                                      {tool.description}
-                                    </div>
-                                  )}
-                                  {tool.category && (
-                                    <div className={`text-xs px-1 rounded mt-1 inline-block ${getCategoryColor(tool.category)}`}>
-                                      {tool.category}
-                                    </div>
-                                  )}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium truncate" title={tool.name}>
+                                  {tool.name}
                                 </div>
+                                {tool.description && (
+                                  <div className="text-xs text-muted-foreground truncate" title={tool.description}>
+                                    {tool.description}
+                                  </div>
+                                )}
                               </div>
                               <Switch
                                 checked={isEnabled}
                                 onCheckedChange={() => toggleTool(server.id, tool.id)}
-                                className="scale-75 flex-shrink-0"
+                                className="scale-75 flex-shrink-0 ml-2"
                               />
                             </div>
                           );
