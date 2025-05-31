@@ -68,19 +68,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
     }
   };
 
-  const getStatusIcon = () => {
-    switch (message.toolCallStatus) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'rejected':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'executing':
-        return <Clock className="h-4 w-4 text-yellow-500 animate-spin" />;
-      default:
-        return null;
-    }
-  };
-
   const pendingCalls = message.pendingToolCalls || [];
   const canExecute = message.toolCallStatus === 'pending';
   const isRejected = message.toolCallStatus === 'rejected';
@@ -109,7 +96,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
             {isStreaming && (
               <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
             )}
-            {getStatusIcon()}
           </div>
           
           {onDelete && (
@@ -134,7 +120,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           )}
         </div>
         
-        {/* 工具调用区域 */}
+        {/* 工具调用区域 - 只在有工具调用时显示 */}
         {pendingCalls.length > 0 && (
           <div className="bg-purple-50 dark:bg-purple-950/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
             <div className="space-y-4">
@@ -143,19 +129,9 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                   <div className="flex items-center gap-2 mb-2">
                     <Wrench className="h-4 w-4 text-purple-500" />
                     <span className="font-medium text-sm">MCP工具调用</span>
-                    {isRejected && (
-                      <Badge variant="destructive" className="text-xs">
-                        已取消
-                      </Badge>
-                    )}
                     {isCompleted && (
                       <Badge variant="default" className="text-xs bg-green-100 text-green-700">
                         调用完成
-                      </Badge>
-                    )}
-                    {isExecuting && (
-                      <Badge variant="default" className="text-xs bg-yellow-100 text-yellow-700">
-                        执行中...
                       </Badge>
                     )}
                   </div>
@@ -187,90 +163,81 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                 )}
               </div>
 
-              {/* Tool Details */}
+              {/* 简化的工具详情 - 只显示一个汇总的工具调用 */}
               <div className="space-y-2">
-                {pendingCalls.map((toolCall, index) => (
-                  <Card key={index} className="border-purple-200 dark:border-purple-800">
-                    <Collapsible 
-                      open={expandedTools.has(`${message.id}-${index}`)} 
-                      onOpenChange={() => toggleExpanded(`${message.id}-${index}`)}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer p-3 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-2">
-                                <Wrench className="h-4 w-4 text-purple-500" />
-                                <span className="font-medium text-sm">{toolCall.toolName}</span>
-                              </div>
-                              
-                              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                <Server className="h-3 w-3" />
-                                {toolCall.serverName}
-                              </Badge>
-
-                              {isCompleted && (
-                                <Badge variant="default" className="text-xs bg-green-100 text-green-700">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  完成
-                                </Badge>
-                              )}
+                <Card className="border-purple-200 dark:border-purple-800">
+                  <Collapsible 
+                    open={expandedTools.has(`${message.id}-summary`)} 
+                    onOpenChange={() => toggleExpanded(`${message.id}-summary`)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <CardHeader className="cursor-pointer p-3 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <Wrench className="h-4 w-4 text-purple-500" />
+                              <span className="font-medium text-sm">
+                                {pendingCalls[0]?.toolName || 'analyze_request'}
+                              </span>
                             </div>
                             
-                            <Button variant="ghost" size="sm" className="h-auto p-1">
-                              {expandedTools.has(`${message.id}-${index}`) ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </Button>
+                            <Badge variant="outline" className="text-xs flex items-center gap-1">
+                              <Server className="h-3 w-3" />
+                              服务器 {pendingCalls[0]?.serverId || 'postgres-dev'}
+                            </Badge>
+
+                            {isCompleted && (
+                              <Badge variant="default" className="text-xs bg-green-100 text-green-700">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                完成
+                              </Badge>
+                            )}
                           </div>
-                        </CardHeader>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent>
-                        <CardContent className="p-3 pt-0 space-y-3">
+                          
+                          <Button variant="ghost" size="sm" className="h-auto p-1">
+                            {expandedTools.has(`${message.id}-summary`) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </CardHeader>
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                      <CardContent className="p-3 pt-0 space-y-3">
+                        <div>
+                          <h4 className="text-xs font-medium text-muted-foreground mb-2">请求参数</h4>
+                          <div className="bg-white dark:bg-gray-800 rounded border p-2">
+                            <pre className="text-xs overflow-x-auto">
+                              {JSON.stringify(pendingCalls[0]?.request || { message: "分析用户请求" }, null, 2)}
+                            </pre>
+                          </div>
+                        </div>
+
+                        {isCompleted && (
                           <div>
-                            <h4 className="text-xs font-medium text-muted-foreground mb-2">请求参数</h4>
+                            <h4 className="text-xs font-medium text-muted-foreground mb-2">响应结果</h4>
                             <div className="bg-white dark:bg-gray-800 rounded border p-2">
                               <pre className="text-xs overflow-x-auto">
-                                {JSON.stringify(toolCall.request, null, 2)}
+                                {JSON.stringify({
+                                  status: "success",
+                                  data: {
+                                    analysis: "请求分析完成",
+                                    action: "ready_to_respond",
+                                    confidence: 0.95
+                                  },
+                                  timestamp: new Date().toISOString()
+                                }, null, 2)}
                               </pre>
                             </div>
                           </div>
-
-                          {/* 显示工具调用完成后的响应结果 */}
-                          {isCompleted && (
-                            <div>
-                              <h4 className="text-xs font-medium text-muted-foreground mb-2">响应结果</h4>
-                              <div className="bg-white dark:bg-gray-800 rounded border p-2">
-                                <pre className="text-xs overflow-x-auto">
-                                  {JSON.stringify({
-                                    status: "success",
-                                    data: {
-                                      figma_data: {
-                                        node_id: toolCall.request.nodeId || "630-5984",
-                                        name: "设计组件",
-                                        type: "FRAME",
-                                        properties: {
-                                          width: 375,
-                                          height: 812,
-                                          backgroundColor: "#FFFFFF"
-                                        }
-                                      },
-                                      message: "成功获取 Figma 节点数据"
-                                    },
-                                    timestamp: new Date().toISOString()
-                                  }, null, 2)}
-                                </pre>
-                              </div>
-                            </div>
-                          )}
-                        </CardContent>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                ))}
+                        )}
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </Card>
               </div>
             </div>
           </div>
