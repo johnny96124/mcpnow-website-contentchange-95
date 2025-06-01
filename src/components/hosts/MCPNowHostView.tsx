@@ -19,6 +19,7 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
+import { InlineChatDialog } from "./InlineChatDialog";
 import { Separator } from "@/components/ui/separator";
 import { 
   DropdownMenu, 
@@ -26,7 +27,6 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
 import { ModelSelector } from "@/components/chat/InputArea/ModelSelector";
 import { ServerSelector } from "@/components/chat/ServerSelector/ServerSelector";
 import { MCPServer, MCPProfile } from "@/components/chat/types/chat";
@@ -60,6 +60,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   const [selectedModel, setSelectedModel] = useState('claude-4-sonnet');
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
@@ -135,6 +136,10 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
     return Math.floor(Math.random() * 90) + 10;
   };
 
+  const handleStartAIChat = () => {
+    setChatDialogOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Host Header */}
@@ -158,11 +163,9 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                <Link to="/ai-chat">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Start AI Chat
-                </Link>
+              <Button onClick={handleStartAIChat} className="bg-blue-600 hover:bg-blue-700">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Start AI Chat
               </Button>
             </div>
           </div>
@@ -310,6 +313,11 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
         onAddServers={handleAddServers}
+      />
+
+      <InlineChatDialog 
+        open={chatDialogOpen} 
+        onOpenChange={setChatDialogOpen}
       />
     </div>
   );
