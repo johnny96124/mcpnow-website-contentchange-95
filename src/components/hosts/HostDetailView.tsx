@@ -23,6 +23,7 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
+import { InlineChatDialog } from "./InlineChatDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { 
