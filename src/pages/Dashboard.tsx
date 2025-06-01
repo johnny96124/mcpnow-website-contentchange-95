@@ -13,6 +13,7 @@ import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import { ServerLogo } from '@/components/servers/ServerLogo';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { DashboardChatInterface } from '@/components/dashboard/DashboardChatInterface';
 
 const formatDownloadCount = (count: number): string => {
   if (count >= 1000) {
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isUserFlowOpen, setIsUserFlowOpen] = useState(true);
   const [selectedTab, setSelectedTab] = useState("visual");
+  const [isDashboardChatOpen, setIsDashboardChatOpen] = useState(false);
   const {
     openAddInstanceDialog
   } = useServerContext();
@@ -215,6 +217,15 @@ const Dashboard = () => {
     setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
   };
 
+  const handleStartDashboardChat = () => {
+    setIsDashboardChatOpen(true);
+  };
+
+  // If dashboard chat is open, show only the chat interface
+  if (isDashboardChatOpen) {
+    return <DashboardChatInterface onClose={() => setIsDashboardChatOpen(false)} />;
+  }
+
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       <div>
@@ -222,7 +233,7 @@ const Dashboard = () => {
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
       </div>
       
-      {/* MCP Now Quick Access - New Section */}
+      {/* MCP Now Quick Access - Modified Section */}
       {mcpNowHost && (
         <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
           <CardHeader>
@@ -244,16 +255,14 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="flex gap-2">
+                <Button onClick={handleStartDashboardChat} className="bg-blue-600 hover:bg-blue-700">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Start AI Chat
+                </Button>
                 <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
                   <Link to="/hosts">
                     <Settings2 className="h-4 w-4 mr-2" />
                     Configure
-                  </Link>
-                </Button>
-                <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                  <Link to="/ai-chat">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Start Chat
                   </Link>
                 </Button>
               </div>
