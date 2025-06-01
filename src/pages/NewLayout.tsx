@@ -282,6 +282,18 @@ const NewLayout = () => {
     }
   };
 
+  const handleDeleteServer = (serverId: string) => {
+    setServerInstances(prev => prev.filter(s => s.id !== serverId));
+    
+    // Remove from all profiles
+    setProfilesList(prev => prev.map(profile => ({
+      ...profile,
+      instances: profile.instances.filter(id => id !== serverId)
+    })));
+    
+    toast("Server has been deleted.");
+  };
+
   // Status summary for selected host
   const getHostStatusSummary = () => {
     if (!selectedProfile) return { total: 0, running: 0, errors: 0 };
@@ -630,7 +642,7 @@ const NewLayout = () => {
       <AddHostDialog 
         open={addHostDialogOpen}
         onOpenChange={setAddHostDialogOpen}
-        onAddHosts={(hosts) => hosts.forEach(handleAddHostSuccess)}
+        onAddHost={handleAddHostSuccess}
       />
 
       <AddServerDialog
@@ -644,6 +656,7 @@ const NewLayout = () => {
           open={serverDetailsOpen}
           onOpenChange={setServerDetailsOpen}
           server={selectedServer}
+          onDelete={() => handleDeleteServer(selectedServer.id)}
         />
       )}
 
@@ -667,7 +680,7 @@ const NewLayout = () => {
         open={deleteProfileOpen}
         onOpenChange={setDeleteProfileOpen}
         profileName={profileToDelete ? profilesList.find(p => p.id === profileToDelete)?.name || '' : ''}
-        onDelete={confirmDeleteProfile}
+        onConfirmDelete={confirmDeleteProfile}
       />
 
       {/* Profile Edit Dialog */}
