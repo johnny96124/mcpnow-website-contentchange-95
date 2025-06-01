@@ -2,21 +2,6 @@
 export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
-export type HostType = 'external' | 'mcpnow';
-
-export interface Host {
-  id: string;
-  name: string;
-  type: HostType;
-  connectionStatus: ConnectionStatus;
-  configStatus: 'configured' | 'misconfigured' | 'unknown';
-  configPath?: string;
-  icon?: string;
-  description?: string;
-  isDefault?: boolean;
-  profileId?: string;
-  defaultProfileName?: string;
-}
 
 export interface ServerDefinition {
   id: string;
@@ -36,7 +21,6 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
-  version?: string;
 }
 
 export interface Tool {
@@ -82,4 +66,3 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
-export const discoveryItems: ServerDefinition[];

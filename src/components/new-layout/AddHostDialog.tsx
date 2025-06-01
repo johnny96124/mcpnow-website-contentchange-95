@@ -56,7 +56,6 @@ export function AddHostDialog({
     const newHost: Host = {
       id: `host-${Date.now()}`,
       name: values.name,
-      type: 'external',
       icon: selectedIcon,
       connectionStatus: "disconnected",
       configStatus: "unknown",

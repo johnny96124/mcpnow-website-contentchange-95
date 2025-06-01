@@ -5,7 +5,7 @@ import { hosts, profiles, type Profile, type Host, type ConnectionStatus } from 
 export function useHostProfiles() {
   const [hostProfiles, setHostProfiles] = useState(
     hosts.reduce((acc, host) => {
-      acc[host.id] = profiles[0]?.id || "";
+      acc[host.id] = host.profileId || "";
       return acc;
     }, {} as Record<string, string>)
   );
@@ -47,16 +47,15 @@ export function useHostProfiles() {
   }, [getProfileById]);
   
   const getAvailableHosts = useCallback((): Host[] => {
+    // Map hosts to include all required properties with proper typing
     return hosts.map(host => ({
       id: host.id,
       name: host.name,
-      type: host.type,
       connectionStatus: host.connectionStatus || "disconnected",
-      configStatus: (host.configStatus || "unknown") as "configured" | "misconfigured" | "unknown",
+      configStatus: (host.configStatus || "unconfigured") as "configured" | "misconfigured" | "unknown",
       icon: host.icon,
-      configPath: host.configPath,
-      description: host.description,
-      isDefault: host.isDefault
+      profileId: host.profileId
+      // Removed the status property since it doesn't exist on the Host interface
     }));
   }, []);
   
