@@ -1,4 +1,3 @@
-
 import React, { useState, lazy } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -214,8 +213,6 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     );
   }
 
-  const isMCPNowHost = host.type === 'mcpnow';
-
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -235,7 +232,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
               <span className="text-sm text-muted-foreground">
                 {host.connectionStatus === "connected" ? "Connected" : "Disconnected"}
               </span>
-              {isMCPNowHost && (
+              {host.type === 'mcpnow' && (
                 <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                   Built-in
                 </Badge>
@@ -245,7 +242,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </div>
         
         <div className="flex gap-2">
-          {isMCPNowHost && onStartAIChat && (
+          {host.type === 'mcpnow' && onStartAIChat && (
             <Button onClick={onStartAIChat} className="bg-blue-600 hover:bg-blue-700">
               <MessageSquare className="h-4 w-4 mr-2" />
               Start AI Chat
