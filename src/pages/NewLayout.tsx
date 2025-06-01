@@ -190,10 +190,7 @@ const NewLayout = () => {
     }
 
     const server = serverInstances.find(s => s.id === serverId);
-    toast({
-      title: enabled ? "Server Starting" : "Server Stopped",
-      description: `${server?.name} is ${enabled ? 'starting up' : 'shutting down'}.`
-    });
+    toast(`${server?.name} is ${enabled ? 'starting up' : 'shutting down'}.`);
   };
 
   const handleCreateProfile = () => {
