@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { MCPServer } from '../types/chat';
 import { ToolControlPopover } from './ToolControlPopover';
+import { ModelSelector } from './ModelSelector';
 
 interface AttachedFile {
   id: string;
@@ -29,11 +30,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const [content, setContent] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
+  const [selectedModel, setSelectedModel] = useState('gpt-4o');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
     if ((content.trim() || attachedFiles.length > 0) && !disabled) {
+      // TODO: Include selectedModel in the message sending logic
+      console.log('Sending message with model:', selectedModel);
       onSendMessage(content.trim(), attachedFiles);
       setContent('');
       setAttachedFiles([]);
@@ -116,6 +120,14 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           </div>
         </div>
       )}
+
+      {/* Model Selector */}
+      <div className="flex items-center justify-between">
+        <ModelSelector
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+        />
+      </div>
 
       {/* Attached Files Preview */}
       {attachedFiles.length > 0 && (
