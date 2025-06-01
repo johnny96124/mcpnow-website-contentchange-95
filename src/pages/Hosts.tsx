@@ -101,7 +101,8 @@ const Hosts = () => {
 
   const handleAddHosts = (newHosts: Host[]) => {
     const hostsWithProfiles = newHosts.map(host => {
-      const profileId = handleCreateProfile(host.defaultProfileName || `${host.name} Profile`);
+      const profileName = host.defaultProfileName || `${host.name} Profile`;
+      const profileId = handleCreateProfile(profileName);
       
       return {
         ...host,

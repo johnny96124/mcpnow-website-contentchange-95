@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Settings, MoreVertical, Server, AlertTriangle, CheckCircle, XCircle, Clock, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -132,10 +131,7 @@ const NewLayout = () => {
 
     setHostsList(prev => [...prev, completeHost]);
     setSelectedHostId(completeHost.id);
-    toast({
-      title: "Host Added",
-      description: `${completeHost.name} has been added successfully.`
-    });
+    toast(`${completeHost.name} has been added successfully.`);
   };
 
   const handleAddServerSuccess = (serverData: any) => {
@@ -163,10 +159,7 @@ const NewLayout = () => {
         : profile
     ));
 
-    toast({
-      title: "Server Added",
-      description: `${newServer.name} has been added to ${selectedProfile.name}.`
-    });
+    toast(`${newServer.name} has been added to ${selectedProfile.name}.`);
   };
 
   const handleServerClick = (serverId: string) => {
@@ -219,10 +212,7 @@ const NewLayout = () => {
     setProfilesList(prev => [...prev, newProfile]);
     setSelectedProfileId(newProfile.id);
     
-    toast({
-      title: "Profile Created",
-      description: `${newProfile.name} has been created.`
-    });
+    toast(`${newProfile.name} has been created.`);
   };
 
   const handleEditProfile = (profileId: string) => {
@@ -250,10 +240,7 @@ const NewLayout = () => {
     ));
 
     setEditingProfile(null);
-    toast({
-      title: "Profile Updated",
-      description: "Profile settings have been saved."
-    });
+    toast("Profile settings have been saved.");
   };
 
   const handleDeleteProfile = (profileId: string) => {
@@ -274,10 +261,7 @@ const NewLayout = () => {
     setDeleteProfileOpen(false);
     setProfileToDelete(null);
     
-    toast({
-      title: "Profile Deleted",
-      description: "The profile has been removed."
-    });
+    toast("The profile has been removed.");
   };
 
   const handleAddClineHost = () => {
@@ -294,10 +278,7 @@ const NewLayout = () => {
       setHostsList(prev => [...prev, clineHost]);
       setSelectedHostId(clineHost.id);
       
-      toast({
-        title: "Cline Host Added",
-        description: "Cline has been added to your hosts."
-      });
+      toast("Cline has been added to your hosts.");
     }
   };
 
@@ -649,13 +630,13 @@ const NewLayout = () => {
       <AddHostDialog 
         open={addHostDialogOpen}
         onOpenChange={setAddHostDialogOpen}
-        onSuccess={handleAddHostSuccess}
+        onAddHosts={(hosts) => hosts.forEach(handleAddHostSuccess)}
       />
 
       <AddServerDialog
         open={addServerDialogOpen}
         onOpenChange={setAddServerDialogOpen}
-        onSuccess={handleAddServerSuccess}
+        onAddServer={handleAddServerSuccess}
       />
 
       {selectedServer && (
@@ -663,11 +644,6 @@ const NewLayout = () => {
           open={serverDetailsOpen}
           onOpenChange={setServerDetailsOpen}
           server={selectedServer}
-          onServerUpdate={(updatedServer) => {
-            setServerInstances(prev => prev.map(s => 
-              s.id === updatedServer.id ? updatedServer : s
-            ));
-          }}
         />
       )}
 
@@ -691,7 +667,7 @@ const NewLayout = () => {
         open={deleteProfileOpen}
         onOpenChange={setDeleteProfileOpen}
         profileName={profileToDelete ? profilesList.find(p => p.id === profileToDelete)?.name || '' : ''}
-        onConfirm={confirmDeleteProfile}
+        onDelete={confirmDeleteProfile}
       />
 
       {/* Profile Edit Dialog */}
