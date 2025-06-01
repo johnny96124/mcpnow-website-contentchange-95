@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -45,21 +44,14 @@ export function ManualHostDialog({ open, onOpenChange, onAddHost }: ManualHostDi
     const newHost: Host = {
       id: `host-${Date.now()}`,
       name: manualHostName,
+      type: 'external',
       icon: "🖥️",
       configPath,
       configStatus: "configured",
-      connectionStatus: "connected",
-      profileId: `profile-${Date.now()}`
+      connectionStatus: "connected"
     };
 
-    const defaultProfileName = `${manualHostName} Default`;
-    
-    const newHostWithProfile = {
-      ...newHost,
-      defaultProfileName
-    };
-
-    onAddHost(newHostWithProfile);
+    onAddHost(newHost);
     
     toast({
       title: "Host Added",

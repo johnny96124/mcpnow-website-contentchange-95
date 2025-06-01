@@ -1,6 +1,7 @@
-import { EndpointType, ConnectionStatus } from './mockData.d';
 
 export type HostType = 'external' | 'mcpnow';
+export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
 
 export interface Host {
   id: string;

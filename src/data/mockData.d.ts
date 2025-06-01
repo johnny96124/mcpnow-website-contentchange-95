@@ -2,6 +2,19 @@
 export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type Status = 'running' | 'stopped' | 'error' | 'connecting';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
+export type HostType = 'external' | 'mcpnow';
+
+export interface Host {
+  id: string;
+  name: string;
+  type: HostType;
+  connectionStatus: ConnectionStatus;
+  configStatus: 'configured' | 'unknown';
+  configPath?: string;
+  icon?: string;
+  description?: string;
+  isDefault?: boolean;
+}
 
 export interface ServerDefinition {
   id: string;

@@ -8,7 +8,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ConnectionStatus } from "@/data/mockData";
+import { type ConnectionStatus } from "@/data/mockData";
+
 const hostSchema = z.object({
   name: z.string().min(1, {
     message: "Host name is required"
@@ -24,8 +25,9 @@ interface AddHostDialogProps {
     name: string;
     configPath?: string;
     icon?: string;
-    configStatus: "configured" | "misconfigured" | "unknown";
+    configStatus: "configured" | "unknown";
     connectionStatus: ConnectionStatus;
+    type: 'external';
   }) => void;
 }
 export function AddHostDialog({
@@ -47,7 +49,8 @@ export function AddHostDialog({
       configPath: values.configPath || undefined,
       icon: values.icon || undefined,
       configStatus: "unknown",
-      connectionStatus: "unknown"
+      connectionStatus: "unknown",
+      type: 'external'
     });
     form.reset();
     onOpenChange(false);
