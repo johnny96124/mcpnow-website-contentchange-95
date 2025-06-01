@@ -124,6 +124,16 @@ const NewLayout = () => {
   };
 
   const handleAddHostSuccess = (newHost: Host) => {
+    const newHost: Host = {
+      ...newHost,
+      type: 'external', // Add the required type property
+      id: `host-${Date.now()}`,
+      name: newHost.name,
+      icon: newHost.icon || '💻',
+      connectionStatus: 'disconnected',
+      configStatus: 'unknown'
+    };
+
     setHostsList(prev => [...prev, newHost]);
     setSelectedHostId(newHost.id);
     toast({

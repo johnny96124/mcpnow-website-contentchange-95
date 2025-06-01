@@ -14,6 +14,8 @@ export interface Host {
   icon?: string;
   description?: string;
   isDefault?: boolean;
+  profileId?: string;
+  defaultProfileName?: string;
 }
 
 export interface ServerDefinition {

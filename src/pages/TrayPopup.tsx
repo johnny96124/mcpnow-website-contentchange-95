@@ -34,6 +34,7 @@ const TrayPopup = () => {
     {
       id: "cline-host",
       name: "Cline",
+      type: 'external' as const,
       icon: "🔄",
       connectionStatus: 'disconnected' as const,
       configStatus: 'configured' as const,
