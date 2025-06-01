@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { hosts, profiles, type Profile, type Host, type ConnectionStatus } from "@/data/mockData";
 
@@ -51,7 +52,7 @@ export function useHostProfiles() {
       name: host.name,
       type: host.type,
       connectionStatus: host.connectionStatus || "disconnected",
-      configStatus: (host.configStatus || "unknown") as "configured" | "unknown",
+      configStatus: (host.configStatus || "unknown") as "configured" | "misconfigured" | "unknown",
       icon: host.icon,
       configPath: host.configPath,
       description: host.description,

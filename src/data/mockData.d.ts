@@ -9,7 +9,7 @@ export interface Host {
   name: string;
   type: HostType;
   connectionStatus: ConnectionStatus;
-  configStatus: 'configured' | 'unknown';
+  configStatus: 'configured' | 'misconfigured' | 'unknown';
   configPath?: string;
   icon?: string;
   description?: string;
@@ -34,6 +34,7 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
+  version?: string;
 }
 
 export interface Tool {
@@ -79,3 +80,4 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
+export const discoveryItems: ServerDefinition[];

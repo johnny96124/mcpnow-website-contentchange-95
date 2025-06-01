@@ -1,4 +1,3 @@
-
 export type HostType = 'external' | 'mcpnow';
 export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
@@ -8,7 +7,7 @@ export interface Host {
   name: string;
   type: HostType;
   connectionStatus: ConnectionStatus;
-  configStatus: 'configured' | 'unknown';
+  configStatus: 'configured' | 'misconfigured' | 'unknown';
   configPath?: string;
   icon?: string;
   description?: string;
@@ -48,6 +47,7 @@ export interface ServerDefinition {
   environment?: Record<string, string>;
   headers?: Record<string, string>;
   tools?: Tool[];
+  version?: string;
 }
 
 export interface ServerInstance {
@@ -130,6 +130,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/ai-systems/fastgpt-server',
     url: 'http://localhost:8000',
     commandArgs: '--model gpt-4',
+    version: '1.2.3',
     environment: {
       'API_KEY': 'your_api_key'
     },
@@ -182,6 +183,7 @@ export const serverDefinitions: ServerDefinition[] = [
     features: ['Multi-language support', 'Context-aware completions', 'Semantic code search', 'Integration with popular IDEs'],
     repository: 'https://github.devtools/code-assistant',
     commandArgs: '--lang python',
+    version: '2.1.0',
     environment: {
       'PYTHON_PATH': '/usr/bin/python3'
     },
@@ -225,6 +227,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/promptlabs/prompt-wizard',
     url: 'http://localhost:8001',
     commandArgs: '--test-mode',
+    version: '1.5.2',
     environment: {
       'PROMPT_API_KEY': 'your_prompt_key'
     },
@@ -273,6 +276,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/searchtech/semantic-search',
     url: 'http://localhost:8002',
     commandArgs: '--db-type pinecone',
+    version: '3.0.1',
     environment: {
       'PINECONE_API_KEY': 'your_pinecone_key'
     },
@@ -321,6 +325,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/doctools/document-loader',
     url: 'http://localhost:8003',
     commandArgs: '--formats pdf,docx',
+    version: '2.3.1',
     environment: {
       'OCR_API_KEY': 'your_ocr_key'
     },
@@ -364,6 +369,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/vectortech/vector-store',
     url: 'http://localhost:8004',
     commandArgs: '--port 5432',
+    version: '1.8.0',
     environment: {
       'DATABASE_URL': 'your_db_url'
     },
@@ -416,6 +422,7 @@ export const serverDefinitions: ServerDefinition[] = [
     features: ['Object detection', 'Image classification', 'Image transformations', 'Batch processing'],
     repository: 'https://github.com/pixelworks/image-processor',
     commandArgs: '--model resnet50',
+    version: '1.4.5',
     environment: {
       'CUDA_VISIBLE_DEVICES': '0'
     },
@@ -463,6 +470,7 @@ export const serverDefinitions: ServerDefinition[] = [
     features: ['Multi-language transcription', 'Speaker diarization', 'Noise reduction', 'Audio summarization'],
     repository: 'https://github.com/audiolabs/audio-transcriber',
     commandArgs: '--lang en',
+    version: '2.0.3',
     environment: {
       'WHISPER_MODEL': 'base'
     },
@@ -506,6 +514,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/dataworks/data-analyzer',
     url: 'http://localhost:8005',
     commandArgs: '--format csv',
+    version: '3.2.1',
     environment: {
       'DATABASE_URL': 'your_db_url'
     },
@@ -554,6 +563,7 @@ export const serverDefinitions: ServerDefinition[] = [
     repository: 'https://github.com/chattech/chatbot',
     url: 'http://localhost:8006',
     commandArgs: '--personality friendly',
+    version: '1.9.2',
     environment: {
       'CHATBOT_API_KEY': 'your_chatbot_key'
     },
@@ -799,3 +809,6 @@ export const profiles: Profile[] = [
     description: 'Profile for vector storage servers'
   }
 ];
+
+// Export discoveryItems as an alias for serverDefinitions
+export const discoveryItems = serverDefinitions;
