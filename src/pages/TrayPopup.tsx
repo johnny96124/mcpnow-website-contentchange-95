@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   ExternalLink, 
@@ -45,7 +46,7 @@ const TrayPopup = () => {
 
   const [selectedProfileIds, setSelectedProfileIds] = useState<Record<string, string>>(
     displayHosts.reduce((acc, host) => {
-      if (host.profileId) {
+      if ('profileId' in host && host.profileId) {
         acc[host.id] = host.profileId;
       }
       return acc;
