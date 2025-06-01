@@ -1,3 +1,4 @@
+
 import React, { useState, lazy } from "react";
 import { 
   FileText, Server, AlertTriangle, 
@@ -149,8 +150,11 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   // Import MCPNowHostView component only when needed
   const MCPNowHostView = React.lazy(() => import('./MCPNowHostView').then(module => ({ default: module.MCPNowHostView })));
 
+  // Check if this is an MCP Now host by checking if it has the specific properties
+  const isMCPNowHost = (host as any).type === 'mcpnow';
+
   // If this is an MCP Now host, render the special view
-  if (host.type === 'mcpnow') {
+  if (isMCPNowHost) {
     return (
       <React.Suspense fallback={<div>Loading...</div>}>
         <MCPNowHostView 
@@ -232,7 +236,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
               <span className="text-sm text-muted-foreground">
                 {host.connectionStatus === "connected" ? "Connected" : "Disconnected"}
               </span>
-              {host.type === 'mcpnow' && (
+              {isMCPNowHost && (
                 <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                   Built-in
                 </Badge>
@@ -242,7 +246,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
         </div>
         
         <div className="flex gap-2">
-          {host.type === 'mcpnow' && onStartAIChat && (
+          {isMCPNowHost && onStartAIChat && (
             <Button onClick={onStartAIChat} className="bg-blue-600 hover:bg-blue-700">
               <MessageSquare className="h-4 w-4 mr-2" />
               Start AI Chat
