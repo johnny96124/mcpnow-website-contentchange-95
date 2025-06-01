@@ -234,9 +234,17 @@ const Dashboard = () => {
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
       </div>
       
-      {/* MCP Now Host Card Section */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-4">MCP Now AI Chat</h2>
+      {/* MCP Now Host Card Section - Enhanced visibility */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-blue-600 p-2 rounded-full">
+            <MessageSquare className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-blue-800 dark:text-blue-200">MCP Now AI Chat</h2>
+            <p className="text-blue-600 dark:text-blue-300">Built-in AI assistant powered by your MCP servers</p>
+          </div>
+        </div>
         <div className="max-w-md">
           <MCPNowHostCard
             onStartChat={handleStartChat}

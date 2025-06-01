@@ -19,16 +19,18 @@ export const MCPNowHostCard: React.FC<MCPNowHostCardProps> = ({
   serverCount,
   activeServers
 }) => {
+  console.log('MCPNowHostCard rendering with:', { serverCount, activeServers });
+  
   return (
-    <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20">
+    <Card className="border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/20 shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-              <span className="text-2xl">🤖</span>
+              <span className="text-3xl">🤖</span>
             </div>
             <div>
-              <CardTitle className="text-xl">MCP Now Host</CardTitle>
+              <CardTitle className="text-2xl font-bold text-blue-800 dark:text-blue-200">MCP Now Host</CardTitle>
               <div className="flex items-center gap-2 mt-1">
                 <StatusIndicator status="active" label="Ready" />
                 <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
@@ -57,7 +59,7 @@ export const MCPNowHostCard: React.FC<MCPNowHostCardProps> = ({
         <div className="space-y-2">
           <Button 
             onClick={onStartChat} 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
           >
             <MessageSquare className="h-4 w-4 mr-2" />
             Start AI Chat
@@ -65,15 +67,15 @@ export const MCPNowHostCard: React.FC<MCPNowHostCardProps> = ({
           <Button 
             onClick={onManageServers} 
             variant="outline" 
-            className="w-full border-blue-200 hover:bg-blue-50"
+            className="w-full border-blue-200 hover:bg-blue-50 py-3"
           >
             <Settings className="h-4 w-4 mr-2" />
             Manage Servers
           </Button>
         </div>
         
-        <div className="text-xs text-muted-foreground bg-white/50 rounded p-2">
-          Chat directly with your MCP servers without leaving the dashboard
+        <div className="text-xs text-muted-foreground bg-white/50 dark:bg-gray-800/50 rounded p-3">
+          💡 Chat directly with your MCP servers without leaving the dashboard
         </div>
       </CardContent>
     </Card>
