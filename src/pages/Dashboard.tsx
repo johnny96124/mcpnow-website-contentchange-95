@@ -11,6 +11,8 @@ import { useServerContext } from '@/context/ServerContext';
 import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import { ServerLogo } from '@/components/servers/ServerLogo';
+import { MCPNowHostCard } from '@/components/dashboard/MCPNowHostCard';
+import { IntegratedChatInterface } from '@/components/dashboard/IntegratedChatInterface';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -32,16 +34,55 @@ const Dashboard = () => {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isUserFlowOpen, setIsUserFlowOpen] = useState(true);
   const [selectedTab, setSelectedTab] = useState("visual");
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  
   const {
     openAddInstanceDialog
   } = useServerContext();
   const navigate = useNavigate();
+  
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
 
   const handleNavigateToServers = () => {
     navigate('/servers');
+  };
+
+  const handleStartChat = () => {
+    setIsChatOpen(true);
+  };
+
+  const handleManageServers = () => {
+    navigate('/servers');
+  };
+
+  const handleViewDetails = (server: ServerDefinition) => {
+    setSelectedServer(server);
+    setIsDialogOpen(true);
+  };
+
+  const handleInstall = (serverId: string) => {
+    const server = trendingServers.find(item => item.id === serverId);
+    if (!server) return;
+    setIsInstalling(prev => ({
+      ...prev,
+      [serverId]: true
+    }));
+    setTimeout(() => {
+      setIsInstalling(prev => ({
+        ...prev,
+        [serverId]: false
+      }));
+      setInstalledServers(prev => ({
+        ...prev,
+        [serverId]: true
+      }));
+    }, 1500);
+  };
+
+  const toggleStep = (stepIndex: number) => {
+    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
   };
 
   const trendingServers = [{
@@ -186,39 +227,24 @@ const Dashboard = () => {
     repository: "https://github.com/chattech/chatbot"
   }];
 
-  const handleViewDetails = (server: ServerDefinition) => {
-    setSelectedServer(server);
-    setIsDialogOpen(true);
-  };
-
-  const handleInstall = (serverId: string) => {
-    const server = trendingServers.find(item => item.id === serverId);
-    if (!server) return;
-    setIsInstalling(prev => ({
-      ...prev,
-      [serverId]: true
-    }));
-    setTimeout(() => {
-      setIsInstalling(prev => ({
-        ...prev,
-        [serverId]: false
-      }));
-      setInstalledServers(prev => ({
-        ...prev,
-        [serverId]: true
-      }));
-    }, 1500);
-  };
-
-  const toggleStep = (stepIndex: number) => {
-    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
-  };
-
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-2">Overview</h1>
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
+      </div>
+      
+      {/* MCP Now Host Card Section */}
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight mb-4">MCP Now AI Chat</h2>
+        <div className="max-w-md">
+          <MCPNowHostCard
+            onStartChat={handleStartChat}
+            onManageServers={handleManageServers}
+            serverCount={serverDefinitions.length}
+            activeServers={runningInstances}
+          />
+        </div>
       </div>
       
       <div className="relative group">
@@ -613,6 +639,12 @@ const Dashboard = () => {
           </CollapsibleContent>
         </Collapsible>
       </div>
+
+      {/* Integrated Chat Interface */}
+      <IntegratedChatInterface
+        open={isChatOpen}
+        onOpenChange={setIsChatOpen}
+      />
     </div>
   );
 };

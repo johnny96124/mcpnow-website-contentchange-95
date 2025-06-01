@@ -66,3 +66,16 @@ export interface Profile {
 }
 
 export const profiles: Profile[];
+
+export interface Host {
+  id: string;
+  name: string;
+  icon?: string;
+  configPath?: string;
+  configStatus: "configured" | "misconfigured" | "unknown";
+  connectionStatus: ConnectionStatus;
+  profileId?: string;
+  defaultProfileName?: string;
+}
+
+export const hosts: Host[];
