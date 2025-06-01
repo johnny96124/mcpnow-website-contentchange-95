@@ -12,6 +12,7 @@ import { serverInstances as initialServerInstances, profiles as initialProfiles 
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
+import { HostsChatInterface } from "@/components/hosts/HostsChatInterface";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -42,6 +43,7 @@ const Hosts = () => {
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
   const [serverInstances, setServerInstances] = useState<ServerInstance[]>(initialServerInstances);
   const [profilesList, setProfilesList] = useState<Profile[]>(initialProfiles);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const {
     hostProfiles,
@@ -259,6 +261,14 @@ const Hosts = () => {
     }
   };
 
+  const handleStartAIChat = () => {
+    setIsChatOpen(true);
+  };
+
+  const handleCloseChatInterface = () => {
+    setIsChatOpen(false);
+  };
+
   const handleCompleteOnboarding = () => {
     setHasSeenOnboarding(true);
   };
@@ -267,6 +277,13 @@ const Hosts = () => {
   const handleOpenAddHostDialog = () => {
     setUnifiedHostDialogOpen(true);
   };
+
+  // Show chat interface as overlay if open
+  if (isChatOpen) {
+    return (
+      <HostsChatInterface onClose={handleCloseChatInterface} />
+    );
+  }
 
   // Render appropriate content based on state
   if (!hasSeenOnboarding) {
@@ -369,6 +386,7 @@ const Hosts = () => {
               onCreateProfile={handleCreateProfile}
               onDeleteProfile={handleDeleteProfile}
               onAddServersToProfile={handleAddServersToProfile}
+              onStartAIChat={handleStartAIChat}
             />
           ) : (
             <div className="border border-dashed rounded-md p-8 text-center space-y-3">

@@ -51,9 +51,10 @@ interface HostDetailViewProps {
   onDeleteHost: (hostId: string) => void;
   onServerStatusChange: (serverId: string, status: 'running' | 'stopped' | 'error' | 'connecting') => void;
   onSaveProfileChanges: () => void;
-  onCreateProfile: (name: string) => string;
+  onCreateProfile: (profileName: string) => string;
   onDeleteProfile: (profileId: string) => void;
-  onAddServersToProfile?: (servers: ServerInstance[]) => void;
+  onAddServersToProfile: (servers: ServerInstance[]) => void;
+  onStartAIChat?: () => void;
 }
 
 export const HostDetailView: React.FC<HostDetailViewProps> = ({
@@ -69,7 +70,8 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   onSaveProfileChanges,
   onCreateProfile,
   onDeleteProfile,
-  onAddServersToProfile
+  onAddServersToProfile,
+  onStartAIChat
 }) => {
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
@@ -211,162 +213,111 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     );
   }
 
+  const isMCPNowHost = host.type === 'mcpnow';
+
   return (
     <div className="space-y-6">
-      <Card className="bg-white">
-        <CardContent className="p-6">
-          {/* Host header section */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-muted/30 p-3 rounded-full">
-                <span className="text-2xl">{host.icon || '🖥️'}</span>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold">{host.name}</h2>
-                <div className="flex items-center gap-2">
-                  <StatusIndicator 
-                    status={
-                      host.connectionStatus === "connected" 
-                        ? "active" 
-                        : host.connectionStatus === "misconfigured" 
-                          ? "error" 
-                          : "inactive"
-                    } 
-                    label={
-                      host.connectionStatus === "connected" 
-                        ? "Connected" 
-                        : host.connectionStatus === "misconfigured" 
-                          ? "Misconfigured" 
-                          : "Disconnected"
-                    } 
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                    <MoreHorizontal className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {host.configPath && (
-                    <DropdownMenuItem 
-                      className="cursor-pointer"
-                      onClick={showConfigFile}
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      View Config
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem 
-                    className="text-red-600 cursor-pointer"
-                    onClick={() => setDeleteHostDialogOpen(true)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Host
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-muted/30 p-3 rounded-full">
+            <span className="text-2xl">{host.icon || '🖥️'}</span>
           </div>
-          
-          <Separator className="my-6" />
-          
-          {/* Profile and servers section */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <ProfileDropdown 
-                  profiles={profiles} 
-                  currentProfileId={selectedProfileId} 
-                  onProfileChange={onProfileChange}
-                  onCreateProfile={onCreateProfile}
-                  onDeleteProfile={onDeleteProfile}
-                />
-              </div>
-              {/* Only show Add Servers button when there is at least one server */}
-              {profileServers.length > 0 && (
-                <Button 
-                  onClick={() => setServerSelectionDialogOpen(true)} 
-                  className="whitespace-nowrap"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Servers
-                </Button>
+            <h2 className="text-2xl font-bold">{host.name}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <div className={`w-3 h-3 rounded-full ${
+                host.connectionStatus === "connected" 
+                  ? 'bg-green-500' 
+                  : 'bg-neutral-400'
+              }`} />
+              <span className="text-sm text-muted-foreground">
+                {host.connectionStatus === "connected" ? "Connected" : "Disconnected"}
+              </span>
+              {isMCPNowHost && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                  Built-in
+                </Badge>
               )}
             </div>
-            
-            {profileServers.length > 0 ? (
-              <div className="rounded-md border mt-4">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-muted/50">
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
-                      <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                      <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
-                      <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {profileServers.map(server => (
-                      <ServerItem 
-                        key={server.id}
-                        server={server}
-                        hostConnectionStatus={host.connectionStatus}
-                        onStatusChange={handleServerStatusChange}
-                        load={getServerLoad(server.id)}
-                        onRemoveFromProfile={(serverId) => {
-                          toast({
-                            title: "Server removed",
-                            description: `${server.name} has been removed from this profile`,
-                          });
-                        }}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
-            )}
           </div>
-        </CardContent>
-      </Card>
-      
-      <ServerSelectionDialog 
-        open={serverSelectionDialogOpen} 
-        onOpenChange={setServerSelectionDialogOpen}
-        onAddServers={handleAddServers}
-      />
-      
-      <ConfigHighlightDialog
-        open={configDialogOpen}
-        onOpenChange={setConfigDialogOpen}
-        configPath={host.configPath || ""}
-      />
-
-      {/* Delete Host Confirmation Dialog */}
-      <Dialog open={deleteHostDialogOpen} onOpenChange={setDeleteHostDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Host</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{host.name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button variant="destructive" onClick={handleConfirmDeleteHost}>
-              Delete Host
+        </div>
+        
+        <div className="flex gap-2">
+          {isMCPNowHost && onStartAIChat && (
+            <Button onClick={onStartAIChat} className="bg-blue-600 hover:bg-blue-700">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Start AI Chat
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          )}
+          <Button variant="outline" onClick={() => onDeleteHost(host.id)}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Host
+          </Button>
+        </div>
+      </div>
+      
+      <Separator className="my-6" />
+      
+      {/* Profile and servers section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <ProfileDropdown 
+              profiles={profiles} 
+              currentProfileId={selectedProfileId} 
+              onProfileChange={onProfileChange}
+              onCreateProfile={onCreateProfile}
+              onDeleteProfile={onDeleteProfile}
+            />
+          </div>
+          {/* Only show Add Servers button when there is at least one server */}
+          {profileServers.length > 0 && (
+            <Button 
+              onClick={() => setServerSelectionDialogOpen(true)} 
+              className="whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Servers
+            </Button>
+          )}
+        </div>
+        
+        {profileServers.length > 0 ? (
+          <div className="rounded-md border mt-4">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
+                  <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
+                  <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
+                  <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
+                  <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {profileServers.map(server => (
+                  <ServerItem 
+                    key={server.id}
+                    server={server}
+                    hostConnectionStatus={host.connectionStatus}
+                    onStatusChange={handleServerStatusChange}
+                    load={getServerLoad(server.id)}
+                    onRemoveFromProfile={(serverId) => {
+                      toast({
+                        title: "Server removed",
+                        description: `${server.name} has been removed from this profile`,
+                      });
+                    }}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
+        )}
+      </div>
     </div>
   );
 };
