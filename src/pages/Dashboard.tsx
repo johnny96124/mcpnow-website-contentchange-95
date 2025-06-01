@@ -11,8 +11,6 @@ import { useServerContext } from '@/context/ServerContext';
 import { EndpointLabel } from '@/components/status/EndpointLabel';
 import { OfficialBadge } from '@/components/discovery/OfficialBadge';
 import { ServerLogo } from '@/components/servers/ServerLogo';
-import { MCPNowHostCard } from '@/components/dashboard/MCPNowHostCard';
-import { IntegratedChatInterface } from '@/components/dashboard/IntegratedChatInterface';
 import type { ServerDefinition, EndpointType } from '@/data/mockData';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -34,55 +32,17 @@ const Dashboard = () => {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [isUserFlowOpen, setIsUserFlowOpen] = useState(true);
   const [selectedTab, setSelectedTab] = useState("visual");
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  
   const {
     openAddInstanceDialog
   } = useServerContext();
   const navigate = useNavigate();
-  
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
+  const mcpNowHost = hosts.find(h => h.type === 'mcpnow');
 
   const handleNavigateToServers = () => {
     navigate('/servers');
-  };
-
-  const handleStartChat = () => {
-    setIsChatOpen(true);
-  };
-
-  const handleManageServers = () => {
-    navigate('/servers');
-  };
-
-  const handleViewDetails = (server: ServerDefinition) => {
-    setSelectedServer(server);
-    setIsDialogOpen(true);
-  };
-
-  const handleInstall = (serverId: string) => {
-    const server = trendingServers.find(item => item.id === serverId);
-    if (!server) return;
-    setIsInstalling(prev => ({
-      ...prev,
-      [serverId]: true
-    }));
-    setTimeout(() => {
-      setIsInstalling(prev => ({
-        ...prev,
-        [serverId]: false
-      }));
-      setInstalledServers(prev => ({
-        ...prev,
-        [serverId]: true
-      }));
-    }, 1500);
-  };
-
-  const toggleStep = (stepIndex: number) => {
-    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
   };
 
   const trendingServers = [{
@@ -227,6 +187,34 @@ const Dashboard = () => {
     repository: "https://github.com/chattech/chatbot"
   }];
 
+  const handleViewDetails = (server: ServerDefinition) => {
+    setSelectedServer(server);
+    setIsDialogOpen(true);
+  };
+
+  const handleInstall = (serverId: string) => {
+    const server = trendingServers.find(item => item.id === serverId);
+    if (!server) return;
+    setIsInstalling(prev => ({
+      ...prev,
+      [serverId]: true
+    }));
+    setTimeout(() => {
+      setIsInstalling(prev => ({
+        ...prev,
+        [serverId]: false
+      }));
+      setInstalledServers(prev => ({
+        ...prev,
+        [serverId]: true
+      }));
+    }, 1500);
+  };
+
+  const toggleStep = (stepIndex: number) => {
+    setExpandedStep(expandedStep === stepIndex ? null : stepIndex);
+  };
+
   return (
     <div className="space-y-8 animate-fade-in pb-16">
       <div>
@@ -234,26 +222,45 @@ const Dashboard = () => {
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
       </div>
       
-      {/* MCP Now Host Card Section - Enhanced visibility */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="bg-blue-600 p-2 rounded-full">
-            <MessageSquare className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-blue-800 dark:text-blue-200">MCP Now AI Chat</h2>
-            <p className="text-blue-600 dark:text-blue-300">Built-in AI assistant powered by your MCP servers</p>
-          </div>
-        </div>
-        <div className="max-w-md">
-          <MCPNowHostCard
-            onStartChat={handleStartChat}
-            onManageServers={handleManageServers}
-            serverCount={serverDefinitions.length}
-            activeServers={runningInstances}
-          />
-        </div>
-      </div>
+      {/* MCP Now Quick Access - New Section */}
+      {mcpNowHost && (
+        <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                  <span className="text-2xl">{mcpNowHost.icon}</span>
+                </div>
+                <div>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    {mcpNowHost.name}
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Built-in
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription className="text-blue-600 dark:text-blue-400">
+                    Ready for AI Chat with {runningInstances} active servers
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
+                  <Link to="/hosts">
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Configure
+                  </Link>
+                </Button>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                  <Link to="/ai-chat">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Start Chat
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
       
       <div className="relative group">
         <div className="flex items-center justify-between mb-4">
@@ -336,6 +343,11 @@ const Dashboard = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{host.icon}</span>
                       <span className="font-medium">{host.name}</span>
+                      {host.type === 'mcpnow' && (
+                        <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                          Built-in
+                        </Badge>
+                      )}
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${host.connectionStatus === 'connected' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : host.connectionStatus === 'disconnected' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'}`}>
                       {host.connectionStatus === 'connected' ? 'Connected' : host.connectionStatus === 'disconnected' ? 'Disconnected' : 'Unknown'}
@@ -427,7 +439,10 @@ const Dashboard = () => {
               <div className="flex items-center justify-center flex-col py-4">
                 <Bot className="h-12 w-12 text-blue-500 mb-2" />
                 <p className="text-sm text-center text-muted-foreground">
-                  Start an AI conversation with your connected MCP servers
+                  {runningInstances > 0 
+                    ? `Ready with ${runningInstances} active servers`
+                    : 'Configure servers to start chatting'
+                  }
                 </p>
               </div>
             </CardContent>
@@ -647,12 +662,6 @@ const Dashboard = () => {
           </CollapsibleContent>
         </Collapsible>
       </div>
-
-      {/* Integrated Chat Interface */}
-      <IntegratedChatInterface
-        open={isChatOpen}
-        onOpenChange={setIsChatOpen}
-      />
     </div>
   );
 };

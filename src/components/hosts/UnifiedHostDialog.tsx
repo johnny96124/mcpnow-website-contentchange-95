@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -41,6 +40,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         {
           id: `host-${Date.now()}-1`,
           name: "Local Development Host",
+          type: 'external',
           icon: "💻",
           configPath: "/Users/dev/.mcp/hosts/local-dev.json",
           configStatus: "configured",
@@ -49,6 +49,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         {
           id: `host-${Date.now()}-2`,
           name: "Test Environment",
+          type: 'external',
           icon: "🧪",
           configPath: "/Users/dev/.mcp/hosts/test-env.json",
           configStatus: "configured",
@@ -57,6 +58,7 @@ export function UnifiedHostDialog({ open, onOpenChange, onAddHosts }: UnifiedHos
         {
           id: `host-${Date.now()}-3`,
           name: "Production Server",
+          type: 'external',
           icon: "🚀",
           configPath: "/Users/dev/.mcp/hosts/prod.json",
           configStatus: "configured",

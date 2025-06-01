@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, lazy } from "react";
 import { 
   FileText, Server, AlertTriangle, 
   CheckCircle, Info, Plus, ChevronDown, 
@@ -144,6 +143,29 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
     onDeleteHost(host.id);
     setDeleteHostDialogOpen(false);
   };
+
+  // Import MCPNowHostView component only when needed
+  const MCPNowHostView = React.lazy(() => import('./MCPNowHostView').then(module => ({ default: module.MCPNowHostView })));
+
+  // If this is an MCP Now host, render the special view
+  if (host.type === 'mcpnow') {
+    return (
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <MCPNowHostView 
+          host={host}
+          profiles={profiles}
+          serverInstances={serverInstances}
+          selectedProfileId={selectedProfileId}
+          onProfileChange={onProfileChange}
+          onServerStatusChange={onServerStatusChange}
+          onSaveProfileChanges={onSaveProfileChanges}
+          onCreateProfile={onCreateProfile}
+          onDeleteProfile={onDeleteProfile}
+          onAddServersToProfile={onAddServersToProfile}
+        />
+      </React.Suspense>
+    );
+  }
 
   if (host.configStatus === "unknown") {
     return (
