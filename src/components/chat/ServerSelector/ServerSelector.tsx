@@ -356,6 +356,7 @@ export const ServerSelector: React.FC<ServerSelectorProps> = ({
         onOpenChange={setEditServerOpen}
         serverDefinition={selectedServerForEdit}
         onUpdateServer={handleUpdateServer}
+        allowEditAll={true}
       />
     </div>
   );

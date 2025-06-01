@@ -25,6 +25,7 @@ interface EditServerDialogProps {
   onOpenChange: (open: boolean) => void;
   onUpdateServer: (data: EditServerFormValues) => void;
   serverDefinition: ServerDefinition | null;
+  allowEditAll?: boolean; // New prop to allow editing all servers
 }
 
 const editServerFormSchema = z.object({
@@ -44,7 +45,8 @@ export function EditServerDialog({
   open,
   onOpenChange,
   onUpdateServer,
-  serverDefinition
+  serverDefinition,
+  allowEditAll = false
 }: EditServerDialogProps) {
   const [envVars, setEnvVars] = useState<{ key: string, value: string }[]>([]);
   const [httpHeaders, setHttpHeaders] = useState<{ key: string, value: string }[]>([]);
@@ -56,6 +58,7 @@ export function EditServerDialog({
   
   const isHttpSse = serverDefinition?.type === "HTTP_SSE";
   const isCustomServer = serverDefinition ? !serverDefinition.isOfficial : false;
+  const canEdit = allowEditAll || isCustomServer; // Allow editing if allowEditAll is true or it's a custom server
   
   const form = useForm<EditServerFormValues>({
     resolver: zodResolver(editServerFormSchema),
@@ -227,7 +230,7 @@ export function EditServerDialog({
                       <Input 
                         placeholder="Enter server name" 
                         {...field}
-                        disabled={!isCustomServer}
+                        disabled={!canEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -260,6 +263,7 @@ export function EditServerDialog({
                         <Input 
                           placeholder="Enter server URL" 
                           {...field} 
+                          disabled={!canEdit}
                           onChange={(e) => {
                             field.onChange(e);
                             if (e.target.value.trim() !== "") {
@@ -291,6 +295,7 @@ export function EditServerDialog({
                         <Input 
                           placeholder="Enter command line arguments" 
                           {...field} 
+                          disabled={!canEdit}
                           onChange={(e) => {
                             field.onChange(e);
                             if (e.target.value.trim() !== "") {
@@ -324,16 +329,18 @@ export function EditServerDialog({
                         </Tooltip>
                       </TooltipProvider>
                     </FormLabel>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleAddHeader}
-                      className="gap-1"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Header
-                    </Button>
+                    {canEdit && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleAddHeader}
+                        className="gap-1"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Header
+                      </Button>
+                    )}
                   </div>
                   
                   {headerKeyError && (
@@ -342,7 +349,7 @@ export function EditServerDialog({
                   
                   {httpHeaders.length === 0 ? (
                     <div className="border rounded-md p-4 text-center text-muted-foreground text-sm">
-                      No HTTP headers defined. Click 'Add Header' to add one.
+                      {canEdit ? "No HTTP headers defined. Click 'Add Header' to add one." : "No HTTP headers defined."}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -353,22 +360,26 @@ export function EditServerDialog({
                             value={header.key}
                             onChange={(e) => handleHeaderChange(index, 'key', e.target.value)}
                             className="flex-1"
+                            disabled={!canEdit}
                           />
                           <Input
                             placeholder="Value"
                             value={header.value}
                             onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
                             className="flex-1"
+                            disabled={!canEdit}
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive h-9 w-9 p-0"
-                            onClick={() => handleRemoveHeader(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          {canEdit && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive h-9 w-9 p-0"
+                              onClick={() => handleRemoveHeader(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -392,16 +403,18 @@ export function EditServerDialog({
                         </Tooltip>
                       </TooltipProvider>
                     </FormLabel>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleAddEnvVar}
-                      className="gap-1"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Add Variable
-                    </Button>
+                    {canEdit && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleAddEnvVar}
+                        className="gap-1"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Variable
+                      </Button>
+                    )}
                   </div>
                   
                   {envKeyError && (
@@ -410,7 +423,7 @@ export function EditServerDialog({
                   
                   {envVars.length === 0 ? (
                     <div className="border rounded-md p-4 text-center text-muted-foreground text-sm">
-                      No environment variables defined. Click 'Add Variable' to add one.
+                      {canEdit ? "No environment variables defined. Click 'Add Variable' to add one." : "No environment variables defined."}
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -421,22 +434,26 @@ export function EditServerDialog({
                             value={env.key}
                             onChange={(e) => handleEnvChange(index, 'key', e.target.value)}
                             className="flex-1"
+                            disabled={!canEdit}
                           />
                           <Input
                             placeholder="Value"
                             value={env.value}
                             onChange={(e) => handleEnvChange(index, 'value', e.target.value)}
                             className="flex-1"
+                            disabled={!canEdit}
                           />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive h-9 w-9 p-0"
-                            onClick={() => handleRemoveEnvVar(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          {canEdit && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive h-9 w-9 p-0"
+                              onClick={() => handleRemoveEnvVar(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -457,7 +474,7 @@ export function EditServerDialog({
                         placeholder="Describe your server's purpose and functionality"
                         className="resize-none"
                         {...field}
-                        disabled={!isCustomServer}
+                        disabled={!canEdit}
                       />
                     </FormControl>
                     <FormMessage />
@@ -471,14 +488,16 @@ export function EditServerDialog({
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                 >
-                  Cancel
+                  {canEdit ? 'Cancel' : 'Close'}
                 </Button>
-                <Button 
-                  type="submit"
-                  disabled={!!envKeyError || !!headerKeyError}
-                >
-                  Save Changes
-                </Button>
+                {canEdit && (
+                  <Button 
+                    type="submit"
+                    disabled={!!envKeyError || !!headerKeyError}
+                  >
+                    Save Changes
+                  </Button>
+                )}
               </DialogFooter>
             </form>
           </Form>
