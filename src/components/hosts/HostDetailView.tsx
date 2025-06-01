@@ -1,8 +1,9 @@
+
 import React, { useState, lazy } from "react";
 import { 
   FileText, Server, AlertTriangle, 
   CheckCircle, Info, Plus, ChevronDown, 
-  ExternalLink, ArrowRight, Settings, MoreHorizontal, Trash2
+  ExternalLink, ArrowRight, Settings, MoreHorizontal, Trash2, MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
