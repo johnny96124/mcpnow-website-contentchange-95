@@ -39,6 +39,7 @@ const Dashboard = () => {
   const activeProfiles = profiles.filter(p => p.enabled).length;
   const runningInstances = serverInstances.filter(s => s.status === 'running').length;
   const connectedHosts = hosts.filter(h => h.connectionStatus === 'connected').length;
+  const mcpNowHost = hosts.find(h => h.type === 'mcpnow');
 
   const handleNavigateToServers = () => {
     navigate('/servers');
@@ -221,6 +222,46 @@ const Dashboard = () => {
         <p className="text-muted-foreground">Monitor your servers, profiles and hosts from a single dashboard.</p>
       </div>
       
+      {/* MCP Now Quick Access - New Section */}
+      {mcpNowHost && (
+        <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                  <span className="text-2xl">{mcpNowHost.icon}</span>
+                </div>
+                <div>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    {mcpNowHost.name}
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Built-in
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription className="text-blue-600 dark:text-blue-400">
+                    Ready for AI Chat with {runningInstances} active servers
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
+                  <Link to="/hosts">
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Configure
+                  </Link>
+                </Button>
+                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                  <Link to="/ai-chat">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Start Chat
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+      
       <div className="relative group">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold tracking-tight">Trending MCP Servers</h2>
@@ -302,6 +343,11 @@ const Dashboard = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{host.icon}</span>
                       <span className="font-medium">{host.name}</span>
+                      {host.type === 'mcpnow' && (
+                        <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                          Built-in
+                        </Badge>
+                      )}
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${host.connectionStatus === 'connected' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : host.connectionStatus === 'disconnected' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'}`}>
                       {host.connectionStatus === 'connected' ? 'Connected' : host.connectionStatus === 'disconnected' ? 'Disconnected' : 'Unknown'}
@@ -393,7 +439,10 @@ const Dashboard = () => {
               <div className="flex items-center justify-center flex-col py-4">
                 <Bot className="h-12 w-12 text-blue-500 mb-2" />
                 <p className="text-sm text-center text-muted-foreground">
-                  Start an AI conversation with your connected MCP servers
+                  {runningInstances > 0 
+                    ? `Ready with ${runningInstances} active servers`
+                    : 'Configure servers to start chatting'
+                  }
                 </p>
               </div>
             </CardContent>

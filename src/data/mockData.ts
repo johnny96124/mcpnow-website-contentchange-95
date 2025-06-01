@@ -1,25 +1,17 @@
-export type EndpointType = 'HTTP_SSE' | 'STDIO' | 'WS';
-export type Status = 'running' | 'stopped' | 'error' | 'connecting';
-export type ConnectionStatus = 'connected' | 'disconnected' | 'misconfigured' | 'unknown';
+import { EndpointType, ConnectionStatus } from './mockData.d';
 
-export interface ServerDefinition {
+export type HostType = 'external' | 'mcpnow';
+
+export interface Host {
   id: string;
   name: string;
-  type: EndpointType;
-  description: string;
-  author?: string;
-  version?: string;
+  type: HostType;
+  connectionStatus: ConnectionStatus;
+  configStatus: 'configured' | 'unknown';
+  configPath?: string;
   icon?: string;
-  isOfficial?: boolean;
-  categories?: string[];
-  features?: string[];
-  repository?: string;
-  downloads?: number;
-  url?: string;
-  commandArgs?: string;
-  environment?: Record<string, string>;
-  headers?: Record<string, string>;
-  tools?: Tool[];
+  description?: string;
+  isDefault?: boolean;
 }
 
 export interface Tool {
@@ -37,16 +29,38 @@ export interface ToolParameter {
   default?: any;
 }
 
+export interface ServerDefinition {
+  id: string;
+  name: string;
+  type: EndpointType;
+  description: string;
+  icon?: string;
+  downloads: number;
+  stars?: number;
+  author?: string;
+  categories?: string[];
+  isOfficial?: boolean;
+  features?: string[];
+  repository?: string;
+  url?: string;
+  commandArgs?: string;
+  environment?: Record<string, string>;
+  headers?: Record<string, string>;
+  tools?: Tool[];
+}
+
 export interface ServerInstance {
   id: string;
-  definitionId: string;
   name: string;
-  status: Status;
-  enabled: boolean;
+  definitionId: string;
+  status: 'running' | 'stopped' | 'error' | 'connecting';
   connectionDetails: string;
+  requestCount?: number;
   environment?: Record<string, string>;
   arguments?: string[];
-  requestCount?: number;
+  url?: string;
+  headers?: Record<string, string>;
+  enabled: boolean;
 }
 
 export interface Profile {
@@ -59,886 +73,728 @@ export interface Profile {
   description?: string;
 }
 
-export interface Host {
-  id: string;
-  name: string;
-  profileId?: string;
-  configStatus: 'configured' | 'misconfigured' | 'unknown';
-  connectionStatus: ConnectionStatus;
-  configPath?: string;
-  icon?: string;
-  needsUpdate?: boolean;
-  defaultProfileName?: string;
-}
+export const hosts: Host[] = [
+  {
+    id: 'mcpnow-host',
+    name: 'MCP Now',
+    type: 'mcpnow',
+    connectionStatus: 'connected',
+    configStatus: 'configured',
+    icon: '🚀',
+    description: 'Built-in MCP Now host for direct AI chat integration',
+    isDefault: true
+  },
+  {
+    id: 'cursor-host',
+    name: 'Cursor',
+    type: 'external',
+    connectionStatus: 'connected',
+    configStatus: 'configured',
+    configPath: '/Users/username/.cursor/mcp_servers.json',
+    icon: '⚡'
+  },
+  {
+    id: 'claude-host',
+    name: 'Claude Desktop',
+    type: 'external',
+    connectionStatus: 'disconnected',
+    configStatus: 'configured',
+    configPath: '/Users/username/Library/Application Support/Claude/claude_desktop_config.json',
+    icon: '🤖'
+  },
+  {
+    id: 'vscode-host',
+    name: 'VS Code',
+    type: 'external',
+    connectionStatus: 'misconfigured',
+    configStatus: 'configured',
+    configPath: '/Users/username/.vscode/settings.json',
+    icon: '💻'
+  }
+];
 
 export const serverDefinitions: ServerDefinition[] = [
   {
-    id: 'postgres-tool',
-    name: 'PostgreSQL MCP Tool',
-    type: 'STDIO',
-    description: 'A tool for interacting with PostgreSQL databases via MCP',
-    author: 'MCP Team',
-    version: '1.0.0',
-    icon: '🐘',
-    isOfficial: true,
-    categories: ['Database', 'SQL', 'Development'],
-    features: [
-      'Database connection management',
-      'SQL query execution',
-      'Schema visualization',
-      'Query optimizations'
-    ],
-    repository: 'https://github.com/mcp/postgres-tool',
-    downloads: 3500,
-    commandArgs: '--postgres-mcp',
-    environment: { 
-      'PG_HOST': 'localhost',
-      'PG_PORT': '5432'
-    },
-    tools: [
-      {
-        id: 'query_execute',
-        name: 'execute_query',
-        description: 'Execute a SQL query against a PostgreSQL database and return the results.',
-        parameters: [
-          {
-            name: 'query',
-            type: 'string',
-            description: 'The SQL query to execute.',
-            required: true
-          },
-          {
-            name: 'params',
-            type: 'array',
-            description: 'Optional parameters for the query.',
-            required: false
-          }
-        ]
-      },
-      {
-        id: 'schema_info',
-        name: 'get_schema_info',
-        description: 'Get information about database schemas, tables, columns, and relationships.',
-        parameters: [
-          {
-            name: 'schema_name',
-            type: 'string',
-            description: 'The schema name to inspect. If not provided, returns all schemas.',
-            required: false
-          },
-          {
-            name: 'table_name',
-            type: 'string',
-            description: 'Filter results to a specific table.',
-            required: false
-          }
-        ]
-      },
-      {
-        id: 'explain_analyze',
-        name: 'explain_analyze',
-        description: 'Generate and analyze an execution plan for a query.',
-        parameters: [
-          {
-            name: 'query',
-            type: 'string',
-            description: 'The SQL query to analyze.',
-            required: true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'github-copilot-proxy',
-    name: 'GitHub Copilot Proxy',
+    id: 'fastgpt-server',
+    name: 'FastGPT Server',
     type: 'HTTP_SSE',
-    description: 'Proxy for GitHub Copilot API',
-    author: 'MCP Team',
-    version: '1.2.0',
-    icon: '🤖',
+    description: 'High-performance GPT model server with streaming responses',
+    icon: '🚀',
+    downloads: 2342,
+    stars: 4.9,
+    author: 'AI Systems Inc',
+    categories: ['AI', 'LLM', 'NLP'],
     isOfficial: true,
-    categories: ['AI', 'Development', 'Productivity'],
-    features: [
-      'Code suggestions',
-      'Auto-completion',
-      'Comment-to-code generation',
-      'API integration'
-    ],
-    repository: 'https://github.com/mcp/github-copilot-proxy',
-    downloads: 4200,
-    url: 'https://api.github.com/copilot/v1',
+    features: ['High throughput streaming responses', 'Automatic model quantization', 'Multi-model support', 'Custom prompt templates'],
+    repository: 'https://github.com/ai-systems/fastgpt-server',
+    url: 'http://localhost:8000',
+    commandArgs: '--model gpt-4',
+    environment: {
+      'API_KEY': 'your_api_key'
+    },
     headers: {
-      'Authorization': 'Bearer ${GITHUB_TOKEN}',
       'Content-Type': 'application/json'
     },
-    tools: [
-      {
-        id: 'code_completion',
-        name: 'get_completions',
-        description: 'Get code completion suggestions based on the current code context.',
-        parameters: [
-          {
-            name: 'prefix',
-            type: 'string',
-            description: 'The code context to generate completions for.',
-            required: true
-          },
-          {
-            name: 'language',
-            type: 'string',
-            description: 'The programming language of the code.',
-            required: false,
-            default: 'javascript'
-          },
-          {
-            name: 'max_tokens',
-            type: 'number',
-            description: 'Maximum number of tokens to generate.',
-            required: false,
-            default: 256
-          }
-        ]
-      },
-      {
-        id: 'comment_to_code',
-        name: 'comment_to_code',
-        description: 'Generate code from a natural language comment or description.',
-        parameters: [
-          {
-            name: 'comment',
-            type: 'string',
-            description: 'The natural language description of what code to generate.',
-            required: true
-          },
-          {
-            name: 'language',
-            type: 'string',
-            description: 'The programming language to generate code in.',
-            required: false,
-            default: 'javascript'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'local-file-assistant',
-    name: 'Local File Assistant',
-    type: 'STDIO',
-    description: 'Assists with local file operations',
-    author: 'MCP Team',
-    version: '0.9.1',
-    icon: '📁',
-    isOfficial: false,
-    categories: ['Files', 'System', 'Utility'],
-    features: [
-      'File search and indexing',
-      'Content analysis',
-      'File monitoring',
-      'Batch operations'
-    ],
-    repository: 'https://github.com/mcp/local-file-assistant',
-    downloads: 2800,
-    tools: [
-      {
-        id: 'file_read',
-        name: 'read_file',
-        description: 'Read the contents of a file from the local filesystem.',
-        parameters: [
-          {
-            name: 'path',
-            type: 'string',
-            description: 'Path to the file to read.',
-            required: true
-          },
-          {
-            name: 'encoding',
-            type: 'string',
-            description: 'File encoding to use when reading the file.',
-            required: false,
-            default: 'utf-8'
-          }
-        ]
-      },
-      {
-        id: 'file_write',
-        name: 'write_file',
-        description: 'Write content to a file on the local filesystem.',
-        parameters: [
-          {
-            name: 'path',
-            type: 'string',
-            description: 'Path to the file to write.',
-            required: true
-          },
-          {
-            name: 'content',
-            type: 'string',
-            description: 'Content to write to the file.',
-            required: true
-          },
-          {
-            name: 'encoding',
-            type: 'string',
-            description: 'File encoding to use when writing the file.',
-            required: false,
-            default: 'utf-8'
-          }
-        ]
-      },
-      {
-        id: 'file_search',
-        name: 'search_files',
-        description: 'Search for files matching a pattern in a directory.',
-        parameters: [
-          {
-            name: 'directory',
-            type: 'string',
-            description: 'Directory to search in.',
-            required: true
-          },
-          {
-            name: 'pattern',
-            type: 'string',
-            description: 'File pattern to match (glob format).',
-            required: true
-          },
-          {
-            name: 'recursive',
-            type: 'boolean',
-            description: 'Whether to search recursively in subdirectories.',
-            required: false,
-            default: true
-          }
-        ]
-      },
-      {
-        id: 'file_delete',
-        name: 'delete_file',
-        description: 'Delete a file from the local filesystem.',
-        parameters: [
-          {
-            name: 'path',
-            type: 'string',
-            description: 'Path to the file to delete.',
-            required: true
-          }
-        ]
-      }
-    ]
+    tools: [{
+      id: 'summarize',
+      name: 'Summarize Text',
+      description: 'Summarizes the given text into a concise summary.',
+      parameters: [{
+        name: 'text',
+        type: 'string',
+        description: 'The text to summarize',
+        required: true
+      }, {
+        name: 'maxLength',
+        type: 'number',
+        description: 'Maximum length of the summary',
+        default: 100
+      }]
+    }, {
+      id: 'translate',
+      name: 'Translate Text',
+      description: 'Translates the given text to a specified language.',
+      parameters: [{
+        name: 'text',
+        type: 'string',
+        description: 'The text to translate',
+        required: true
+      }, {
+        name: 'language',
+        type: 'string',
+        description: 'The target language',
+        required: true
+      }]
+    }]
   },
   {
     id: 'code-assistant',
-    name: 'Code Assistant',
-    type: 'HTTP_SSE',
-    description: 'AI-powered code completion and suggestions',
-    author: 'MCP Community',
-    version: '2.1.0',
+    name: 'CodeAssistant',
+    type: 'STDIO',
+    description: 'Code completion and analysis server with multiple language support',
     icon: '💻',
-    isOfficial: false,
-    categories: ['Development', 'AI', 'Productivity'],
-    features: [
-      'Code completion',
-      'Documentation generation',
-      'Code refactoring',
-      'Bug detection'
-    ],
-    repository: 'https://github.com/mcp-community/code-assistant',
-    downloads: 3700,
-    tools: [
-      {
-        id: 'complete_code',
-        name: 'complete_code',
-        description: 'Complete code based on the existing context.',
-        parameters: [
-          {
-            name: 'code_context',
-            type: 'string',
-            description: 'Existing code context to complete from.',
-            required: true
-          },
-          {
-            name: 'language',
-            type: 'string',
-            description: 'Programming language of the code.',
-            required: true
-          },
-          {
-            name: 'max_length',
-            type: 'number',
-            description: 'Maximum length of completion.',
-            required: false,
-            default: 100
-          }
-        ]
-      },
-      {
-        id: 'generate_docs',
-        name: 'generate_documentation',
-        description: 'Generate documentation for a given code snippet.',
-        parameters: [
-          {
-            name: 'code',
-            type: 'string',
-            description: 'Code to document.',
-            required: true
-          },
-          {
-            name: 'language',
-            type: 'string',
-            description: 'Programming language of the code.',
-            required: true
-          },
-          {
-            name: 'doc_style',
-            type: 'string',
-            description: 'Documentation style (e.g., JSDoc, DocString).',
-            required: false
-          }
-        ]
-      }
-    ]
+    downloads: 1856,
+    stars: 4.8,
+    author: 'DevTools Ltd',
+    categories: ['Development', 'AI', 'Code'],
+    isOfficial: true,
+    features: ['Multi-language support', 'Context-aware completions', 'Semantic code search', 'Integration with popular IDEs'],
+    repository: 'https://github.devtools/code-assistant',
+    commandArgs: '--lang python',
+    environment: {
+      'PYTHON_PATH': '/usr/bin/python3'
+    },
+    headers: {
+      'Authorization': 'Bearer your_token'
+    },
+    tools: [{
+      id: 'complete-code',
+      name: 'Complete Code',
+      description: 'Completes the given code snippet.',
+      parameters: [{
+        name: 'code',
+        type: 'string',
+        description: 'The code snippet to complete',
+        required: true
+      }]
+    }, {
+      id: 'analyze-code',
+      name: 'Analyze Code',
+      description: 'Analyzes the given code for potential issues.',
+      parameters: [{
+        name: 'code',
+        type: 'string',
+        description: 'The code to analyze',
+        required: true
+      }]
+    }]
   },
   {
-    id: 'docker-compose-tools',
-    name: 'Docker Compose Tools',
-    type: 'STDIO',
-    description: 'Tools for managing Docker Compose environments',
-    author: 'MCP Community',
-    version: '1.4.2',
-    icon: '🐋',
+    id: 'prompt-wizard',
+    name: 'PromptWizard',
+    type: 'HTTP_SSE',
+    description: 'Advanced prompt engineering and testing server',
+    icon: '✨',
+    downloads: 1543,
+    stars: 4.7,
+    author: 'PromptLabs',
+    categories: ['AI', 'Prompting', 'Testing'],
     isOfficial: false,
-    categories: ['DevOps', 'Containers'],
-    features: [
-      'Environment management',
-      'Service scaling',
-      'Config validation',
-      'Performance monitoring'
-    ],
-    repository: 'https://github.com/mcp-community/docker-compose-tools',
-    downloads: 2950,
-    tools: [
-      {
-        id: 'docker_compose_up',
-        name: 'compose_up',
-        description: 'Start services defined in a docker-compose.yml file.',
-        parameters: [
-          {
-            name: 'compose_file',
-            type: 'string',
-            description: 'Path to docker-compose.yml file.',
-            required: false,
-            default: './docker-compose.yml'
-          },
-          {
-            name: 'services',
-            type: 'array',
-            description: 'List of services to start. If empty, starts all services.',
-            required: false
-          },
-          {
-            name: 'detach',
-            type: 'boolean',
-            description: 'Run in detached mode.',
-            required: false,
-            default: true
-          }
-        ]
-      },
-      {
-        id: 'docker_compose_down',
-        name: 'compose_down',
-        description: 'Stop and remove services defined in a docker-compose.yml file.',
-        parameters: [
-          {
-            name: 'compose_file',
-            type: 'string',
-            description: 'Path to docker-compose.yml file.',
-            required: false,
-            default: './docker-compose.yml'
-          },
-          {
-            name: 'remove_volumes',
-            type: 'boolean',
-            description: 'Remove volumes as well.',
-            required: false,
-            default: false
-          }
-        ]
-      }
-    ]
+    features: ['Prompt versioning', 'A/B testing framework', 'Performance analytics', 'Template library'],
+    repository: 'https://github.com/promptlabs/prompt-wizard',
+    url: 'http://localhost:8001',
+    commandArgs: '--test-mode',
+    environment: {
+      'PROMPT_API_KEY': 'your_prompt_key'
+    },
+    headers: {
+      'X-Request-ID': 'unique_id'
+    },
+    tools: [{
+      id: 'generate-prompt',
+      name: 'Generate Prompt',
+      description: 'Generates a prompt based on the given parameters.',
+      parameters: [{
+        name: 'topic',
+        type: 'string',
+        description: 'The topic of the prompt',
+        required: true
+      }, {
+        name: 'style',
+        type: 'string',
+        description: 'The style of the prompt',
+        default: 'informative'
+      }]
+    }, {
+      id: 'test-prompt',
+      name: 'Test Prompt',
+      description: 'Tests the given prompt and returns the results.',
+      parameters: [{
+        name: 'prompt',
+        type: 'string',
+        description: 'The prompt to test',
+        required: true
+      }]
+    }]
+  },
+  {
+    id: 'semantic-search',
+    name: 'SemanticSearch',
+    type: 'HTTP_SSE',
+    description: 'Vector database integration for semantic search capabilities',
+    icon: '🔍',
+    downloads: 1278,
+    stars: 4.6,
+    author: 'SearchTech',
+    categories: ['Search', 'Embeddings', 'Vector DB'],
+    isOfficial: false,
+    features: ['Multiple vector DB integrations', 'Hybrid search capabilities', 'Custom embeddings support', 'Query optimization'],
+    repository: 'https://github.com/searchtech/semantic-search',
+    url: 'http://localhost:8002',
+    commandArgs: '--db-type pinecone',
+    environment: {
+      'PINECONE_API_KEY': 'your_pinecone_key'
+    },
+    headers: {
+      'Accept': 'application/json'
+    },
+    tools: [{
+      id: 'search-documents',
+      name: 'Search Documents',
+      description: 'Searches for documents related to the given query.',
+      parameters: [{
+        name: 'query',
+        type: 'string',
+        description: 'The search query',
+        required: true
+      }, {
+        name: 'limit',
+        type: 'number',
+        description: 'The maximum number of results to return',
+        default: 10
+      }]
+    }, {
+      id: 'embed-document',
+      name: 'Embed Document',
+      description: 'Embeds the given document into the vector database.',
+      parameters: [{
+        name: 'document',
+        type: 'string',
+        description: 'The document to embed',
+        required: true
+      }]
+    }]
+  },
+  {
+    id: 'document-loader',
+    name: 'DocumentLoader',
+    type: 'HTTP_SSE',
+    description: 'Document parsing and processing for various file formats',
+    icon: '📄',
+    downloads: 1150,
+    stars: 4.5,
+    author: 'DocTools',
+    categories: ['Document', 'Processing', 'Parsing'],
+    isOfficial: true,
+    features: ['Multi-format support (PDF, DOCX, TXT)', 'Extraction of structured data', 'Document chunking', 'Metadata extraction'],
+    repository: 'https://github.com/doctools/document-loader',
+    url: 'http://localhost:8003',
+    commandArgs: '--formats pdf,docx',
+    environment: {
+      'OCR_API_KEY': 'your_ocr_key'
+    },
+    headers: {
+      'User-Agent': 'DocumentLoader/1.0'
+    },
+    tools: [{
+      id: 'load-document',
+      name: 'Load Document',
+      description: 'Loads and parses the given document.',
+      parameters: [{
+        name: 'url',
+        type: 'string',
+        description: 'The URL of the document',
+        required: true
+      }]
+    }, {
+      id: 'extract-metadata',
+      name: 'Extract Metadata',
+      description: 'Extracts metadata from the given document.',
+      parameters: [{
+        name: 'document',
+        type: 'string',
+        description: 'The document to extract metadata from',
+        required: true
+      }]
+    }]
+  },
+  {
+    id: 'vector-store',
+    name: 'VectorStore',
+    type: 'HTTP_SSE',
+    description: 'High-performance vector database for AI applications',
+    icon: '🔮',
+    downloads: 1050,
+    stars: 4.4,
+    author: 'VectorTech',
+    categories: ['Database', 'Vectors', 'Storage'],
+    isOfficial: false,
+    features: ['Fast similarity search', 'Efficient vector storage', 'Hybrid queries', 'Multi-tenancy support'],
+    repository: 'https://github.com/vectortech/vector-store',
+    url: 'http://localhost:8004',
+    commandArgs: '--port 5432',
+    environment: {
+      'DATABASE_URL': 'your_db_url'
+    },
+    headers: {
+      'X-API-Version': '1.0'
+    },
+    tools: [{
+      id: 'store-vector',
+      name: 'Store Vector',
+      description: 'Stores the given vector in the database.',
+      parameters: [{
+        name: 'vector',
+        type: 'array',
+        description: 'The vector to store',
+        required: true
+      }, {
+        name: 'metadata',
+        type: 'object',
+        description: 'Metadata associated with the vector',
+        required: false
+      }]
+    }, {
+      id: 'query-vector',
+      name: 'Query Vector',
+      description: 'Queries the database for similar vectors.',
+      parameters: [{
+        name: 'vector',
+        type: 'array',
+        description: 'The query vector',
+        required: true
+      }, {
+        name: 'limit',
+        type: 'number',
+        description: 'The maximum number of results to return',
+        default: 5
+      }]
+    }]
+  },
+  {
+    id: 'image-processor',
+    name: 'ImageProcessor',
+    type: 'STDIO',
+    description: 'Image analysis and transformation server',
+    icon: '🖼️',
+    downloads: 980,
+    stars: 4.3,
+    author: 'PixelWorks',
+    categories: ['Image', 'Processing', 'AI'],
+    isOfficial: true,
+    features: ['Object detection', 'Image classification', 'Image transformations', 'Batch processing'],
+    repository: 'https://github.com/pixelworks/image-processor',
+    commandArgs: '--model resnet50',
+    environment: {
+      'CUDA_VISIBLE_DEVICES': '0'
+    },
+    headers: {
+      'Cache-Control': 'no-cache'
+    },
+    tools: [{
+      id: 'detect-objects',
+      name: 'Detect Objects',
+      description: 'Detects objects in the given image.',
+      parameters: [{
+        name: 'image',
+        type: 'string',
+        description: 'The URL or path to the image',
+        required: true
+      }]
+    }, {
+      id: 'transform-image',
+      name: 'Transform Image',
+      description: 'Transforms the given image using specified parameters.',
+      parameters: [{
+        name: 'image',
+        type: 'string',
+        description: 'The URL or path to the image',
+        required: true
+      }, {
+        name: 'rotation',
+        type: 'number',
+        description: 'The rotation angle in degrees',
+        default: 0
+      }]
+    }]
+  },
+  {
+    id: 'audio-transcriber',
+    name: 'AudioTranscriber',
+    type: 'STDIO',
+    description: 'Speech-to-text and audio analysis server',
+    icon: '🎵',
+    downloads: 920,
+    stars: 4.2,
+    author: 'AudioLabs',
+    categories: ['Audio', 'Transcription', 'Speech'],
+    isOfficial: false,
+    features: ['Multi-language transcription', 'Speaker diarization', 'Noise reduction', 'Audio summarization'],
+    repository: 'https://github.com/audiolabs/audio-transcriber',
+    commandArgs: '--lang en',
+    environment: {
+      'WHISPER_MODEL': 'base'
+    },
+    headers: {
+      'X-Real-IP': '127.0.0.1'
+    },
+    tools: [{
+      id: 'transcribe-audio',
+      name: 'Transcribe Audio',
+      description: 'Transcribes the given audio file.',
+      parameters: [{
+        name: 'audio',
+        type: 'string',
+        description: 'The URL or path to the audio file',
+        required: true
+      }]
+    }, {
+      id: 'summarize-audio',
+      name: 'Summarize Audio',
+      description: 'Summarizes the content of the given audio file.',
+      parameters: [{
+        name: 'audio',
+        type: 'string',
+        description: 'The URL or path to the audio file',
+        required: true
+      }]
+    }]
+  },
+  {
+    id: 'data-analyzer',
+    name: 'DataAnalyzer',
+    type: 'HTTP_SSE',
+    description: 'Data analysis and visualization server',
+    icon: '📊',
+    downloads: 870,
+    stars: 4.1,
+    author: 'DataWorks',
+    categories: ['Data', 'Analysis', 'Visualization'],
+    isOfficial: true,
+    features: ['Statistical analysis', 'Data visualization', 'Automated insights', 'Report generation'],
+    repository: 'https://github.com/dataworks/data-analyzer',
+    url: 'http://localhost:8005',
+    commandArgs: '--format csv',
+    environment: {
+      'DATABASE_URL': 'your_db_url'
+    },
+    headers: {
+      'Content-Encoding': 'gzip'
+    },
+    tools: [{
+      id: 'analyze-data',
+      name: 'Analyze Data',
+      description: 'Analyzes the given data and returns insights.',
+      parameters: [{
+        name: 'data',
+        type: 'string',
+        description: 'The URL or path to the data file',
+        required: true
+      }]
+    }, {
+      id: 'visualize-data',
+      name: 'Visualize Data',
+      description: 'Visualizes the given data using specified parameters.',
+      parameters: [{
+        name: 'data',
+        type: 'string',
+        description: 'The URL or path to the data file',
+        required: true
+      }, {
+        name: 'chartType',
+        type: 'string',
+        description: 'The type of chart to generate',
+        default: 'bar'
+      }]
+    }]
+  },
+  {
+    id: 'chat-bot',
+    name: 'ChatBot',
+    type: 'HTTP_SSE',
+    description: 'Conversational AI platform with multiple personalities',
+    icon: '💬',
+    downloads: 820,
+    stars: 4.0,
+    author: 'ChatTech',
+    categories: ['Chat', 'Conversational', 'AI'],
+    isOfficial: false,
+    features: ['Multiple personality templates', 'Context management', 'Knowledge base integration', 'Multi-turn conversations'],
+    repository: 'https://github.com/chattech/chatbot',
+    url: 'http://localhost:8006',
+    commandArgs: '--personality friendly',
+    environment: {
+      'CHATBOT_API_KEY': 'your_chatbot_key'
+    },
+    headers: {
+      'X-Origin': 'MCP'
+    },
+    tools: [{
+      id: 'send-message',
+      name: 'Send Message',
+      description: 'Sends a message to the chatbot and returns the response.',
+      parameters: [{
+        name: 'message',
+        type: 'string',
+        description: 'The message to send',
+        required: true
+      }]
+    }, {
+      id: 'get-context',
+      name: 'Get Context',
+      description: 'Retrieves the current context of the conversation.',
+      parameters: []
+    }]
   }
 ];
 
 export const serverInstances: ServerInstance[] = [
   {
-    id: 'postgres-dev',
-    definitionId: 'postgres-tool',
-    name: 'PostgresTool-DevDB',
+    id: 'fastgpt-instance-1',
+    name: 'FastGPT Instance 1',
+    definitionId: 'fastgpt-server',
     status: 'running',
-    enabled: true,
-    connectionDetails: '/usr/local/bin/postgres-mcp',
+    connectionDetails: 'http://localhost:8000',
+    requestCount: 120,
     environment: {
-      'DB_URL': 'postgresql://dev:password@localhost:5432/dev'
+      'API_KEY': 'your_api_key'
     },
-    requestCount: 124
+    arguments: ['--model gpt-4'],
+    url: 'http://localhost:8000',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    enabled: true
   },
   {
-    id: 'postgres-prod',
-    definitionId: 'postgres-tool',
-    name: 'PostgresTool-ProdDB',
+    id: 'code-assistant-instance-1',
+    name: 'CodeAssistant Instance 1',
+    definitionId: 'code-assistant',
     status: 'stopped',
-    enabled: false,
-    connectionDetails: '/usr/local/bin/postgres-mcp',
+    connectionDetails: 'stdio',
+    requestCount: 50,
     environment: {
-      'DB_URL': 'postgresql://prod:password@db.example.com:5432/prod'
+      'PYTHON_PATH': '/usr/bin/python3'
     },
-    requestCount: 37
+    arguments: ['--lang python'],
+    url: null,
+    headers: {
+      'Authorization': 'Bearer your_token'
+    },
+    enabled: false
   },
   {
-    id: 'github-copilot',
-    definitionId: 'github-copilot-proxy',
-    name: 'GitHub Copilot',
+    id: 'prompt-wizard-instance-1',
+    name: 'PromptWizard Instance 1',
+    definitionId: 'prompt-wizard',
     status: 'running',
-    enabled: true,
-    connectionDetails: 'https://api.github.com/copilot/v1',
+    connectionDetails: 'http://localhost:8001',
+    requestCount: 80,
     environment: {
-      'GITHUB_TOKEN': 'github_pat_xxxxxxxxxxxx'
+      'PROMPT_API_KEY': 'your_prompt_key'
     },
-    requestCount: 892
+    arguments: ['--test-mode'],
+    url: 'http://localhost:8001',
+    headers: {
+      'X-Request-ID': 'unique_id'
+    },
+    enabled: true
   },
   {
-    id: 'local-files',
-    definitionId: 'local-file-assistant',
-    name: 'Local File Assistant',
+    id: 'semantic-search-instance-1',
+    name: 'SemanticSearch Instance 1',
+    definitionId: 'semantic-search',
     status: 'error',
-    enabled: true,
-    connectionDetails: '/usr/local/bin/file-assistant',
-    arguments: ['--watch', '/home/user/projects'],
-    requestCount: 56
+    connectionDetails: 'http://localhost:8002',
+    requestCount: 30,
+    environment: {
+      'PINECONE_API_KEY': 'your_pinecone_key'
+    },
+    arguments: ['--db-type pinecone'],
+    url: 'http://localhost:8002',
+    headers: {
+      'Accept': 'application/json'
+    },
+    enabled: false
   },
   {
-    id: 'code-assist-team1',
-    definitionId: 'code-assistant',
-    name: 'Team1 Code Assistant',
+    id: 'document-loader-instance-1',
+    name: 'DocumentLoader Instance 1',
+    definitionId: 'document-loader',
     status: 'running',
-    enabled: true,
-    connectionDetails: 'http://localhost:8090/code-assist',
-    requestCount: 245
+    connectionDetails: 'http://localhost:8003',
+    requestCount: 90,
+    environment: {
+      'OCR_API_KEY': 'your_ocr_key'
+    },
+    arguments: ['--formats pdf,docx'],
+    url: 'http://localhost:8003',
+    headers: {
+      'User-Agent': 'DocumentLoader/1.0'
+    },
+    enabled: true
   },
   {
-    id: 'code-assist-team2',
-    definitionId: 'code-assistant',
-    name: 'Team2 Code Assistant',
+    id: 'vector-store-instance-1',
+    name: 'VectorStore Instance 1',
+    definitionId: 'vector-store',
+    status: 'stopped',
+    connectionDetails: 'http://localhost:8004',
+    requestCount: 40,
+    environment: {
+      'DATABASE_URL': 'your_db_url'
+    },
+    arguments: ['--port 5432'],
+    url: 'http://localhost:8004',
+    headers: {
+      'X-API-Version': '1.0'
+    },
+    enabled: false
+  },
+  {
+    id: 'image-processor-instance-1',
+    name: 'ImageProcessor Instance 1',
+    definitionId: 'image-processor',
+    status: 'running',
+    connectionDetails: 'stdio',
+    requestCount: 70,
+    environment: {
+      'CUDA_VISIBLE_DEVICES': '0'
+    },
+    arguments: ['--model resnet50'],
+    url: null,
+    headers: {
+      'Cache-Control': 'no-cache'
+    },
+    enabled: true
+  },
+  {
+    id: 'audio-transcriber-instance-1',
+    name: 'AudioTranscriber Instance 1',
+    definitionId: 'audio-transcriber',
     status: 'error',
-    enabled: true,
-    connectionDetails: 'http://localhost:8091/code-assist',
-    requestCount: 178
+    connectionDetails: 'stdio',
+    requestCount: 20,
+    environment: {
+      'WHISPER_MODEL': 'base'
+    },
+    arguments: ['--lang en'],
+    url: null,
+    headers: {
+      'X-Real-IP': '127.0.0.1'
+    },
+    enabled: false
   },
   {
-    id: 'code-assist-personal',
-    definitionId: 'code-assistant',
-    name: 'Personal Code Assistant',
-    status: 'stopped',
-    enabled: false,
-    connectionDetails: 'http://localhost:8092/code-assist',
-    requestCount: 57
-  },
-  {
-    id: 'docker-tools-dev',
-    definitionId: 'docker-compose-tools',
-    name: 'Development Docker Tools',
+    id: 'data-analyzer-instance-1',
+    name: 'DataAnalyzer Instance 1',
+    definitionId: 'data-analyzer',
     status: 'running',
-    enabled: true,
-    connectionDetails: '/usr/local/bin/docker-tools',
-    requestCount: 325
+    connectionDetails: 'http://localhost:8005',
+    requestCount: 60,
+    environment: {
+      'DATABASE_URL': 'your_db_url'
+    },
+    arguments: ['--format csv'],
+    url: 'http://localhost:8005',
+    headers: {
+      'Content-Encoding': 'gzip'
+    },
+    enabled: true
   },
   {
-    id: 'docker-tools-prod',
-    definitionId: 'docker-compose-tools',
-    name: 'Production Docker Tools',
+    id: 'chat-bot-instance-1',
+    name: 'ChatBot Instance 1',
+    definitionId: 'chat-bot',
     status: 'stopped',
-    enabled: false,
-    connectionDetails: '/usr/local/bin/docker-tools',
-    requestCount: 112
-  },
-  {
-    id: 'docker-tools-test',
-    definitionId: 'docker-compose-tools',
-    name: 'Testing Docker Tools',
-    status: 'running',
-    enabled: true,
-    connectionDetails: '/usr/local/bin/docker-tools',
-    requestCount: 204
-  },
+    connectionDetails: 'http://localhost:8006',
+    requestCount: 100,
+    environment: {
+      'CHATBOT_API_KEY': 'your_chatbot_key'
+    },
+    arguments: ['--personality friendly'],
+    url: 'http://localhost:8006',
+    headers: {
+      'X-Origin': 'MCP'
+    },
+    enabled: false
+  }
 ];
 
 export const profiles: Profile[] = [
   {
-    id: 'general-dev',
-    name: 'General Development',
+    id: 'profile-1',
+    name: 'AI Development',
     endpointType: 'HTTP_SSE',
     enabled: true,
-    endpoint: 'http://localhost:8008/mcp',
-    instances: ['github-copilot', 'local-files'],
-    description: 'General development profile for everyday coding tasks'
+    endpoint: 'http://localhost:8000',
+    instances: ['fastgpt-instance-1', 'code-assistant-instance-1'],
+    description: 'Profile for AI development servers'
   },
   {
-    id: 'database-ops',
-    name: 'Database Operations',
+    id: 'profile-2',
+    name: 'Data Analysis',
     endpointType: 'HTTP_SSE',
-    enabled: true,
-    endpoint: 'http://localhost:8009/mcp',
-    instances: ['postgres-dev'],
-    description: 'Profile for database operations and management'
-  },
-  {
-    id: 'project-x',
-    name: 'Project X',
-    endpointType: 'STDIO',
     enabled: false,
-    endpoint: '/usr/local/bin/mcp-stdio',
-    instances: ['github-copilot', 'postgres-prod'],
-    description: 'Specialized profile for Project X development'
-  },
-];
-
-export const hosts: Host[] = [
-  {
-    id: 'cursor',
-    name: 'Cursor',
-    profileId: 'general-dev',
-    configStatus: 'configured',
-    connectionStatus: 'connected',
-    configPath: '/Users/user/Library/Application Support/Cursor/settings.json',
-    icon: '⌨️'
+    endpoint: 'http://localhost:8001',
+    instances: ['prompt-wizard-instance-1', 'data-analyzer-instance-1'],
+    description: 'Profile for data analysis servers'
   },
   {
-    id: 'claude-desktop',
-    name: 'Claude Desktop',
-    profileId: 'project-x',
-    configStatus: 'misconfigured',
-    connectionStatus: 'disconnected',
-    configPath: '/Users/user/Library/Application Support/Claude/config.json',
-    icon: '🧠',
-    needsUpdate: true
+    id: 'profile-3',
+    name: 'Image Processing',
+    endpointType: 'STDIO',
+    enabled: true,
+    endpoint: 'stdio',
+    instances: ['image-processor-instance-1', 'audio-transcriber-instance-1'],
+    description: 'Profile for image and audio processing servers'
+  },
+  {
+    id: 'profile-4',
+    name: 'Semantic Search',
+    endpointType: 'HTTP_SSE',
+    enabled: false,
+    endpoint: 'http://localhost:8002',
+    instances: ['semantic-search-instance-1', 'document-loader-instance-1'],
+    description: 'Profile for semantic search servers'
+  },
+  {
+    id: 'profile-5',
+    name: 'Vector Storage',
+    endpointType: 'HTTP_SSE',
+    enabled: true,
+    endpoint: 'http://localhost:8003',
+    instances: ['vector-store-instance-1', 'chat-bot-instance-1'],
+    description: 'Profile for vector storage servers'
   }
-];
-
-export const discoveryItems: ServerDefinition[] = [
-  {
-    id: 'aws-toolkit',
-    name: 'AWS Toolkit',
-    type: 'STDIO',
-    description: 'Tools for working with AWS services, including Lambda, EC2, S3, and more. Provides seamless integration with the AWS ecosystem.',
-    author: 'AWS Community',
-    version: '2.1.0',
-    icon: '☁️',
-    isOfficial: true,
-    categories: ['Cloud', 'DevOps', 'Infrastructure'],
-    features: [
-      'Supports TypeScript development',
-      'Auto-imports and code completion',
-      'Real-time error checking',
-      'Integrated debugging'
-    ],
-    repository: 'https://github.com/AWS Community/aws toolkit',
-    downloads: 4500,
-    tools: [
-      {
-        id: 'lambda_deploy',
-        name: 'deploy_lambda',
-        description: 'Deploy a Lambda function to AWS with specified configuration and permissions.',
-        parameters: [
-          {
-            name: 'function_name',
-            type: 'string',
-            description: 'Name of the Lambda function to deploy.',
-            required: true
-          },
-          {
-            name: 'runtime',
-            type: 'string',
-            description: 'Runtime environment for the Lambda function (e.g., nodejs18.x, python3.9).',
-            required: true
-          },
-          {
-            name: 'source_path',
-            type: 'string',
-            description: 'Path to the function source code.',
-            required: true
-          },
-          {
-            name: 'memory_size',
-            type: 'number',
-            description: 'Memory allocation for the function in MB.',
-            required: false,
-            default: 128
-          }
-        ]
-      },
-      {
-        id: 's3_operations',
-        name: 'manage_s3',
-        description: 'Perform operations on S3 buckets and objects.',
-        parameters: [
-          {
-            name: 'bucket_name',
-            type: 'string',
-            description: 'Name of the S3 bucket.',
-            required: true
-          },
-          {
-            name: 'operation',
-            type: 'string',
-            description: 'Operation to perform (create, delete, list, upload, download).',
-            required: true
-          },
-          {
-            name: 'object_key',
-            type: 'string',
-            description: 'Object key for operations on specific objects.',
-            required: false
-          }
-        ]
-      },
-      {
-        id: 'ec2_control',
-        name: 'manage_ec2',
-        description: 'Control EC2 instances and manage their lifecycle.',
-        parameters: [
-          {
-            name: 'instance_id',
-            type: 'string',
-            description: 'ID of the EC2 instance.',
-            required: true
-          },
-          {
-            name: 'action',
-            type: 'string',
-            description: 'Action to perform (start, stop, reboot, terminate).',
-            required: true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'docker-assistant',
-    name: 'Docker Assistant',
-    type: 'HTTP_SSE',
-    description: 'Helps manage Docker containers and images. Provides an intuitive interface for container management and monitoring.',
-    author: 'Docker Community',
-    version: '1.5.0',
-    icon: '🐳',
-    isOfficial: false,
-    categories: ['DevOps', 'Containers', 'Infrastructure'],
-    features: [
-      'Container lifecycle management',
-      'Image building and optimization',
-      'Network configuration',
-      'Volume management'
-    ],
-    repository: 'https://github.com/docker/assistant',
-    downloads: 4000,
-    tools: [
-      {
-        id: 'container_manage',
-        name: 'manage_container',
-        description: 'Start, stop, restart, or remove Docker containers.',
-        parameters: [
-          {
-            name: 'container_id',
-            type: 'string',
-            description: 'ID or name of the container to manage.',
-            required: true
-          },
-          {
-            name: 'action',
-            type: 'string',
-            description: 'Action to perform (start, stop, restart, remove).',
-            required: true
-          },
-          {
-            name: 'force',
-            type: 'boolean',
-            description: 'Force the action if necessary.',
-            required: false,
-            default: false
-          }
-        ]
-      },
-      {
-        id: 'image_build',
-        name: 'build_image',
-        description: 'Build a Docker image from a Dockerfile.',
-        parameters: [
-          {
-            name: 'dockerfile_path',
-            type: 'string',
-            description: 'Path to the Dockerfile.',
-            required: true
-          },
-          {
-            name: 'tag',
-            type: 'string',
-            description: 'Tag for the built image.',
-            required: true
-          },
-          {
-            name: 'build_args',
-            type: 'object',
-            description: 'Build arguments to pass to the build process.',
-            required: false
-          }
-        ]
-      },
-      {
-        id: 'network_create',
-        name: 'create_network',
-        description: 'Create a Docker network with specified configuration.',
-        parameters: [
-          {
-            name: 'network_name',
-            type: 'string',
-            description: 'Name for the network.',
-            required: true
-          },
-          {
-            name: 'driver',
-            type: 'string',
-            description: 'Network driver to use.',
-            required: false,
-            default: 'bridge'
-          },
-          {
-            name: 'subnet',
-            type: 'string',
-            description: 'Subnet in CIDR format.',
-            required: false
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'kubernetes-helper',
-    name: 'Kubernetes Helper',
-    type: 'STDIO',
-    description: 'Tools for working with Kubernetes clusters, including deployment, scaling, and monitoring solutions.',
-    author: 'K8s Community',
-    version: '0.9.5',
-    icon: '⎈',
-    isOfficial: false,
-    categories: ['DevOps', 'Cloud', 'Infrastructure'],
-    features: [
-      'Cluster management',
-      'Pod visualization',
-      'Resource monitoring',
-      'Deployment automation'
-    ],
-    repository: 'https://github.com/k8s/helper',
-    downloads: 3800,
-    tools: [
-      {
-        id: 'deploy_resource',
-        name: 'apply_resource',
-        description: 'Apply a Kubernetes resource definition to the cluster.',
-        parameters: [
-          {
-            name: 'manifest_path',
-            type: 'string',
-            description: 'Path to the YAML or JSON manifest file.',
-            required: true
-          },
-          {
-            name: 'namespace',
-            type: 'string',
-            description: 'Kubernetes namespace to apply the resource to.',
-            required: false,
-            default: 'default'
-          }
-        ]
-      },
-      {
-        id: 'pod_logs',
-        name: 'get_pod_logs',
-        description: 'Retrieve logs from a Kubernetes pod.',
-        parameters: [
-          {
-            name: 'pod_name',
-            type: 'string',
-            description: 'Name of the pod.',
-            required: true
-          },
-          {
-            name: 'namespace',
-            type: 'string',
-            description: 'Kubernetes namespace where the pod is located.',
-            required: false,
-            default: 'default'
-          },
-          {
-            name: 'container',
-            type: 'string',
-            description: 'Container name (if pod has multiple containers).',
-            required: false
-          },
-          {
-            name: 'tail_lines',
-            type: 'number',
-            description: 'Number of lines to show from the end of the logs.',
-            required: false,
-            default: 100
-          }
-        ]
-      },
-      {
-        id: 'scale_deployment',
-        name: 'scale_deployment',
-        description: 'Scale a Kubernetes deployment to a specified number of replicas.',
-        parameters: [
-          {
-            name: 'deployment_name',
-            type: 'string',
-            description: 'Name of the deployment to scale.',
-            required: true
-          },
-          {
-            name: 'replicas',
-            type: 'number',
-            description: 'Desired number of replicas.',
-            required: true
-          },
-          {
-            name: 'namespace',
-            type: 'string',
-            description: 'Kubernetes namespace where the deployment is located.',
-            required: false,
-            default: 'default'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'frontend-dev-tools',
-    name: 'Frontend Dev Tools',
-    type: 'HTTP_SSE',
-    description: 'Utilities for frontend development, including code generators, component libraries, and testing tools.',
-    author: 'Web Dev Team',
-    version: '3.2.1',
-    icon: '🖥️',
-    isOfficial: true,
-    categories: ['Web', 'UI/UX', 'Frontend'],
-    features: [
-      'Component scaffolding',
-      'Style generation',
-      'Accessibility testing',
-      'Performance optimization'
-    ],
-    repository: 'https://github.com/webdev/frontend-tools',
-    downloads: 3800
-  },
 ];
