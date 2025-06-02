@@ -464,7 +464,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
         serverDefinition={configDialog.server ? {
           id: configDialog.server.id,
           name: configDialog.server.name,
-          type: configDialog.server.type,
+          type: configDialog.server.type === 'SSE' ? 'HTTP_SSE' : configDialog.server.type as EndpointType,
           description: configDialog.server.description,
           isOfficial: configDialog.server.isOfficial || false,
           categories: ['Development'],
