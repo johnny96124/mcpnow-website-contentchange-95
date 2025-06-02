@@ -49,6 +49,15 @@ export const useStreamingChat = () => {
             ]
           };
           break;
+        case 'search_documents':
+          invocation.response = {
+            results: [
+              { title: "相关文档1", score: 0.95 },
+              { title: "相关文档2", score: 0.87 }
+            ],
+            total: 2
+          };
+          break;
         case 'read_file':
           invocation.response = {
             content: "文件内容示例...",
@@ -77,11 +86,15 @@ export const useStreamingChat = () => {
   }, []);
 
   const generateServerDiscoveryCards = useCallback((userMessage: string): ServerDiscoveryCard[] => {
+    console.log('检查服务器发现条件:', { userMessage, shouldShow: shouldShowServerDiscovery(userMessage) });
+    
     if (!shouldShowServerDiscovery(userMessage)) {
       return [];
     }
 
     const matches = findRelevantServers(userMessage);
+    console.log('找到的服务器匹配:', matches);
+    
     return matches.map(match => ({
       id: `discovery-${Date.now()}-${match.server.id}`,
       serverId: match.server.id,
@@ -99,13 +112,19 @@ export const useStreamingChat = () => {
     addMessage: (sessionId: string, message: Message) => void,
     updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => void
   ): Promise<void> => {
+    console.log('开始生成AI回复，用户消息:', userMessage);
+    
     // 检查是否需要显示服务器发现卡片
     const discoveryCards = generateServerDiscoveryCards(userMessage);
+    console.log('生成的服务器发现卡片:', discoveryCards);
     
     // 分析用户消息，决定使用哪些工具
     const toolsToUse: Array<{ name: string; request: any }> = [];
 
-    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
+    // 更宽松的工具触发条件
+    if (userMessage.toLowerCase().includes('figma') || 
+        userMessage.toLowerCase().includes('设计') ||
+        userMessage.toLowerCase().includes('原型')) {
       toolsToUse.push({
         name: 'get_figma_data',
         request: {
@@ -115,27 +134,44 @@ export const useStreamingChat = () => {
       });
     }
 
-    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
+    if (userMessage.toLowerCase().includes('文件') || 
+        userMessage.toLowerCase().includes('读取') ||
+        userMessage.toLowerCase().includes('查看')) {
       toolsToUse.push({
         name: 'read_file',
         request: { path: '/example/config.json' }
       });
     }
 
-    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
+    if (userMessage.toLowerCase().includes('搜索') || 
+        userMessage.toLowerCase().includes('查找') ||
+        userMessage.toLowerCase().includes('文档')) {
       toolsToUse.push({
-        name: 'search',
+        name: 'search_documents',
         request: { query: userMessage.substring(0, 50) }
       });
     }
+
+    // 为了测试，对任何消息都添加一个默认工具调用
+    if (toolsToUse.length === 0) {
+      toolsToUse.push({
+        name: 'search_documents',
+        request: { 
+          query: userMessage.substring(0, 50),
+          filters: { type: 'relevant' }
+        }
+      });
+    }
+
+    console.log('将要使用的工具:', toolsToUse);
 
     // 如果需要工具调用，先添加工具调用消息
     if (toolsToUse.length > 0) {
       const pendingCalls: PendingToolCall[] = toolsToUse.map((tool, index) => ({
         id: `tool-${Date.now()}-${index}`,
         toolName: tool.name,
-        serverId: selectedServers[0],
-        serverName: `服务器 ${selectedServers[0]}`,
+        serverId: selectedServers[0] || 'default-server',
+        serverName: `服务器 ${selectedServers[0] || 'Default'}`,
         request: tool.request,
         status: 'pending' as const,
         order: index,
@@ -145,14 +181,30 @@ export const useStreamingChat = () => {
       const toolCallMessage: Message = {
         id: `msg-${Date.now()}-tool`,
         role: 'tool_call',
-        content: `好的，我将使用 MCP 工具来获取您提供的 Figma 链接中指定节点（node-id=${pendingCalls[0]?.request?.nodeId}）的数据。`,
+        content: `好的，我将使用 MCP 工具来处理您的请求"${userMessage}"。`,
         timestamp: Date.now(),
         pendingToolCalls: pendingCalls,
         toolCallStatus: 'pending',
         serverDiscoveryCards: discoveryCards.length > 0 ? discoveryCards : undefined
       };
 
+      console.log('添加工具调用消息:', toolCallMessage);
       addMessage(sessionId, toolCallMessage);
+      
+      // 延迟添加AI响应
+      setTimeout(() => {
+        const aiMessageId = `msg-${Date.now()}-ai`;
+        const aiMessage: Message = {
+          id: aiMessageId,
+          role: 'assistant',
+          content: `根据您的请求"${userMessage}"，我已经调用了相关的MCP工具。工具执行完成后，我将为您提供详细的分析结果。`,
+          timestamp: Date.now()
+        };
+        
+        console.log('添加AI回复消息:', aiMessage);
+        addMessage(sessionId, aiMessage);
+      }, 1500);
+      
     } else if (discoveryCards.length > 0) {
       // 如果没有工具调用但有服务器发现，添加带发现卡片的AI回复
       const messageId = `msg-${Date.now()}`;
@@ -166,6 +218,7 @@ export const useStreamingChat = () => {
         serverDiscoveryCards: discoveryCards
       };
 
+      console.log('添加带服务器发现的AI消息:', aiMessage);
       // 模拟流式响应延迟
       setTimeout(() => {
         addMessage(sessionId, aiMessage);
@@ -183,6 +236,7 @@ export const useStreamingChat = () => {
         timestamp: Date.now()
       };
 
+      console.log('添加普通AI回复:', aiMessage);
       // 模拟流式响应延迟
       setTimeout(() => {
         addMessage(sessionId, aiMessage);
