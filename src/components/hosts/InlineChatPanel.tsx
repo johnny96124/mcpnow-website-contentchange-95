@@ -161,7 +161,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
         )}
       </div>
 
-      {/* Input Area */}
+      {/* Simplified Input Area */}
       <div className="border-t p-3">
         <MessageInput
           onSendMessage={handleSendMessage}
@@ -171,8 +171,8 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
               ? "请先连接MCP服务器..."
               : "输入您的消息..."
           }
-          selectedServers={selectedServers}
-          servers={connectedServers}
+          selectedServers={[]}
+          servers={[]}
         />
       </div>
     </div>
