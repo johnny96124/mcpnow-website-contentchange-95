@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, Server, AlertTriangle } from 'lucide-react';
+import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -81,22 +81,22 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
 
   return (
     <div 
-      className="flex gap-3 animate-fade-in group"
+      className="flex gap-2 sm:gap-3 animate-fade-in group"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <Avatar className="h-8 w-8 flex-shrink-0">
+      <Avatar className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 mt-1">
         <AvatarImage src="/lovable-uploads/4128f88c-639d-47a2-baf6-4288709b348a.png" alt="MCP Now Logo" />
         <AvatarFallback className="bg-blue-100 text-blue-600">
-          <Bot className="h-4 w-4" />
+          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
         </AvatarFallback>
       </Avatar>
       
-      <div className="flex-1 space-y-3 max-w-none">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">AI助手</span>
-            <span className="text-xs text-muted-foreground">
+      <div className="flex-1 space-y-2 sm:space-y-3 max-w-none min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="font-medium text-xs sm:text-sm">AI助手</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
               {formatDistanceToNow(message.timestamp, { addSuffix: true })}
             </span>
             {isStreaming && (
@@ -104,7 +104,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
             )}
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {/* 新增的消息操作按钮 */}
             <MessageActions
               content={message.content}
@@ -123,7 +123,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
               <div className={`transition-opacity ${showActions ? 'opacity-100' : 'opacity-0'}`}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6">
                       <MoreVertical className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -144,8 +144,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
         
         {/* AI 回复内容 */}
         {displayedContent && (
-          <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-4 prose prose-sm max-w-none">
-            <div className="whitespace-pre-wrap m-0">
+          <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 sm:p-4 prose prose-sm max-w-none">
+            <div className="whitespace-pre-wrap m-0 text-sm">
               {displayedContent}
               {isStreaming && displayedContent.length < message.content.length && (
                 <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1" />
@@ -156,25 +156,25 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
 
         {/* 顺序显示的工具调用区域 */}
         {hasToolCalls && (
-          <div className={`rounded-lg p-4 border ${
+          <div className={`rounded-lg p-3 sm:p-4 border ${
             isFailed 
               ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
               : 'bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800'
           }`}>
-            <div className="space-y-4">
-              <div className="flex items-start justify-between">
-                <div>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     {isFailed ? (
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                      <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500 flex-shrink-0" />
                     ) : (
-                      <Wrench className="h-4 w-4 text-purple-500" />
+                      <Wrench className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500 flex-shrink-0" />
                     )}
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-xs sm:text-sm">
                       {isFailed ? 'MCP工具调用失败' : 'MCP工具调用'}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {isFailed 
                       ? '工具执行过程中遇到了问题，请查看详细错误信息。'
                       : '这将帮助您了解相关信息，以便更好地回答您的问题。'
@@ -183,7 +183,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {visibleTools
                   .sort((a, b) => a.order - b.order)
                   .map((tool) => (
@@ -195,58 +195,51 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                       onOpenChange={() => toggleExpanded(tool.id)}
                     >
                       <CollapsibleTrigger asChild>
-                        <CardHeader className="cursor-pointer p-3 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-2">
-                                <Wrench className="h-4 w-4 text-purple-500" />
-                                <span className="font-medium text-sm">{tool.toolName}</span>
-                              </div>
-                              
-                              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                                <Server className="h-3 w-3" />
-                                {tool.serverName}
-                              </Badge>
+                        <CardHeader className="cursor-pointer p-2 sm:p-3 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <Wrench className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500 flex-shrink-0" />
+                              <span className="font-medium text-xs sm:text-sm truncate">{tool.toolName}</span>
 
                               {tool.status === 'executing' && (
-                                <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-700">
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  执行中
+                                <Badge variant="outline" className="text-xs px-1 py-0 bg-yellow-100 text-yellow-700 flex-shrink-0">
+                                  <Loader2 className="h-2 w-2 sm:h-3 sm:w-3 mr-1 animate-spin" />
+                                  <span className="hidden sm:inline">执行中</span>
                                 </Badge>
                               )}
                               
                               {tool.status === 'completed' && (
-                                <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-200">
-                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                <Badge variant="outline" className="text-xs px-1 py-0 bg-green-100 text-green-700 border-green-200 flex-shrink-0">
+                                  <CheckCircle className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                                   完成
                                 </Badge>
                               )}
                               
                               {tool.status === 'cancelled' && (
-                                <Badge variant="outline" className="text-xs bg-red-100 text-red-700 border-red-200">
-                                  <X className="h-3 w-3 mr-1" />
-                                  已取消
+                                <Badge variant="outline" className="text-xs px-1 py-0 bg-red-100 text-red-700 border-red-200 flex-shrink-0">
+                                  <X className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
+                                  <span className="hidden sm:inline">已取消</span>
                                 </Badge>
                               )}
 
                               {tool.status === 'failed' && (
-                                <Badge variant="outline" className="text-xs bg-red-100 text-red-700 border-red-200">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                <Badge variant="outline" className="text-xs px-1 py-0 bg-red-100 text-red-700 border-red-200 flex-shrink-0">
+                                  <AlertTriangle className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                                   失败
                                 </Badge>
                               )}
 
                               {tool.status === 'pending' && (
-                                <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-200">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  待执行
+                                <Badge variant="outline" className="text-xs px-1 py-0 bg-blue-100 text-blue-700 border-blue-200 flex-shrink-0">
+                                  <Clock className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
+                                  <span className="hidden sm:inline">待执行</span>
                                 </Badge>
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                               {tool.status === 'pending' && (
-                                <div className="flex gap-2">
+                                <div className="flex gap-1 sm:gap-2">
                                   <Button
                                     size="sm"
                                     onClick={(e) => {
@@ -254,10 +247,10 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                       handleToolAction('cancel', tool.id);
                                     }}
                                     variant="outline"
-                                    className="text-gray-600 hover:text-gray-800 h-6 px-2"
+                                    className="text-gray-600 hover:text-gray-800 h-6 px-2 text-xs"
                                   >
-                                    <X className="h-3 w-3 mr-1" />
-                                    跳过
+                                    <X className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">跳过</span>
                                   </Button>
                                   <Button
                                     size="sm"
@@ -265,10 +258,10 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                       e.stopPropagation();
                                       handleToolAction('run', tool.id);
                                     }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2 text-xs"
                                   >
-                                    <Play className="h-3 w-3 mr-1" />
-                                    执行
+                                    <Play className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">执行</span>
                                   </Button>
                                 </div>
                               )}
@@ -280,18 +273,18 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                     e.stopPropagation();
                                     handleToolAction('run', tool.id);
                                   }}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2 text-xs"
                                 >
-                                  <Play className="h-3 w-3 mr-1" />
-                                  重试
+                                  <Play className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
+                                  <span className="hidden sm:inline">重试</span>
                                 </Button>
                               )}
 
                               <Button variant="ghost" size="sm" className="h-auto p-1">
                                 {expandedTools.has(tool.id) ? (
-                                  <ChevronDown className="h-4 w-4" />
+                                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                                 ) : (
-                                  <ChevronRight className="h-4 w-4" />
+                                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                                 )}
                               </Button>
                             </div>
@@ -300,7 +293,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent>
-                        <CardContent className="p-3 pt-0 space-y-3">
+                        <CardContent className="p-2 sm:p-3 pt-0 space-y-3">
                           <div>
                             <h4 className="text-xs font-medium text-muted-foreground mb-2">请求参数</h4>
                             <div className="bg-white dark:bg-gray-800 rounded border p-2">
