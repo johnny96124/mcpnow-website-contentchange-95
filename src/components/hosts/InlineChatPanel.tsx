@@ -331,14 +331,33 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         // 开始流式文本生成
         await simulateStreamingText(sessionId, aiMessageId, fullContent);
 
-        // 并行调用多个工具
-        const toolsToCall = [
-          { name: 'search_documents', request: { query: content.substring(0, 50), filters: { type: 'relevant' } } },
-          { name: 'analyze_content', request: { content, analysis_type: 'comprehensive' } }
+        // 创建工具调用数组，修复类型错误
+        const toolsToCall: Array<{ name: string; request: any }> = [
+          { 
+            name: 'search_documents', 
+            request: { 
+              query: content.substring(0, 50), 
+              filters: { type: 'relevant' } 
+            } 
+          },
+          { 
+            name: 'analyze_content', 
+            request: { 
+              content, 
+              analysis_type: 'comprehensive' 
+            } 
+          }
         ];
 
+        // 如果提到天气，添加天气工具调用
         if (content.toLowerCase().includes('天气')) {
-          toolsToCall.push({ name: 'get_weather_data', request: { location: 'Shanghai', format: 'detailed' } });
+          toolsToCall.push({ 
+            name: 'get_weather_data', 
+            request: { 
+              location: 'Shanghai', 
+              format: 'detailed' 
+            } 
+          });
         }
 
         const toolPromises = toolsToCall.map(tool => 
