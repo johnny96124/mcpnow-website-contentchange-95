@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ServerInstance, ConnectionStatus, serverDefinitions } from "@/data/mockData";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
@@ -75,7 +74,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             <ServerIcon className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="font-medium">{server.name}</div>
+            <div className="text-xs">{server.name}</div>
             {hasError && (
               <Button 
                 variant="ghost" 
