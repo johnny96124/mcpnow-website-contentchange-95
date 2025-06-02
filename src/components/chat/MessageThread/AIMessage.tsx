@@ -63,15 +63,15 @@ export const AIMessage: React.FC<AIMessageProps> = ({
             messageId={message.id}
             onRegenerate={onRegenerate}
             onDelete={onDelete}
-            onEdit={onEdit}
+            onEdit={onEdit ? () => onEdit('') : undefined}
             isUserMessage={false}
           />
           
           {onRate && (
             <MessageRating
               messageId={message.id}
-              currentRating={message.rating}
-              onRate={onRate}
+              initialRating={message.rating}
+              onRating={onRate}
             />
           )}
         </div>
