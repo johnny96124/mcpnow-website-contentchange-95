@@ -10,7 +10,7 @@ import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
 import { Message, MessageAttachment } from '@/components/chat/types/chat';
-import { HistoryDrawer } from './HistoryDrawer';
+import { ChatHistoryPopover } from './ChatHistoryPopover';
 
 interface AttachedFile {
   id: string;
@@ -42,6 +42,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false);
 
   const connectedServers = getConnectedServers();
   const selectedServers = connectedServers.map(s => s.id);
@@ -191,15 +192,21 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           </div>
           
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setHistoryDrawerOpen(true)}
-              className="gap-2"
+            <ChatHistoryPopover
+              open={historyPopoverOpen}
+              onOpenChange={setHistoryPopoverOpen}
+              sessions={chatSessions}
+              onSelectSession={handleSelectHistorySession}
             >
-              <History className="h-4 w-4" />
-              历史
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <History className="h-4 w-4" />
+                历史
+              </Button>
+            </ChatHistoryPopover>
             
             <Button
               variant="default"
@@ -254,13 +261,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           />
         </div>
       </div>
-
-      <HistoryDrawer
-        open={historyDrawerOpen}
-        onOpenChange={setHistoryDrawerOpen}
-        sessions={chatSessions}
-        onSelectSession={handleSelectHistorySession}
-      />
     </>
   );
 };
