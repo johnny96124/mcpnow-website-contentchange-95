@@ -106,7 +106,7 @@ export const ServerItem: React.FC<ServerItemProps> = ({
             } 
             size="sm"
           />
-          <span className="text-[10px]">{server.status}</span>
+          {server.status}
         </div>
       </td>
       <td className="p-4 align-middle text-center">
