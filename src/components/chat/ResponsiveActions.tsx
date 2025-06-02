@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, X, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, X, MoreHorizontal, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,64 +22,138 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
   messages,
   sessionTitle
 }) => {
-  const [showFullActions, setShowFullActions] = useState(true);
+  const [isCompact, setIsCompact] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
-    const updateLayout = () => {
-      if (!containerRef.current) return;
-      
-      const width = containerRef.current.offsetWidth;
-      setContainerWidth(width);
-      
-      // 如果宽度小于200px，隐藏导出按钮
-      const shouldShowFull = width >= 200;
-      setShowFullActions(shouldShowFull);
+    const checkWidth = () => {
+      if (containerRef.current) {
+        const width = containerRef.current.offsetWidth;
+        // 如果宽度小于150px，使用紧凑模式
+        setIsCompact(width < 150);
+      }
     };
 
-    // 初始化
-    updateLayout();
+    // 初始检查
+    checkWidth();
 
     // 使用ResizeObserver监听容器大小变化
-    const resizeObserver = new ResizeObserver(updateLayout);
+    const resizeObserver = new ResizeObserver(checkWidth);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
     // 也监听窗口大小变化
-    window.addEventListener('resize', updateLayout);
+    window.addEventListener('resize', checkWidth);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener('resize', updateLayout);
+      window.removeEventListener('resize', checkWidth);
     };
   }, []);
 
+  const exportAsMarkdown = () => {
+    const title = sessionTitle || '对话记录';
+    let markdown = `# ${title}\n\n`;
+    
+    messages.forEach((message) => {
+      const role = message.role === 'user' ? '用户' : 'AI助手';
+      const timestamp = new Date(message.timestamp).toLocaleString('zh-CN');
+      
+      markdown += `## ${role} (${timestamp})\n\n`;
+      markdown += `${message.content}\n\n`;
+      
+      if (message.attachments && message.attachments.length > 0) {
+        markdown += `**附件:**\n`;
+        message.attachments.forEach(attachment => {
+          markdown += `- ${attachment.name} (${Math.round(attachment.size / 1024)}KB)\n`;
+        });
+        markdown += `\n`;
+      }
+    });
+    
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportAsJSON = () => {
+    const data = {
+      title: sessionTitle || '对话记录',
+      exportTime: new Date().toISOString(),
+      messages: messages
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sessionTitle || '对话记录'}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div ref={containerRef} className="flex items-center gap-1 min-w-0">
-      {/* 返回按钮 - 始终显示 */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClose}
-        className="flex-shrink-0"
-      >
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-
-      {/* 根据空间显示不同的布局 */}
-      {showFullActions ? (
+      {isCompact ? (
+        // 紧凑模式：只显示返回按钮和更多操作菜单
         <>
-          {/* 导出按钮 */}
-          <div className="flex-shrink-0">
-            <ConversationExport
-              messages={messages}
-              sessionTitle={sessionTitle}
-            />
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="flex-shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           
-          {/* 关闭按钮 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="flex-shrink-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={exportAsMarkdown} className="gap-2">
+                <Download className="h-4 w-4" />
+                导出为 Markdown
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportAsJSON} className="gap-2">
+                <Download className="h-4 w-4" />
+                导出为 JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onClose} className="gap-2">
+                <X className="h-4 w-4" />
+                关闭对话
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      ) : (
+        // 正常模式：显示所有按钮
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="flex-shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+
+          <ConversationExport
+            messages={messages}
+            sessionTitle={sessionTitle}
+          />
+          
           <Button
             variant="ghost"
             size="icon"
@@ -88,31 +162,6 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
           >
             <X className="h-4 w-4" />
           </Button>
-        </>
-      ) : (
-        <>
-          {/* 更多操作菜单 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="flex-shrink-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <div className="w-full">
-                  <ConversationExport
-                    messages={messages}
-                    sessionTitle={sessionTitle}
-                    variant="menu"
-                  />
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onClose}>
-                关闭对话
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </>
       )}
     </div>

@@ -405,8 +405,8 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col" style={{ maxWidth: 'calc(100vw - 240px)', marginLeft: 'auto' }}>
       {/* Header */}
-      <div className="border-b p-4 flex items-center min-w-0">
-        <div className="flex items-center gap-3 min-w-0 flex-1 mr-2">
+      <div className="border-b p-4 flex items-center justify-between min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold truncate">
               {currentSession?.title || 'MCP Now AI 对话'}
@@ -416,7 +416,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             </p>
           </div>
         </div>
-        <div className="flex-shrink-0 min-w-0" style={{ maxWidth: '300px' }}>
+        <div className="flex-shrink-0" style={{ minWidth: '80px', maxWidth: '200px' }}>
           <ResponsiveActions
             onClose={onClose}
             messages={currentMessages}
