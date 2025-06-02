@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Info, MessageSquare } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -313,10 +313,6 @@ const Hosts = () => {
             Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
-        <Button onClick={handleToggleChat} variant={isChatOpen ? "default" : "outline"}>
-          <MessageSquare className="h-4 w-4 mr-2" />
-          {isChatOpen ? "Hide Chat" : "Start AI Chat"}
-        </Button>
       </div>
 
       {/* Main Content with Collapsible Layout */}
