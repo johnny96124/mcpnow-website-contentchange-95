@@ -169,7 +169,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
             {onRating && (
               <MessageRating
                 messageId={message.id}
-                currentRating={message.rating}
+                initialRating={message.rating}
                 onRating={onRating}
               />
             )}
