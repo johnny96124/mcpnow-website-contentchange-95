@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   MessageSquare, Bot, Server, 
@@ -27,7 +26,6 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { ModelSelector } from "@/components/chat/InputArea/ModelSelector";
 import { ServerSelector } from "@/components/chat/ServerSelector/ServerSelector";
 import { MCPServer, MCPProfile } from "@/components/chat/types/chat";
 

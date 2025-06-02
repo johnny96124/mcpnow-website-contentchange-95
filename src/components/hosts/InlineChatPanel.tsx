@@ -4,7 +4,6 @@ import { Send, Bot } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
 import { ChatHistory } from '@/components/chat/ChatHistory/ChatHistory';
@@ -38,7 +37,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
   const { toast } = useToast();
   
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [selectedModel, setSelectedModel] = useState('Claude 4 Sonnet');
   const [isSending, setIsSending] = useState(false);
   const [showHistory, setShowHistory] = useState(true);
 
@@ -141,30 +139,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
 
   return (
     <div className={`h-full flex flex-col ${className}`}>
-      {/* Model Selection */}
-      <div className="p-3 border-b">
-        <Select value={selectedModel} onValueChange={setSelectedModel}>
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Claude 4 Sonnet">⭐ Claude 4 Sonnet</SelectItem>
-            <SelectItem value="GPT-4">GPT-4</SelectItem>
-            <SelectItem value="Claude 3">Claude 3</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Connected Servers Info */}
-      <div className="p-3 border-b bg-muted/30">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Connected:</span>
-          <Badge variant="secondary">
-            {connectedServers.length > 0 ? connectedServers[0].name : 'No servers'}
-          </Badge>
-        </div>
-      </div>
-
       {/* Chat Area */}
       <div className="flex-1 min-h-0">
         {currentMessages.length > 0 ? (

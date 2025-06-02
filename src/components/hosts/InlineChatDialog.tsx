@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
 import { ChatHistory } from '@/components/chat/ChatHistory/ChatHistory';
@@ -46,7 +45,6 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
   const { toast } = useToast();
   
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [selectedModel, setSelectedModel] = useState('Claude 4 Sonnet');
   const [isSending, setIsSending] = useState(false);
 
   const connectedServers = getConnectedServers();
@@ -162,18 +160,6 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Claude 4 Sonnet">⭐ Claude 4 Sonnet</SelectItem>
-                  <SelectItem value="GPT-4">GPT-4</SelectItem>
-                  <SelectItem value="Claude 3">Claude 3</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </DialogHeader>
 
@@ -206,16 +192,6 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
 
           {/* Right Side - Chat Area */}
           <div className="flex-1 flex flex-col">
-            {/* Connected Servers Info */}
-            <div className="p-4 border-b bg-muted/30">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Connected to:</span>
-                <Badge variant="secondary">
-                  {connectedServers.length > 0 ? connectedServers[0].name : 'No servers'}
-                </Badge>
-              </div>
-            </div>
-
             {/* Message Thread */}
             <div className="flex-1 overflow-hidden">
               {currentMessages.length > 0 ? (
