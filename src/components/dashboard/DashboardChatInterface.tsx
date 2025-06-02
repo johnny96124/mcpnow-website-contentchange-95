@@ -467,10 +467,11 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
           type: configDialog.server.type,
           description: configDialog.server.description,
           isOfficial: configDialog.server.isOfficial || false,
-          category: 'Development',
+          categories: ['Development'],
+          downloads: 0,
           url: '',
-          args: '',
-          env: {},
+          commandArgs: '',
+          environment: {},
           headers: {}
         } : null}
         onCreateInstance={handleServerConfigComplete}
