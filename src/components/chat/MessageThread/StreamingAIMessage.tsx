@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,10 +38,24 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (isStreaming) {
-      streamText();
+    if (message.contentPhases && message.contentPhases.length > 0) {
+      // 使用分阶段内容模式
+      const currentPhase = message.currentPhase || 0;
+      const phasesToShow = message.contentPhases.slice(0, currentPhase + 1);
+      const fullContent = phasesToShow.join('\n\n');
+      
+      if (message.isStreamingPhase && isStreaming) {
+        streamPhaseText(fullContent, phasesToShow[currentPhase]);
+      } else {
+        setDisplayedContent(fullContent);
+      }
     } else {
-      setDisplayedContent(message.content);
+      // 传统单一内容模式
+      if (isStreaming) {
+        streamText();
+      } else {
+        setDisplayedContent(message.content);
+      }
     }
   }, [message, isStreaming]);
 
@@ -51,6 +64,21 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
     const streamTimer = setInterval(() => {
       if (index < message.content.length) {
         setDisplayedContent(message.content.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(streamTimer);
+      }
+    }, 30);
+  };
+
+  const streamPhaseText = (fullContent: string, currentPhaseContent: string) => {
+    const baseContent = fullContent.slice(0, fullContent.length - currentPhaseContent.length);
+    let index = 0;
+    
+    const streamTimer = setInterval(() => {
+      if (index < currentPhaseContent.length) {
+        const partialPhaseContent = currentPhaseContent.slice(0, index + 1);
+        setDisplayedContent(baseContent + (baseContent ? '\n\n' : '') + partialPhaseContent);
         index++;
       } else {
         clearInterval(streamTimer);
@@ -78,6 +106,14 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const visibleTools = pendingCalls.filter(tool => tool.visible);
   const hasToolCalls = pendingCalls.length > 0;
   const isFailed = message.toolCallStatus === 'failed';
+  
+  // 判断是否应该显示工具调用区域
+  const shouldShowTools = hasToolCalls && (
+    !message.contentPhases || 
+    message.streamingPhase === 'tools' || 
+    message.streamingPhase === 'post-tools' || 
+    message.streamingPhase === 'completed'
+  );
 
   return (
     <div 
@@ -99,13 +135,12 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
             <span className="text-xs text-muted-foreground hidden sm:inline">
               {formatDistanceToNow(message.timestamp, { addSuffix: true })}
             </span>
-            {isStreaming && (
+            {(isStreaming || message.isStreamingPhase) && (
               <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
             )}
           </div>
           
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* 新增的消息操作按钮 */}
             <MessageActions
               content={message.content}
               messageId={message.id}
@@ -113,7 +148,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
               isUserMessage={false}
             />
             
-            {/* 新增的评分组件 */}
             <MessageRating
               messageId={message.id}
               onRating={onRating}
@@ -147,15 +181,15 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 sm:p-4 prose prose-sm max-w-none">
             <div className="whitespace-pre-wrap m-0 text-sm">
               {displayedContent}
-              {isStreaming && displayedContent.length < message.content.length && (
+              {(isStreaming || message.isStreamingPhase) && (
                 <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1" />
               )}
             </div>
           </div>
         )}
 
-        {/* 顺序显示的工具调用区域 */}
-        {hasToolCalls && (
+        {/* 工具调用区域 - 只在适当的阶段显示 */}
+        {shouldShowTools && (
           <div className={`rounded-lg p-3 sm:p-4 border ${
             isFailed 
               ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
