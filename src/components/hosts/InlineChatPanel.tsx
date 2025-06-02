@@ -10,7 +10,7 @@ import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
-import { Message, MessageAttachment } from '@/components/chat/types/chat';
+import { Message, MessageAttachment, PendingToolCall } from '@/components/chat/types/chat';
 import { ChatHistoryPopover } from './ChatHistoryPopover';
 
 interface AttachedFile {
@@ -37,7 +37,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     deleteMessage,
     renameSession,
   } = useChatHistory();
-  const { streamingMessageId, generateAIResponseWithInlineTools } = useStreamingChat();
+  const { streamingMessageId } = useStreamingChat();
   const { toast } = useToast();
   
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
@@ -66,6 +66,114 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
 
   const handleSelectHistorySession = (sessionId: string) => {
     selectChat(sessionId);
+  };
+
+  const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
+    let currentIndex = 0;
+    const words = fullContent.split('');
+    
+    return new Promise<void>((resolve) => {
+      const streamInterval = setInterval(() => {
+        if (currentIndex < words.length) {
+          const partialContent = words.slice(0, currentIndex + 1).join('');
+          
+          setCurrentMessages(prev => 
+            prev.map(msg => 
+              msg.id === messageId ? { ...msg, content: partialContent } : msg
+            )
+          );
+          
+          updateMessage(sessionId, messageId, { content: partialContent });
+          
+          currentIndex++;
+        } else {
+          clearInterval(streamInterval);
+          resolve();
+        }
+      }, 30);
+    });
+  };
+
+  const generateSequentialToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
+    const useMultipleServers = Math.random() < 0.5;
+    const availableServers = selectedServers.length > 1 ? selectedServers : connectedServers.map(s => s.id);
+    
+    if (useMultipleServers && availableServers.length > 1) {
+      const tools = [
+        {
+          id: `tool-${Date.now()}-1`,
+          toolName: 'search_documents',
+          serverId: availableServers[0],
+          serverName: `服务器 ${availableServers[0]}`,
+          request: { 
+            query: userMessage.substring(0, 50),
+            filters: { type: 'relevant' }
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        },
+        {
+          id: `tool-${Date.now()}-2`,
+          toolName: 'get_weather_data',
+          serverId: availableServers[1] || availableServers[0],
+          serverName: `服务器 ${availableServers[1] || availableServers[0]}`,
+          request: { 
+            location: 'Shanghai',
+            format: 'detailed'
+          },
+          status: 'pending' as const,
+          order: 1,
+          visible: false
+        },
+        {
+          id: `tool-${Date.now()}-3`,
+          toolName: 'analyze_content',
+          serverId: availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0],
+          serverName: `服务器 ${availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0]}`,
+          request: { 
+            content: userMessage,
+            analysis_type: 'comprehensive'
+          },
+          status: 'pending' as const,
+          order: 2,
+          visible: false
+        }
+      ];
+
+      return tools;
+    } else {
+      const tools = [
+        {
+          id: `tool-${Date.now()}-1`,
+          toolName: 'search_documents',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            query: userMessage.substring(0, 50),
+            filters: { type: 'relevant' }
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        },
+        {
+          id: `tool-${Date.now()}-2`,
+          toolName: 'analyze_content',
+          serverId: selectedServers[0],
+          serverName: `服务器 ${selectedServers[0]}`,
+          request: { 
+            content: userMessage,
+            analysis_type: 'comprehensive'
+          },
+          status: 'pending' as const,
+          order: 1,
+          visible: false
+        }
+      ];
+
+      return tools;
+    }
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
@@ -107,14 +215,55 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     addMessage(sessionId, userMessage);
 
     try {
-      // Use streaming chat with inline tools
-      await generateAIResponseWithInlineTools(
-        content,
-        selectedServers,
-        sessionId,
-        addMessage,
-        updateMessage
-      );
+      // 创建AI助手消息，开始流式生成
+      const aiMessageId = `msg-${Date.now()}-ai`;
+      
+      // 根据用户消息内容决定是否需要工具调用
+      const needsTools = content.toLowerCase().includes('figma') || 
+                        content.toLowerCase().includes('文件') || 
+                        content.toLowerCase().includes('搜索') ||
+                        content.toLowerCase().includes('查找') ||
+                        content.length > 20; // 复杂问题可能需要工具
+
+      let fullContent: string;
+      
+      if (needsTools) {
+        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+      } else {
+        fullContent = `我理解您的请求"${content}"。这是一个简单的回复：您输入的内容是"${content}"。如果您需要更复杂的功能或工具调用，请描述更详细的需求。`;
+      }
+
+      const aiMessage: Message = {
+        id: aiMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now()
+      };
+
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      addMessage(sessionId, aiMessage);
+
+      // 先完成流式文字生成
+      await simulateStreamingText(sessionId, aiMessageId, fullContent);
+      
+      // 如果需要工具调用，添加工具调用序列
+      if (needsTools) {
+        const toolCalls = generateSequentialToolCalls(content, selectedServers);
+        const messageWithTools: Partial<Message> = {
+          pendingToolCalls: toolCalls,
+          toolCallStatus: 'pending',
+          currentToolIndex: 0
+        };
+
+        setCurrentMessages(prev => 
+          prev.map(msg => 
+            msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+          )
+        );
+        
+        updateMessage(sessionId, aiMessageId, messageWithTools);
+      }
+
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -130,35 +279,81 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     }
   };
 
-  const handleToolAction = (messageId: string, action: 'run' | 'cancel') => {
-    if (!currentSession) return;
-    
-    if (action === 'run') {
-      updateMessage(currentSession.id, messageId, { 
-        toolCallStatus: 'executing' as const 
+  const handleToolAction = (messageId: string, action: 'run' | 'cancel', toolId?: string) => {
+    const message = currentMessages.find(msg => msg.id === messageId);
+    if (!message || !message.pendingToolCalls) return;
+
+    const updateMessageInline = (updates: Partial<Message>) => {
+      setCurrentMessages(prev => 
+        prev.map(msg => msg.id === messageId ? { ...msg, ...updates } : msg)
+      );
+      if (currentSession) {
+        updateMessage(currentSession.id, messageId, updates);
+      }
+    };
+
+    if (action === 'cancel') {
+      const updatedToolCalls = message.pendingToolCalls.map(tool => ({
+        ...tool,
+        status: tool.status === 'pending' ? 'cancelled' as const : tool.status
+      }));
+
+      updateMessageInline({ 
+        pendingToolCalls: updatedToolCalls,
+        toolCallStatus: 'cancelled',
+        content: message.content + '\n\n工具调用已被取消。如果您还有其他问题，请随时告诉我。'
+      });
+    } else if (action === 'run' && toolId) {
+      const toolIndex = message.pendingToolCalls.findIndex(tool => tool.id === toolId);
+      if (toolIndex === -1) return;
+
+      const updatedToolCalls = message.pendingToolCalls.map(tool => 
+        tool.id === toolId ? { ...tool, status: 'executing' as const } : tool
+      );
+
+      updateMessageInline({ 
+        pendingToolCalls: updatedToolCalls,
+        toolCallStatus: 'executing'
       });
       
-      // Simulate tool execution
       setTimeout(() => {
-        updateMessage(currentSession.id, messageId, { 
-          toolCallStatus: 'completed' as const 
-        });
+        const shouldFail = Math.random() < 0.2;
         
-        // Add AI response after tool completion
-        const aiResponse: Message = {
-          id: `msg-${Date.now()}-ai`,
-          role: 'assistant',
-          content: '已成功获取 Figma 数据。根据工具调用的结果，我可以看到该节点是一个设计组件，包含了宽度375px、高度812px的白色背景框架。这些信息可以帮助您进行前端界面开发。',
-          timestamp: Date.now()
-        };
-        
-        setCurrentMessages(prev => [...prev, aiResponse]);
-        addMessage(currentSession.id, aiResponse);
+        if (shouldFail) {
+          const failedToolCalls = updatedToolCalls.map(tool => 
+            tool.id === toolId ? { ...tool, status: 'failed' as const } : tool
+          );
+
+          updateMessageInline({ 
+            pendingToolCalls: failedToolCalls,
+            toolCallStatus: 'failed',
+            errorMessage: '工具调用执行失败：连接超时'
+          });
+        } else {
+          const completedToolCalls = updatedToolCalls.map((tool, index) => {
+            if (tool.id === toolId) {
+              return { ...tool, status: 'completed' as const };
+            }
+            if (index === toolIndex + 1) {
+              return { ...tool, visible: true };
+            }
+            return tool;
+          });
+
+          const allCompleted = completedToolCalls.every(tool => 
+            tool.status === 'completed' || tool.status === 'cancelled'
+          );
+
+          updateMessageInline({ 
+            pendingToolCalls: completedToolCalls,
+            toolCallStatus: allCompleted ? 'completed' : 'pending',
+            currentToolIndex: allCompleted ? undefined : toolIndex + 1,
+            content: allCompleted ? 
+              message.content + '\n\n工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答：\n\n通过搜索相关文档和分析内容，我找到了与您问题相关的信息。如果您需要更多详细信息或有其他问题，请随时告诉我。' :
+              message.content
+          });
+        }
       }, 2000);
-    } else {
-      updateMessage(currentSession.id, messageId, { 
-        toolCallStatus: 'rejected' as const 
-      });
     }
   };
 
