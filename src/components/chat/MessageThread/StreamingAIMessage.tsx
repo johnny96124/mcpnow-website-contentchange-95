@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,6 +14,8 @@ import {
 import { Message } from '../types/chat';
 import { MessageActions } from './MessageActions';
 import { MessageRating } from './MessageRating';
+import { ServerRecommendations } from './ServerRecommendations';
+import { ServerRecommendation } from './ServerRecommendationCard';
 import { formatDistanceToNow } from 'date-fns';
 
 interface StreamingAIMessageProps {
@@ -24,6 +25,7 @@ interface StreamingAIMessageProps {
   onRegenerate?: () => void;
   onToolAction?: (messageId: string, action: 'run' | 'cancel', toolId?: string) => void;
   onRating?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
+  onConfigureServer?: (messageId: string, server: ServerRecommendation) => void;
 }
 
 export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({ 
@@ -32,7 +34,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   onDelete,
   onRegenerate,
   onToolAction,
-  onRating
+  onRating,
+  onConfigureServer
 }) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const [showActions, setShowActions] = useState(false);
@@ -78,6 +81,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const visibleTools = pendingCalls.filter(tool => tool.visible);
   const hasToolCalls = pendingCalls.length > 0;
   const isFailed = message.toolCallStatus === 'failed';
+  const shouldShowServerRecommendations = !hasToolCalls && !isStreaming && displayedContent && onConfigureServer;
 
   return (
     <div 
@@ -330,6 +334,14 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* Server推荐区域 */}
+        {shouldShowServerRecommendations && (
+          <ServerRecommendations
+            messageId={message.id}
+            onConfigureServer={onConfigureServer}
+          />
         )}
       </div>
     </div>

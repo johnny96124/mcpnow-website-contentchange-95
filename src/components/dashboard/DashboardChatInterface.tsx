@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,11 +5,13 @@ import { Card } from '@/components/ui/card';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
 import { ConversationExport } from '@/components/chat/ConversationExport';
+import { AddInstanceDialog } from '@/components/servers/AddInstanceDialog';
 import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
 import { Message, MessageAttachment, PendingToolCall } from '@/components/chat/types/chat';
+import { ServerRecommendation } from '@/components/chat/MessageThread/ServerRecommendationCard';
 
 interface AttachedFile {
   id: string;
@@ -41,6 +42,15 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   
   const [isSending, setIsSending] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [configDialog, setConfigDialog] = useState<{
+    open: boolean;
+    server: ServerRecommendation | null;
+    messageId: string | null;
+  }>({
+    open: false,
+    server: null,
+    messageId: null
+  });
 
   const connectedServers = getConnectedServers();
   
@@ -347,6 +357,37 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
     );
   }
 
+  const handleConfigureServer = (messageId: string, server: ServerRecommendation) => {
+    setConfigDialog({
+      open: true,
+      server,
+      messageId
+    });
+  };
+
+  const handleServerConfigComplete = (formData: any) => {
+    // Mock success message
+    toast({
+      title: "服务器配置成功",
+      description: `${configDialog.server?.name} 已成功添加到您的配置文件中`,
+    });
+
+    // 模拟添加成功反馈到对话中
+    if (currentSession && configDialog.messageId) {
+      const successMessage: Message = {
+        id: `msg-${Date.now()}-config-success`,
+        role: 'assistant',
+        content: `太好了！我已经帮您成功配置了 ${configDialog.server?.name}。现在您可以使用这个服务器的功能来增强我们的对话体验。这个服务器已经添加到您的配置文件中，您可以在主页面看到它。`,
+        timestamp: Date.now()
+      };
+
+      setCurrentMessages(prev => [...prev, successMessage]);
+      addMessage(currentSession.id, successMessage);
+    }
+
+    setConfigDialog({ open: false, server: null, messageId: null });
+  };
+
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
@@ -390,6 +431,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             onUpdateMessage={handleToolAction}
             onDeleteMessage={handleDeleteMessage}
             onEditMessage={handleEditMessage}
+            onConfigureServer={handleConfigureServer}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -414,6 +456,26 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
           servers={connectedServers}
         />
       </div>
+
+      {/* Server Configuration Dialog */}
+      <AddInstanceDialog
+        open={configDialog.open}
+        onOpenChange={(open) => setConfigDialog(prev => ({ ...prev, open }))}
+        serverDefinition={configDialog.server ? {
+          id: configDialog.server.id,
+          name: configDialog.server.name,
+          type: configDialog.server.type,
+          description: configDialog.server.description,
+          isOfficial: configDialog.server.isOfficial || false,
+          category: 'Development',
+          url: '',
+          args: '',
+          env: {},
+          headers: {}
+        } : null}
+        onCreateInstance={handleServerConfigComplete}
+        editMode={false}
+      />
     </div>
   );
 };
