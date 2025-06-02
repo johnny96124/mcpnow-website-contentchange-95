@@ -38,6 +38,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log('MessageInput render - isGenerating:', isGenerating, 'disabled:', disabled);
+
   const handleSubmit = () => {
     if ((content.trim() || attachedFiles.length > 0) && !disabled && !isGenerating) {
       console.log('Sending message with model:', selectedModel);
@@ -48,6 +50,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const handleStop = () => {
+    console.log('Stop button clicked');
     if (onStopGeneration) {
       onStopGeneration();
     }
