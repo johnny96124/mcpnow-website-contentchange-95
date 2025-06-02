@@ -83,9 +83,20 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const isFailed = message.toolCallStatus === 'failed';
   const isToolCallCompleted = message.toolCallStatus === 'completed';
   
-  // 修改条件：在没有工具调用时显示，或者在工具调用完成后也显示
+  // 修改显示条件：简化逻辑，确保Server推荐能正确显示
+  // 当没有工具调用时，或者工具调用完成时，都应该显示Server推荐
   const shouldShowServerRecommendations = !isStreaming && displayedContent && onConfigureServer && 
     (!hasToolCalls || isToolCallCompleted);
+
+  console.log('StreamingAIMessage render:', {
+    messageId: message.id,
+    isStreaming,
+    displayedContent: !!displayedContent,
+    onConfigureServer: !!onConfigureServer,
+    hasToolCalls,
+    isToolCallCompleted,
+    shouldShowServerRecommendations
+  });
 
   return (
     <div 
@@ -340,13 +351,24 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           </div>
         )}
 
-        {/* Server推荐区域 - 修改显示条件 */}
+        {/* Server推荐区域 - 强制显示以便调试 */}
         {shouldShowServerRecommendations && (
-          <ServerRecommendations
-            messageId={message.id}
-            onConfigureServer={onConfigureServer}
-          />
+          <div>
+            <div className="text-sm text-gray-500 mb-2">
+              调试信息: 正在显示Server推荐
+            </div>
+            <ServerRecommendations
+              messageId={message.id}
+              onConfigureServer={onConfigureServer}
+            />
+          </div>
         )}
+
+        {/* 添加强制显示的调试信息 */}
+        <div className="text-xs text-gray-400 border p-2 rounded">
+          调试: hasToolCalls={hasToolCalls.toString()}, isToolCallCompleted={isToolCallCompleted.toString()}, 
+          shouldShow={shouldShowServerRecommendations.toString()}
+        </div>
       </div>
     </div>
   );
