@@ -62,7 +62,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
-    if (!content.trim() || selectedServers.length === 0 || isSending) return;
+    if (!content.trim() || isSending) return;
     
     setIsSending(true);
 
@@ -103,7 +103,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
       // Simulate AI response
       setTimeout(async () => {
         const aiMessageId = `msg-${Date.now()}-ai`;
-        const aiResponse = `我理解您的问题："${content}"。基于当前连接的MCP服务器，我正在为您分析和处理这个请求。`;
+        const aiResponse = `我理解您的问题："${content}"。我正在为您分析和处理这个请求。`;
 
         const aiMessage: Message = {
           id: aiMessageId,
@@ -135,8 +135,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
     deleteMessage(currentSession.id, messageId);
   };
 
-  const canSendMessage = selectedServers.length > 0 && !isSending;
-
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Chat Area */}
@@ -165,12 +163,8 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
       <div className="border-t p-3">
         <MessageInput
           onSendMessage={handleSendMessage}
-          disabled={!canSendMessage}
-          placeholder={
-            selectedServers.length === 0 
-              ? "请先连接MCP服务器..."
-              : "输入您的消息..."
-          }
+          disabled={isSending}
+          placeholder="输入您的消息..."
           selectedServers={selectedServers}
           servers={connectedServers}
         />
