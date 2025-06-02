@@ -12,6 +12,7 @@ import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
 import { Message, MessageAttachment, PendingToolCall } from '@/components/chat/types/chat';
 import { ServerRecommendation } from '@/components/chat/MessageThread/ServerRecommendationCard';
+import { EndpointType } from '@/data/mockData';
 
 interface AttachedFile {
   id: string;
