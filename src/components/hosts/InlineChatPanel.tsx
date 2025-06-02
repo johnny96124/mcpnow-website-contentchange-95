@@ -10,7 +10,7 @@ import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
-import { Message, MessageAttachment, PendingToolCall, ToolInvocation } from '@/components/chat/types/chat';
+import { Message, MessageAttachment, ToolInvocation } from '@/components/chat/types/chat';
 import { ChatHistoryPopover } from './ChatHistoryPopover';
 
 interface AttachedFile {
@@ -173,88 +173,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     return updatedInvocation;
   };
 
-  const generateSequentialToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
-    const useMultipleServers = Math.random() < 0.5;
-    const availableServers = selectedServers.length > 1 ? selectedServers : connectedServers.map(s => s.id);
-    
-    if (useMultipleServers && availableServers.length > 1) {
-      const tools = [
-        {
-          id: `tool-${Date.now()}-1`,
-          toolName: 'search_documents',
-          serverId: availableServers[0],
-          serverName: `服务器 ${availableServers[0]}`,
-          request: { 
-            query: userMessage.substring(0, 50),
-            filters: { type: 'relevant' }
-          },
-          status: 'pending' as const,
-          order: 0,
-          visible: true
-        },
-        {
-          id: `tool-${Date.now()}-2`,
-          toolName: 'get_weather_data',
-          serverId: availableServers[1] || availableServers[0],
-          serverName: `服务器 ${availableServers[1] || availableServers[0]}`,
-          request: { 
-            location: 'Shanghai',
-            format: 'detailed'
-          },
-          status: 'pending' as const,
-          order: 1,
-          visible: false
-        },
-        {
-          id: `tool-${Date.now()}-3`,
-          toolName: 'analyze_content',
-          serverId: availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0],
-          serverName: `服务器 ${availableServers[Math.min(2, availableServers.length - 1)] || availableServers[0]}`,
-          request: { 
-            content: userMessage,
-            analysis_type: 'comprehensive'
-          },
-          status: 'pending' as const,
-          order: 2,
-          visible: false
-        }
-      ];
-
-      return tools;
-    } else {
-      const tools = [
-        {
-          id: `tool-${Date.now()}-1`,
-          toolName: 'search_documents',
-          serverId: selectedServers[0],
-          serverName: `服务器 ${selectedServers[0]}`,
-          request: { 
-            query: userMessage.substring(0, 50),
-            filters: { type: 'relevant' }
-          },
-          status: 'pending' as const,
-          order: 0,
-          visible: true
-        },
-        {
-          id: `tool-${Date.now()}-2`,
-          toolName: 'analyze_content',
-          serverId: selectedServers[0],
-          serverName: `服务器 ${selectedServers[0]}`,
-          request: { 
-            content: userMessage,
-            analysis_type: 'comprehensive'
-          },
-          status: 'pending' as const,
-          order: 1,
-          visible: false
-        }
-      ];
-
-      return tools;
-    }
-  };
-
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
     if (!content.trim() || selectedServers.length === 0 || isSending) return;
     
@@ -331,7 +249,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         // 开始流式文本生成
         await simulateStreamingText(sessionId, aiMessageId, fullContent);
 
-        // 创建工具调用数组，修复类型错误
+        // 创建工具调用数组
         const toolsToCall: Array<{ name: string; request: any }> = [
           { 
             name: 'search_documents', 
@@ -568,7 +486,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
       {/* Chat Area - positioned relative for popover positioning */}
       <div className="flex-1 min-h-0 relative">
         {currentMessages.length > 0 ? (
-          <>
+          <div className="h-full relative">
             <MessageThread
               messages={currentMessages}
               isLoading={isSending}
@@ -578,13 +496,13 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
               onEditMessage={() => {}}
             />
             
-            {/* Tool Invocation Flow */}
+            {/* Tool Invocation Flow Overlay */}
             {showToolFlow && currentToolInvocations.length > 0 && (
-              <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t p-4 max-h-60 overflow-y-auto">
+              <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t p-4 max-h-60 overflow-y-auto animate-slide-up-from-bottom">
                 <ToolInvocationFlow invocations={currentToolInvocations} />
               </div>
             )}
-          </>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full p-4">
             <div className="text-center">
