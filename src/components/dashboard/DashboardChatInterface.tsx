@@ -115,7 +115,16 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
     try {
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
-      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+      
+      // 随机决定是否显示工具调用（50%概率）
+      const shouldShowToolCalls = Math.random() < 0.5;
+      
+      let fullContent: string;
+      if (shouldShowToolCalls) {
+        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+      } else {
+        fullContent = `我理解您的请求"${content}"。根据您的需求，我为您推荐一些相关的MCP服务器，这些服务器可以增强我们的对话能力，帮助您更好地完成任务。`;
+      }
 
       const aiMessage: Message = {
         id: aiMessageId,
@@ -130,23 +139,26 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 先完成流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
-      // 文字生成完成后，生成工具调用序列
-      const toolCalls = generateSequentialToolCalls(content, selectedServers);
-      const messageWithTools: Partial<Message> = {
-        pendingToolCalls: toolCalls,
-        toolCallStatus: 'pending',
-        currentToolIndex: 0
-      };
+      if (shouldShowToolCalls) {
+        // 50%概率生成工具调用序列
+        const toolCalls = generateSequentialToolCalls(content, selectedServers);
+        const messageWithTools: Partial<Message> = {
+          pendingToolCalls: toolCalls,
+          toolCallStatus: 'pending',
+          currentToolIndex: 0
+        };
 
-      setCurrentMessages(prev => 
-        prev.map(msg => 
-          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
-        )
-      );
-      
-      if (currentSession) {
-        updateMessage(sessionId, aiMessageId, messageWithTools);
+        setCurrentMessages(prev => 
+          prev.map(msg => 
+            msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+          )
+        );
+        
+        if (currentSession) {
+          updateMessage(sessionId, aiMessageId, messageWithTools);
+        }
       }
+      // 如果不显示工具调用，消息会自动显示服务器推荐卡片（因为没有pendingToolCalls）
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
