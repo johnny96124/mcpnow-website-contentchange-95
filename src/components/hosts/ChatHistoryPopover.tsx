@@ -36,18 +36,18 @@ export const ChatHistoryPopover: React.FC<ChatHistoryPopoverProps> = ({
 
   return (
     <>
-      {/* Backdrop - only covers the chat area */}
+      {/* Backdrop - covers the entire chat container including input area */}
       <div 
-        className="absolute inset-0 bg-black/20 z-40"
+        className="fixed inset-0 bg-black/20 z-50"
         onClick={() => onOpenChange(false)}
       />
       
-      {/* Sliding Panel from bottom of chat area */}
-      <div className="absolute bottom-0 left-0 right-0 z-50 animate-slide-up-from-bottom">
-        <Card className="mx-2 mb-2 max-h-[60vh] rounded-t-xl shadow-xl border-0 bg-white">
-          <div className="flex flex-col h-full max-h-[60vh]">
+      {/* Sliding Panel from bottom - positioned to cover entire chat area */}
+      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up-from-bottom">
+        <Card className="mx-4 mb-4 max-h-[80vh] rounded-t-xl shadow-2xl border-0 bg-white">
+          <div className="flex flex-col h-full max-h-[80vh]">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-xl">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
                 <h3 className="font-semibold">对话历史</h3>
@@ -63,7 +63,7 @@ export const ChatHistoryPopover: React.FC<ChatHistoryPopoverProps> = ({
             </div>
             
             {/* Search */}
-            <div className="p-4 border-b">
+            <div className="p-4 border-b bg-white">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -76,7 +76,7 @@ export const ChatHistoryPopover: React.FC<ChatHistoryPopoverProps> = ({
             </div>
 
             {/* Content */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 bg-white">
               {filteredSessions.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
