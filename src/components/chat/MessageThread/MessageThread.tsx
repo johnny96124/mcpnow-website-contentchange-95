@@ -17,6 +17,7 @@ interface MessageThreadProps {
   onEditAndRegenerate?: (messageId: string, newContent: string) => void;
   onRegenerateMessage?: (messageId: string) => void;
   onRateMessage?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
+  onSetupServer?: (serverId: string) => void;
 }
 
 export const MessageThread: React.FC<MessageThreadProps> = ({
@@ -29,6 +30,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   onEditAndRegenerate,
   onRegenerateMessage,
   onRateMessage,
+  onSetupServer,
 }) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -87,6 +89,7 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
                   onRegenerate={onRegenerateMessage ? () => onRegenerateMessage(message.id) : undefined}
                   onToolAction={onUpdateMessage}
                   onRating={onRateMessage}
+                  onSetupServer={onSetupServer}
                 />
               );
             }
