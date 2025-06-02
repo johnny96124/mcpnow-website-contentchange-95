@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
+import { MessageSquare, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
-import { ConversationExport } from '@/components/chat/ConversationExport';
 import { AddInstanceDialog } from '@/components/servers/AddInstanceDialog';
+import { ResponsiveActions } from '@/components/chat/ResponsiveActions';
 import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
@@ -403,35 +403,25 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   };
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col">
+    <div className="fixed inset-0 bg-background z-50 flex flex-col max-w-[calc(100vw-240px)] ml-auto">
       {/* Header */}
-      <div className="border-b p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h2 className="font-semibold">
+      <div className="border-b p-4 flex items-center justify-between min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
+            <h2 className="font-semibold truncate">
               {currentSession?.title || 'MCP Now AI 对话'}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground truncate">
               使用 {selectedServers.length} 个连接的服务器
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <ConversationExport
+        <div className="flex-shrink-0 ml-4">
+          <ResponsiveActions
+            onClose={onClose}
             messages={currentMessages}
             sessionTitle={currentSession?.title}
           />
-          
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 

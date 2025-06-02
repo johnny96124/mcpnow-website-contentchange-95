@@ -1,40 +1,43 @@
 
-import { cn } from "@/lib/utils";
-import type { EndpointType } from "@/data/mockData";
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { EndpointType } from '@/data/mockData';
 
 interface EndpointLabelProps {
-  type: EndpointType | 'Custom';
+  type: EndpointType;
   className?: string;
 }
 
-export function EndpointLabel({ type, className }: EndpointLabelProps) {
-  let labelText = '';
-  let typeClasses = '';
-  
-  switch(type) {
-    case 'HTTP_SSE':
-      labelText = 'HTTP SSE';
-      typeClasses = "bg-blue-50 text-blue-700 border border-blue-200";
-      break;
-    case 'STDIO':
-      labelText = 'STDIO';
-      typeClasses = "bg-purple-50 text-purple-700 border border-purple-200";
-      break;
-    case 'WS':
-      labelText = 'WebSocket';
-      typeClasses = "bg-green-50 text-green-700 border border-green-200";
-      break;
-    case 'Custom':
-      labelText = 'Custom';
-      typeClasses = "bg-gray-50 text-gray-700 border border-gray-200";
-      break;
-  }
-  
-  const baseClasses = "px-2 py-0.5 text-xs font-medium rounded-md";
-  
+export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type, className }) => {
+  const getLabel = (type: EndpointType) => {
+    switch (type) {
+      case 'STDIO':
+        return 'STDIO';
+      case 'HTTP_SSE':
+        return 'SSE';
+      case 'WebSocket':
+        return 'WebSocket';
+      default:
+        return type;
+    }
+  };
+
+  const getVariant = (type: EndpointType) => {
+    switch (type) {
+      case 'STDIO':
+        return 'default';
+      case 'HTTP_SSE':
+        return 'secondary';
+      case 'WebSocket':
+        return 'outline';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
-    <span className={cn(baseClasses, typeClasses, className)}>
-      {labelText}
-    </span>
+    <Badge variant={getVariant(type)} className={className}>
+      {getLabel(type)}
+    </Badge>
   );
-}
+};
