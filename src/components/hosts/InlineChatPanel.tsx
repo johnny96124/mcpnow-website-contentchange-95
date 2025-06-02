@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Send, Bot, History, Plus, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -96,83 +97,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     });
   };
 
-  const simulateToolInvocation = async (
-    toolName: string, 
-    serverId: string, 
-    serverName: string,
-    request: any
-  ): Promise<ToolInvocation> => {
-    const invocation: ToolInvocation = {
-      id: `tool-${Date.now()}-${Math.random()}`,
-      toolName,
-      serverId,
-      serverName,
-      request,
-      response: null,
-      status: 'pending',
-      timestamp: Date.now()
-    };
-
-    // 添加到当前工具调用列表
-    setCurrentToolInvocations(prev => [...prev, invocation]);
-
-    // 模拟工具调用延迟
-    const delay = Math.random() * 2000 + 1000; // 1-3秒
-    await new Promise(resolve => setTimeout(resolve, delay));
-
-    // 模拟成功或失败（90%成功率）
-    const success = Math.random() > 0.1;
-
-    const updatedInvocation = { ...invocation };
-    
-    if (success) {
-      updatedInvocation.status = 'success';
-      updatedInvocation.duration = Math.round(delay);
-      
-      // 根据工具类型生成模拟响应
-      switch (toolName) {
-        case 'search_documents':
-          updatedInvocation.response = {
-            results: [
-              { title: "相关文档1", content: "找到了相关内容...", score: 0.95 },
-              { title: "相关文档2", content: "另一个相关内容...", score: 0.87 }
-            ],
-            total: 2
-          };
-          break;
-        case 'get_weather_data':
-          updatedInvocation.response = {
-            location: "Shanghai",
-            temperature: 22,
-            humidity: 65,
-            condition: "多云",
-            forecast: "今天多云，温度适宜"
-          };
-          break;
-        case 'analyze_content':
-          updatedInvocation.response = {
-            analysis: "内容分析完成",
-            sentiment: "中性",
-            keywords: ["关键词1", "关键词2"],
-            summary: "这是一个综合分析结果"
-          };
-          break;
-        default:
-          updatedInvocation.response = { success: true, data: "操作完成" };
-      }
-    } else {
-      updatedInvocation.status = 'error';
-      updatedInvocation.error = '工具调用失败：服务器连接超时';
-    }
-
-    // 更新工具调用状态
-    setCurrentToolInvocations(prev => 
-      prev.map(inv => inv.id === invocation.id ? updatedInvocation : inv)
-    );
-
-    return updatedInvocation;
-  };
-
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
     if (!content.trim() || selectedServers.length === 0 || isSending) return;
     
@@ -216,31 +140,50 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
     try {
       const aiMessageId = `msg-${Date.now()}-ai`;
       
-      // 根据用户消息内容决定是否需要工具调用
-      const needsTools = content.toLowerCase().includes('figma') || 
-                        content.toLowerCase().includes('文件') || 
-                        content.toLowerCase().includes('搜索') ||
-                        content.toLowerCase().includes('查找') ||
-                        content.toLowerCase().includes('天气') ||
-                        content.toLowerCase().includes('分析') ||
-                        content.length > 20; // 复杂问题可能需要工具
-
-      // 50%的概率显示工具调用过程
-      const shouldShowToolFlow = Math.random() < 0.5;
+      // 确保总是显示工具调用过程（去掉50%概率限制，便于调试）
+      const needsTools = true; // 强制显示工具调用
+      const shouldShowToolFlow = true; // 强制显示工具流程
 
       let fullContent: string;
       
       if (needsTools && shouldShowToolFlow) {
-        // 显示工具调用流程
-        setShowToolFlow(true);
-        
-        fullContent = `我理解您的请求"${content}"。让我调用相关的MCP工具来获取信息，请稍等...`;
+        // 创建带有工具调用的AI消息
+        const pendingToolCalls = [
+          {
+            id: `tool-${Date.now()}-1`,
+            toolName: 'search_documents',
+            serverName: `fastgpt-instance-${Math.floor(Math.random() * 9) + 1}`,
+            request: { 
+              query: content.substring(0, 50), 
+              filters: { type: 'relevant' } 
+            },
+            status: 'pending' as const,
+            visible: true,
+            order: 0
+          },
+          {
+            id: `tool-${Date.now()}-2`,
+            toolName: 'analyze_content',
+            serverName: `fastgpt-instance-${Math.floor(Math.random() * 9) + 1}`,
+            request: { 
+              content, 
+              analysis_type: 'comprehensive' 
+            },
+            status: 'pending' as const,
+            visible: false, // 第二个工具初始不可见
+            order: 1
+          }
+        ];
+
+        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
         
         const aiMessage: Message = {
           id: aiMessageId,
           role: 'assistant',
           content: '',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          pendingToolCalls,
+          toolCallStatus: 'pending'
         };
 
         setCurrentMessages(prev => [...prev, aiMessage]);
@@ -249,75 +192,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         // 开始流式文本生成
         await simulateStreamingText(sessionId, aiMessageId, fullContent);
 
-        // 创建工具调用数组
-        const toolsToCall: Array<{ name: string; request: any }> = [
-          { 
-            name: 'search_documents', 
-            request: { 
-              query: content.substring(0, 50), 
-              filters: { type: 'relevant' } 
-            } 
-          },
-          { 
-            name: 'analyze_content', 
-            request: { 
-              content, 
-              analysis_type: 'comprehensive' 
-            } 
-          }
-        ];
-
-        // 如果提到天气，添加天气工具调用
-        if (content.toLowerCase().includes('天气')) {
-          toolsToCall.push({ 
-            name: 'get_weather_data', 
-            request: { 
-              location: 'Shanghai', 
-              format: 'detailed' 
-            } 
-          });
-        }
-
-        const toolPromises = toolsToCall.map(tool => 
-          simulateToolInvocation(tool.name, selectedServers[0], `服务器 ${selectedServers[0]}`, tool.request)
-        );
-
-        const toolResults = await Promise.all(toolPromises);
-        
-        // 工具调用完成后，更新AI消息
-        const finalContent = fullContent + '\n\n基于工具调用的结果，我为您提供以下信息：\n\n' + 
-          toolResults.map(result => {
-            if (result.status === 'success') {
-              return `✅ ${result.toolName}: 执行成功，获取到相关数据`;
-            } else {
-              return `❌ ${result.toolName}: 执行失败 - ${result.error}`;
-            }
-          }).join('\n') + 
-          '\n\n如果您需要更多详细信息，请告诉我！';
-
-        setCurrentMessages(prev => 
-          prev.map(msg => 
-            msg.id === aiMessageId ? { ...msg, content: finalContent } : msg
-          )
-        );
-        
-        updateMessage(sessionId, aiMessageId, { content: finalContent });
-        
-      } else if (needsTools) {
-        // 不显示工具调用流程，直接返回结果
-        fullContent = `我理解您的请求"${content}"。基于您的问题，我已经为您分析并获取了相关信息：\n\n通过内部工具调用，我找到了与您问题相关的内容。这是一个模拟的智能回复，展示了如何处理复杂的用户请求。如果您需要更多详细信息或有其他问题，请随时告诉我。`;
-        
-        const aiMessage: Message = {
-          id: aiMessageId,
-          role: 'assistant',
-          content: '',
-          timestamp: Date.now()
-        };
-
-        setCurrentMessages(prev => [...prev, aiMessage]);
-        addMessage(sessionId, aiMessage);
-
-        await simulateStreamingText(sessionId, aiMessageId, fullContent);
       } else {
         // 简单回复，不需要工具调用
         fullContent = `我理解您的请求"${content}"。这是一个简单的回复：您输入的内容是"${content}"。如果您需要更复杂的功能或工具调用，请描述更详细的需求。`;
@@ -347,17 +221,17 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
       addMessage(sessionId, errorMessage);
     } finally {
       setIsSending(false);
-      // 延迟隐藏工具流程
-      setTimeout(() => {
-        setShowToolFlow(false);
-        setCurrentToolInvocations([]);
-      }, 3000);
     }
   };
 
   const handleToolAction = (messageId: string, action: 'run' | 'cancel', toolId?: string) => {
+    console.log('Tool action triggered:', { messageId, action, toolId });
+    
     const message = currentMessages.find(msg => msg.id === messageId);
-    if (!message || !message.pendingToolCalls) return;
+    if (!message || !message.pendingToolCalls) {
+      console.log('Message or pendingToolCalls not found:', { message });
+      return;
+    }
 
     const updateMessageInline = (updates: Partial<Message>) => {
       setCurrentMessages(prev => 
@@ -381,7 +255,10 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
       });
     } else if (action === 'run' && toolId) {
       const toolIndex = message.pendingToolCalls.findIndex(tool => tool.id === toolId);
-      if (toolIndex === -1) return;
+      if (toolIndex === -1) {
+        console.log('Tool not found:', { toolId, tools: message.pendingToolCalls });
+        return;
+      }
 
       const updatedToolCalls = message.pendingToolCalls.map(tool => 
         tool.id === toolId ? { ...tool, status: 'executing' as const } : tool
@@ -392,6 +269,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         toolCallStatus: 'executing'
       });
       
+      // 模拟工具执行
       setTimeout(() => {
         const shouldFail = Math.random() < 0.2;
         
@@ -495,13 +373,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
               onDeleteMessage={handleDeleteMessage}
               onEditMessage={() => {}}
             />
-            
-            {/* Tool Invocation Flow Overlay */}
-            {showToolFlow && currentToolInvocations.length > 0 && (
-              <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t p-4 max-h-60 overflow-y-auto animate-slide-up-from-bottom">
-                <ToolInvocationFlow invocations={currentToolInvocations} />
-              </div>
-            )}
           </div>
         ) : (
           <div className="flex items-center justify-center h-full p-4">
