@@ -212,8 +212,8 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         </div>
       </div>
 
-      {/* Chat Area */}
-      <div className="flex-1 min-h-0">
+      {/* Chat Area - positioned relative for popover positioning */}
+      <div className="flex-1 min-h-0 relative">
         {currentMessages.length > 0 ? (
           <MessageThread
             messages={currentMessages}
@@ -235,6 +235,14 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
             </div>
           </div>
         )}
+
+        {/* History Popover positioned absolutely within chat area */}
+        <ChatHistoryPopover
+          open={historyOpen}
+          onOpenChange={setHistoryOpen}
+          sessions={chatSessions}
+          onSelectSession={handleSelectHistorySession}
+        />
       </div>
 
       {/* Input Area */}
@@ -251,14 +259,6 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           servers={[]}
         />
       </div>
-
-      {/* History Popover */}
-      <ChatHistoryPopover
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
-        sessions={chatSessions}
-        onSelectSession={handleSelectHistorySession}
-      />
     </div>
   );
 };
