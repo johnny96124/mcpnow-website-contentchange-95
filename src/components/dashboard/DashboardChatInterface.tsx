@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -116,8 +117,8 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
       
-      // 降低工具调用概率到20%，80%概率显示服务器推荐
-      const shouldShowToolCalls = Math.random() < 0.2;
+      // 降低工具调用概率到5%，95%概率显示服务器推荐
+      const shouldShowToolCalls = Math.random() < 0.05;
       
       let fullContent: string;
       if (shouldShowToolCalls) {
@@ -140,7 +141,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
       if (shouldShowToolCalls) {
-        // 20%概率生成工具调用序列
+        // 5%概率生成工具调用序列
         const toolCalls = generateSequentialToolCalls(content, selectedServers);
         const messageWithTools: Partial<Message> = {
           pendingToolCalls: toolCalls,
