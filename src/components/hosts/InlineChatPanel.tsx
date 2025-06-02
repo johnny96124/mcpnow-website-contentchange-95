@@ -199,10 +199,9 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
+                className="h-8 w-8 p-0"
               >
                 <History className="h-4 w-4" />
-                历史
               </Button>
             }
           />
@@ -211,11 +210,10 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
             variant="default"
             size="sm"
             onClick={handleNewChat}
-            className="gap-2"
+            className="h-8 w-8 p-0"
             disabled={selectedServers.length === 0}
           >
             <Plus className="h-4 w-4" />
-            新对话
           </Button>
         </div>
       </div>
