@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -117,12 +116,12 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
       
-      // 降低工具调用概率到5%，95%概率显示服务器推荐
-      const shouldShowToolCalls = Math.random() < 0.05;
+      // 50%概率显示工具调用，但工具调用不影响服务器推荐的显示
+      const shouldShowToolCalls = Math.random() < 0.5;
       
       let fullContent: string;
       if (shouldShowToolCalls) {
-        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。同时，我也为您推荐一些相关的MCP服务器。`;
       } else {
         fullContent = `我理解您的请求"${content}"。根据您的需求，我为您推荐一些相关的MCP服务器，这些服务器可以增强我们的对话能力，帮助您更好地完成任务。`;
       }
@@ -141,7 +140,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
       if (shouldShowToolCalls) {
-        // 5%概率生成工具调用序列
+        // 如果显示工具调用，生成工具调用序列
         const toolCalls = generateSequentialToolCalls(content, selectedServers);
         const messageWithTools: Partial<Message> = {
           pendingToolCalls: toolCalls,
@@ -159,7 +158,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
           updateMessage(sessionId, aiMessageId, messageWithTools);
         }
       }
-      // 如果不显示工具调用，消息会自动显示服务器推荐卡片（因为没有pendingToolCalls）
+      // 注意：无论是否显示工具调用，服务器推荐卡片都会显示，因为它们是独立的逻辑
 
     } catch (error) {
       console.error('Failed to get AI response:', error);

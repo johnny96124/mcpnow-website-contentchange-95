@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -84,9 +83,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const isFailed = message.toolCallStatus === 'failed';
   const isToolCallCompleted = message.toolCallStatus === 'completed';
   
-  // 简化显示逻辑
-  const shouldShowServerRecommendations = !isStreaming && displayedContent && onConfigureServer && 
-    (!hasToolCalls || isToolCallCompleted);
+  // 修改显示逻辑：服务器推荐卡片独立显示，不受工具调用影响
+  const shouldShowServerRecommendations = !isStreaming && displayedContent && onConfigureServer;
 
   console.log('StreamingAIMessage render:', {
     messageId: message.id,
@@ -351,7 +349,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           </div>
         )}
 
-        {/* Server推荐区域 */}
+        {/* Server推荐区域 - 独立显示，不受工具调用状态影响 */}
         {shouldShowServerRecommendations && (
           <ServerRecommendations
             messageId={message.id}
