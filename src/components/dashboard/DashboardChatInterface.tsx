@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -403,10 +404,10 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   };
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col max-w-[calc(100vw-240px)] ml-auto">
+    <div className="fixed inset-0 bg-background z-50 flex flex-col" style={{ maxWidth: 'calc(100vw - 240px)', marginLeft: 'auto' }}>
       {/* Header */}
       <div className="border-b p-4 flex items-center justify-between min-w-0">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold truncate">
               {currentSession?.title || 'MCP Now AI 对话'}
@@ -416,7 +417,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             </p>
           </div>
         </div>
-        <div className="flex-shrink-0 ml-4">
+        <div className="flex-shrink-0">
           <ResponsiveActions
             onClose={onClose}
             messages={currentMessages}

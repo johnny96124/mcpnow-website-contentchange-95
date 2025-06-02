@@ -22,34 +22,30 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
   messages,
   sessionTitle
 }) => {
-  const [visibleActions, setVisibleActions] = useState<string[]>([]);
+  const [visibleActions, setVisibleActions] = useState<string[]>(['back', 'close']);
   const [hiddenActions, setHiddenActions] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // 所有可能的操作按钮，按优先级排序
-  const allActions = [
-    { id: 'back', priority: 1, component: 'back' },
-    { id: 'export', priority: 2, component: 'export' },
-    { id: 'close', priority: 1, component: 'close' } // 高优先级，始终显示
-  ];
 
   useEffect(() => {
     const updateVisibleActions = () => {
       if (!containerRef.current) return;
 
       const containerWidth = containerRef.current.offsetWidth;
+      console.log('Container width:', containerWidth);
       
-      // 计算基础按钮宽度：返回按钮(40px) + 关闭按钮(40px) + 间隙(16px) + 菜单按钮(40px)
-      const baseWidth = 136;
-      
-      // 导出按钮大约需要额外 120px
-      const exportButtonWidth = 120;
+      // 基础按钮：返回(40px) + 关闭(40px) + 间隙(8px) = 88px
+      const baseWidth = 88;
+      // 导出按钮约需要 100px
+      const exportButtonWidth = 100;
+      // 菜单按钮需要 40px
+      const menuButtonWidth = 40;
       
       let visible: string[] = ['back', 'close']; // 始终显示的按钮
       let hidden: string[] = [];
 
-      if (containerWidth > baseWidth + exportButtonWidth) {
-        visible.push('export');
+      // 如果有足够空间显示导出按钮
+      if (containerWidth >= baseWidth + exportButtonWidth + 16) { // 16px额外间隙
+        visible.splice(1, 0, 'export'); // 在close之前插入export
       } else {
         hidden.push('export');
       }
@@ -65,8 +61,12 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
       resizeObserver.observe(containerRef.current);
     }
 
+    // 也监听窗口大小变化
+    window.addEventListener('resize', updateVisibleActions);
+
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener('resize', updateVisibleActions);
     };
   }, []);
 
@@ -79,17 +79,19 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
             variant="ghost"
             size="icon"
             onClick={onClose}
+            className="flex-shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
         );
       case 'export':
         return (
-          <ConversationExport
-            key="export"
-            messages={messages}
-            sessionTitle={sessionTitle}
-          />
+          <div key="export" className="flex-shrink-0">
+            <ConversationExport
+              messages={messages}
+              sessionTitle={sessionTitle}
+            />
+          </div>
         );
       case 'close':
         return (
@@ -98,6 +100,7 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
             variant="ghost"
             size="icon"
             onClick={onClose}
+            className="flex-shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -114,7 +117,7 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
       {hiddenActions.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="flex-shrink-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
