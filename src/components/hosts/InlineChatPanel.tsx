@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Send, Bot, History, Plus, ChevronLeft } from 'lucide-react';
+import { Send, Bot, History, Plus, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -181,7 +180,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
               onClick={onToggleChat}
               className="p-1 h-auto hover:bg-muted"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
             <h3 className="font-semibold">AI对话</h3>
             {currentSession && (
