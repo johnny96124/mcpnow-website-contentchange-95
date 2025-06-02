@@ -19,33 +19,36 @@ export const CollapsedHostsList: React.FC<CollapsedHostsListProps> = ({
 }) => {
   return (
     <TooltipProvider>
-      <div className="p-2 space-y-2">
+      <div className="p-1 space-y-1">
         {hosts.map(host => (
           <Tooltip key={host.id}>
             <TooltipTrigger asChild>
               <Card 
                 className={cn(
-                  "cursor-pointer transition-colors hover:bg-muted/50 relative",
-                  selectedHostId === host.id && "border-primary bg-primary/5"
+                  "cursor-pointer transition-all duration-200 hover:bg-muted/50 relative border-2",
+                  selectedHostId === host.id ? "border-primary bg-primary/10" : "border-transparent"
                 )}
                 onClick={() => onHostSelect(host.id)}
               >
-                <CardContent className="p-3 flex flex-col items-center justify-center">
-                  <div className="bg-muted/30 p-2 rounded-full mb-2 relative">
-                    <span className="text-lg">{host.icon || '🖥️'}</span>
-                    {/* Connection Status Indicator */}
-                    <div className="absolute -bottom-1 -right-1">
-                      <StatusIndicator 
-                        status={host.connectionStatus === "connected" ? "active" : "inactive"} 
-                        iconOnly 
-                        size="sm"
-                      />
+                <CardContent className="p-2 flex flex-col items-center justify-center">
+                  <div className="relative">
+                    <div className="bg-muted/30 p-1.5 rounded-lg flex items-center justify-center w-8 h-8">
+                      <span className="text-sm">{host.icon || '🖥️'}</span>
+                    </div>
+                    {/* Connection Status Indicator - 更小的指示器 */}
+                    <div className="absolute -bottom-0.5 -right-0.5">
+                      <div className={cn(
+                        "w-2.5 h-2.5 rounded-full border border-background",
+                        host.connectionStatus === "connected" 
+                          ? "bg-green-500" 
+                          : "bg-gray-400"
+                      )} />
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="right" sideOffset={10}>
               <div className="text-sm">
                 <p className="font-medium">{host.name}</p>
                 <p className="text-muted-foreground">

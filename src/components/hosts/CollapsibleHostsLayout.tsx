@@ -24,21 +24,39 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
 }) => {
   const [isHostsListCollapsed, setIsHostsListCollapsed] = useState(false);
 
+  // 动态计算面板尺寸
+  const getLeftPanelSize = () => {
+    if (isHostsListCollapsed) {
+      return isChatOpen ? 6 : 8; // 收起时的最小宽度
+    }
+    return isChatOpen ? 20 : 25; // 展开时的默认宽度
+  };
+
+  const getMiddlePanelSize = () => {
+    if (isHostsListCollapsed) {
+      return isChatOpen ? 69 : 92; // 收起时中间面板的宽度
+    }
+    return isChatOpen ? 55 : 75; // 展开时中间面板的宽度
+  };
+
   return (
     <div className="h-full flex">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Left Panel - Hosts List */}
         <ResizablePanel 
-          defaultSize={isHostsListCollapsed ? 8 : 25} 
-          minSize={8}
-          maxSize={40}
+          defaultSize={getLeftPanelSize()}
+          minSize={isHostsListCollapsed ? 6 : 15}
+          maxSize={isHostsListCollapsed ? 8 : 40}
           className={cn(
-            "transition-all duration-300",
-            isHostsListCollapsed && "min-w-16"
+            "transition-all duration-300 ease-in-out",
+            isHostsListCollapsed && "min-w-16 max-w-20"
           )}
         >
           <div className="h-full border-r bg-card relative">
-            <div className="p-4 border-b flex items-center justify-between">
+            <div className={cn(
+              "p-4 border-b flex items-center transition-all duration-300",
+              isHostsListCollapsed ? "justify-center p-2" : "justify-between"
+            )}>
               {!isHostsListCollapsed && (
                 <h3 className="font-semibold text-sm">Hosts</h3>
               )}
@@ -46,7 +64,10 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsHostsListCollapsed(!isHostsListCollapsed)}
-                className="h-8 w-8 p-0"
+                className={cn(
+                  "h-8 w-8 p-0 transition-all duration-200",
+                  isHostsListCollapsed && "hover:bg-muted"
+                )}
               >
                 {isHostsListCollapsed ? (
                   <ChevronRight className="h-4 w-4" />
@@ -64,7 +85,10 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
         <ResizableHandle withHandle />
 
         {/* Middle Panel - Host Details */}
-        <ResizablePanel defaultSize={isChatOpen ? 50 : 75} minSize={30}>
+        <ResizablePanel 
+          defaultSize={getMiddlePanelSize()} 
+          minSize={30}
+        >
           <div className="h-full bg-background">
             {hostDetails}
           </div>
