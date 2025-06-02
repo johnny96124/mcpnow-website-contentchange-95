@@ -30,8 +30,7 @@ export const ChatInterface = () => {
     updateMessage,
     deleteSession,
     deleteMessage,
-    renameSession,
-    isLoading 
+    renameSession
   } = useChatHistory();
   const { 
     streamingMessageId, 
