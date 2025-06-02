@@ -22,81 +22,65 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
   messages,
   sessionTitle
 }) => {
-  const [visibleActions, setVisibleActions] = useState<string[]>(['back', 'close']);
-  const [hiddenActions, setHiddenActions] = useState<string[]>([]);
+  const [showFullActions, setShowFullActions] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
-    const updateVisibleActions = () => {
+    const updateLayout = () => {
       if (!containerRef.current) return;
-
-      const containerWidth = containerRef.current.offsetWidth;
-      console.log('Container width:', containerWidth);
       
-      // 基础按钮：返回(40px) + 关闭(40px) + 间隙(8px) = 88px
-      const baseWidth = 88;
-      // 导出按钮约需要 100px
-      const exportButtonWidth = 100;
-      // 菜单按钮需要 40px
-      const menuButtonWidth = 40;
+      const width = containerRef.current.offsetWidth;
+      setContainerWidth(width);
       
-      let visible: string[] = ['back', 'close']; // 始终显示的按钮
-      let hidden: string[] = [];
-
-      // 如果有足够空间显示导出按钮
-      if (containerWidth >= baseWidth + exportButtonWidth + 16) { // 16px额外间隙
-        visible.splice(1, 0, 'export'); // 在close之前插入export
-      } else {
-        hidden.push('export');
-      }
-
-      setVisibleActions(visible);
-      setHiddenActions(hidden);
+      // 如果宽度小于200px，隐藏导出按钮
+      const shouldShowFull = width >= 200;
+      setShowFullActions(shouldShowFull);
     };
 
-    updateVisibleActions();
-    
-    const resizeObserver = new ResizeObserver(updateVisibleActions);
+    // 初始化
+    updateLayout();
+
+    // 使用ResizeObserver监听容器大小变化
+    const resizeObserver = new ResizeObserver(updateLayout);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
     // 也监听窗口大小变化
-    window.addEventListener('resize', updateVisibleActions);
+    window.addEventListener('resize', updateLayout);
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener('resize', updateVisibleActions);
+      window.removeEventListener('resize', updateLayout);
     };
   }, []);
 
-  const renderAction = (actionId: string) => {
-    switch (actionId) {
-      case 'back':
-        return (
-          <Button
-            key="back"
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="flex-shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        );
-      case 'export':
-        return (
-          <div key="export" className="flex-shrink-0">
+  return (
+    <div ref={containerRef} className="flex items-center gap-1 min-w-0">
+      {/* 返回按钮 - 始终显示 */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClose}
+        className="flex-shrink-0"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+
+      {/* 根据空间显示不同的布局 */}
+      {showFullActions ? (
+        <>
+          {/* 导出按钮 */}
+          <div className="flex-shrink-0">
             <ConversationExport
               messages={messages}
               sessionTitle={sessionTitle}
             />
           </div>
-        );
-      case 'close':
-        return (
+          
+          {/* 关闭按钮 */}
           <Button
-            key="close"
             variant="ghost"
             size="icon"
             onClick={onClose}
@@ -104,25 +88,17 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
           >
             <X className="h-4 w-4" />
           </Button>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div ref={containerRef} className="flex items-center gap-2 min-w-0">
-      {visibleActions.map(actionId => renderAction(actionId))}
-      
-      {hiddenActions.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="flex-shrink-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            {hiddenActions.includes('export') && (
+        </>
+      ) : (
+        <>
+          {/* 更多操作菜单 */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="flex-shrink-0">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <div className="w-full">
                   <ConversationExport
@@ -132,9 +108,12 @@ export const ResponsiveActions: React.FC<ResponsiveActionsProps> = ({
                   />
                 </div>
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onClick={onClose}>
+                关闭对话
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       )}
     </div>
   );
