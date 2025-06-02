@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { 
   MessageSquare, Bot, Server, 
   CheckCircle, Settings, MoreHorizontal,
@@ -62,6 +62,8 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
 }) => {
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [serverPanelSize, setServerPanelSize] = useState(40);
+  const [chatPanelSize, setChatPanelSize] = useState(60);
   const { toast } = useToast();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
@@ -127,54 +129,79 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
     setIsChatOpen(!isChatOpen);
   };
 
+  const handleRequestMoreSpace = useCallback(() => {
+    // Give more space to server management when needed
+    const newServerSize = Math.min(70, serverPanelSize + 20);
+    const newChatSize = 100 - newServerSize;
+    setServerPanelSize(newServerSize);
+    setChatPanelSize(newChatSize);
+  }, [serverPanelSize]);
+
+  const handlePanelResize = useCallback((sizes: number[]) => {
+    const [newServerSize, newChatSize] = sizes;
+    setServerPanelSize(newServerSize);
+    setChatPanelSize(newChatSize);
+  }, []);
+
   const getServerLoad = (serverId: string) => {
     return Math.floor(Math.random() * 90) + 10;
   };
 
   return (
-    <div className="h-full flex flex-col p-6">
+    <div className="h-full flex flex-col">
       {/* Host Header with AI Chat Button */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800 mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                <span className="text-2xl">{host.icon || '🚀'}</span>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  {host.name}
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-                    Built-in
-                  </Badge>
-                </h2>
-                <div className="flex items-center gap-2">
-                  <StatusIndicator status="active" label="Ready for AI Chat" />
+      <div className="flex-shrink-0 p-6 pb-4">
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                  <span className="text-2xl">{host.icon || '🚀'}</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    {host.name}
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                      Built-in
+                    </Badge>
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <StatusIndicator status="active" label="Ready for AI Chat" />
+                  </div>
                 </div>
               </div>
+              
+              {/* AI Chat Button */}
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={handleStartAIChat}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  开始AI对话
+                </Button>
+              </div>
             </div>
-            
-            {/* AI Chat Button */}
-            <div className="flex items-center gap-3">
-              <Button 
-                onClick={handleStartAIChat}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                开始AI对话
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Resizable Content Area */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 px-6 pb-6">
         {isChatOpen ? (
-          <ResizablePanelGroup direction="vertical" className="h-full">
+          <ResizablePanelGroup 
+            direction="vertical" 
+            className="h-full"
+            onLayout={handlePanelResize}
+          >
             {/* Server Management Panel */}
-            <ResizablePanel defaultSize={40} minSize={25}>
-              <div className="h-full overflow-auto">
+            <ResizablePanel 
+              defaultSize={serverPanelSize} 
+              minSize={25} 
+              maxSize={75}
+              className="flex flex-col"
+            >
+              <div className="h-full">
                 <CollapsibleServerManagement
                   profiles={profiles}
                   serverInstances={serverInstances}
@@ -193,16 +220,21 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
                   }}
                   getServerLoad={getServerLoad}
                   hostConnectionStatus="connected"
+                  onRequestMoreSpace={handleRequestMoreSpace}
                 />
               </div>
             </ResizablePanel>
 
-            <ResizableHandle withHandle />
+            <ResizableHandle withHandle className="my-2" />
 
             {/* AI Chat Panel */}
-            <ResizablePanel defaultSize={60} minSize={35}>
-              <Card className="h-full border-blue-200 dark:border-blue-800">
-                <CardHeader className="pb-3">
+            <ResizablePanel 
+              defaultSize={chatPanelSize} 
+              minSize={25}
+              className="flex flex-col"
+            >
+              <Card className="h-full border-blue-200 dark:border-blue-800 flex flex-col">
+                <CardHeader className="pb-3 flex-shrink-0">
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <MessageSquare className="h-5 w-5 text-blue-600" />
@@ -218,7 +250,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0 h-[calc(100%-5rem)]">
+                <CardContent className="p-0 flex-1 min-h-0">
                   <div className="h-full border-t">
                     <InlineChatPanel className="h-full" />
                   </div>
@@ -228,7 +260,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
           </ResizablePanelGroup>
         ) : (
           /* Server Management Only */
-          <div className="h-full overflow-auto">
+          <div className="h-full">
             <CollapsibleServerManagement
               profiles={profiles}
               serverInstances={serverInstances}
