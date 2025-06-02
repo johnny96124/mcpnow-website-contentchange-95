@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,17 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
     return isChatOpen ? 55 : 75; // 展开时中间面板的宽度
   };
 
+  // 监听左侧面板尺寸变化
+  const handleLeftPanelResize = useCallback((size: number) => {
+    // 设定展开阈值为15%
+    const expandThreshold = 15;
+    
+    // 如果当前是收起状态，且拖拽宽度超过阈值，则自动展开
+    if (isHostsListCollapsed && size > expandThreshold) {
+      setIsHostsListCollapsed(false);
+    }
+  }, [isHostsListCollapsed]);
+
   return (
     <div className="h-full flex">
       <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -47,6 +58,7 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
           defaultSize={getLeftPanelSize()}
           minSize={isHostsListCollapsed ? 6 : 15}
           maxSize={isHostsListCollapsed ? 8 : 40}
+          onResize={handleLeftPanelResize}
           className={cn(
             "transition-all duration-300 ease-in-out",
             isHostsListCollapsed && "min-w-16 max-w-20"
