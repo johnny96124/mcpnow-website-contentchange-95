@@ -10,7 +10,7 @@ import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
 import { Message, MessageAttachment } from '@/components/chat/types/chat';
-import { HistoryDrawer } from './HistoryDrawer';
+import { ChatHistoryPopover } from './ChatHistoryPopover';
 
 interface AttachedFile {
   id: string;
@@ -41,7 +41,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false);
 
   const connectedServers = getConnectedServers();
   const selectedServers = connectedServers.map(s => s.id);
@@ -169,98 +169,96 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   const canSendMessage = selectedServers.length > 0 && !isSending;
 
   return (
-    <>
-      <div className={`h-full flex flex-col ${className}`}>
-        {/* Single header with all controls */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onToggleChat}
-              className="p-1 h-auto hover:bg-muted"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <h3 className="font-semibold">AI对话</h3>
-            {currentSession && (
-              <Badge variant="secondary" className="text-xs">
-                {currentMessages.length} 条消息
-              </Badge>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setHistoryDrawerOpen(true)}
-              className="gap-2"
-            >
-              <History className="h-4 w-4" />
-              历史
-            </Button>
-            
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleNewChat}
-              className="gap-2"
-              disabled={selectedServers.length === 0}
-            >
-              <Plus className="h-4 w-4" />
-              新对话
-            </Button>
-          </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="flex-1 min-h-0">
-          {currentMessages.length > 0 ? (
-            <MessageThread
-              messages={currentMessages}
-              isLoading={isSending}
-              streamingMessageId={streamingMessageId}
-              onUpdateMessage={handleToolAction}
-              onDeleteMessage={handleDeleteMessage}
-              onEditMessage={() => {}}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full p-4">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Bot className="h-8 w-8 text-blue-600" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  发送消息开始与AI助手交流，支持MCP工具调用
-                </p>
-              </div>
-            </div>
+    <div className={`h-full flex flex-col ${className}`}>
+      {/* Single header with all controls */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleChat}
+            className="p-1 h-auto hover:bg-muted"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <h3 className="font-semibold">AI对话</h3>
+          {currentSession && (
+            <Badge variant="secondary" className="text-xs">
+              {currentMessages.length} 条消息
+            </Badge>
           )}
         </div>
-
-        {/* Input Area */}
-        <div className="border-t p-3">
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            disabled={!canSendMessage}
-            placeholder={
-              selectedServers.length === 0 
-                ? "请先连接MCP服务器..."
-                : "输入您的消息..."
+        
+        <div className="flex items-center gap-2">
+          <ChatHistoryPopover
+            open={historyPopoverOpen}
+            onOpenChange={setHistoryPopoverOpen}
+            sessions={chatSessions}
+            onSelectSession={handleSelectHistorySession}
+            trigger={
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <History className="h-4 w-4" />
+                历史
+              </Button>
             }
-            selectedServers={[]}
-            servers={[]}
           />
+          
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleNewChat}
+            className="gap-2"
+            disabled={selectedServers.length === 0}
+          >
+            <Plus className="h-4 w-4" />
+            新对话
+          </Button>
         </div>
       </div>
 
-      <HistoryDrawer
-        open={historyDrawerOpen}
-        onOpenChange={setHistoryDrawerOpen}
-        sessions={chatSessions}
-        onSelectSession={handleSelectHistorySession}
-      />
-    </>
+      {/* Chat Area */}
+      <div className="flex-1 min-h-0">
+        {currentMessages.length > 0 ? (
+          <MessageThread
+            messages={currentMessages}
+            isLoading={isSending}
+            streamingMessageId={streamingMessageId}
+            onUpdateMessage={handleToolAction}
+            onDeleteMessage={handleDeleteMessage}
+            onEditMessage={() => {}}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full p-4">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Bot className="h-8 w-8 text-blue-600" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                发送消息开始与AI助手交流，支持MCP工具调用
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Input Area */}
+      <div className="border-t p-3">
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          disabled={!canSendMessage}
+          placeholder={
+            selectedServers.length === 0 
+              ? "请先连接MCP服务器..."
+              : "输入您的消息..."
+          }
+          selectedServers={[]}
+          servers={[]}
+        />
+      </div>
+    </div>
   );
 };
