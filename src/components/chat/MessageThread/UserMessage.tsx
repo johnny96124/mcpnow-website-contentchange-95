@@ -38,7 +38,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({
 
   const handleSaveEdit = () => {
     if (editContent.trim() !== message.content && editContent.trim()) {
-      // 当内容有变化时，始终触发编辑并重新生成
+      // 当内容有变化时，使用编辑并重新生成功能
       if (onEditAndRegenerate) {
         onEditAndRegenerate(editContent.trim());
       } else if (onEdit) {
@@ -47,14 +47,24 @@ export const UserMessage: React.FC<UserMessageProps> = ({
     } else if (editContent.trim() === message.content) {
       // 内容没有变化时，只是关闭编辑模式
       setIsEditing(false);
+    } else {
+      // 内容为空时，重置为原始内容
+      setEditContent(message.content);
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
     setEditContent(message.content);
     setIsEditing(false);
   };
+
+  // 每次 message.content 变化时，更新 editContent
+  React.useEffect(() => {
+    if (!isEditing) {
+      setEditContent(message.content);
+    }
+  }, [message.content, isEditing]);
 
   if (isEditing) {
     return (
@@ -97,6 +107,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({
             <Button 
               size="sm" 
               onClick={handleSaveEdit}
+              disabled={!editContent.trim()}
               className="h-6 sm:h-8 px-2 sm:px-3 text-xs"
             >
               <Check className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
