@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Copy, RotateCcw, Edit, Trash2 } from 'lucide-react';
+import { Copy, RotateCcw, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,7 +9,6 @@ interface MessageActionsProps {
   messageId: string;
   onRegenerate?: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
   isUserMessage?: boolean;
 }
 
@@ -18,7 +17,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
   messageId,
   onRegenerate,
   onEdit,
-  onDelete,
   isUserMessage = false
 }) => {
   const { toast } = useToast();
@@ -54,12 +52,6 @@ export const MessageActions: React.FC<MessageActionsProps> = ({
       {!isUserMessage && onRegenerate && (
         <Button size="sm" variant="ghost" onClick={onRegenerate} className="h-7 px-2">
           <RotateCcw className="h-3 w-3" />
-        </Button>
-      )}
-
-      {onDelete && (
-        <Button size="sm" variant="ghost" onClick={onDelete} className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50">
-          <Trash2 className="h-3 w-3" />
         </Button>
       )}
     </div>

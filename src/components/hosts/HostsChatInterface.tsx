@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
 import { ConversationExport } from '@/components/chat/ConversationExport';
-import { ServerSelectionDialog } from './ServerSelectionDialog';
 import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
@@ -36,7 +35,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
   } = useChatHistory();
   const { 
     streamingMessageId, 
-    generateAIResponseWithInlineTools
   } = useStreamingChat();
   const { toast } = useToast();
   
@@ -44,8 +42,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStreamingTimer, setCurrentStreamingTimer] = useState<NodeJS.Timeout | null>(null);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [showServerSelectionDialog, setShowServerSelectionDialog] = useState(false);
-  const [selectedServerIdForConfig, setSelectedServerIdForConfig] = useState<string | null>(null);
 
   const connectedServers = getConnectedServers();
   const selectedServers = connectedServers.map(s => s.id);
@@ -74,20 +70,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     toast({
       title: "生成已停止",
       description: "AI回复已被用户终止",
-    });
-  };
-
-  const handleConfigureServer = (serverId: string) => {
-    setSelectedServerIdForConfig(serverId);
-    setShowServerSelectionDialog(true);
-  };
-
-  const handleServerConfigured = () => {
-    setShowServerSelectionDialog(false);
-    setSelectedServerIdForConfig(null);
-    toast({
-      title: "服务器配置成功",
-      description: "MCP 服务器已添加到当前 Profile",
     });
   };
 
@@ -131,15 +113,41 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     addMessage(sessionId, userMessage);
 
     try {
-      // Use streaming chat with inline tools and server discovery
-      await generateAIResponseWithInlineTools(
-        content,
-        selectedServers,
-        sessionId,
-        addMessage,
-        updateMessage
+      const aiMessageId = `msg-${Date.now()}-ai`;
+      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+
+      const aiMessage: Message = {
+        id: aiMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now()
+      };
+
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      addMessage(sessionId, aiMessage);
+
+      await simulateStreamingText(sessionId, aiMessageId, fullContent);
+      
+      // 检查是否被用户停止
+      if (!isGenerating) return;
+      
+      const toolCalls = generateSequentialToolCalls(content, selectedServers);
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls: toolCalls,
+        toolCallStatus: 'pending',
+        currentToolIndex: 0
+      };
+
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
       );
       
+      if (currentSession) {
+        updateMessage(sessionId, aiMessageId, messageWithTools);
+      }
+
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -363,83 +371,74 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        {/* Header */}
-        <div className="border-b p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h2 className="font-semibold">
-                {currentSession?.title || 'MCP Now AI 对话'}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                使用 {selectedServers.length} 个连接的服务器
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ConversationExport
-              messages={currentMessages}
-              sessionTitle={currentSession?.title}
-            />
-            
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
+    <div className="fixed inset-0 bg-background z-50 flex flex-col">
+      {/* Header */}
+      <div className="border-b p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h2 className="font-semibold">
+              {currentSession?.title || 'MCP Now AI 对话'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              使用 {selectedServers.length} 个连接的服务器
+            </p>
           </div>
         </div>
-
-        {/* Message Thread */}
-        <div className="flex-1 overflow-hidden">
-          {currentMessages.length > 0 ? (
-            <MessageThread
-              messages={currentMessages}
-              isLoading={false}
-              streamingMessageId={streamingMessageId}
-              onUpdateMessage={handleToolAction}
-              onDeleteMessage={handleDeleteMessage}
-              onEditMessage={handleEditMessage}
-              onConfigureServer={handleConfigureServer}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">开始与AI对话</h3>
-                <p className="text-muted-foreground">
-                  MCP Now AI助手已准备就绪
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Input Area */}
-        <div className="border-t p-4">
-          <MessageInput
-            onSendMessage={handleSendMessage}
-            onStopGeneration={handleStopGeneration}
-            disabled={!canSendMessage}
-            isGenerating={isGenerating}
-            placeholder="输入您的消息..."
-            selectedServers={selectedServers}
-            servers={connectedServers}
+        <div className="flex items-center gap-2">
+          <ConversationExport
+            messages={currentMessages}
+            sessionTitle={currentSession?.title}
           />
+          
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <ServerSelectionDialog
-        open={showServerSelectionDialog}
-        onOpenChange={setShowServerSelectionDialog}
-        onAddServers={handleServerConfigured}
-      />
-    </>
+      {/* Message Thread */}
+      <div className="flex-1 overflow-hidden">
+        {currentMessages.length > 0 ? (
+          <MessageThread
+            messages={currentMessages}
+            isLoading={false}
+            streamingMessageId={streamingMessageId}
+            onUpdateMessage={handleToolAction}
+            onDeleteMessage={handleDeleteMessage}
+            onEditMessage={handleEditMessage}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">开始与AI对话</h3>
+              <p className="text-muted-foreground">
+                MCP Now AI助手已准备就绪
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Input Area */}
+      <div className="border-t p-4">
+        <MessageInput
+          onSendMessage={handleSendMessage}
+          onStopGeneration={handleStopGeneration}
+          disabled={!canSendMessage}
+          isGenerating={isGenerating}
+          placeholder="输入您的消息..."
+          selectedServers={selectedServers}
+          servers={connectedServers}
+        />
+      </div>
+    </div>
   );
 };

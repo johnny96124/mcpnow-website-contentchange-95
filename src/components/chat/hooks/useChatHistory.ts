@@ -1,165 +1,309 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { ChatSession, Message } from '../types/chat';
+import { ChatSession, Message, ToolInvocation } from '../types/chat';
 
 const STORAGE_KEY = 'mcp-chat-history';
-const MAX_SESSIONS = 10; // 限制最大会话数量
-const MAX_MESSAGES_PER_SESSION = 50; // 限制每个会话的最大消息数
-
-const saveToStorage = (data: ChatSession[]) => {
-  try {
-    // 清理旧数据以节省空间
-    const cleanedData = data
-      .slice(-MAX_SESSIONS) // 只保留最新的会话
-      .map(session => ({
-        ...session,
-        messages: session.messages.slice(-MAX_MESSAGES_PER_SESSION) // 每个会话只保留最新的消息
-      }));
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanedData));
-    console.log('Chat history saved successfully');
-  } catch (error) {
-    console.error('Failed to save chat history:', error);
-    
-    // 如果存储失败，尝试清理更多数据
-    try {
-      const minimalData = data
-        .slice(-5) // 只保留最新的5个会话
-        .map(session => ({
-          ...session,
-          messages: session.messages.slice(-20) // 每个会话只保留最新的20条消息
-        }));
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalData));
-      console.log('Chat history saved with reduced data');
-    } catch (secondError) {
-      console.error('Failed to save reduced chat history:', secondError);
-      // 如果还是失败，清空存储
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }
-};
-
-const loadFromStorage = (): ChatSession[] => {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Failed to load chat history:', error);
-    return [];
-  }
-};
 
 export const useChatHistory = () => {
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => loadFromStorage());
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const currentSession = chatSessions.find(session => session.id === currentSessionId) || null;
-
-  // 保存到 localStorage
+  // Load chat history from localStorage
   useEffect(() => {
-    saveToStorage(chatSessions);
-  }, [chatSessions]);
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const sessions = JSON.parse(stored);
+        setChatSessions(sessions);
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+      }
+    }
+  }, []);
 
-  const createNewChat = useCallback((selectedServers: string[], profileId?: string): ChatSession => {
-    const now = Date.now();
+  // Save chat history to localStorage
+  const saveChatHistory = useCallback((sessions: ChatSession[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    } catch (error) {
+      console.error('Failed to save chat history:', error);
+    }
+  }, []);
+
+  const generateTitle = (firstMessage: string): string => {
+    const maxLength = 50;
+    if (firstMessage.length <= maxLength) {
+      return firstMessage;
+    }
+    return firstMessage.substring(0, maxLength) + '...';
+  };
+
+  const createNewChat = useCallback((selectedServers: string[], selectedProfile?: string): ChatSession => {
     const newSession: ChatSession = {
-      id: `session-${now}`,
-      title: '新对话',
-      createdAt: now,
-      updatedAt: now,
+      id: `chat-${Date.now()}`,
+      title: 'New Chat',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       selectedServers,
-      selectedProfile: profileId,
+      selectedProfile,
       messages: []
     };
 
     setChatSessions(prev => {
       const updated = [newSession, ...prev];
-      console.log('创建新会话:', newSession);
+      saveChatHistory(updated);
       return updated;
     });
-    
-    setCurrentSessionId(newSession.id);
+
     return newSession;
-  }, []);
+  }, [saveChatHistory]);
 
   const selectChat = useCallback((sessionId: string) => {
-    console.log('选择会话:', sessionId);
-    setCurrentSessionId(sessionId);
-  }, []);
+    const session = chatSessions.find(s => s.id === sessionId);
+    setCurrentSession(session || null);
+  }, [chatSessions]);
 
-  const addMessage = useCallback((sessionId: string, message: Message) => {
-    console.log('添加消息到会话:', sessionId, message);
-    setChatSessions(prev => prev.map(session => {
-      if (session.id === sessionId) {
-        const updatedSession = {
-          ...session,
-          messages: [...session.messages, message],
-          updatedAt: Date.now(),
-          title: session.messages.length === 0 && message.role === 'user' 
-            ? message.content.substring(0, 30) + (message.content.length > 30 ? '...' : '')
-            : session.title
-        };
-        console.log('会话更新:', updatedSession);
-        return updatedSession;
+  const updateSession = useCallback((sessionId: string, updates: Partial<ChatSession>) => {
+    setChatSessions(prev => {
+      const updated = prev.map(session => 
+        session.id === sessionId 
+          ? { ...session, ...updates, updatedAt: Date.now() }
+          : session
+      );
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // 如果更新的是当前会话，也要更新 currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        return { ...prev, ...updates, updatedAt: Date.now() };
       }
-      return session;
-    }));
-  }, []);
-
-  const updateMessage = useCallback((sessionId: string, messageId: string, updates: Partial<Message>) => {
-    console.log('更新消息:', sessionId, messageId, updates);
-    setChatSessions(prev => prev.map(session => {
-      if (session.id === sessionId) {
-        return {
-          ...session,
-          messages: session.messages.map(msg => 
-            msg.id === messageId ? { ...msg, ...updates } : msg
-          ),
-          updatedAt: Date.now()
-        };
-      }
-      return session;
-    }));
-  }, []);
-
-  const deleteMessage = useCallback((sessionId: string, messageId: string) => {
-    setChatSessions(prev => prev.map(session => {
-      if (session.id === sessionId) {
-        return {
-          ...session,
-          messages: session.messages.filter(msg => msg.id !== messageId),
-          updatedAt: Date.now()
-        };
-      }
-      return session;
-    }));
-  }, []);
-
-  const deleteSession = useCallback((sessionId: string) => {
-    setChatSessions(prev => prev.filter(session => session.id !== sessionId));
-    if (currentSessionId === sessionId) {
-      setCurrentSessionId(null);
-    }
-  }, [currentSessionId]);
+      return prev;
+    });
+  }, [saveChatHistory]);
 
   const renameSession = useCallback((sessionId: string, newTitle: string) => {
-    setChatSessions(prev => prev.map(session => 
-      session.id === sessionId 
-        ? { ...session, title: newTitle, updatedAt: Date.now() }
-        : session
-    ));
+    updateSession(sessionId, { title: newTitle });
+  }, [updateSession]);
+
+  const addMessage = useCallback((sessionId: string, message: Message) => {
+    console.log('Adding message to session:', sessionId, message);
+    
+    setChatSessions(prev => {
+      const session = prev.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found:', sessionId);
+        return prev;
+      }
+
+      const updatedMessages = [...session.messages, message];
+      const updates: Partial<ChatSession> = {
+        messages: updatedMessages
+      };
+
+      // Update title if this is the first user message
+      if (message.role === 'user' && session.messages.length === 0) {
+        updates.title = generateTitle(message.content);
+      }
+
+      const updatedSession = { ...session, ...updates, updatedAt: Date.now() };
+      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
+      
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // 同时更新 currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        const updatedMessages = [...prev.messages, message];
+        const updates: Partial<ChatSession> = {
+          messages: updatedMessages
+        };
+
+        // Update title if this is the first user message
+        if (message.role === 'user' && prev.messages.length === 0) {
+          updates.title = generateTitle(message.content);
+        }
+
+        return { ...prev, ...updates, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory, generateTitle]);
+
+  const updateMessage = useCallback((sessionId: string, messageId: string, updates: Partial<Message>) => {
+    console.log('Updating message:', messageId, updates);
+    
+    setChatSessions(prev => {
+      const session = prev.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found:', sessionId);
+        return prev;
+      }
+
+      const updatedMessages = session.messages.map(msg => 
+        msg.id === messageId ? { ...msg, ...updates } : msg
+      );
+
+      const updatedSession = { 
+        ...session, 
+        messages: updatedMessages, 
+        updatedAt: Date.now() 
+      };
+      
+      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // 同时更新 currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        const updatedMessages = prev.messages.map(msg => 
+          msg.id === messageId ? { ...msg, ...updates } : msg
+        );
+        return { ...prev, messages: updatedMessages, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
+
+  const simulateAIResponse = useCallback(async (userMessage: string, selectedServers: string[]): Promise<Message> => {
+    // Simulate AI processing with tool invocations
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const toolInvocations: ToolInvocation[] = [];
+    
+    // Simulate some tool calls based on message content
+    if (userMessage.toLowerCase().includes('file') || userMessage.toLowerCase().includes('read')) {
+      toolInvocations.push({
+        id: `tool-${Date.now()}-1`,
+        toolName: 'read_file',
+        serverId: selectedServers[0],
+        serverName: `Server ${selectedServers[0]}`,
+        request: { path: '/example/file.txt' },
+        response: { content: 'File content example...' },
+        status: 'success',
+        duration: 250,
+        timestamp: Date.now()
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('search') || userMessage.toLowerCase().includes('find')) {
+      toolInvocations.push({
+        id: `tool-${Date.now()}-2`,
+        toolName: 'search',
+        serverId: selectedServers[0],
+        serverName: `Server ${selectedServers[0]}`,
+        request: { query: 'search terms' },
+        response: { results: ['Result 1', 'Result 2'] },
+        status: 'success',
+        duration: 500,
+        timestamp: Date.now()
+      });
+    }
+
+    return {
+      id: `msg-${Date.now()}`,
+      role: 'assistant',
+      content: `I understand you're asking about "${userMessage}". Based on the available MCP tools, I've processed your request and here's what I found:\n\n${toolInvocations.length > 0 ? 'I used several tools to help answer your question. ' : ''}This is a simulated AI response that would incorporate the results from any MCP tool invocations.`,
+      timestamp: Date.now(),
+      toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined
+    };
   }, []);
+
+  const sendMessage = useCallback(async (sessionId: string, content: string, selectedServers: string[]) => {
+    if (!currentSession) return;
+
+    setIsLoading(true);
+
+    // Add user message
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content,
+      timestamp: Date.now()
+    };
+
+    addMessage(sessionId, userMessage);
+
+    try {
+      // Simulate AI response
+      const aiMessage = await simulateAIResponse(content, selectedServers);
+      addMessage(sessionId, aiMessage);
+    } catch (error) {
+      console.error('Failed to get AI response:', error);
+      const errorMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'assistant',
+        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        timestamp: Date.now()
+      };
+      addMessage(sessionId, errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentSession, addMessage, simulateAIResponse]);
+
+  const deleteSession = useCallback((sessionId: string) => {
+    setChatSessions(prev => {
+      const updated = prev.filter(session => session.id !== sessionId);
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // If deleting current session, clear it
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        return null;
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
+
+  const deleteMessage = useCallback((sessionId: string, messageId: string) => {
+    setChatSessions(prev => {
+      const session = prev.find(s => s.id === sessionId);
+      if (!session) {
+        console.error('Session not found:', sessionId);
+        return prev;
+      }
+
+      const updatedMessages = session.messages.filter(msg => msg.id !== messageId);
+      const updatedSession = { 
+        ...session, 
+        messages: updatedMessages, 
+        updatedAt: Date.now() 
+      };
+      
+      const updated = prev.map(s => s.id === sessionId ? updatedSession : s);
+      saveChatHistory(updated);
+      return updated;
+    });
+
+    // Also update currentSession
+    setCurrentSession(prev => {
+      if (prev && prev.id === sessionId) {
+        const updatedMessages = prev.messages.filter(msg => msg.id !== messageId);
+        return { ...prev, messages: updatedMessages, updatedAt: Date.now() };
+      }
+      return prev;
+    });
+  }, [saveChatHistory]);
 
   return {
     chatSessions,
     currentSession,
+    isLoading,
     createNewChat,
     selectChat,
+    updateSession,
+    renameSession,
     addMessage,
     updateMessage,
-    deleteMessage,
     deleteSession,
-    renameSession
+    deleteMessage
   };
 };
