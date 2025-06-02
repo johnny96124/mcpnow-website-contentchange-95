@@ -57,9 +57,6 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   onAddServersToProfile
 }) => {
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('claude-4-sonnet');
-  const [selectedServers, setSelectedServers] = useState<string[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string | undefined>();
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -67,24 +64,6 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   const profileServers = serverInstances.filter(
     server => currentProfile?.instances.includes(server.id)
   );
-
-  const runningServers = profileServers.filter(s => s.status === 'running');
-  const totalRequests = profileServers.reduce((sum, server) => sum + (server.requestCount || 0), 0);
-
-  // Convert data for chat components
-  const mcpServers: MCPServer[] = serverInstances.map(server => ({
-    id: server.id,
-    name: server.name,
-    type: 'STDIO', // Convert from internal types
-    status: server.status === 'running' ? 'connected' : 'disconnected',
-    enabled: server.enabled
-  }));
-
-  const mcpProfiles: MCPProfile[] = profiles.map(profile => ({
-    id: profile.id,
-    name: profile.name,
-    serverIds: profile.instances
-  }));
 
   const handleServerStatusChange = (serverId: string, enabled: boolean) => {
     onServerStatusChange(
@@ -171,76 +150,6 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* AI Chat Configuration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bot className="h-5 w-5" />
-            AI Chat Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium mb-3 block">AI Model</label>
-              <ModelSelector 
-                selectedModel={selectedModel} 
-                onModelChange={setSelectedModel} 
-              />
-            </div>
-            <div>
-              <ServerSelector 
-                servers={mcpServers}
-                profiles={mcpProfiles}
-                selectedServers={selectedServers}
-                selectedProfile={selectedProfile}
-                onServersChange={setSelectedServers}
-                onProfileChange={setSelectedProfile}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active Servers</p>
-                <p className="text-2xl font-bold">{runningServers.length}</p>
-              </div>
-              <Server className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Requests</p>
-                <p className="text-2xl font-bold">{totalRequests}</p>
-              </div>
-              <Activity className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Available Profiles</p>
-                <p className="text-2xl font-bold">{profiles.length}</p>
-              </div>
-              <Users className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Profile Management */}
       <Card>
