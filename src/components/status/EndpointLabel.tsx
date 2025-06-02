@@ -4,9 +4,10 @@ import { EndpointType } from '@/data/mockData';
 
 interface EndpointLabelProps {
   type: EndpointType;
+  className?: string;
 }
 
-export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type }) => {
+export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type, className }) => {
   const getDisplayType = (type: EndpointType) => {
     switch (type) {
       case 'HTTP_SSE':
@@ -36,7 +37,7 @@ export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type }) => {
   };
 
   return (
-    <div className={getClassNames()}>
+    <div className={`${getClassNames()} ${className || ''}`}>
       {getDisplayType(type)}
     </div>
   );
