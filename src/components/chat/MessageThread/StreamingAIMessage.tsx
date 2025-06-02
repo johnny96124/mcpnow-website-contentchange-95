@@ -81,7 +81,11 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const visibleTools = pendingCalls.filter(tool => tool.visible);
   const hasToolCalls = pendingCalls.length > 0;
   const isFailed = message.toolCallStatus === 'failed';
-  const shouldShowServerRecommendations = !hasToolCalls && !isStreaming && displayedContent && onConfigureServer;
+  const isToolCallCompleted = message.toolCallStatus === 'completed';
+  
+  // 修改条件：在没有工具调用时显示，或者在工具调用完成后也显示
+  const shouldShowServerRecommendations = !isStreaming && displayedContent && onConfigureServer && 
+    (!hasToolCalls || isToolCallCompleted);
 
   return (
     <div 
@@ -336,7 +340,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           </div>
         )}
 
-        {/* Server推荐区域 */}
+        {/* Server推荐区域 - 修改显示条件 */}
         {shouldShowServerRecommendations && (
           <ServerRecommendations
             messageId={message.id}
