@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Host, Profile, ServerInstance
 } from "@/data/mockData";
-import { ProfileDropdown } from "./ProfileDropdown";
-import { ServerItem } from "./ServerItem";
-import { ServerListEmpty } from "./ServerListEmpty";
-import { ServerSelectionDialog } from "./ServerSelectionDialog";
 import { CollapsibleServerManagement } from "./CollapsibleServerManagement";
 import { ConfigRequired } from "./ConfigRequired";
 import { MCPNowHostView } from "./MCPNowHostView";
@@ -67,7 +64,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
   };
 
   // For MCP Now (built-in host)
-  if (host.name === "MCP Now" || host.type === "builtin") {
+  if (host.name === "MCP Now" || host.type === "mcpnow") {
     return (
       <MCPNowHostView 
         host={host}
@@ -84,6 +81,11 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
       />
     );
   }
+
+  // Convert the status-based callback to enabled-based for CollapsibleServerManagement
+  const handleServerStatusToggle = (serverId: string, enabled: boolean) => {
+    onServerStatusChange(serverId, enabled ? 'connecting' : 'stopped');
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -121,7 +123,7 @@ export const HostDetailView: React.FC<HostDetailViewProps> = ({
           onProfileChange={onProfileChange}
           onCreateProfile={onCreateProfile}
           onDeleteProfile={onDeleteProfile}
-          onServerStatusChange={onServerStatusChange}
+          onServerStatusChange={handleServerStatusToggle}
           onAddServers={onAddServersToHost}
           onRemoveFromProfile={(serverId) => {
             const server = serverInstances.find(s => s.id === serverId);
