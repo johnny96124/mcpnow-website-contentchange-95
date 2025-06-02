@@ -279,6 +279,14 @@ const Hosts = () => {
     setUnifiedHostDialogOpen(true);
   };
 
+  const handleStartAIChatFromHost = () => {
+    setIsChatOpen(true);
+    toast({
+      title: "AI Chat Opened",
+      description: "You can now start chatting with AI using the connected MCP servers"
+    });
+  };
+
   // Show appropriate content based on state
   if (!hasSeenOnboarding) {
     return (
@@ -378,7 +386,7 @@ const Hosts = () => {
                 onCreateProfile={handleCreateProfile}
                 onDeleteProfile={handleDeleteProfile}
                 onAddServersToProfile={handleAddServersToProfile}
-                onStartAIChat={handleStartAIChat}
+                onStartAIChat={handleStartAIChatFromHost}
               />
             ) : (
               <div className="border border-dashed rounded-md p-8 text-center space-y-3">

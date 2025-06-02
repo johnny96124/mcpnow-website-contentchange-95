@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   MessageSquare, Bot, Server, 
@@ -41,6 +42,7 @@ interface MCPNowHostViewProps {
   onCreateProfile: (name: string) => string;
   onDeleteProfile: (profileId: string) => void;
   onAddServersToProfile?: (servers: ServerInstance[]) => void;
+  onStartAIChat?: () => void;
 }
 
 export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
@@ -53,7 +55,8 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   onSaveProfileChanges,
   onCreateProfile,
   onDeleteProfile,
-  onAddServersToProfile
+  onAddServersToProfile,
+  onStartAIChat
 }) => {
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -106,13 +109,23 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
     }
   };
 
+  const handleStartAIChat = () => {
+    if (onStartAIChat) {
+      onStartAIChat();
+      toast({
+        title: "AI Chat Started",
+        description: "AI chat panel has been opened",
+      });
+    }
+  };
+
   const getServerLoad = (serverId: string) => {
     return Math.floor(Math.random() * 90) + 10;
   };
 
   return (
     <div className="space-y-6 p-6">
-      {/* Host Header */}
+      {/* Host Header with AI Chat Button */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
@@ -131,6 +144,17 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
                   <StatusIndicator status="active" label="Ready for AI Chat" />
                 </div>
               </div>
+            </div>
+            
+            {/* AI Chat Button */}
+            <div className="flex items-center gap-3">
+              <Button 
+                onClick={handleStartAIChat}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                开始AI对话
+              </Button>
             </div>
           </div>
         </CardContent>
