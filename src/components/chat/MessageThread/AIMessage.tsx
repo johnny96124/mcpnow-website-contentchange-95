@@ -4,13 +4,27 @@ import { Bot } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Message } from '../types/chat';
 import { ToolInvocation } from './ToolInvocation';
+import { MessageActions } from './MessageActions';
+import { MessageRating } from './MessageRating';
 import { formatDistanceToNow } from 'date-fns';
 
 interface AIMessageProps {
   message: Message;
+  isStreaming?: boolean;
+  onDelete?: () => void;
+  onEdit?: (newContent: string) => void;
+  onRegenerate?: () => void;
+  onRate?: (rating: 'positive' | 'negative' | null) => void;
 }
 
-export const AIMessage: React.FC<AIMessageProps> = ({ message }) => {
+export const AIMessage: React.FC<AIMessageProps> = ({ 
+  message, 
+  isStreaming = false,
+  onDelete,
+  onEdit,
+  onRegenerate,
+  onRate
+}) => {
   return (
     <div className="flex gap-3">
       <Avatar className="h-8 w-8 flex-shrink-0">
@@ -40,6 +54,26 @@ export const AIMessage: React.FC<AIMessageProps> = ({ message }) => {
         {/* AI Response */}
         <div className="bg-gray-50 dark:bg-gray-900/20 rounded-lg p-3 prose prose-sm max-w-none">
           <p className="whitespace-pre-wrap m-0">{message.content}</p>
+        </div>
+
+        {/* Message Actions and Rating */}
+        <div className="flex items-center justify-between">
+          <MessageActions
+            content={message.content}
+            messageId={message.id}
+            onRegenerate={onRegenerate}
+            onDelete={onDelete}
+            onEdit={onEdit}
+            isUserMessage={false}
+          />
+          
+          {onRate && (
+            <MessageRating
+              messageId={message.id}
+              currentRating={message.rating}
+              onRate={onRate}
+            />
+          )}
         </div>
       </div>
     </div>

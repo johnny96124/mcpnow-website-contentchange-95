@@ -15,6 +15,9 @@ interface MessageThreadProps {
   onUpdateMessage: (messageId: string, action: 'run' | 'cancel', toolId?: string) => void;
   onDeleteMessage: (messageId: string) => void;
   onEditMessage: (messageId: string, newContent: string) => void;
+  onEditAndRegenerate?: (messageId: string, newContent: string) => void;
+  onRegenerateMessage?: (messageId: string) => void;
+  onRateMessage?: (messageId: string, rating: 'positive' | 'negative' | null) => void;
   onConfigureServer?: (serverId: string) => void;
 }
 
@@ -25,6 +28,9 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
   onUpdateMessage,
   onDeleteMessage,
   onEditMessage,
+  onEditAndRegenerate,
+  onRegenerateMessage,
+  onRateMessage,
   onConfigureServer
 }) => {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -47,8 +53,9 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
               <UserMessage
                 key={message.id}
                 message={message}
-                onDeleteMessage={onDeleteMessage}
-                onEditMessage={onEditMessage}
+                onDelete={() => onDeleteMessage(message.id)}
+                onEdit={onEditMessage ? (newContent: string) => onEditMessage(message.id, newContent) : undefined}
+                onEditAndRegenerate={onEditAndRegenerate ? (newContent: string) => onEditAndRegenerate(message.id, newContent) : undefined}
               />
             );
           }
@@ -58,8 +65,8 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
               <div key={message.id} className="space-y-4">
                 <ToolCallMessage
                   message={message}
-                  onUpdateMessage={onUpdateMessage}
-                  onDeleteMessage={onDeleteMessage}
+                  onToolAction={(action: 'run' | 'cancel') => onUpdateMessage(message.id, action)}
+                  onDelete={() => onDeleteMessage(message.id)}
                 />
                 {message.serverDiscoveryCards && message.serverDiscoveryCards.length > 0 && onConfigureServer && (
                   <ServerDiscoveryMessage
@@ -76,8 +83,10 @@ export const MessageThread: React.FC<MessageThreadProps> = ({
               <AIMessage
                 message={message}
                 isStreaming={streamingMessageId === message.id}
-                onDeleteMessage={onDeleteMessage}
-                onEditMessage={onEditMessage}
+                onDelete={() => onDeleteMessage(message.id)}
+                onEdit={onEditMessage ? (newContent: string) => onEditMessage(message.id, newContent) : undefined}
+                onRegenerate={onRegenerateMessage ? () => onRegenerateMessage(message.id) : undefined}
+                onRate={onRateMessage ? (rating: 'positive' | 'negative' | null) => onRateMessage(message.id, rating) : undefined}
               />
               {message.serverDiscoveryCards && message.serverDiscoveryCards.length > 0 && onConfigureServer && (
                 <ServerDiscoveryMessage

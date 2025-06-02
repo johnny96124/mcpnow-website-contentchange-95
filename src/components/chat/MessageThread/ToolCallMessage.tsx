@@ -17,7 +17,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface ToolCallMessageProps {
   message: Message;
-  onToolAction: (messageId: string, action: 'run' | 'cancel') => void;
+  onToolAction: (action: 'run' | 'cancel') => void;
   onDelete?: () => void;
 }
 
@@ -128,7 +128,7 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onToolAction(message.id, 'cancel')}
+                    onClick={() => onToolAction('cancel')}
                     className="text-gray-600 hover:text-gray-800 text-xs px-2 py-1 h-7"
                   >
                     <X className="h-3 w-3 mr-1" />
@@ -136,7 +136,7 @@ export const ToolCallMessage: React.FC<ToolCallMessageProps> = ({
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => onToolAction(message.id, 'run')}
+                    onClick={() => onToolAction('run')}
                     className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 h-7"
                   >
                     <Play className="h-3 w-3 mr-1" />
