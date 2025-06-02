@@ -1,8 +1,10 @@
+
 import React, { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+
 interface CollapsibleHostsLayoutProps {
   hostsList: React.ReactNode;
   hostsListCollapsed: React.ReactNode;
@@ -11,6 +13,7 @@ interface CollapsibleHostsLayoutProps {
   isChatOpen: boolean;
   onToggleChat: () => void;
 }
+
 export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
   hostsList,
   hostsListCollapsed,
@@ -28,6 +31,7 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
     }
     return isChatOpen ? 20 : 25; // 展开时的默认宽度
   };
+
   const getMiddlePanelSize = () => {
     if (isHostsListCollapsed) {
       return isChatOpen ? 69 : 92; // 收起时中间面板的宽度
@@ -39,21 +43,49 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
   const handleLeftPanelResize = useCallback((size: number) => {
     // 设定展开阈值为15%
     const expandThreshold = 15;
-
+    
     // 如果当前是收起状态，且拖拽宽度超过阈值，则自动展开
     if (isHostsListCollapsed && size > expandThreshold) {
       setIsHostsListCollapsed(false);
     }
   }, [isHostsListCollapsed]);
-  return <div className="h-full flex">
+
+  return (
+    <div className="h-full flex">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Left Panel - Hosts List */}
-        <ResizablePanel defaultSize={getLeftPanelSize()} minSize={isHostsListCollapsed ? 6 : 15} maxSize={isHostsListCollapsed ? 8 : 40} onResize={handleLeftPanelResize} className={cn("transition-all duration-300 ease-in-out", isHostsListCollapsed && "min-w-16 max-w-20")}>
+        <ResizablePanel 
+          defaultSize={getLeftPanelSize()}
+          minSize={isHostsListCollapsed ? 6 : 15}
+          maxSize={isHostsListCollapsed ? 8 : 40}
+          onResize={handleLeftPanelResize}
+          className={cn(
+            "transition-all duration-300 ease-in-out",
+            isHostsListCollapsed && "min-w-16 max-w-20"
+          )}
+        >
           <div className="h-full border-r bg-card relative">
-            <div className={cn("p-4 border-b flex items-center transition-all duration-300", isHostsListCollapsed ? "justify-center p-2" : "justify-between")}>
-              {!isHostsListCollapsed && <h3 className="font-semibold text-sm">Hosts</h3>}
-              <Button variant="ghost" size="sm" onClick={() => setIsHostsListCollapsed(!isHostsListCollapsed)} className={cn("h-8 w-8 p-0 transition-all duration-200", isHostsListCollapsed && "hover:bg-muted")}>
-                {isHostsListCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            <div className={cn(
+              "p-4 border-b flex items-center transition-all duration-300",
+              isHostsListCollapsed ? "justify-center p-2" : "justify-between"
+            )}>
+              {!isHostsListCollapsed && (
+                <h3 className="font-semibold text-sm">Hosts</h3>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsHostsListCollapsed(!isHostsListCollapsed)}
+                className={cn(
+                  "h-8 w-8 p-0 transition-all duration-200",
+                  isHostsListCollapsed && "hover:bg-muted"
+                )}
+              >
+                {isHostsListCollapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <div className="overflow-hidden">
@@ -65,24 +97,43 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
         <ResizableHandle withHandle />
 
         {/* Middle Panel - Host Details */}
-        <ResizablePanel defaultSize={getMiddlePanelSize()} minSize={30}>
+        <ResizablePanel 
+          defaultSize={getMiddlePanelSize()} 
+          minSize={30}
+        >
           <div className="h-full bg-background">
             {hostDetails}
           </div>
         </ResizablePanel>
 
         {/* Right Panel - AI Chat */}
-        {isChatOpen && <>
+        {isChatOpen && (
+          <>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={25} minSize={20} maxSize={50}>
               <div className="h-full border-l bg-card">
-                
+                <div className="p-4 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    <h3 className="font-semibold text-sm">AI Chat</h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onToggleChat}
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="h-[calc(100%-4rem)]">
                   {chatPanel}
                 </div>
               </div>
             </ResizablePanel>
-          </>}
+          </>
+        )}
       </ResizablePanelGroup>
-    </div>;
+    </div>
+  );
 };
