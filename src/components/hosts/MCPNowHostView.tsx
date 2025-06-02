@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   MessageSquare, Bot, Server, 
@@ -19,7 +18,7 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { ServerListEmpty } from "./ServerListEmpty";
 import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
-import { InlineChatDialog } from "./InlineChatDialog";
+import { CollapsibleServerManagement } from "./CollapsibleServerManagement";
 import { Separator } from "@/components/ui/separator";
 import { 
   DropdownMenu, 
@@ -57,13 +56,9 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   onAddServersToProfile
 }) => {
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
-  const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
-  const profileServers = serverInstances.filter(
-    server => currentProfile?.instances.includes(server.id)
-  );
 
   const handleServerStatusChange = (serverId: string, enabled: boolean) => {
     onServerStatusChange(
@@ -115,12 +110,8 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
     return Math.floor(Math.random() * 90) + 10;
   };
 
-  const handleStartAIChat = () => {
-    setChatDialogOpen(true);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Host Header */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
         <CardContent className="p-6">
@@ -141,92 +132,35 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Button onClick={handleStartAIChat} className="bg-blue-600 hover:bg-blue-700">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Start AI Chat
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Profile Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" />
-            Server Profile Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <ProfileDropdown 
-                profiles={profiles} 
-                currentProfileId={selectedProfileId} 
-                onProfileChange={onProfileChange}
-                onCreateProfile={onCreateProfile}
-                onDeleteProfile={onDeleteProfile}
-              />
-            </div>
-            {profileServers.length > 0 && (
-              <Button 
-                onClick={() => setServerSelectionDialogOpen(true)} 
-                className="whitespace-nowrap"
-              >
-                <Server className="h-4 w-4 mr-2" />
-                Add Servers
-              </Button>
-            )}
-          </div>
-          
-          {profileServers.length > 0 ? (
-            <div className="rounded-md border">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Server</th>
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Type</th>
-                    <th className="h-10 px-4 text-left text-sm font-medium text-muted-foreground">Status</th>
-                    <th className="h-10 px-4 text-center text-sm font-medium text-muted-foreground">Active</th>
-                    <th className="h-10 px-4 text-right text-sm font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {profileServers.map(server => (
-                    <ServerItem 
-                      key={server.id}
-                      server={server}
-                      hostConnectionStatus="connected"
-                      onStatusChange={handleServerStatusChange}
-                      load={getServerLoad(server.id)}
-                      onRemoveFromProfile={(serverId) => {
-                        toast({
-                          title: "Server removed",
-                          description: `${server.name} has been removed from this profile`,
-                        });
-                      }}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <ServerListEmpty onAddServers={() => setServerSelectionDialogOpen(true)} />
-          )}
-        </CardContent>
-      </Card>
+      {/* Collapsible Server Management */}
+      <CollapsibleServerManagement
+        profiles={profiles}
+        serverInstances={serverInstances}
+        selectedProfileId={selectedProfileId}
+        onProfileChange={onProfileChange}
+        onCreateProfile={onCreateProfile}
+        onDeleteProfile={onDeleteProfile}
+        onServerStatusChange={handleServerStatusChange}
+        onAddServers={() => setServerSelectionDialogOpen(true)}
+        onRemoveFromProfile={(serverId) => {
+          const server = serverInstances.find(s => s.id === serverId);
+          toast({
+            title: "Server removed",
+            description: `${server?.name} has been removed from this profile`,
+          });
+        }}
+        getServerLoad={getServerLoad}
+        hostConnectionStatus="connected"
+      />
       
       <ServerSelectionDialog 
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
         onAddServers={handleAddServers}
-      />
-
-      <InlineChatDialog 
-        open={chatDialogOpen} 
-        onOpenChange={setChatDialogOpen}
       />
     </div>
   );

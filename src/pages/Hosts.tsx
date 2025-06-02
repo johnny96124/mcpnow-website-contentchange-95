@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Info, X } from "lucide-react";
+import { Plus, Info, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -12,7 +12,8 @@ import { serverInstances as initialServerInstances, profiles as initialProfiles 
 import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
-import { HostsChatInterface } from "@/components/hosts/HostsChatInterface";
+import { CollapsibleHostsLayout } from "@/components/hosts/CollapsibleHostsLayout";
+import { InlineChatPanel } from "@/components/hosts/InlineChatPanel";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -265,27 +266,19 @@ const Hosts = () => {
     setIsChatOpen(true);
   };
 
-  const handleCloseChatInterface = () => {
-    setIsChatOpen(false);
+  const handleToggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   const handleCompleteOnboarding = () => {
     setHasSeenOnboarding(true);
   };
 
-  // Updated this function to be used when clicking the "Add your First Host" button
   const handleOpenAddHostDialog = () => {
     setUnifiedHostDialogOpen(true);
   };
 
-  // Show chat interface as overlay if open
-  if (isChatOpen) {
-    return (
-      <HostsChatInterface onClose={handleCloseChatInterface} />
-    );
-  }
-
-  // Render appropriate content based on state
+  // Show appropriate content based on state
   if (!hasSeenOnboarding) {
     return (
       <Welcome 
@@ -302,22 +295,26 @@ const Hosts = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
-      <div className="flex items-center justify-between">
+    <div className="h-screen flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 border-b">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
+        <Button onClick={handleToggleChat} variant={isChatOpen ? "default" : "outline"}>
+          <MessageSquare className="h-4 w-4 mr-2" />
+          {isChatOpen ? "Hide Chat" : "Start AI Chat"}
+        </Button>
       </div>
-      
-      {/* Removed search input section */}
-      
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="space-y-4">
-          {filteredHosts.length > 0 ? (
-            <div className="space-y-2">
+
+      {/* Main Content with Collapsible Layout */}
+      <div className="flex-1 min-h-0">
+        <CollapsibleHostsLayout
+          hostsList={
+            <div className="p-4 space-y-2">
               {filteredHosts.map(host => (
                 <Card 
                   key={host.id}
@@ -348,57 +345,48 @@ const Hosts = () => {
                   </CardContent>
                 </Card>
               ))}
+              
+              <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
+                <CardContent className="p-4 text-center space-y-2">
+                  <Plus className="h-6 w-6 mx-auto text-muted-foreground" />
+                  <p className="text-xs font-medium">Add New Host</p>
+                </CardContent>
+              </Card>
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-8 text-center border-2 border-dashed rounded-lg mb-6">
-              <Info className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-1">No hosts found</h3>
-              <p className="text-muted-foreground mb-4">
-                No hosts were found in your system
-              </p>
-              <Button variant="outline" onClick={handleOpenAddHostDialog}>
-                Add Host
-              </Button>
-            </div>
-          )}
-          
-          <Card className="border-2 border-dashed bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUnifiedHostDialogOpen(true)}>
-            <CardContent className="p-4 text-center space-y-2">
-              <Plus className="h-6 w-6 mx-auto text-muted-foreground" />
-              <p className="text-xs font-medium">Add New Host</p>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="md:col-span-3">
-          {selectedHost ? (
-            <HostDetailView 
-              host={selectedHost}
-              profiles={profilesList}
-              serverInstances={serverInstances}
-              selectedProfileId={selectedProfileId}
-              onCreateConfig={handleCreateConfigDialog}
-              onProfileChange={handleProfileChange}
-              onAddServersToHost={handleAddServersToHost}
-              onDeleteHost={handleDeleteHost}
-              onServerStatusChange={handleServerStatusChange}
-              onSaveProfileChanges={handleSaveProfileChanges}
-              onCreateProfile={handleCreateProfile}
-              onDeleteProfile={handleDeleteProfile}
-              onAddServersToProfile={handleAddServersToProfile}
-              onStartAIChat={handleStartAIChat}
-            />
-          ) : (
-            <div className="border border-dashed rounded-md p-8 text-center space-y-3">
-              <Info className="h-8 w-8 mx-auto text-muted-foreground" />
-              <h3 className="text-base font-medium">No Host Selected</h3>
-              <p className="text-sm text-muted-foreground">
-                Select a host from the list or add a new host to get started
-              </p>
-              <Button onClick={() => setUnifiedHostDialogOpen(true)}>Add Host</Button>
-            </div>
-          )}
-        </div>
+          }
+          hostDetails={
+            selectedHost ? (
+              <HostDetailView 
+                host={selectedHost}
+                profiles={profilesList}
+                serverInstances={serverInstances}
+                selectedProfileId={selectedProfileId}
+                onCreateConfig={handleCreateConfigDialog}
+                onProfileChange={handleProfileChange}
+                onAddServersToHost={handleAddServersToHost}
+                onDeleteHost={handleDeleteHost}
+                onServerStatusChange={handleServerStatusChange}
+                onSaveProfileChanges={handleSaveProfileChanges}
+                onCreateProfile={handleCreateProfile}
+                onDeleteProfile={handleDeleteProfile}
+                onAddServersToProfile={handleAddServersToProfile}
+                onStartAIChat={handleStartAIChat}
+              />
+            ) : (
+              <div className="border border-dashed rounded-md p-8 text-center space-y-3">
+                <Info className="h-8 w-8 mx-auto text-muted-foreground" />
+                <h3 className="text-base font-medium">No Host Selected</h3>
+                <p className="text-sm text-muted-foreground">
+                  Select a host from the list or add a new host to get started
+                </p>
+                <Button onClick={() => setUnifiedHostDialogOpen(true)}>Add Host</Button>
+              </div>
+            )
+          }
+          chatPanel={<InlineChatPanel />}
+          isChatOpen={isChatOpen}
+          onToggleChat={handleToggleChat}
+        />
       </div>
       
       <UnifiedHostDialog 
