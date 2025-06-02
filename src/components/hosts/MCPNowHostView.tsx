@@ -73,9 +73,9 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   useEffect(() => {
     if (isChatOpen) {
       if (isServerManagementCollapsed) {
-        // When collapsed, give more space to chat
-        setServerPanelSize(15);
-        setChatPanelSize(85);
+        // When collapsed, minimize server panel and maximize chat
+        setServerPanelSize(8);
+        setChatPanelSize(92);
       } else {
         // When expanded, restore balanced layout
         setServerPanelSize(40);
@@ -219,8 +219,8 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
             {/* Server Management Panel */}
             <ResizablePanel 
               defaultSize={serverPanelSize} 
-              minSize={isServerManagementCollapsed ? 8 : 25}
-              maxSize={isServerManagementCollapsed ? 20 : 75}
+              minSize={isServerManagementCollapsed ? 6 : 25}
+              maxSize={isServerManagementCollapsed ? 12 : 75}
               className="flex flex-col"
             >
               <div className="h-full">
