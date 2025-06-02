@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Send, Bot, History, Plus, ChevronRight } from 'lucide-react';
+import { Send, Bot, History, Plus, ChevronLeft } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -172,7 +172,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   return (
     <>
       <div className={`h-full flex flex-col ${className}`}>
-        {/* Optimized Header */}
+        {/* Single header with all controls */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-3">
             <Button
@@ -181,7 +181,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
               onClick={onToggleChat}
               className="p-1 h-auto hover:bg-muted"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <h3 className="font-semibold">AI对话</h3>
             {currentSession && (
