@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Info } from "lucide-react";
+import { Plus, Info, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hosts as initialHosts, type Host, type Profile, ServerInstance } from "@/data/mockData";
 import { ConfigFileDialog } from "@/components/hosts/ConfigFileDialog";
@@ -13,6 +13,7 @@ import { UnifiedHostDialog } from "@/components/hosts/UnifiedHostDialog";
 import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
 import { CollapsibleHostsLayout } from "@/components/hosts/CollapsibleHostsLayout";
+import { InlineChatPanel } from "@/components/hosts/InlineChatPanel";
 import { CollapsedHostsList } from "@/components/hosts/CollapsedHostsList";
 
 const mockJsonConfig = {
@@ -44,6 +45,7 @@ const Hosts = () => {
   const [selectedHostId, setSelectedHostId] = useState<string | null>(null);
   const [serverInstances, setServerInstances] = useState<ServerInstance[]>(initialServerInstances);
   const [profilesList, setProfilesList] = useState<Profile[]>(initialProfiles);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const {
     hostProfiles,
@@ -262,10 +264,11 @@ const Hosts = () => {
   };
 
   const handleStartAIChat = () => {
-    toast({
-      title: "AI Chat Opened",
-      description: "You can now start chatting with AI using the connected MCP servers"
-    });
+    setIsChatOpen(true);
+  };
+
+  const handleToggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   const handleCompleteOnboarding = () => {
@@ -277,6 +280,7 @@ const Hosts = () => {
   };
 
   const handleStartAIChatFromHost = () => {
+    setIsChatOpen(true);
     toast({
       title: "AI Chat Opened",
       description: "You can now start chatting with AI using the connected MCP servers"
@@ -309,9 +313,13 @@ const Hosts = () => {
             Manage your hosts, profiles, and servers to efficiently configure your MCP environment
           </p>
         </div>
+        <Button onClick={handleToggleChat} variant={isChatOpen ? "default" : "outline"}>
+          <MessageSquare className="h-4 w-4 mr-2" />
+          {isChatOpen ? "Hide Chat" : "Start AI Chat"}
+        </Button>
       </div>
 
-      {/* Main Content with Collapsible Layout - Chat functionality removed */}
+      {/* Main Content with Collapsible Layout */}
       <div className="flex-1 min-h-0">
         <CollapsibleHostsLayout
           hostsList={
@@ -391,9 +399,9 @@ const Hosts = () => {
               </div>
             )
           }
-          chatPanel={null}
-          isChatOpen={false}
-          onToggleChat={() => {}}
+          chatPanel={<InlineChatPanel />}
+          isChatOpen={isChatOpen}
+          onToggleChat={handleToggleChat}
         />
       </div>
       
