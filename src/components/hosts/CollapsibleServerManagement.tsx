@@ -8,7 +8,7 @@ import { ProfileDropdown } from './ProfileDropdown';
 import { ServerListEmpty } from './ServerListEmpty';
 import { ServerItem } from './ServerItem';
 import { cn } from '@/lib/utils';
-import { Profile, ServerInstance } from '@/data/mockData';
+import { Profile, ServerInstance, ConnectionStatus } from '@/data/mockData';
 
 interface CollapsibleServerManagementProps {
   profiles: Profile[];
@@ -21,7 +21,7 @@ interface CollapsibleServerManagementProps {
   onAddServers: () => void;
   onRemoveFromProfile: (serverId: string) => void;
   getServerLoad: (serverId: string) => number;
-  hostConnectionStatus: string;
+  hostConnectionStatus: ConnectionStatus;
 }
 
 export const CollapsibleServerManagement: React.FC<CollapsibleServerManagementProps> = ({
