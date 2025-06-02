@@ -44,11 +44,8 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
     // 设定展开阈值为15%
     const expandThreshold = 15;
     
-    console.log('Panel resize:', size, 'isCollapsed:', isHostsListCollapsed);
-    
     // 如果当前是收起状态，且拖拽宽度超过阈值，则自动展开
     if (isHostsListCollapsed && size > expandThreshold) {
-      console.log('Auto expanding due to resize');
       setIsHostsListCollapsed(false);
     }
   }, [isHostsListCollapsed]);
@@ -60,17 +57,14 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
         <ResizablePanel 
           defaultSize={getLeftPanelSize()}
           minSize={isHostsListCollapsed ? 6 : 15}
-          maxSize={isHostsListCollapsed ? 50 : 40} // 允许拖拽展开，但保持视觉宽度限制
+          maxSize={isHostsListCollapsed ? 8 : 40}
           onResize={handleLeftPanelResize}
           className={cn(
             "transition-all duration-300 ease-in-out",
-            isHostsListCollapsed && "min-w-16"
+            isHostsListCollapsed && "min-w-16 max-w-20"
           )}
         >
-          <div className={cn(
-            "h-full border-r bg-card relative",
-            isHostsListCollapsed && "max-w-16" // 保持收起时的视觉宽度限制
-          )}>
+          <div className="h-full border-r bg-card relative">
             <div className={cn(
               "p-4 border-b flex items-center transition-all duration-300",
               isHostsListCollapsed ? "justify-center p-2" : "justify-between"
