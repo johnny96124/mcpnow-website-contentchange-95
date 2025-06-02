@@ -31,6 +31,7 @@ import { ModelSelector } from "@/components/chat/InputArea/ModelSelector";
 import { ServerSelector } from "@/components/chat/ServerSelector/ServerSelector";
 import { MCPServer, MCPProfile } from "@/components/chat/types/chat";
 import { InlineChatPanel } from "./InlineChatPanel";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface MCPNowHostViewProps {
   host: Host;
@@ -131,9 +132,9 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="h-full flex flex-col p-6">
       {/* Host Header with AI Chat Button */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800 mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -167,53 +168,89 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
         </CardContent>
       </Card>
 
-      {/* Collapsible Server Management */}
-      <CollapsibleServerManagement
-        profiles={profiles}
-        serverInstances={serverInstances}
-        selectedProfileId={selectedProfileId}
-        onProfileChange={onProfileChange}
-        onCreateProfile={onCreateProfile}
-        onDeleteProfile={onDeleteProfile}
-        onServerStatusChange={handleServerStatusChange}
-        onAddServers={() => setServerSelectionDialogOpen(true)}
-        onRemoveFromProfile={(serverId) => {
-          const server = serverInstances.find(s => s.id === serverId);
-          toast({
-            title: "Server removed",
-            description: `${server?.name} has been removed from this profile`,
-          });
-        }}
-        getServerLoad={getServerLoad}
-        hostConnectionStatus="connected"
-      />
-
-      {/* AI Chat Panel - Inline Display */}
-      {isChatOpen && (
-        <Card className="border-blue-200 dark:border-blue-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
-                AI Chat
+      {/* Resizable Content Area */}
+      <div className="flex-1 min-h-0">
+        {isChatOpen ? (
+          <ResizablePanelGroup direction="vertical" className="h-full">
+            {/* Server Management Panel */}
+            <ResizablePanel defaultSize={40} minSize={25}>
+              <div className="h-full overflow-auto">
+                <CollapsibleServerManagement
+                  profiles={profiles}
+                  serverInstances={serverInstances}
+                  selectedProfileId={selectedProfileId}
+                  onProfileChange={onProfileChange}
+                  onCreateProfile={onCreateProfile}
+                  onDeleteProfile={onDeleteProfile}
+                  onServerStatusChange={handleServerStatusChange}
+                  onAddServers={() => setServerSelectionDialogOpen(true)}
+                  onRemoveFromProfile={(serverId) => {
+                    const server = serverInstances.find(s => s.id === serverId);
+                    toast({
+                      title: "Server removed",
+                      description: `${server?.name} has been removed from this profile`,
+                    });
+                  }}
+                  getServerLoad={getServerLoad}
+                  hostConnectionStatus="connected"
+                />
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleToggleChat}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                收起
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="h-96 border-t">
-              <InlineChatPanel />
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            {/* AI Chat Panel */}
+            <ResizablePanel defaultSize={60} minSize={35}>
+              <Card className="h-full border-blue-200 dark:border-blue-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                      AI Chat
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleToggleChat}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      收起
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 h-[calc(100%-5rem)]">
+                  <div className="h-full border-t">
+                    <InlineChatPanel className="h-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        ) : (
+          /* Server Management Only */
+          <div className="h-full overflow-auto">
+            <CollapsibleServerManagement
+              profiles={profiles}
+              serverInstances={serverInstances}
+              selectedProfileId={selectedProfileId}
+              onProfileChange={onProfileChange}
+              onCreateProfile={onCreateProfile}
+              onDeleteProfile={onDeleteProfile}
+              onServerStatusChange={handleServerStatusChange}
+              onAddServers={() => setServerSelectionDialogOpen(true)}
+              onRemoveFromProfile={(serverId) => {
+                const server = serverInstances.find(s => s.id === serverId);
+                toast({
+                  title: "Server removed",
+                  description: `${server?.name} has been removed from this profile`,
+                });
+              }}
+              getServerLoad={getServerLoad}
+              hostConnectionStatus="connected"
+            />
+          </div>
+        )}
+      </div>
       
       <ServerSelectionDialog 
         open={serverSelectionDialogOpen} 
