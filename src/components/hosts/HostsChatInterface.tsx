@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
-import { Message, MessageAttachment } from '@/components/chat/types/chat';
+import { Message, MessageAttachment, PendingToolCall } from '@/components/chat/types/chat';
 
 interface AttachedFile {
   id: string;
@@ -35,8 +36,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
   } = useChatHistory();
   const { 
     streamingMessageId, 
-    generateAIResponseWithInlineTools,
-    handleToolsCompletion
   } = useStreamingChat();
   const { toast } = useToast();
   
@@ -98,14 +97,38 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     addMessage(sessionId, userMessage);
 
     try {
-      // 使用新的分阶段流式生成
-      await generateAIResponseWithInlineTools(
-        content,
-        selectedServers,
-        sessionId,
-        addMessage,
-        updateMessage
+      const aiMessageId = `msg-${Date.now()}-ai`;
+      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+
+      const aiMessage: Message = {
+        id: aiMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: Date.now()
+      };
+
+      setCurrentMessages(prev => [...prev, aiMessage]);
+      addMessage(sessionId, aiMessage);
+
+      await simulateStreamingText(sessionId, aiMessageId, fullContent);
+      
+      const toolCalls = generateSequentialToolCalls(content, selectedServers);
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls: toolCalls,
+        toolCallStatus: 'pending',
+        currentToolIndex: 0
+      };
+
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
       );
+      
+      if (currentSession) {
+        updateMessage(sessionId, aiMessageId, messageWithTools);
+      }
+
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -119,6 +142,80 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     } finally {
       setIsSending(false);
     }
+  };
+
+  const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
+    let currentIndex = 0;
+    const words = fullContent.split('');
+    
+    return new Promise<void>((resolve) => {
+      const streamInterval = setInterval(() => {
+        if (currentIndex < words.length) {
+          const partialContent = words.slice(0, currentIndex + 1).join('');
+          
+          setCurrentMessages(prev => 
+            prev.map(msg => 
+              msg.id === messageId ? { ...msg, content: partialContent } : msg
+            )
+          );
+          
+          if (currentSession) {
+            updateMessage(sessionId, messageId, { content: partialContent });
+          }
+          
+          currentIndex++;
+        } else {
+          clearInterval(streamInterval);
+          resolve();
+        }
+      }, 25);
+    });
+  };
+
+  const generateSequentialToolCalls = (userMessage: string, selectedServers: string[]): PendingToolCall[] => {
+    const tools = [
+      {
+        id: `tool-${Date.now()}-1`,
+        toolName: 'search_documents',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          query: userMessage.substring(0, 50),
+          filters: { type: 'relevant' }
+        },
+        status: 'pending' as const,
+        order: 0,
+        visible: true
+      },
+      {
+        id: `tool-${Date.now()}-2`,
+        toolName: 'analyze_content',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          content: userMessage,
+          analysis_type: 'comprehensive'
+        },
+        status: 'pending' as const,
+        order: 1,
+        visible: false
+      },
+      {
+        id: `tool-${Date.now()}-3`,
+        toolName: 'generate_summary',
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: { 
+          source: 'user_query',
+          context: userMessage
+        },
+        status: 'pending' as const,
+        order: 2,
+        visible: false
+      }
+    ];
+
+    return tools;
   };
 
   const handleToolAction = (messageId: string, action: 'run' | 'cancel', toolId?: string) => {
@@ -142,7 +239,8 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
 
       updateMessageInline({ 
         pendingToolCalls: updatedToolCalls,
-        toolCallStatus: 'cancelled'
+        toolCallStatus: 'cancelled',
+        content: message.content + '\n\n工具调用已被取消。如果您还有其他问题，请随时告诉我。'
       });
     } else if (action === 'run' && toolId) {
       const toolIndex = message.pendingToolCalls.findIndex(tool => tool.id === toolId);
@@ -188,13 +286,11 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
           updateMessageInline({ 
             pendingToolCalls: completedToolCalls,
             toolCallStatus: allCompleted ? 'completed' : 'pending',
-            currentToolIndex: allCompleted ? undefined : toolIndex + 1
+            currentToolIndex: allCompleted ? undefined : toolIndex + 1,
+            content: allCompleted ? 
+              message.content + '\n\n工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答。' :
+              message.content
           });
-
-          // 如果所有工具都完成了，开始第二阶段流式输出
-          if (allCompleted && currentSession) {
-            handleToolsCompletion(currentSession.id, messageId, updateMessage);
-          }
         }
       }, 2000);
     }

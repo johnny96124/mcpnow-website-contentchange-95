@@ -1,15 +1,9 @@
 
 import { useState, useCallback } from 'react';
 import { Message, ToolInvocation, PendingToolCall } from '../types/chat';
-import { useStreamingPhases } from './useStreamingPhases';
 
 export const useStreamingChat = () => {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
-  const {
-    activeStreamingMessageId,
-    startPreToolsStreaming,
-    handleToolsCompletion
-  } = useStreamingPhases();
 
   const simulateToolInvocation = useCallback(async (
     toolName: string, 
@@ -28,15 +22,18 @@ export const useStreamingChat = () => {
       timestamp: Date.now()
     };
 
-    const delay = Math.random() * 1000 + 500;
+    // 模拟工具调用延迟
+    const delay = Math.random() * 1000 + 500; // 500-1500ms
     await new Promise(resolve => setTimeout(resolve, delay));
 
-    const success = Math.random() > 0.1;
+    // 模拟成功或失败
+    const success = Math.random() > 0.1; // 90% 成功率
 
     if (success) {
       invocation.status = 'success';
       invocation.duration = Math.round(delay);
       
+      // 根据工具类型生成模拟响应
       switch (toolName) {
         case 'get_figma_data':
           invocation.response = {
@@ -112,15 +109,8 @@ export const useStreamingChat = () => {
       });
     }
 
-    const messageId = `msg-${Date.now()}-ai`;
-    setStreamingMessageId(messageId);
-
+    // 如果需要工具调用，先添加工具调用消息
     if (toolsToUse.length > 0) {
-      // 准备分阶段内容
-      const preToolContent = `我理解您的请求"${userMessage}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
-      const postToolContent = '工具调用执行完成！基于获取到的信息，我现在可以为您提供详细的回答。根据工具调用的结果，我可以看到该节点是一个设计组件，包含了宽度375px、高度812px的白色背景框架。这些信息可以帮助您进行前端界面开发。';
-
-      // 准备工具调用
       const pendingCalls: PendingToolCall[] = toolsToUse.map((tool, index) => ({
         id: `tool-${Date.now()}-${index}`,
         toolName: tool.name,
@@ -132,22 +122,25 @@ export const useStreamingChat = () => {
         visible: index === 0 // 只有第一个工具可见
       }));
 
-      // 开始分阶段流式输出
-      startPreToolsStreaming(
-        sessionId,
-        messageId,
-        addMessage,
-        updateMessage,
-        preToolContent,
-        postToolContent,
-        pendingCalls,
-        () => {
-          // 第一阶段完成后的回调 - 这里可以处理工具调用的初始化
-          console.log('Pre-tools streaming completed, tools are now visible');
-        }
-      );
+      const toolCallMessage: Message = {
+        id: `msg-${Date.now()}-tool`,
+        role: 'tool_call',
+        content: `好的，我将使用 MCP 工具来获取您提供的 Figma 链接中指定节点（node-id=${pendingCalls[0]?.request?.nodeId}）的数据。`,
+        timestamp: Date.now(),
+        pendingToolCalls: pendingCalls,
+        toolCallStatus: 'pending'
+      };
+
+      addMessage(sessionId, toolCallMessage);
+      
+      // 监听工具调用状态变化，当状态变为 completed 时，添加 AI 回复
+      // 这里我们模拟一个简单的延迟来等待用户操作
+      // 在实际实现中，你需要监听 updateMessage 的调用
     } else {
       // 没有工具调用，直接生成普通AI回复
+      const messageId = `msg-${Date.now()}`;
+      setStreamingMessageId(messageId);
+
       const aiMessage: Message = {
         id: messageId,
         role: 'assistant',
@@ -155,16 +148,16 @@ export const useStreamingChat = () => {
         timestamp: Date.now()
       };
 
+      // 模拟流式响应延迟
       setTimeout(() => {
         addMessage(sessionId, aiMessage);
         setStreamingMessageId(null);
       }, 1000);
     }
-  }, [startPreToolsStreaming]);
+  }, [simulateToolInvocation]);
 
   return {
-    streamingMessageId: activeStreamingMessageId || streamingMessageId,
-    generateAIResponseWithInlineTools,
-    handleToolsCompletion
+    streamingMessageId,
+    generateAIResponseWithInlineTools
   };
 };

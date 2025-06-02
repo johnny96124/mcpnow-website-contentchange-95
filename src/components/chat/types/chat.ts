@@ -57,14 +57,7 @@ export interface Message {
   attachments?: MessageAttachment[];
   errorMessage?: string;
   currentToolIndex?: number; // 当前显示的工具索引
-  rating?: 'positive' | 'negative' | null; // 评分属性
-  
-  // 新增分阶段内容支持
-  contentPhases?: string[]; // 存储多个阶段的内容
-  currentPhase?: number; // 当前显示的阶段
-  toolCallsPhase?: number; // 工具调用在哪个阶段之后出现
-  streamingPhase?: 'pre-tools' | 'tools' | 'post-tools' | 'completed'; // 当前流式状态
-  isStreamingPhase?: boolean; // 是否正在流式显示某个阶段
+  rating?: 'positive' | 'negative' | null; // 新增评分属性
 }
 
 export interface ChatSession {
