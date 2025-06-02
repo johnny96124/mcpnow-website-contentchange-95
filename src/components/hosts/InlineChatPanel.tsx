@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Send, Bot, History, Plus, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -41,7 +42,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [historyPopoverOpen, setHistoryPopoverOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const connectedServers = getConnectedServers();
   const selectedServers = connectedServers.map(s => s.id);
@@ -169,7 +170,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
   const canSendMessage = selectedServers.length > 0 && !isSending;
 
   return (
-    <div className={`h-full flex flex-col ${className}`}>
+    <div className={`h-full flex flex-col relative ${className}`}>
       {/* Single header with all controls */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
@@ -190,21 +191,14 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
         </div>
         
         <div className="flex items-center gap-2">
-          <ChatHistoryPopover
-            open={historyPopoverOpen}
-            onOpenChange={setHistoryPopoverOpen}
-            sessions={chatSessions}
-            onSelectSession={handleSelectHistorySession}
-            trigger={
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-              >
-                <History className="h-4 w-4" />
-              </Button>
-            }
-          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => setHistoryOpen(true)}
+          >
+            <History className="h-4 w-4" />
+          </Button>
           
           <Button
             variant="default"
@@ -257,6 +251,14 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           servers={[]}
         />
       </div>
+
+      {/* History Popover */}
+      <ChatHistoryPopover
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        sessions={chatSessions}
+        onSelectSession={handleSelectHistorySession}
+      />
     </div>
   );
 };
