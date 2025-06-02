@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Send, Bot, History, Plus } from 'lucide-react';
+import { Send, Bot, History, Plus, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,9 +21,10 @@ interface AttachedFile {
 
 interface InlineChatPanelProps {
   className?: string;
+  onToggleChat?: () => void;
 }
 
-export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) => {
+export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onToggleChat }) => {
   const { getConnectedServers } = useMCPServers();
   const { 
     chatSessions, 
@@ -171,9 +172,17 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
   return (
     <>
       <div className={`h-full flex flex-col ${className}`}>
-        {/* Header with actions */}
+        {/* Optimized Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleChat}
+              className="p-1 h-auto hover:bg-muted"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
             <h3 className="font-semibold">AI对话</h3>
             {currentSession && (
               <Badge variant="secondary" className="text-xs">
@@ -223,25 +232,15 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className }) =
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Bot className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="font-semibold mb-2">开始AI对话</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground">
                   发送消息开始与AI助手交流，支持MCP工具调用
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={handleNewChat}
-                  className="gap-2"
-                  disabled={selectedServers.length === 0}
-                >
-                  <Plus className="h-4 w-4" />
-                  开始新对话
-                </Button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Simplified Input Area */}
+        {/* Input Area */}
         <div className="border-t p-3">
           <MessageInput
             onSendMessage={handleSendMessage}

@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { ChatSession } from '@/components/chat/types/chat';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -39,14 +38,14 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[80vh]">
-        <DrawerHeader className="border-b">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+        <SheetHeader className="border-b pb-4">
           <div className="flex items-center justify-between">
-            <DrawerTitle className="flex items-center gap-2">
+            <SheetTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
               对话历史
-            </DrawerTitle>
+            </SheetTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -67,9 +66,9 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
               />
             </div>
           </div>
-        </DrawerHeader>
+        </SheetHeader>
 
-        <ScrollArea className="flex-1 p-4">
+        <ScrollArea className="flex-1 mt-4">
           {filteredSessions.length === 0 ? (
             <div className="text-center py-8">
               <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -78,7 +77,7 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 pr-4">
               {filteredSessions.map((session) => (
                 <div
                   key={session.id}
@@ -109,7 +108,7 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
             </div>
           )}
         </ScrollArea>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 };

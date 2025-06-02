@@ -399,7 +399,7 @@ const Hosts = () => {
               </div>
             )
           }
-          chatPanel={<InlineChatPanel />}
+          chatPanel={<InlineChatPanel onToggleChat={handleToggleChat} />}
           isChatOpen={isChatOpen}
           onToggleChat={handleToggleChat}
         />
