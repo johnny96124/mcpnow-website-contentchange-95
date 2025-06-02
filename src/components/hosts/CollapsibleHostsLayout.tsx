@@ -112,23 +112,7 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={25} minSize={20} maxSize={50}>
               <div className="h-full border-l bg-card">
-                <div className="p-4 border-b flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    <h3 className="font-semibold text-sm">AI Chat</h3>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onToggleChat}
-                    className="h-8 w-8 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="h-[calc(100%-4rem)]">
-                  {chatPanel}
-                </div>
+                {chatPanel}
               </div>
             </ResizablePanel>
           </>
