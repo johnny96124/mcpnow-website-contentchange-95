@@ -36,16 +36,16 @@ export const ChatHistoryPopover: React.FC<ChatHistoryPopoverProps> = ({
 
   return (
     <>
-      {/* Backdrop - covers the entire chat component area */}
+      {/* Backdrop - only covers the chat component area */}
       <div 
-        className="fixed inset-0 bg-black/20 z-50"
+        className="absolute inset-0 bg-black/20 z-50"
         onClick={() => onOpenChange(false)}
       />
       
-      {/* Sliding Panel from bottom covering everything including input */}
-      <div className="fixed inset-0 z-50 flex items-end justify-center animate-slide-up-from-bottom">
-        <Card className="w-full max-w-md mx-4 mb-0 max-h-[75vh] rounded-t-xl shadow-xl border-0 bg-white">
-          <div className="flex flex-col h-full max-h-[75vh]">
+      {/* Sliding Panel from bottom - positioned within chat component */}
+      <div className="absolute inset-x-0 bottom-0 top-0 z-50 flex items-end justify-center animate-slide-up-from-bottom">
+        <Card className="w-full max-w-md mx-4 mb-0 max-h-[90vh] rounded-t-xl shadow-xl border-0 bg-white">
+          <div className="flex flex-col h-full max-h-[90vh]">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-2">
