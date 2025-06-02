@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -359,9 +358,5 @@
   
   .table-consistent-text td {
     @apply text-sm;
-  }
-  
-  .table-consistent-text .font-medium {
-    @apply text-sm font-medium;
   }
 }
