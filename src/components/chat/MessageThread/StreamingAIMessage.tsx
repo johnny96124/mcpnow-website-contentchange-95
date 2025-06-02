@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Bot, Loader2, MoreVertical, Trash2, Play, X, ChevronDown, ChevronRight, Wrench, CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -83,7 +84,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
   const isFailed = message.toolCallStatus === 'failed';
   const isToolCallCompleted = message.toolCallStatus === 'completed';
   
-  // 修复布尔值问题并简化显示逻辑
+  // 简化显示逻辑
   const shouldShowServerRecommendations = !isStreaming && displayedContent && onConfigureServer && 
     (!hasToolCalls || isToolCallCompleted);
 
@@ -350,24 +351,13 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           </div>
         )}
 
-        {/* Server推荐区域 - 强制显示以便调试 */}
+        {/* Server推荐区域 */}
         {shouldShowServerRecommendations && (
-          <div>
-            <div className="text-sm text-gray-500 mb-2">
-              调试信息: 正在显示Server推荐
-            </div>
-            <ServerRecommendations
-              messageId={message.id}
-              onConfigureServer={onConfigureServer}
-            />
-          </div>
+          <ServerRecommendations
+            messageId={message.id}
+            onConfigureServer={onConfigureServer}
+          />
         )}
-
-        {/* 修复的调试信息显示 */}
-        <div className="text-xs text-gray-400 border p-2 rounded">
-          调试: hasToolCalls={String(hasToolCalls)}, isToolCallCompleted={String(isToolCallCompleted)}, 
-          shouldShow={String(shouldShowServerRecommendations)}
-        </div>
       </div>
     </div>
   );

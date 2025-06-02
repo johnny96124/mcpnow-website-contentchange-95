@@ -116,7 +116,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
       
-      // 随机决定是否显示工具调用（50%概率）
+      // 50%概率显示工具调用，50%概率显示服务器推荐
       const shouldShowToolCalls = Math.random() < 0.5;
       
       let fullContent: string;
@@ -371,6 +371,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   }
 
   const handleConfigureServer = (messageId: string, server: ServerRecommendation) => {
+    console.log('handleConfigureServer called:', { messageId, server });
     setConfigDialog({
       open: true,
       server,
