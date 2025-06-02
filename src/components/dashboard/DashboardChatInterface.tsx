@@ -116,8 +116,8 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
       
-      // 50%概率显示工具调用，50%概率显示服务器推荐
-      const shouldShowToolCalls = Math.random() < 0.5;
+      // 降低工具调用概率到20%，80%概率显示服务器推荐
+      const shouldShowToolCalls = Math.random() < 0.2;
       
       let fullContent: string;
       if (shouldShowToolCalls) {
@@ -140,7 +140,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
       if (shouldShowToolCalls) {
-        // 50%概率生成工具调用序列
+        // 20%概率生成工具调用序列
         const toolCalls = generateSequentialToolCalls(content, selectedServers);
         const messageWithTools: Partial<Message> = {
           pendingToolCalls: toolCalls,
