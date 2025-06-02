@@ -1,21 +1,35 @@
 
 import React from 'react';
+import { EndpointType } from '@/data/mockData';
 
 interface EndpointLabelProps {
-  type: 'HTTP' | 'STDIO' | 'OFFICIAL';
+  type: EndpointType;
 }
 
 export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type }) => {
+  const getDisplayType = (type: EndpointType) => {
+    switch (type) {
+      case 'HTTP_SSE':
+        return 'HTTP';
+      case 'STDIO':
+        return 'STDIO';
+      case 'WS':
+        return 'WS';
+      default:
+        return type;
+    }
+  };
+
   const getClassNames = () => {
-    const baseClasses = 'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium';
+    const baseClasses = 'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium';
     
     switch (type) {
-      case 'HTTP':
+      case 'HTTP_SSE':
         return `${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300`;
       case 'STDIO':
         return `${baseClasses} bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300`;
-      case 'OFFICIAL':
-        return `${baseClasses} bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300`;
+      case 'WS':
+        return `${baseClasses} bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300`;
     }
@@ -23,7 +37,7 @@ export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type }) => {
 
   return (
     <div className={getClassNames()}>
-      {type}
+      {getDisplayType(type)}
     </div>
   );
 };
