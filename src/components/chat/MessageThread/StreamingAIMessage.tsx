@@ -204,7 +204,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               {tool.status === 'executing' && (
                                 <Badge variant="outline" className="text-xs px-1 py-0 bg-yellow-100 text-yellow-700 flex-shrink-0">
                                   <Loader2 className="h-2 w-2 sm:h-3 sm:w-3 mr-1 animate-spin" />
-                                  <span className="hidden sm:inline">执行中</span>
+                                  执行中
                                 </Badge>
                               )}
                               
@@ -218,7 +218,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                               {tool.status === 'cancelled' && (
                                 <Badge variant="outline" className="text-xs px-1 py-0 bg-red-100 text-red-700 border-red-200 flex-shrink-0">
                                   <X className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
-                                  <span className="hidden sm:inline">已取消</span>
+                                  已取消
                                 </Badge>
                               )}
 
@@ -226,13 +226,6 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                 <Badge variant="outline" className="text-xs px-1 py-0 bg-red-100 text-red-700 border-red-200 flex-shrink-0">
                                   <AlertTriangle className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                                   失败
-                                </Badge>
-                              )}
-
-                              {tool.status === 'pending' && (
-                                <Badge variant="outline" className="text-xs px-1 py-0 bg-blue-100 text-blue-700 border-blue-200 flex-shrink-0">
-                                  <Clock className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
-                                  <span className="hidden sm:inline">待执行</span>
                                 </Badge>
                               )}
                             </div>
@@ -247,10 +240,9 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                       handleToolAction('cancel', tool.id);
                                     }}
                                     variant="outline"
-                                    className="text-gray-600 hover:text-gray-800 h-6 px-2 text-xs"
+                                    className="text-gray-600 hover:text-gray-800 h-6 w-6 p-0"
                                   >
-                                    <X className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
-                                    <span className="hidden sm:inline">跳过</span>
+                                    <X className="h-2 w-2 sm:h-3 sm:w-3" />
                                   </Button>
                                   <Button
                                     size="sm"
@@ -258,10 +250,9 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                       e.stopPropagation();
                                       handleToolAction('run', tool.id);
                                     }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2 text-xs"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white h-6 w-6 p-0"
                                   >
-                                    <Play className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
-                                    <span className="hidden sm:inline">执行</span>
+                                    <Play className="h-2 w-2 sm:h-3 sm:w-3" />
                                   </Button>
                                 </div>
                               )}
@@ -273,10 +264,9 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
                                     e.stopPropagation();
                                     handleToolAction('run', tool.id);
                                   }}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white h-6 px-2 text-xs"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white h-6 w-6 p-0"
                                 >
-                                  <Play className="h-2 w-2 sm:h-3 sm:w-3 sm:mr-1" />
-                                  <span className="hidden sm:inline">重试</span>
+                                  <Play className="h-2 w-2 sm:h-3 sm:w-3" />
                                 </Button>
                               )}
 
