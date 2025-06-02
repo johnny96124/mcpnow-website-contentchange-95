@@ -15,7 +15,7 @@ export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type, className })
         return 'STDIO';
       case 'HTTP_SSE':
         return 'SSE';
-      case 'WebSocket':
+      case 'WS':
         return 'WebSocket';
       default:
         return type;
@@ -28,7 +28,7 @@ export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type, className })
         return 'default';
       case 'HTTP_SSE':
         return 'secondary';
-      case 'WebSocket':
+      case 'WS':
         return 'outline';
       default:
         return 'outline';
