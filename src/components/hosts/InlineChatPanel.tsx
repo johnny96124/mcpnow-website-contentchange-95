@@ -152,6 +152,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           {
             id: `tool-${Date.now()}-1`,
             toolName: 'search_documents',
+            serverId: `server-${Math.floor(Math.random() * 9) + 1}`,
             serverName: `fastgpt-instance-${Math.floor(Math.random() * 9) + 1}`,
             request: { 
               query: content.substring(0, 50), 
@@ -164,6 +165,7 @@ export const InlineChatPanel: React.FC<InlineChatPanelProps> = ({ className, onT
           {
             id: `tool-${Date.now()}-2`,
             toolName: 'analyze_content',
+            serverId: `server-${Math.floor(Math.random() * 9) + 1}`,
             serverName: `fastgpt-instance-${Math.floor(Math.random() * 9) + 1}`,
             request: { 
               content, 
