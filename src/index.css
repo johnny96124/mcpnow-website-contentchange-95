@@ -282,7 +282,7 @@
 
     .mobile-table-responsive th,
     .mobile-table-responsive td {
-      @apply px-2 py-1 text-xs;
+      @apply px-2 py-1 text-sm;
     }
 
     .mobile-button-compact {
@@ -350,5 +350,18 @@
     .sm-mobile-compact-grid {
       @apply grid-cols-1;
     }
+  }
+
+  /* Table text consistency - match sidebar text size */
+  .table-consistent-text th {
+    @apply text-sm font-medium;
+  }
+  
+  .table-consistent-text td {
+    @apply text-sm;
+  }
+  
+  .table-consistent-text .font-medium {
+    @apply text-sm font-medium;
   }
 }
