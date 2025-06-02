@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { 
   MessageSquare, Bot, Server, 
   CheckCircle, Settings, MoreHorizontal,
@@ -64,9 +64,25 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [serverPanelSize, setServerPanelSize] = useState(40);
   const [chatPanelSize, setChatPanelSize] = useState(60);
+  const [isServerManagementCollapsed, setIsServerManagementCollapsed] = useState(false);
   const { toast } = useToast();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
+
+  // Adjust panel sizes when server management collapses/expands
+  useEffect(() => {
+    if (isChatOpen) {
+      if (isServerManagementCollapsed) {
+        // When collapsed, give more space to chat
+        setServerPanelSize(15);
+        setChatPanelSize(85);
+      } else {
+        // When expanded, restore balanced layout
+        setServerPanelSize(40);
+        setChatPanelSize(60);
+      }
+    }
+  }, [isServerManagementCollapsed, isChatOpen]);
 
   const handleServerStatusChange = (serverId: string, enabled: boolean) => {
     onServerStatusChange(
@@ -131,16 +147,22 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
 
   const handleRequestMoreSpace = useCallback(() => {
     // Give more space to server management when needed
-    const newServerSize = Math.min(70, serverPanelSize + 20);
-    const newChatSize = 100 - newServerSize;
-    setServerPanelSize(newServerSize);
-    setChatPanelSize(newChatSize);
-  }, [serverPanelSize]);
+    if (!isServerManagementCollapsed) {
+      const newServerSize = Math.min(70, serverPanelSize + 20);
+      const newChatSize = 100 - newServerSize;
+      setServerPanelSize(newServerSize);
+      setChatPanelSize(newChatSize);
+    }
+  }, [serverPanelSize, isServerManagementCollapsed]);
 
   const handlePanelResize = useCallback((sizes: number[]) => {
     const [newServerSize, newChatSize] = sizes;
     setServerPanelSize(newServerSize);
     setChatPanelSize(newChatSize);
+  }, []);
+
+  const handleServerManagementToggle = useCallback((isCollapsed: boolean) => {
+    setIsServerManagementCollapsed(isCollapsed);
   }, []);
 
   const getServerLoad = (serverId: string) => {
@@ -197,8 +219,8 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
             {/* Server Management Panel */}
             <ResizablePanel 
               defaultSize={serverPanelSize} 
-              minSize={25} 
-              maxSize={75}
+              minSize={isServerManagementCollapsed ? 8 : 25}
+              maxSize={isServerManagementCollapsed ? 20 : 75}
               className="flex flex-col"
             >
               <div className="h-full">
@@ -221,6 +243,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
                   getServerLoad={getServerLoad}
                   hostConnectionStatus="connected"
                   onRequestMoreSpace={handleRequestMoreSpace}
+                  onCollapseChange={handleServerManagementToggle}
                 />
               </div>
             </ResizablePanel>
@@ -279,6 +302,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
               }}
               getServerLoad={getServerLoad}
               hostConnectionStatus="connected"
+              onCollapseChange={handleServerManagementToggle}
             />
           </div>
         )}

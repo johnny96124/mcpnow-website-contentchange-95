@@ -23,6 +23,7 @@ interface CollapsibleServerManagementProps {
   getServerLoad: (serverId: string) => number;
   hostConnectionStatus: ConnectionStatus;
   onRequestMoreSpace?: () => void;
+  onCollapseChange?: (isCollapsed: boolean) => void;
 }
 
 export const CollapsibleServerManagement: React.FC<CollapsibleServerManagementProps> = ({
@@ -37,7 +38,8 @@ export const CollapsibleServerManagement: React.FC<CollapsibleServerManagementPr
   onRemoveFromProfile,
   getServerLoad,
   hostConnectionStatus,
-  onRequestMoreSpace
+  onRequestMoreSpace,
+  onCollapseChange
 }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [showAllServers, setShowAllServers] = useState(false);
@@ -51,6 +53,13 @@ export const CollapsibleServerManagement: React.FC<CollapsibleServerManagementPr
 
   const visibleServers = showAllServers ? profileServers : profileServers.slice(0, maxVisibleServers);
   const hasMoreServers = profileServers.length > maxVisibleServers && !showAllServers;
+
+  // Notify parent component when collapse state changes
+  useEffect(() => {
+    if (onCollapseChange) {
+      onCollapseChange(!isOpen);
+    }
+  }, [isOpen, onCollapseChange]);
 
   // Calculate max visible servers based on available height
   useEffect(() => {
