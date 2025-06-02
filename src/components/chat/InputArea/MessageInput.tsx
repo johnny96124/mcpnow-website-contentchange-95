@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Server, Paperclip, X } from 'lucide-react';
+import { Send, Server, Paperclip, X, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,9 @@ interface AttachedFile {
 
 interface MessageInputProps {
   onSendMessage: (content: string, attachments?: AttachedFile[]) => void;
+  onStopGeneration?: () => void;
   disabled: boolean;
+  isGenerating?: boolean;
   placeholder: string;
   selectedServers: string[];
   servers: MCPServer[];
@@ -23,7 +25,9 @@ interface MessageInputProps {
 
 export const MessageInput: React.FC<MessageInputProps> = ({
   onSendMessage,
+  onStopGeneration,
   disabled,
+  isGenerating = false,
   placeholder,
   selectedServers,
   servers,
@@ -35,8 +39,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
-    if ((content.trim() || attachedFiles.length > 0) && !disabled) {
-      // TODO: Include selectedModel in the message sending logic
+    if ((content.trim() || attachedFiles.length > 0) && !disabled && !isGenerating) {
       console.log('Sending message with model:', selectedModel);
       onSendMessage(content.trim(), attachedFiles);
       setContent('');
@@ -44,10 +47,20 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
+  const handleStop = () => {
+    if (onStopGeneration) {
+      onStopGeneration();
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      handleSubmit();
+      if (isGenerating) {
+        handleStop();
+      } else {
+        handleSubmit();
+      }
     }
   };
 
@@ -58,7 +71,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       const id = `file-${Date.now()}-${Math.random()}`;
       const attachedFile: AttachedFile = { id, file };
       
-      // Create preview for images
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -72,7 +84,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       setAttachedFiles(prev => [...prev, attachedFile]);
     });
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -178,7 +189,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={isGenerating ? "AI正在回复中..." : placeholder}
           disabled={disabled}
           className="min-h-[80px] max-h-[200px] resize-none pr-28"
           style={{ height: 'auto' }}
@@ -188,7 +199,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
           <ToolControlPopover
             servers={servers}
             selectedServers={selectedServers}
-            disabled={disabled}
+            disabled={disabled || isGenerating}
           />
           
           <Button
@@ -196,19 +207,31 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             size="icon"
             className="h-8 w-8"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
+            disabled={disabled || isGenerating}
           >
             <Paperclip className="h-4 w-4" />
           </Button>
           
-          <Button
-            onClick={handleSubmit}
-            disabled={disabled || (!content.trim() && attachedFiles.length === 0)}
-            size="icon"
-            className="h-8 w-8"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          {isGenerating ? (
+            <Button
+              onClick={handleStop}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+              title="停止生成"
+            >
+              <Square className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              disabled={disabled || (!content.trim() && attachedFiles.length === 0)}
+              size="icon"
+              className="h-8 w-8"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -227,6 +250,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <div>
           {disabled ? (
             <span>Select servers to start chatting</span>
+          ) : isGenerating ? (
+            <span>Press <kbd className="bg-muted px-1 rounded">Cmd+Enter</kbd> or click stop button to terminate</span>
           ) : (
             <span>Press <kbd className="bg-muted px-1 rounded">Cmd+Enter</kbd> to send</span>
           )}
