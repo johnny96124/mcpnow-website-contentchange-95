@@ -37,6 +37,15 @@ export interface PendingToolCall {
   visible: boolean; // 是否显示
 }
 
+export interface ServerDiscoveryCard {
+  id: string;
+  serverId: string;
+  serverName: string;
+  serverType: string;
+  description: string;
+  matchedKeywords: string[];
+}
+
 export interface MessageAttachment {
   id: string;
   name: string;
@@ -58,6 +67,7 @@ export interface Message {
   errorMessage?: string;
   currentToolIndex?: number; // 当前显示的工具索引
   rating?: 'positive' | 'negative' | null; // 新增评分属性
+  serverDiscoveryCards?: ServerDiscoveryCard[]; // 新增服务器发现卡片
 }
 
 export interface ChatSession {

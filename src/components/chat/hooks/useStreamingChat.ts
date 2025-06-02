@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
-import { Message, ToolInvocation, PendingToolCall } from '../types/chat';
+import { Message, ToolInvocation, PendingToolCall, ServerDiscoveryCard } from '../types/chat';
+import { findRelevantServers, shouldShowServerDiscovery } from '../ServerDiscovery/serverMatcher';
 
 export const useStreamingChat = () => {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
@@ -75,6 +76,22 @@ export const useStreamingChat = () => {
     return invocation;
   }, []);
 
+  const generateServerDiscoveryCards = useCallback((userMessage: string): ServerDiscoveryCard[] => {
+    if (!shouldShowServerDiscovery(userMessage)) {
+      return [];
+    }
+
+    const matches = findRelevantServers(userMessage);
+    return matches.map(match => ({
+      id: `discovery-${Date.now()}-${match.server.id}`,
+      serverId: match.server.id,
+      serverName: match.server.name,
+      serverType: match.server.type,
+      description: match.server.description,
+      matchedKeywords: match.matchedKeywords
+    }));
+  }, []);
+
   const generateAIResponseWithInlineTools = useCallback(async (
     userMessage: string,
     selectedServers: string[],
@@ -82,6 +99,9 @@ export const useStreamingChat = () => {
     addMessage: (sessionId: string, message: Message) => void,
     updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => void
   ): Promise<void> => {
+    // 检查是否需要显示服务器发现卡片
+    const discoveryCards = generateServerDiscoveryCards(userMessage);
+    
     // 分析用户消息，决定使用哪些工具
     const toolsToUse: Array<{ name: string; request: any }> = [];
 
@@ -128,16 +148,31 @@ export const useStreamingChat = () => {
         content: `好的，我将使用 MCP 工具来获取您提供的 Figma 链接中指定节点（node-id=${pendingCalls[0]?.request?.nodeId}）的数据。`,
         timestamp: Date.now(),
         pendingToolCalls: pendingCalls,
-        toolCallStatus: 'pending'
+        toolCallStatus: 'pending',
+        serverDiscoveryCards: discoveryCards.length > 0 ? discoveryCards : undefined
       };
 
       addMessage(sessionId, toolCallMessage);
-      
-      // 监听工具调用状态变化，当状态变为 completed 时，添加 AI 回复
-      // 这里我们模拟一个简单的延迟来等待用户操作
-      // 在实际实现中，你需要监听 updateMessage 的调用
+    } else if (discoveryCards.length > 0) {
+      // 如果没有工具调用但有服务器发现，添加带发现卡片的AI回复
+      const messageId = `msg-${Date.now()}`;
+      setStreamingMessageId(messageId);
+
+      const aiMessage: Message = {
+        id: messageId,
+        role: 'assistant',
+        content: `我理解您的请求"${userMessage}"。基于您的问题，我为您推荐了一些相关的 MCP 服务器，这些服务器可以帮助您完成相关任务。`,
+        timestamp: Date.now(),
+        serverDiscoveryCards: discoveryCards
+      };
+
+      // 模拟流式响应延迟
+      setTimeout(() => {
+        addMessage(sessionId, aiMessage);
+        setStreamingMessageId(null);
+      }, 1000);
     } else {
-      // 没有工具调用，直接生成普通AI回复
+      // 没有工具调用也没有服务器发现，直接生成普通AI回复
       const messageId = `msg-${Date.now()}`;
       setStreamingMessageId(messageId);
 
@@ -154,7 +189,7 @@ export const useStreamingChat = () => {
         setStreamingMessageId(null);
       }, 1000);
     }
-  }, [simulateToolInvocation]);
+  }, [simulateToolInvocation, generateServerDiscoveryCards]);
 
   return {
     streamingMessageId,

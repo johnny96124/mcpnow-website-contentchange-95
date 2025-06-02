@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
 import { ChatHistory } from '@/components/chat/ChatHistory/ChatHistory';
+import { ServerSelectionDialog } from './ServerSelectionDialog';
 import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
@@ -50,6 +51,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [showServerSelectionDialog, setShowServerSelectionDialog] = useState(false);
 
   const connectedServers = getConnectedServers();
   const selectedServers = connectedServers.map(s => s.id);
@@ -73,6 +75,18 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
 
   const handleSelectHistorySession = (sessionId: string) => {
     selectChat(sessionId);
+  };
+
+  const handleConfigureServer = (serverId: string) => {
+    setShowServerSelectionDialog(true);
+  };
+
+  const handleServerConfigured = () => {
+    setShowServerSelectionDialog(false);
+    toast({
+      title: "服务器配置成功",
+      description: "MCP 服务器已添加到当前 Profile",
+    });
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
@@ -114,7 +128,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
     addMessage(sessionId, userMessage);
 
     try {
-      // Use streaming chat with inline tools
+      // Use streaming chat with inline tools and server discovery
       await generateAIResponseWithInlineTools(
         content,
         selectedServers,
@@ -251,6 +265,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
                     onUpdateMessage={handleToolAction}
                     onDeleteMessage={handleDeleteMessage}
                     onEditMessage={() => {}}
+                    onConfigureServer={handleConfigureServer}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
@@ -294,6 +309,12 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      <ServerSelectionDialog
+        open={showServerSelectionDialog}
+        onOpenChange={setShowServerSelectionDialog}
+        onAddServers={handleServerConfigured}
+      />
 
       <HistoryDrawer
         open={historyDrawerOpen}
