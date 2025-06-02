@@ -69,7 +69,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
   };
 
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
-    if (!content.trim() || isSending) return;
+    if (!content.trim() || selectedServers.length === 0 || isSending) return;
     
     setIsSending(true);
 
@@ -110,7 +110,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
       // Simulate AI response
       setTimeout(async () => {
         const aiMessageId = `msg-${Date.now()}-ai`;
-        const aiResponse = `我理解您的问题："${content}"。我正在为您分析和处理这个请求。`;
+        const aiResponse = `我理解您的问题："${content}"。基于当前连接的MCP服务器，我正在为您分析和处理这个请求。让我调用相关的工具来获取更多信息...`;
 
         const aiMessage: Message = {
           id: aiMessageId,
@@ -142,6 +142,8 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
     deleteMessage(currentSession.id, messageId);
   };
 
+  const canSendMessage = selectedServers.length > 0 && !isSending;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
@@ -154,7 +156,7 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
               <div>
                 <DialogTitle className="text-xl font-semibold">AI Chat</DialogTitle>
                 <p className="text-sm text-muted-foreground mt-1">
-                  与AI助手进行对话
+                  与MCP服务器进行AI对话
                 </p>
               </div>
             </div>
@@ -216,8 +218,12 @@ export const InlineChatDialog: React.FC<InlineChatDialogProps> = ({
             <div className="border-t p-4">
               <MessageInput
                 onSendMessage={handleSendMessage}
-                disabled={isSending}
-                placeholder="输入您的消息..."
+                disabled={!canSendMessage}
+                placeholder={
+                  selectedServers.length === 0 
+                    ? "请先连接MCP服务器..."
+                    : "输入您的消息..."
+                }
                 selectedServers={selectedServers}
                 servers={connectedServers}
               />
