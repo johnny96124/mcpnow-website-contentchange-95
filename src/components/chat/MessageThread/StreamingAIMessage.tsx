@@ -354,6 +354,7 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           <ServerRecommendations
             messageId={message.id}
             onConfigureServer={onConfigureServer}
+            context={message.content}
           />
         )}
       </div>

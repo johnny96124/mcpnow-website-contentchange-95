@@ -6,24 +6,102 @@ import { ServerRecommendationCard, ServerRecommendation } from './ServerRecommen
 interface ServerRecommendationsProps {
   messageId: string;
   onConfigureServer: (messageId: string, server: ServerRecommendation) => void;
+  context?: string; // 新增：用于根据上下文推荐不同服务器
 }
 
 export const ServerRecommendations: React.FC<ServerRecommendationsProps> = ({
   messageId,
-  onConfigureServer
+  onConfigureServer,
+  context = ''
 }) => {
-  // Mock server recommendations based on context
-  const recommendations: ServerRecommendation[] = [
-    {
-      id: 'filesystem-mcp',
-      name: 'Filesystem MCP Server',
-      type: 'STDIO',
-      description: 'Node.js server implementing Model Context Protocol for filesystem operations.',
-      icon: 'folder',
-      badges: ['STDIO'],
-      isOfficial: true
+  // 根据上下文智能推荐服务器
+  const getRecommendations = (): ServerRecommendation[] => {
+    const contextLower = context.toLowerCase();
+    
+    // 文件操作相关
+    if (contextLower.includes('文件') || contextLower.includes('目录') || contextLower.includes('读取') || contextLower.includes('写入')) {
+      return [
+        {
+          id: 'filesystem-mcp',
+          name: 'Filesystem MCP Server',
+          type: 'STDIO',
+          description: 'Node.js server implementing Model Context Protocol for filesystem operations.',
+          icon: 'folder',
+          badges: ['STDIO', 'File Operations'],
+          isOfficial: true
+        }
+      ];
     }
-  ];
+    
+    // 数据库相关
+    if (contextLower.includes('数据库') || contextLower.includes('sql') || contextLower.includes('查询')) {
+      return [
+        {
+          id: 'database-mcp',
+          name: 'Database MCP Server',
+          type: 'STDIO',
+          description: 'Connect and query databases with SQL support for multiple database engines.',
+          icon: 'database',
+          badges: ['STDIO', 'Database'],
+          isOfficial: true
+        }
+      ];
+    }
+    
+    // 网络请求相关
+    if (contextLower.includes('api') || contextLower.includes('请求') || contextLower.includes('http')) {
+      return [
+        {
+          id: 'fetch-mcp',
+          name: 'Fetch MCP Server',
+          type: 'STDIO',
+          description: 'Make HTTP requests and fetch data from external APIs and websites.',
+          icon: 'globe',
+          badges: ['STDIO', 'HTTP'],
+          isOfficial: true
+        }
+      ];
+    }
+    
+    // Git相关
+    if (contextLower.includes('git') || contextLower.includes('代码') || contextLower.includes('仓库')) {
+      return [
+        {
+          id: 'git-mcp',
+          name: 'Git MCP Server',
+          type: 'STDIO',
+          description: 'Git operations and repository management through MCP protocol.',
+          icon: 'git-branch',
+          badges: ['STDIO', 'Git'],
+          isOfficial: true
+        }
+      ];
+    }
+    
+    // 默认推荐
+    return [
+      {
+        id: 'filesystem-mcp',
+        name: 'Filesystem MCP Server',
+        type: 'STDIO',
+        description: 'Node.js server implementing Model Context Protocol for filesystem operations.',
+        icon: 'folder',
+        badges: ['STDIO'],
+        isOfficial: true
+      },
+      {
+        id: 'fetch-mcp',
+        name: 'Fetch MCP Server',
+        type: 'STDIO',
+        description: 'Make HTTP requests and fetch data from external APIs and websites.',
+        icon: 'globe',
+        badges: ['STDIO', 'HTTP'],
+        isOfficial: true
+      }
+    ];
+  };
+
+  const recommendations = getRecommendations();
 
   return (
     <div className="rounded-lg p-3 sm:p-4 border bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
