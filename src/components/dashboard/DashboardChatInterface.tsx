@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,8 +41,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   
   const [isSending, setIsSending] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [showServerDialog, setShowServerDialog] = useState(false);
-  const [selectedServerId, setSelectedServerId] = useState<string | null>(null);
 
   const connectedServers = getConnectedServers();
   
@@ -329,21 +328,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
 
   const canSendMessage = selectedServers.length > 0 && !isSending;
 
-  const handleSetupServer = (serverId: string) => {
-    console.log('Setting up server:', serverId);
-    setSelectedServerId(serverId);
-    setShowServerDialog(true);
-  };
-
-  const handleServerConfigured = () => {
-    setShowServerDialog(false);
-    setSelectedServerId(null);
-    toast({
-      title: "服务器已配置",
-      description: "新的MCP服务器已成功添加到您的配置文件中",
-    });
-  };
-
   if (connectedServers.length === 0) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -406,7 +390,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             onUpdateMessage={handleToolAction}
             onDeleteMessage={handleDeleteMessage}
             onEditMessage={handleEditMessage}
-            onSetupServer={handleSetupServer}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -431,58 +414,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
           servers={connectedServers}
         />
       </div>
-
-      {/* Server Configuration Dialog */}
-      {showServerDialog && selectedServerId && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">配置MCP服务器</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              正在配置 {selectedServerId === 'filesystem-mcp' ? 'Filesystem MCP Server' : 'Brave Search MCP Server'}
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">服务器名称</label>
-                <input 
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                  defaultValue={selectedServerId === 'filesystem-mcp' ? 'My Filesystem Server' : 'My Search Server'}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">连接类型</label>
-                <select className="w-full border rounded-lg px-3 py-2 text-sm">
-                  <option value="stdio">STDIO</option>
-                  <option value="sse">SSE</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">配置路径</label>
-                <input 
-                  type="text" 
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                  defaultValue="/path/to/server"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowServerDialog(false)}
-                className="flex-1"
-              >
-                取消
-              </Button>
-              <Button
-                onClick={handleServerConfigured}
-                className="flex-1"
-              >
-                保存配置
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

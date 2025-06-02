@@ -83,80 +83,59 @@ export const useStreamingChat = () => {
     updateMessage: (sessionId: string, messageId: string, updates: Partial<Message>) => void
   ): Promise<void> => {
     // 分析用户消息，决定使用哪些工具
-    const shouldUseFigmaTools = userMessage.toLowerCase().includes('figma') || 
-                              userMessage.toLowerCase().includes('设计') ||
-                              userMessage.toLowerCase().includes('节点') ||
-                              userMessage.toLowerCase().includes('node-id');
+    const toolsToUse: Array<{ name: string; request: any }> = [];
 
-    const shouldUseFileTools = userMessage.toLowerCase().includes('文件') || 
-                              userMessage.toLowerCase().includes('读取') ||
-                              userMessage.toLowerCase().includes('read');
+    if (userMessage.toLowerCase().includes('figma') || userMessage.toLowerCase().includes('设计')) {
+      toolsToUse.push({
+        name: 'get_figma_data',
+        request: {
+          nodeId: '630-5984',
+          fileKey: 'NuM4uOURmTCLfqltMzDJH'
+        }
+      });
+    }
 
-    const shouldUseSearchTools = userMessage.toLowerCase().includes('搜索') || 
-                                userMessage.toLowerCase().includes('查找') ||
-                                userMessage.toLowerCase().includes('search');
+    if (userMessage.toLowerCase().includes('文件') || userMessage.toLowerCase().includes('读取')) {
+      toolsToUse.push({
+        name: 'read_file',
+        request: { path: '/example/config.json' }
+      });
+    }
+
+    if (userMessage.toLowerCase().includes('搜索') || userMessage.toLowerCase().includes('查找')) {
+      toolsToUse.push({
+        name: 'search',
+        request: { query: userMessage.substring(0, 50) }
+      });
+    }
 
     // 如果需要工具调用，先添加工具调用消息
-    if (shouldUseFigmaTools || shouldUseFileTools || shouldUseSearchTools) {
-      const pendingCalls: PendingToolCall[] = [];
-
-      if (shouldUseFigmaTools) {
-        pendingCalls.push({
-          id: `tool-${Date.now()}-figma`,
-          toolName: 'get_figma_data',
-          serverId: selectedServers[0] || 'default-server',
-          serverName: `Figma MCP服务器`,
-          request: {
-            nodeId: '630-5984',
-            fileKey: 'NuM4uOURmTCLfqltMzDJH'
-          },
-          status: 'pending' as const,
-          order: 0,
-          visible: true
-        });
-      }
-
-      if (shouldUseFileTools) {
-        pendingCalls.push({
-          id: `tool-${Date.now()}-file`,
-          toolName: 'read_file',
-          serverId: selectedServers[0] || 'default-server',
-          serverName: `文件系统 MCP服务器`,
-          request: { path: '/example/config.json' },
-          status: 'pending' as const,
-          order: pendingCalls.length,
-          visible: pendingCalls.length === 0
-        });
-      }
-
-      if (shouldUseSearchTools) {
-        pendingCalls.push({
-          id: `tool-${Date.now()}-search`,
-          toolName: 'search',
-          serverId: selectedServers[0] || 'default-server',
-          serverName: `搜索 MCP服务器`,
-          request: { 
-            query: userMessage.substring(0, 50),
-            type: 'web'
-          },
-          status: 'pending' as const,
-          order: pendingCalls.length,
-          visible: pendingCalls.length === 0
-        });
-      }
+    if (toolsToUse.length > 0) {
+      const pendingCalls: PendingToolCall[] = toolsToUse.map((tool, index) => ({
+        id: `tool-${Date.now()}-${index}`,
+        toolName: tool.name,
+        serverId: selectedServers[0],
+        serverName: `服务器 ${selectedServers[0]}`,
+        request: tool.request,
+        status: 'pending' as const,
+        order: index,
+        visible: index === 0 // 只有第一个工具可见
+      }));
 
       const toolCallMessage: Message = {
         id: `msg-${Date.now()}-tool`,
         role: 'tool_call',
-        content: `好的，我将使用 MCP 工具来处理您的请求。基于您的消息内容，我需要调用以下工具来获取相关信息：`,
+        content: `好的，我将使用 MCP 工具来获取您提供的 Figma 链接中指定节点（node-id=${pendingCalls[0]?.request?.nodeId}）的数据。`,
         timestamp: Date.now(),
         pendingToolCalls: pendingCalls,
         toolCallStatus: 'pending'
       };
 
-      console.log('Creating tool call message:', toolCallMessage);
       addMessage(sessionId, toolCallMessage);
       
+      // 监听工具调用状态变化，当状态变为 completed 时，添加 AI 回复
+      // 这里我们模拟一个简单的延迟来等待用户操作
+      // 在实际实现中，你需要监听 updateMessage 的调用
     } else {
       // 没有工具调用，直接生成普通AI回复
       const messageId = `msg-${Date.now()}`;
@@ -165,7 +144,7 @@ export const useStreamingChat = () => {
       const aiMessage: Message = {
         id: messageId,
         role: 'assistant',
-        content: `我理解您的请求"${userMessage}"。这是一个模拟的AI回复，展示了如何处理不需要工具调用的对话。如果您需要特定的功能，比如获取Figma设计、读取文件或进行搜索，请在消息中提及这些关键词，我会调用相应的MCP工具来帮助您。`,
+        content: `我理解您的请求"${userMessage}"。这是一个模拟的AI回复，展示了如何处理不需要工具调用的对话。`,
         timestamp: Date.now()
       };
 
