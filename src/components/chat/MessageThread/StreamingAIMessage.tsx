@@ -71,8 +71,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
     }
   };
 
-  // Show tool call message if it exists
-  if (message.role === 'tool_call') {
+  // Show tool call message if it exists - this is the key fix
+  if (message.role === 'tool_call' || message.pendingToolCalls) {
     return (
       <ToolCallMessage 
         message={message}
@@ -143,8 +143,8 @@ export const StreamingAIMessage: React.FC<StreamingAIMessageProps> = ({
           </div>
         )}
 
-        {/* Server Recommendations - Only show after content is complete */}
-        {showServerRecommendations && !isStreaming && displayContent && (
+        {/* Server Recommendations - Only show after content is complete and if no tool calls */}
+        {showServerRecommendations && !isStreaming && displayContent && !message.pendingToolCalls && (
           <div className="mt-4">
             <ServerRecommendations onSetupServer={handleSetupServer} />
           </div>
