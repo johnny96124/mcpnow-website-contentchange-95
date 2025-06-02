@@ -14,6 +14,7 @@ import Welcome from "@/components/hosts/Welcome";
 import { HostsEmptyState } from "@/components/hosts/HostsEmptyState";
 import { CollapsibleHostsLayout } from "@/components/hosts/CollapsibleHostsLayout";
 import { InlineChatPanel } from "@/components/hosts/InlineChatPanel";
+import { CollapsedHostsList } from "@/components/hosts/CollapsedHostsList";
 
 const mockJsonConfig = {
   "mcpServers": {
@@ -353,6 +354,13 @@ const Hosts = () => {
                 </CardContent>
               </Card>
             </div>
+          }
+          hostsListCollapsed={
+            <CollapsedHostsList 
+              hosts={filteredHosts}
+              selectedHostId={selectedHostId}
+              onHostSelect={setSelectedHostId}
+            />
           }
           hostDetails={
             selectedHost ? (

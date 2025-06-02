@@ -7,6 +7,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 
 interface CollapsibleHostsLayoutProps {
   hostsList: React.ReactNode;
+  hostsListCollapsed: React.ReactNode;
   hostDetails: React.ReactNode;
   chatPanel?: React.ReactNode;
   isChatOpen: boolean;
@@ -15,6 +16,7 @@ interface CollapsibleHostsLayoutProps {
 
 export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
   hostsList,
+  hostsListCollapsed,
   hostDetails,
   chatPanel,
   isChatOpen,
@@ -53,11 +55,8 @@ export const CollapsibleHostsLayout: React.FC<CollapsibleHostsLayoutProps> = ({
                 )}
               </Button>
             </div>
-            <div className={cn(
-              "overflow-hidden transition-all duration-300",
-              isHostsListCollapsed ? "opacity-0" : "opacity-100"
-            )}>
-              {hostsList}
+            <div className="overflow-hidden">
+              {isHostsListCollapsed ? hostsListCollapsed : hostsList}
             </div>
           </div>
         </ResizablePanel>
