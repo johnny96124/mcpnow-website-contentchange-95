@@ -17,8 +17,6 @@ import { HelpDialog } from "@/components/help/HelpDialog";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { SocialLinks } from "./SocialLinks";
-import { UserProfile } from "@/components/auth/UserProfile";
-import { useAuth } from "@clerk/clerk-react";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -26,7 +24,6 @@ interface MainSidebarProps {
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [showGettingStarted, setShowGettingStarted] = useState(false);
-  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   
   const handleLogoClick = () => {
@@ -45,7 +42,6 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
           {!collapsed && <h1 className="text-lg font-semibold">MCP Now</h1>}
         </div>
       </div>
-      
       <ScrollArea className="flex-1 px-2 py-4">
         <nav className="space-y-2">
           <NavLink 
@@ -121,13 +117,6 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
       </ScrollArea>
       
       <SocialLinks />
-      
-      {/* User Profile Section */}
-      {isSignedIn && (
-        <div className="border-t p-4">
-          <UserProfile collapsed={collapsed} />
-        </div>
-      )}
       
       <div className="border-t p-4">
         <div className="flex justify-between items-center gap-2">
