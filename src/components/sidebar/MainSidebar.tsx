@@ -7,7 +7,9 @@ import {
   BookOpen,
   Telescope,
   Home,
-  MessageSquare
+  MessageSquare,
+  User,
+  LogIn
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,16 @@ import { HelpDialog } from "@/components/help/HelpDialog";
 import { GettingStartedDialog } from "@/components/onboarding/GettingStartedDialog";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { SocialLinks } from "./SocialLinks";
+import { useAuth, useUser, SignOutButton } from "@clerk/clerk-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface MainSidebarProps {
   collapsed?: boolean;
@@ -24,6 +36,8 @@ interface MainSidebarProps {
 
 export function MainSidebar({ collapsed = false }: MainSidebarProps) {
   const [showGettingStarted, setShowGettingStarted] = useState(false);
+  const { isSignedIn } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
   
   const handleLogoClick = () => {
@@ -113,12 +127,111 @@ export function MainSidebar({ collapsed = false }: MainSidebarProps) {
             <Settings className="h-4 w-4 mr-2" />
             {!collapsed && "Settings"}
           </NavLink>
+
+          {isSignedIn && (
+            <NavLink 
+              to="/account" 
+              className={({ isActive }) => 
+                cn(
+                  "sidebar-item text-sm", 
+                  isActive && "sidebar-item-active",
+                  collapsed && "justify-center px-0"
+                )
+              }
+            >
+              <User className="h-4 w-4 mr-2" />
+              {!collapsed && "Account"}
+            </NavLink>
+          )}
         </nav>
       </ScrollArea>
       
       <SocialLinks />
       
-      <div className="border-t p-4">
+      {/* User Authentication Section */}
+      <div className="border-t p-4 space-y-3">
+        {isSignedIn && user ? (
+          <div className={cn("flex items-center gap-2", collapsed && "justify-center")}>
+            {collapsed ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full h-8 w-8">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={user.imageUrl} />
+                      <AvatarFallback>{user.firstName?.[0] || user.emailAddresses[0]?.emailAddress[0]}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    {user.firstName ? `${user.firstName} ${user.lastName || ''}` : user.emailAddresses[0]?.emailAddress}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/account')}>
+                    <User className="h-4 w-4 mr-2" />
+                    Account Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <SignOutButton>
+                      <span className="flex items-center w-full">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </span>
+                    </SignOutButton>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="justify-start gap-2 px-2 h-auto py-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={user.imageUrl} />
+                      <AvatarFallback>{user.firstName?.[0] || user.emailAddresses[0]?.emailAddress[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 text-left overflow-hidden">
+                      <p className="text-sm font-medium truncate">
+                        {user.firstName ? `${user.firstName} ${user.lastName || ''}` : 'User'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.emailAddresses[0]?.emailAddress}
+                      </p>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/account')}>
+                    <User className="h-4 w-4 mr-2" />
+                    Account Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <SignOutButton>
+                      <span className="flex items-center w-full">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </span>
+                    </SignOutButton>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        ) : (
+          <Button 
+            variant="default" 
+            size="sm" 
+            className={cn("w-full", collapsed && "px-2")}
+            onClick={() => navigate('/auth')}
+          >
+            <LogIn className="h-4 w-4 mr-2" />
+            {!collapsed && "Sign In"}
+          </Button>
+        )}
+        
         <div className="flex justify-between items-center gap-2">
           <ThemeToggle />
           <Button 

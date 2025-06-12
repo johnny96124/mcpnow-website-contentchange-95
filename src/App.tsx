@@ -21,6 +21,8 @@ import HostsNewUser from "./pages/HostsNewUser";
 import WebsiteEn from "./pages/website-en";
 import WebsiteCn from "./pages/website-cn";
 import FileNavigator from "./pages/FileNavigator";
+import Auth from "./pages/Auth";
+import AccountSettings from "./pages/AccountSettings";
 import { LanguageProvider } from "./components/theme/language-provider";
 
 function App() {
@@ -40,6 +42,14 @@ function App() {
               {
                 path: "/index",
                 element: <Navigate to="/" replace />
+              },
+              {
+                path: "/auth",
+                element: <Auth />
+              },
+              {
+                path: "/account",
+                element: <DefaultLayout><AccountSettings /></DefaultLayout>
               },
               {
                 path: "/website-en",
