@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
 import { ServerProvider } from "@/context/ServerContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import Dashboard from "@/pages/Dashboard";
 import Hosts from "@/pages/Hosts";
@@ -14,9 +13,6 @@ import Profiles from "@/pages/Profiles";
 import Discovery from "@/pages/Discovery";
 import Settings from "@/pages/Settings";
 import AIChat from "@/pages/AIChat";
-import Account from "@/pages/Account";
-import SignIn from "@/pages/auth/SignIn";
-import SignUp from "@/pages/auth/SignUp";
 import HostNewLayout from "./pages/Host-newlayout";
 import NotFound from "./pages/NotFound";
 import TrayPopup from "./pages/TrayPopup";
@@ -38,16 +34,8 @@ function App() {
             <Toaster />
             <RouterProvider router={createBrowserRouter([
               {
-                path: "/auth/sign-in",
-                element: <SignIn />
-              },
-              {
-                path: "/auth/sign-up", 
-                element: <SignUp />
-              },
-              {
                 path: "/",
-                element: <ProtectedRoute><DefaultLayout><Hosts /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Hosts /></DefaultLayout>
               },
               {
                 path: "/index",
@@ -71,7 +59,7 @@ function App() {
               },
               {
                 path: "/dashboard",
-                element: <ProtectedRoute><DefaultLayout><Dashboard /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Dashboard /></DefaultLayout>
               },
               {
                 path: "/hosts",
@@ -79,35 +67,31 @@ function App() {
               },
               {
                 path: "/hosts-new-user",
-                element: <ProtectedRoute><DefaultLayout><HostsNewUser /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><HostsNewUser /></DefaultLayout>
               },
               {
                 path: "/servers",
-                element: <ProtectedRoute><DefaultLayout><Servers /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Servers /></DefaultLayout>
               },
               {
                 path: "/profiles",
-                element: <ProtectedRoute><DefaultLayout><Profiles /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Profiles /></DefaultLayout>
               },
               {
                 path: "/discovery",
-                element: <ProtectedRoute><DefaultLayout><Discovery /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Discovery /></DefaultLayout>
               },
               {
                 path: "/settings",
-                element: <ProtectedRoute><DefaultLayout><Settings /></DefaultLayout></ProtectedRoute>
-              },
-              {
-                path: "/account",
-                element: <ProtectedRoute><DefaultLayout><Account /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><Settings /></DefaultLayout>
               },
               {
                 path: "/ai-chat",
-                element: <ProtectedRoute><DefaultLayout><AIChat /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><AIChat /></DefaultLayout>
               },
               {
                 path: "/host-new",
-                element: <ProtectedRoute><DefaultLayout><HostNewLayout /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><HostNewLayout /></DefaultLayout>
               },
               {
                 path: "/tray",
@@ -119,11 +103,11 @@ function App() {
               },
               {
                 path: "/file-navigator",
-                element: <ProtectedRoute><DefaultLayout><FileNavigator /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><FileNavigator /></DefaultLayout>
               },
               {
                 path: "*",
-                element: <ProtectedRoute><DefaultLayout><NotFound /></DefaultLayout></ProtectedRoute>
+                element: <DefaultLayout><NotFound /></DefaultLayout>
               }
             ])} />
           </ServerProvider>
