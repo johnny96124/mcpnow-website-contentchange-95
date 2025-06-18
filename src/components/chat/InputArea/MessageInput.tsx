@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { MCPServer } from '../types/chat';
 import { ToolControlPopover } from './ToolControlPopover';
 import { ModelSelector } from './ModelSelector';
+import { SuggestionsPanel } from './SuggestionsPanel';
+import { useInputSuggestions } from './useInputSuggestions';
 
 interface AttachedFile {
   id: string;
@@ -35,8 +37,36 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   const [content, setContent] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([]);
   const [selectedModel, setSelectedModel] = useState('gpt-4o');
+  const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Mock data for suggestions - in real app, these would come from props or context
+  const mockProfiles = [
+    { id: 'dev-profile', name: 'Development Profile', serverInstances: [] },
+    { id: 'prod-profile', name: 'Production Profile', serverInstances: [] }
+  ];
+  
+  const mockHosts = [
+    { id: 'local-host', name: 'Local Host', url: 'localhost:3000', connectionStatus: 'active' },
+    { id: 'remote-host', name: 'Remote Server', url: 'remote.example.com', connectionStatus: 'inactive' }
+  ];
+
+  const {
+    showSuggestions,
+    suggestions,
+    selectedIndex,
+    triggerInfo,
+    selectSuggestion,
+    moveCursor,
+    closeSuggestions
+  } = useInputSuggestions({
+    inputValue: content,
+    cursorPosition,
+    servers,
+    profiles: mockProfiles,
+    hosts: mockHosts
+  });
 
   console.log('MessageInput render - isGenerating:', isGenerating, 'disabled:', disabled);
 
@@ -46,6 +76,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       onSendMessage(content.trim(), attachedFiles);
       setContent('');
       setAttachedFiles([]);
+      closeSuggestions();
     }
   };
 
@@ -57,6 +88,41 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle suggestions navigation
+    if (showSuggestions) {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        moveCursor('up');
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        moveCursor('down');
+        return;
+      }
+      if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        const result = selectSuggestion(selectedIndex);
+        if (result) {
+          setContent(result.newValue);
+          setCursorPosition(result.newCursorPosition);
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.setSelectionRange(result.newCursorPosition, result.newCursorPosition);
+              textareaRef.current.focus();
+            }
+          }, 0);
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeSuggestions();
+        return;
+      }
+    }
+
+    // Handle normal input
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       if (isGenerating) {
@@ -64,6 +130,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       } else {
         handleSubmit();
       }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    setCursorPosition(e.target.selectionStart);
+  };
+
+  const handleCursorChange = () => {
+    if (textareaRef.current) {
+      setCursorPosition(textareaRef.current.selectionStart);
     }
   };
 
@@ -190,13 +267,37 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         <Textarea
           ref={textareaRef}
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onSelect={handleCursorChange}
+          onClick={handleCursorChange}
           placeholder={isGenerating ? "AI正在回复中..." : placeholder}
           disabled={disabled}
           className="min-h-[80px] max-h-[200px] resize-none pr-28"
           style={{ height: 'auto' }}
         />
+        
+        {/* Suggestions Panel */}
+        {showSuggestions && (
+          <SuggestionsPanel
+            suggestions={suggestions}
+            selectedIndex={selectedIndex}
+            onSelect={(index) => {
+              const result = selectSuggestion(index);
+              if (result) {
+                setContent(result.newValue);
+                setCursorPosition(result.newCursorPosition);
+                setTimeout(() => {
+                  if (textareaRef.current) {
+                    textareaRef.current.setSelectionRange(result.newCursorPosition, result.newCursorPosition);
+                    textareaRef.current.focus();
+                  }
+                }, 0);
+              }
+            }}
+            triggerType={triggerInfo.type || 'template'}
+          />
+        )}
         
         <div className="absolute bottom-2 right-2 flex gap-1">
           <ToolControlPopover
@@ -255,6 +356,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             <span>Select servers to start chatting</span>
           ) : isGenerating ? (
             <span>Press <kbd className="bg-muted px-1 rounded">Cmd+Enter</kbd> or click stop button to terminate</span>
+          ) : showSuggestions ? (
+            <span>Type <kbd className="bg-muted px-1 rounded">/</kbd> for templates, <kbd className="bg-muted px-1 rounded">@</kbd> for resources</span>
           ) : (
             <span>Press <kbd className="bg-muted px-1 rounded">Cmd+Enter</kbd> to send</span>
           )}
