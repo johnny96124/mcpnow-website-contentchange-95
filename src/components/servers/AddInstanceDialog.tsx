@@ -203,30 +203,14 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
         {/* AI Install Option - Only show for non-edit mode */}
         {!editMode && onStartAIChat && (
           <div className="px-6 pb-4">
-            <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    <Bot className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div>
-                      <h3 className="font-medium text-blue-900 dark:text-blue-100">AI 辅助安装</h3>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                        让AI助手引导您完成服务器的自动化安装和配置
-                      </p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleAIInstall}
-                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300"
-                  >
-                    <Bot className="h-4 w-4 mr-2" />
-                    使用AI安装
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <Button 
+              variant="outline" 
+              onClick={handleAIInstall}
+              className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/50"
+            >
+              <Bot className="h-4 w-4 mr-2" />
+              AI 辅助安装
+            </Button>
           </div>
         )}
 
