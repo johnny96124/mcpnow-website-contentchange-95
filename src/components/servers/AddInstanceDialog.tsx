@@ -53,15 +53,94 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
   availableHosts,
   onStartAIChat
 }) => {
-  const [formData, setFormData] = useState<InstanceFormValues>({
-    name: initialValues?.name || "",
-    url: initialValues?.url || "",
-    args: initialValues?.args || "",
-    description: initialValues?.description || "",
-    env: initialValues?.env || {},
-    headers: initialValues?.headers || {},
-    instanceId: instanceId
-  });
+  // Function to get default values based on server definition
+  const getDefaultFormData = () => {
+    if (initialValues) {
+      return {
+        name: initialValues.name || "",
+        url: initialValues.url || "",
+        args: initialValues.args || "",
+        description: initialValues.description || "",
+        env: initialValues.env || {},
+        headers: initialValues.headers || {},
+        instanceId: instanceId
+      };
+    }
+
+    // Pre-fill data based on server definition
+    const defaultData: InstanceFormValues = {
+      name: serverDefinition?.name || "",
+      url: "",
+      args: "",
+      description: serverDefinition?.description || "",
+      env: {},
+      headers: {},
+      instanceId: instanceId
+    };
+
+    // Pre-fill specific configurations based on server type
+    if (serverDefinition) {
+      switch (serverDefinition.name.toLowerCase()) {
+        case 'filesystem':
+          defaultData.args = "--allowed-dir /Users/username/Desktop --allowed-dir /path/to/other/allowed/dir";
+          defaultData.description = "MCP server for filesystem operations including read/write, directory management, and file searching.";
+          break;
+        case 'postgres':
+          defaultData.url = "postgresql://username:password@localhost:5432/database";
+          defaultData.description = "PostgreSQL database connection for MCP operations";
+          break;
+        case 'sqlite':
+          defaultData.args = "--db-path /path/to/database.db";
+          defaultData.description = "SQLite database connection for MCP operations";
+          break;
+        case 'github':
+          defaultData.description = "GitHub integration for repository management and operations";
+          defaultData.env = { GITHUB_TOKEN: "" };
+          break;
+        case 'gitlab':
+          defaultData.description = "GitLab integration for repository management and operations";
+          defaultData.env = { GITLAB_TOKEN: "" };
+          break;
+        case 'fetch':
+          defaultData.description = "HTTP client for making web requests and API calls";
+          break;
+        case 'puppeteer':
+          defaultData.description = "Web automation and scraping capabilities";
+          break;
+        case 'brave-search':
+          defaultData.description = "Brave Search API integration";
+          defaultData.env = { BRAVE_SEARCH_API_KEY: "" };
+          break;
+        case 'google-maps':
+          defaultData.description = "Google Maps Platform integration";
+          defaultData.env = { GOOGLE_MAPS_API_KEY: "" };
+          break;
+        case 'slack':
+          defaultData.description = "Slack workspace integration";
+          defaultData.env = { SLACK_BOT_TOKEN: "", SLACK_SIGNING_SECRET: "" };
+          break;
+        case 'memory':
+          defaultData.description = "Persistent memory storage for conversation context";
+          break;
+        case 'everart':
+          defaultData.description = "EverArt API integration for image generation";
+          defaultData.env = { EVERART_API_KEY: "" };
+          break;
+        default:
+          // Keep default values
+          break;
+      }
+
+      // Set default URL for HTTP_SSE servers
+      if (serverDefinition.type === 'HTTP_SSE' && !defaultData.url) {
+        defaultData.url = "http://localhost:8080";
+      }
+    }
+
+    return defaultData;
+  };
+
+  const [formData, setFormData] = useState<InstanceFormValues>(getDefaultFormData());
 
   const [showAIInstallDialog, setShowAIInstallDialog] = useState(false);
 
