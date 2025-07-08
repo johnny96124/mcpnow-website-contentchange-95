@@ -153,13 +153,15 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   };
 
   const simulateStreamingText = async (sessionId: string, messageId: string, fullContent: string) => {
+    const words = fullContent.split(' ');
     let currentIndex = 0;
-    const words = fullContent.split('');
     
     return new Promise<void>((resolve) => {
       const streamInterval = setInterval(() => {
         if (currentIndex < words.length) {
-          const partialContent = words.slice(0, currentIndex + 1).join('');
+          // Stream 2-3 words at a time for faster output
+          const wordsToAdd = Math.min(3, words.length - currentIndex);
+          const partialContent = words.slice(0, currentIndex + wordsToAdd).join(' ');
           
           setCurrentMessages(prev => 
             prev.map(msg => 
@@ -171,12 +173,12 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             updateMessage(sessionId, messageId, { content: partialContent });
           }
           
-          currentIndex++;
+          currentIndex += wordsToAdd;
         } else {
           clearInterval(streamInterval);
           resolve();
         }
-      }, 25);
+      }, 80); // Faster interval: 80ms for 2-3 words
     });
   };
 
