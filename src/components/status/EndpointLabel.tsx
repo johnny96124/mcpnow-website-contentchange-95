@@ -1,44 +1,40 @@
 
-import React from 'react';
-import { EndpointType } from '@/data/mockData';
+import { cn } from "@/lib/utils";
+import type { EndpointType } from "@/data/mockData";
 
 interface EndpointLabelProps {
-  type: EndpointType;
+  type: EndpointType | 'Custom';
   className?: string;
 }
 
-export const EndpointLabel: React.FC<EndpointLabelProps> = ({ type, className }) => {
-  const getDisplayType = (type: EndpointType) => {
-    switch (type) {
-      case 'HTTP_SSE':
-        return 'HTTP';
-      case 'STDIO':
-        return 'STDIO';
-      case 'WS':
-        return 'WS';
-      default:
-        return type;
-    }
-  };
-
-  const getClassNames = () => {
-    const baseClasses = 'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium';
-    
-    switch (type) {
-      case 'HTTP_SSE':
-        return `${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300`;
-      case 'STDIO':
-        return `${baseClasses} bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300`;
-      case 'WS':
-        return `${baseClasses} bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300`;
-    }
-  };
-
+export function EndpointLabel({ type, className }: EndpointLabelProps) {
+  let labelText = '';
+  let typeClasses = '';
+  
+  switch(type) {
+    case 'HTTP_SSE':
+      labelText = 'HTTP SSE';
+      typeClasses = "bg-blue-50 text-blue-700 border border-blue-200";
+      break;
+    case 'STDIO':
+      labelText = 'STDIO';
+      typeClasses = "bg-purple-50 text-purple-700 border border-purple-200";
+      break;
+    case 'WS':
+      labelText = 'WebSocket';
+      typeClasses = "bg-green-50 text-green-700 border border-green-200";
+      break;
+    case 'Custom':
+      labelText = 'Custom';
+      typeClasses = "bg-gray-50 text-gray-700 border border-gray-200";
+      break;
+  }
+  
+  const baseClasses = "px-2 py-0.5 text-xs font-medium rounded-md";
+  
   return (
-    <div className={`${getClassNames()} ${className || ''}`}>
-      {getDisplayType(type)}
-    </div>
+    <span className={cn(baseClasses, typeClasses, className)}>
+      {labelText}
+    </span>
   );
-};
+}

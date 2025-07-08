@@ -19,7 +19,6 @@ import { ServerDetails } from "@/components/new-layout/ServerDetails";
 import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog";
 import { ServerDebugDialog } from "@/components/new-layout/ServerDebugDialog";
 import { DeleteProfileDialog } from "@/components/new-layout/DeleteProfileDialog";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   hosts as initialHosts, 
   profiles as initialProfiles, 
@@ -32,7 +31,6 @@ import {
 } from "@/data/mockData";
 
 const NewLayout = () => {
-  const { isMobile, isSmallMobile } = useIsMobile();
   const [hostsList, setHostsList] = useState<Host[]>(initialHosts);
   const [profilesList, setProfilesList] = useState<Profile[]>(initialProfiles);
   const [serverInstances, setServerInstances] = useState<ServerInstance[]>(initialServerInstances);
@@ -87,13 +85,13 @@ const NewLayout = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'running':
-        return <CheckCircle className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-green-500`} />;
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'error':
-        return <XCircle className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-red-500`} />;
+        return <XCircle className="h-4 w-4 text-red-500" />;
       case 'connecting':
-        return <Clock className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-yellow-500`} />;
+        return <Clock className="h-4 w-4 text-yellow-500" />;
       default:
-        return <XCircle className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} text-gray-400`} />;
+        return <XCircle className="h-4 w-4 text-gray-400" />;
     }
   };
 
@@ -308,31 +306,31 @@ const NewLayout = () => {
   const statusSummary = getHostStatusSummary();
 
   return (
-    <div className={`flex h-screen bg-gray-50 ${isMobile ? 'flex-col' : ''}`}>
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className={`${isMobile ? 'w-full border-b' : 'w-80 border-r'} bg-white border-gray-200 flex flex-col ${isMobile ? 'max-h-[40vh]' : ''}`}>
-        <div className={`${isMobile ? 'mobile-header-compact' : 'p-6'} border-b border-gray-200`}>
-          <div className={`flex items-center justify-between ${isMobile ? 'mb-2' : 'mb-4'}`}>
-            <h1 className={`${isMobile ? 'mobile-compact-title' : 'text-xl'} font-semibold text-gray-900`}>MCP Dashboard</h1>
-            <Button size={isMobile ? "sm" : "default"} onClick={handleAddHost} className={isMobile ? 'mobile-button-compact' : ''}>
-              <Plus className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
-              {!isSmallMobile && 'Add Host'}
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-semibold text-gray-900">MCP Dashboard</h1>
+            <Button size="sm" onClick={handleAddHost}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Host
             </Button>
           </div>
           
           {/* Host Selection */}
           <div className="space-y-2">
-            <div className={`${isMobile ? 'mobile-compact-subtitle' : 'text-sm'} font-medium text-gray-700`}>Select Host</div>
+            <div className="text-sm font-medium text-gray-700">Select Host</div>
             <Select value={selectedHostId || ""} onValueChange={setSelectedHostId}>
-              <SelectTrigger className={isMobile ? 'h-8 text-sm' : ''}>
+              <SelectTrigger>
                 <SelectValue placeholder="Choose a host" />
               </SelectTrigger>
               <SelectContent>
                 {hostsList.map(host => (
                   <SelectItem key={host.id} value={host.id}>
                     <div className="flex items-center gap-2">
-                      <span className={isMobile ? 'text-xs' : ''}>{host.icon || '💻'}</span>
-                      <span className={isMobile ? 'text-xs' : ''}>{host.name}</span>
+                      <span>{host.icon || '💻'}</span>
+                      <span>{host.name}</span>
                       <div className={`w-2 h-2 rounded-full ${
                         host.connectionStatus === 'connected' ? 'bg-green-500' : 'bg-gray-400'
                       }`} />
@@ -344,20 +342,20 @@ const NewLayout = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className={`${isMobile ? 'mt-2' : 'mt-4'} flex gap-2`}>
+          <div className="mt-4 flex gap-2">
             <Button 
               variant="outline" 
-              size={isMobile ? "sm" : "default"}
+              size="sm" 
               onClick={handleAddClineHost}
-              className={`flex-1 ${isMobile ? 'mobile-button-compact' : ''}`}
+              className="flex-1"
             >
               + Cline
             </Button>
             <Button 
               variant="outline" 
-              size={isMobile ? "sm" : "default"}
+              size="sm" 
               onClick={handleCreateProfile}
-              className={`flex-1 ${isMobile ? 'mobile-button-compact' : ''}`}
+              className="flex-1"
             >
               + Profile
             </Button>
@@ -366,18 +364,18 @@ const NewLayout = () => {
 
         {/* Profile Section */}
         <div className="flex-1 overflow-hidden flex flex-col">
-          <div className={`${isMobile ? 'mobile-content-padding' : 'p-4'} border-b border-gray-200`}>
-            <div className={`flex items-center justify-between ${isMobile ? 'mb-2' : 'mb-3'}`}>
-              <h2 className={`${isMobile ? 'mobile-compact-text' : 'font-medium'} text-gray-900`}>Profiles</h2>
-              <Badge variant="secondary" className={isMobile ? 'mobile-badge-compact' : ''}>{hostProfiles.length}</Badge>
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-medium text-gray-900">Profiles</h2>
+              <Badge variant="secondary">{hostProfiles.length}</Badge>
             </div>
             
-            <ScrollArea className={isMobile ? 'max-h-24' : 'max-h-40'}>
-              <div className={`space-y-${isMobile ? '1' : '2'}`}>
+            <ScrollArea className="max-h-40">
+              <div className="space-y-2">
                 {hostProfiles.map(profile => (
                   <div
                     key={profile.id}
-                    className={`${isMobile ? 'mobile-card-compact' : 'p-3'} rounded-lg border cursor-pointer transition-colors ${
+                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                       selectedProfileId === profile.id
                         ? 'border-blue-200 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
@@ -387,19 +385,19 @@ const NewLayout = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`${isMobile ? 'mobile-compact-text' : 'text-sm'} font-medium`}>{profile.name}</span>
-                          <Badge variant={profile.enabled ? "default" : "secondary"} className={`text-xs ${isMobile ? 'mobile-badge-compact' : ''}`}>
+                          <span className="font-medium text-sm">{profile.name}</span>
+                          <Badge variant={profile.enabled ? "default" : "secondary"} className="text-xs">
                             {profile.enabled ? "Active" : "Inactive"}
                           </Badge>
                         </div>
-                        <div className={`${isMobile ? 'mobile-compact-subtitle' : 'text-xs text-gray-500'} mt-1`}>
+                        <div className="text-xs text-gray-500 mt-1">
                           {profile.instances.length} servers
                         </div>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className={`${isMobile ? 'h-5 w-5 p-0' : 'h-6 w-6 p-0'}`}>
-                            <MoreVertical className={`${isMobile ? 'h-2 w-2' : 'h-3 w-3'}`} />
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <MoreVertical className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -422,48 +420,48 @@ const NewLayout = () => {
           </div>
 
           {/* Servers Section */}
-          <div className={`flex-1 ${isMobile ? 'mobile-content-padding' : 'p-4'}`}>
-            <div className={`flex items-center justify-between ${isMobile ? 'mb-2' : 'mb-3'}`}>
-              <h2 className={`${isMobile ? 'mobile-compact-text' : 'font-medium'} text-gray-900`}>Servers</h2>
+          <div className="flex-1 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-medium text-gray-900">Servers</h2>
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className={isMobile ? 'mobile-badge-compact' : ''}>{statusSummary.total}</Badge>
-                <Button size={isMobile ? "sm" : "default"} onClick={handleAddServer} className={isMobile ? 'mobile-button-compact' : ''}>
-                  <Plus className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                <Badge variant="secondary">{statusSummary.total}</Badge>
+                <Button size="sm" onClick={handleAddServer}>
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             {selectedProfile && (
-              <div className={isMobile ? 'mb-2' : 'mb-4'}>
+              <div className="mb-4">
                 <Input
                   placeholder="Search servers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={isMobile ? 'h-7 text-sm' : 'h-8'}
+                  className="h-8"
                 />
               </div>
             )}
 
             <ScrollArea className="flex-1">
-              <div className={`space-y-${isMobile ? '1' : '2'}`}>
+              <div className="space-y-2">
                 {filteredServers.map(server => {
                   const definition = serverDefinitions.find(d => d.id === server.definitionId);
                   return (
                     <div
                       key={server.id}
-                      className={`${isMobile ? 'mobile-card-compact' : 'p-3'} border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer`}
+                      className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors cursor-pointer"
                       onClick={() => handleServerClick(server.id)}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className={`flex items-center gap-2 ${isMobile ? 'mb-0.5' : 'mb-1'}`}>
+                          <div className="flex items-center gap-2 mb-1">
                             {getStatusIcon(server.status)}
-                            <span className={`${isMobile ? 'mobile-compact-text' : 'text-sm'} font-medium mobile-text-truncate`}>{server.name}</span>
+                            <span className="font-medium text-sm">{server.name}</span>
                           </div>
-                          <div className={`${isMobile ? 'mobile-compact-subtitle' : 'text-xs text-gray-500'}`}>
+                          <div className="text-xs text-gray-500">
                             {definition?.name || 'Custom Server'}
                           </div>
-                          <Badge className={`text-xs mt-1 ${getStatusColor(server.status)} ${isMobile ? 'mobile-badge-compact' : ''}`}>
+                          <Badge className={`text-xs mt-1 ${getStatusColor(server.status)}`}>
                             {server.status}
                           </Badge>
                         </div>
@@ -472,7 +470,6 @@ const NewLayout = () => {
                             checked={server.enabled}
                             onCheckedChange={(enabled) => handleServerToggle(server.id, enabled)}
                             onClick={(e) => e.stopPropagation()}
-                            className={isMobile ? 'scale-75' : ''}
                           />
                         </div>
                       </div>
@@ -488,58 +485,58 @@ const NewLayout = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         {selectedHost && selectedProfile ? (
-          <div className={`h-full ${isMobile ? 'mobile-content-padding' : 'p-6'}`}>
-            <div className={isMobile ? 'mb-3' : 'mb-6'}>
-              <div className={`flex items-center justify-between ${isMobile ? 'mb-1' : 'mb-2'} ${isMobile ? 'mobile-flex-wrap' : ''}`}>
-                <h1 className={`${isMobile ? 'mobile-compact-title' : 'text-2xl'} font-bold text-gray-900 mobile-text-truncate`}>{selectedHost.name}</h1>
-                <div className={`flex items-center gap-2 ${isMobile ? 'mobile-flex-wrap' : ''}`}>
-                  <Badge className={`${selectedHost.connectionStatus === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} ${isMobile ? 'mobile-badge-compact' : ''}`}>
+          <div className="h-full p-6">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-2xl font-bold text-gray-900">{selectedHost.name}</h1>
+                <div className="flex items-center gap-2">
+                  <Badge className={selectedHost.connectionStatus === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                     {selectedHost.connectionStatus}
                   </Badge>
                   {selectedHost.configStatus === 'misconfigured' && (
-                    <Badge variant="destructive" className={isMobile ? 'mobile-badge-compact' : ''}>Misconfigured</Badge>
+                    <Badge variant="destructive">Misconfigured</Badge>
                   )}
                 </div>
               </div>
-              <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-gray-600'}`}>
+              <p className="text-gray-600">
                 Currently managing <strong>{selectedProfile.name}</strong> with {statusSummary.total} servers
               </p>
             </div>
 
             {/* Status Cards */}
-            <div className={`grid ${isMobile ? 'grid-cols-3 gap-2 mb-3' : 'grid-cols-1 md:grid-cols-3 gap-4 mb-6'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card>
-                <CardContent className={isMobile ? 'mobile-card-compact' : 'p-4'}>
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-sm text-gray-600'}`}>Total Servers</p>
-                      <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold`}>{statusSummary.total}</p>
+                      <p className="text-sm text-gray-600">Total Servers</p>
+                      <p className="text-2xl font-bold">{statusSummary.total}</p>
                     </div>
-                    <Server className={`${isMobile ? 'h-5 w-5' : 'h-8 w-8'} text-blue-500`} />
+                    <Server className="h-8 w-8 text-blue-500" />
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className={isMobile ? 'mobile-card-compact' : 'p-4'}>
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-sm text-gray-600'}`}>Running</p>
-                      <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-600`}>{statusSummary.running}</p>
+                      <p className="text-sm text-gray-600">Running</p>
+                      <p className="text-2xl font-bold text-green-600">{statusSummary.running}</p>
                     </div>
-                    <CheckCircle className={`${isMobile ? 'h-5 w-5' : 'h-8 w-8'} text-green-500`} />
+                    <CheckCircle className="h-8 w-8 text-green-500" />
                   </div>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardContent className={isMobile ? 'mobile-card-compact' : 'p-4'}>
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-sm text-gray-600'}`}>Errors</p>
-                      <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-red-600`}>{statusSummary.errors}</p>
+                      <p className="text-sm text-gray-600">Errors</p>
+                      <p className="text-2xl font-bold text-red-600">{statusSummary.errors}</p>
                     </div>
-                    <AlertTriangle className={`${isMobile ? 'h-5 w-5' : 'h-8 w-8'} text-red-500`} />
+                    <AlertTriangle className="h-8 w-8 text-red-500" />
                   </div>
                 </CardContent>
               </Card>
@@ -547,44 +544,43 @@ const NewLayout = () => {
 
             {/* Server List */}
             <Card>
-              <CardHeader className={isMobile ? 'mobile-header-compact' : ''}>
-                <CardTitle className={isMobile ? 'mobile-compact-title' : ''}>Server Management</CardTitle>
+              <CardHeader>
+                <CardTitle>Server Management</CardTitle>
               </CardHeader>
-              <CardContent className={isMobile ? 'mobile-content-padding' : ''}>
+              <CardContent>
                 {filteredServers.length > 0 ? (
-                  <div className={`space-y-${isMobile ? '2' : '3'}`}>
+                  <div className="space-y-3">
                     {filteredServers.map(server => {
                       const definition = serverDefinitions.find(d => d.id === server.definitionId);
                       return (
                         <div
                           key={server.id}
-                          className={`flex items-center justify-between ${isMobile ? 'mobile-card-compact' : 'p-4'} border border-gray-200 rounded-lg hover:border-gray-300 transition-colors ${isMobile ? 'mobile-flex-wrap gap-2' : ''}`}
+                          className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
                         >
-                          <div className={`flex items-center ${isMobile ? 'gap-2 flex-1 min-w-0' : 'gap-4'}`}>
-                            <Avatar className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'}`}>
-                              <AvatarFallback className={isMobile ? 'text-xs' : ''}>{definition?.icon || server.name.charAt(0)}</AvatarFallback>
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback>{definition?.icon || server.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div className="min-w-0 flex-1">
-                              <h3 className={`${isMobile ? 'mobile-compact-text' : 'font-medium'} mobile-text-truncate`}>{server.name}</h3>
-                              <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-sm text-gray-500'} mobile-text-truncate`}>{definition?.name || 'Custom Server'}</p>
-                              <div className={`flex items-center gap-2 ${isMobile ? 'mt-0.5' : 'mt-1'}`}>
+                            <div>
+                              <h3 className="font-medium">{server.name}</h3>
+                              <p className="text-sm text-gray-500">{definition?.name || 'Custom Server'}</p>
+                              <div className="flex items-center gap-2 mt-1">
                                 {getStatusIcon(server.status)}
-                                <Badge className={`text-xs ${getStatusColor(server.status)} ${isMobile ? 'mobile-badge-compact' : ''}`}>
+                                <Badge className={`text-xs ${getStatusColor(server.status)}`}>
                                   {server.status}
                                 </Badge>
                               </div>
                             </div>
                           </div>
-                          <div className={`flex items-center gap-2 ${isMobile ? 'mobile-actions-compact' : ''}`}>
+                          <div className="flex items-center gap-2">
                             <Switch
                               checked={server.enabled}
                               onCheckedChange={(enabled) => handleServerToggle(server.id, enabled)}
-                              className={isMobile ? 'scale-75' : ''}
                             />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size={isMobile ? "sm" : "default"} className={isMobile ? 'mobile-button-compact' : ''}>
-                                  <MoreVertical className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -612,14 +608,14 @@ const NewLayout = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Server className={`${isMobile ? 'h-8 w-8' : 'h-12 w-12'} text-gray-400 mx-auto mb-4`} />
-                    <h3 className={`${isMobile ? 'mobile-compact-title' : 'text-lg'} font-medium text-gray-900 mb-2`}>No servers found</h3>
-                    <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-gray-500'} mb-4`}>
+                    <Server className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No servers found</h3>
+                    <p className="text-gray-500 mb-4">
                       {searchQuery ? 'No servers match your search criteria.' : 'Add servers to get started.'}
                     </p>
                     {!searchQuery && (
-                      <Button onClick={handleAddServer} size={isMobile ? "sm" : "default"} className={isMobile ? 'mobile-button-compact' : ''}>
-                        <Plus className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} />
+                      <Button onClick={handleAddServer}>
+                        <Plus className="h-4 w-4 mr-2" />
                         Add Server
                       </Button>
                     )}
@@ -631,9 +627,9 @@ const NewLayout = () => {
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <Users className={`${isMobile ? 'h-8 w-8' : 'h-12 w-12'} text-gray-400 mx-auto mb-4`} />
-              <h3 className={`${isMobile ? 'mobile-compact-title' : 'text-lg'} font-medium text-gray-900 mb-2`}>Select a Host and Profile</h3>
-              <p className={`${isMobile ? 'mobile-compact-subtitle' : 'text-gray-500'}`}>Choose a host and profile to manage your MCP servers.</p>
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Host and Profile</h3>
+              <p className="text-gray-500">Choose a host and profile to manage your MCP servers.</p>
             </div>
           </div>
         )}

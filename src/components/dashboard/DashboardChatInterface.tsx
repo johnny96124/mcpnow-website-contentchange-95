@@ -1,18 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Bot } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MessageThread } from '@/components/chat/MessageThread/MessageThread';
 import { MessageInput } from '@/components/chat/InputArea/MessageInput';
-import { AddInstanceDialog } from '@/components/servers/AddInstanceDialog';
-import { ResponsiveActions } from '@/components/chat/ResponsiveActions';
+import { ConversationExport } from '@/components/chat/ConversationExport';
 import { useChatHistory } from '@/components/chat/hooks/useChatHistory';
 import { useMCPServers } from '@/components/chat/hooks/useMCPServers';
 import { useStreamingChat } from '@/components/chat/hooks/useStreamingChat';
 import { useToast } from '@/hooks/use-toast';
 import { Message, MessageAttachment, PendingToolCall } from '@/components/chat/types/chat';
-import { ServerRecommendation } from '@/components/chat/MessageThread/ServerRecommendationCard';
-import { EndpointType } from '@/data/mockData';
 
 interface AttachedFile {
   id: string;
@@ -43,15 +41,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
   
   const [isSending, setIsSending] = useState(false);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
-  const [configDialog, setConfigDialog] = useState<{
-    open: boolean;
-    server: ServerRecommendation | null;
-    messageId: string | null;
-  }>({
-    open: false,
-    server: null,
-    messageId: null
-  });
 
   const connectedServers = getConnectedServers();
   
@@ -115,16 +104,7 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
     try {
       // 创建AI助手消息，开始流式生成
       const aiMessageId = `msg-${Date.now()}-ai`;
-      
-      // 50%概率显示工具调用，但工具调用不影响服务器推荐的显示
-      const shouldShowToolCalls = Math.random() < 0.5;
-      
-      let fullContent: string;
-      if (shouldShowToolCalls) {
-        fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。同时，我也为您推荐一些相关的MCP服务器。`;
-      } else {
-        fullContent = `我理解您的请求"${content}"。根据您的需求，我为您推荐一些相关的MCP服务器，这些服务器可以增强我们的对话能力，帮助您更好地完成任务。`;
-      }
+      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
 
       const aiMessage: Message = {
         id: aiMessageId,
@@ -139,26 +119,23 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
       // 先完成流式文字生成
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
-      if (shouldShowToolCalls) {
-        // 如果显示工具调用，生成工具调用序列
-        const toolCalls = generateSequentialToolCalls(content, selectedServers);
-        const messageWithTools: Partial<Message> = {
-          pendingToolCalls: toolCalls,
-          toolCallStatus: 'pending',
-          currentToolIndex: 0
-        };
+      // 文字生成完成后，生成工具调用序列
+      const toolCalls = generateSequentialToolCalls(content, selectedServers);
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls: toolCalls,
+        toolCallStatus: 'pending',
+        currentToolIndex: 0
+      };
 
-        setCurrentMessages(prev => 
-          prev.map(msg => 
-            msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
-          )
-        );
-        
-        if (currentSession) {
-          updateMessage(sessionId, aiMessageId, messageWithTools);
-        }
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
+      );
+      
+      if (currentSession) {
+        updateMessage(sessionId, aiMessageId, messageWithTools);
       }
-      // 注意：无论是否显示工具调用，服务器推荐卡片都会显示，因为它们是独立的逻辑
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -370,58 +347,36 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
     );
   }
 
-  const handleConfigureServer = (messageId: string, server: ServerRecommendation) => {
-    console.log('handleConfigureServer called:', { messageId, server });
-    setConfigDialog({
-      open: true,
-      server,
-      messageId
-    });
-  };
-
-  const handleServerConfigComplete = (formData: any) => {
-    // Mock success message
-    toast({
-      title: "服务器配置成功",
-      description: `${configDialog.server?.name} 已成功添加到您的配置文件中`,
-    });
-
-    // 模拟添加成功反馈到对话中
-    if (currentSession && configDialog.messageId) {
-      const successMessage: Message = {
-        id: `msg-${Date.now()}-config-success`,
-        role: 'assistant',
-        content: `太好了！我已经帮您成功配置了 ${configDialog.server?.name}。现在您可以使用这个服务器的功能来增强我们的对话体验。这个服务器已经添加到您的配置文件中，您可以在主页面看到它。`,
-        timestamp: Date.now()
-      };
-
-      setCurrentMessages(prev => [...prev, successMessage]);
-      addMessage(currentSession.id, successMessage);
-    }
-
-    setConfigDialog({ open: false, server: null, messageId: null });
-  };
-
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col" style={{ maxWidth: 'calc(100vw - 240px)', marginLeft: 'auto' }}>
+    <div className="fixed inset-0 bg-background z-50 flex flex-col">
       {/* Header */}
-      <div className="border-b p-4 flex items-center justify-between min-w-0">
-        <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="font-semibold truncate">
+      <div className="border-b p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h2 className="font-semibold">
               {currentSession?.title || 'MCP Now AI 对话'}
             </h2>
-            <p className="text-sm text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground">
               使用 {selectedServers.length} 个连接的服务器
             </p>
           </div>
         </div>
-        <div className="flex-shrink-0" style={{ minWidth: '80px', maxWidth: '200px' }}>
-          <ResponsiveActions
-            onClose={onClose}
+        <div className="flex items-center gap-2">
+          <ConversationExport
             messages={currentMessages}
             sessionTitle={currentSession?.title}
           />
+          
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -435,7 +390,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
             onUpdateMessage={handleToolAction}
             onDeleteMessage={handleDeleteMessage}
             onEditMessage={handleEditMessage}
-            onConfigureServer={handleConfigureServer}
           />
         ) : (
           <div className="flex items-center justify-center h-full">
@@ -460,27 +414,6 @@ export const DashboardChatInterface: React.FC<DashboardChatInterfaceProps> = ({ 
           servers={connectedServers}
         />
       </div>
-
-      {/* Server Configuration Dialog */}
-      <AddInstanceDialog
-        open={configDialog.open}
-        onOpenChange={(open) => setConfigDialog(prev => ({ ...prev, open }))}
-        serverDefinition={configDialog.server ? {
-          id: configDialog.server.id,
-          name: configDialog.server.name,
-          type: configDialog.server.type === 'SSE' ? 'HTTP_SSE' : configDialog.server.type as EndpointType,
-          description: configDialog.server.description,
-          isOfficial: configDialog.server.isOfficial || false,
-          categories: ['Development'],
-          downloads: 0,
-          url: '',
-          commandArgs: '',
-          environment: {},
-          headers: {}
-        } : null}
-        onCreateInstance={handleServerConfigComplete}
-        editMode={false}
-      />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, MessageSquare, Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,8 +40,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
   const { toast } = useToast();
   
   const [isSending, setIsSending] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [currentStreamingTimer, setCurrentStreamingTimer] = useState<NodeJS.Timeout | null>(null);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
 
   const connectedServers = getConnectedServers();
@@ -59,25 +58,10 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     }
   }, [currentSession, selectedServers]);
 
-  const handleStopGeneration = () => {
-    if (currentStreamingTimer) {
-      clearInterval(currentStreamingTimer);
-      setCurrentStreamingTimer(null);
-    }
-    setIsGenerating(false);
-    setIsSending(false);
-    
-    toast({
-      title: "生成已停止",
-      description: "AI回复已被用户终止",
-    });
-  };
-
   const handleSendMessage = async (content: string, attachedFiles?: AttachedFile[]) => {
-    if (selectedServers.length === 0 || isSending || isGenerating) return;
+    if (selectedServers.length === 0 || isSending) return;
     
     setIsSending(true);
-    setIsGenerating(true);
 
     // Process attachments
     const attachments: MessageAttachment[] = [];
@@ -128,9 +112,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
 
       await simulateStreamingText(sessionId, aiMessageId, fullContent);
       
-      // 检查是否被用户停止
-      if (!isGenerating) return;
-      
       const toolCalls = generateSequentialToolCalls(content, selectedServers);
       const messageWithTools: Partial<Message> = {
         pendingToolCalls: toolCalls,
@@ -160,7 +141,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
       addMessage(sessionId, errorMessage);
     } finally {
       setIsSending(false);
-      setIsGenerating(false);
     }
   };
 
@@ -170,14 +150,6 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     
     return new Promise<void>((resolve) => {
       const streamInterval = setInterval(() => {
-        // 检查是否被用户停止
-        if (!isGenerating) {
-          clearInterval(streamInterval);
-          setCurrentStreamingTimer(null);
-          resolve();
-          return;
-        }
-
         if (currentIndex < words.length) {
           const partialContent = words.slice(0, currentIndex + 1).join('');
           
@@ -194,12 +166,9 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
           currentIndex++;
         } else {
           clearInterval(streamInterval);
-          setCurrentStreamingTimer(null);
           resolve();
         }
       }, 25);
-      
-      setCurrentStreamingTimer(streamInterval);
     });
   };
 
@@ -349,7 +318,7 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
     deleteMessage(currentSession.id, messageId);
   };
 
-  const canSendMessage = selectedServers.length > 0 && !isSending && !isGenerating;
+  const canSendMessage = selectedServers.length > 0 && !isSending;
 
   if (connectedServers.length === 0) {
     return (
@@ -431,9 +400,7 @@ export const HostsChatInterface: React.FC<HostsChatInterfaceProps> = ({ onClose 
       <div className="border-t p-4">
         <MessageInput
           onSendMessage={handleSendMessage}
-          onStopGeneration={handleStopGeneration}
           disabled={!canSendMessage}
-          isGenerating={isGenerating}
           placeholder="输入您的消息..."
           selectedServers={selectedServers}
           servers={connectedServers}

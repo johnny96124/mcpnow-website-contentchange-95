@@ -200,40 +200,10 @@
     animation: fadeIn 0.3s ease-out forwards;
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.3s ease-out forwards;
-  }
-
-  .animate-slide-up-from-bottom {
-    animation: slideUpFromBottom 0.3s ease-out forwards;
-  }
-
   @keyframes fadeIn {
     from {
       opacity: 0;
       transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideUpFromBottom {
-    from {
-      opacity: 0;
-      transform: translateY(100%);
     }
     to {
       opacity: 1;
@@ -255,108 +225,5 @@
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-
-  /* Mobile responsive optimizations */
-  @media (max-width: 768px) {
-    .mobile-compact-text {
-      @apply text-sm leading-tight;
-    }
-    
-    .mobile-compact-title {
-      @apply text-lg font-medium;
-    }
-    
-    .mobile-compact-subtitle {
-      @apply text-xs text-muted-foreground;
-    }
-    
-    .mobile-compact-padding {
-      @apply p-2;
-    }
-    
-    .mobile-compact-margin {
-      @apply m-1;
-    }
-
-    .mobile-table-responsive th,
-    .mobile-table-responsive td {
-      @apply px-2 py-1 text-sm;
-    }
-
-    .mobile-button-compact {
-      @apply px-2 py-1 text-xs h-7;
-    }
-
-    .mobile-badge-compact {
-      @apply px-1.5 py-0.5 text-xs;
-    }
-
-    .mobile-icon-compact {
-      @apply w-4 h-4;
-    }
-
-    .mobile-card-compact {
-      @apply p-3 space-y-2;
-    }
-
-    .mobile-header-compact {
-      @apply px-3 py-2;
-    }
-
-    .mobile-sidebar-compact {
-      @apply w-64;
-    }
-
-    .mobile-content-padding {
-      @apply px-2 py-3;
-    }
-
-    .mobile-flex-wrap {
-      @apply flex-wrap gap-1;
-    }
-
-    .mobile-overflow-hidden {
-      @apply overflow-hidden;
-    }
-
-    .mobile-text-truncate {
-      @apply truncate max-w-[120px];
-    }
-
-    .mobile-actions-compact {
-      @apply space-x-1;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .sm-mobile-stack {
-      @apply flex-col space-y-2;
-    }
-    
-    .sm-mobile-full-width {
-      @apply w-full;
-    }
-    
-    .sm-mobile-hide {
-      @apply hidden;
-    }
-    
-    .sm-mobile-text-xs {
-      @apply text-xs;
-    }
-
-    .sm-mobile-compact-grid {
-      @apply grid-cols-1;
-    }
-  }
-
-  /* Table text consistency - match sidebar text size */
-  .table-consistent-text th {
-    @apply text-sm font-medium;
-  }
-  
-  .table-consistent-text td {
-    @apply text-sm;
   }
 }

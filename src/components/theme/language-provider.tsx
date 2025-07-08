@@ -20,32 +20,18 @@ export function LanguageProvider({
   defaultLanguage = "zh",
 }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>(() => {
-    // Try to get the language from localStorage with error handling
-    try {
-      const storedLanguage = localStorage.getItem("language") as Language;
-      return storedLanguage || defaultLanguage;
-    } catch (error) {
-      console.warn("Failed to read language from localStorage:", error);
-      return defaultLanguage;
-    }
+    // Try to get the language from localStorage
+    const storedLanguage = localStorage.getItem("language") as Language;
+    return storedLanguage || defaultLanguage;
   });
 
   // Update localStorage when language changes
   useEffect(() => {
-    try {
-      localStorage.setItem("language", language);
-    } catch (error) {
-      console.warn("Failed to save language to localStorage:", error);
-    }
+    localStorage.setItem("language", language);
   }, [language]);
 
-  const value = React.useMemo(() => ({
-    language,
-    setLanguage,
-  }), [language, setLanguage]);
-
   return (
-    <LanguageContext.Provider value={value}>
+    <LanguageContext.Provider value={{ language, setLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

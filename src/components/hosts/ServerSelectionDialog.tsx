@@ -201,49 +201,44 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
                   <div className="mb-6">
                     <h3 className="text-sm font-medium mb-2">Added Servers</h3>
                     <div className="space-y-2">
-                      {filteredExistingInstances.map((instance) => {
-                        const serverDef = serverDefinitions.find(def => def.id === instance.definitionId);
-                        return (
-                          <div
-                            key={instance.id}
-                            className="flex items-start justify-between p-4 border rounded-lg"
-                          >
-                            <div className="flex items-start space-x-4">
-                              <ServerLogo name={instance.name} className="flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-medium text-sm truncate">{instance.name}</h4>
-                                  {serverDef && (
-                                    <EndpointLabel 
-                                      type={serverDef.type} 
-                                    />
+                      {filteredExistingInstances.map((instance) => (
+                        <div
+                          key={instance.id}
+                          className="flex items-start justify-between p-4 border rounded-lg"
+                        >
+                          <div className="flex items-start space-x-4">
+                            <ServerLogo name={instance.name} className="flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-medium text-sm truncate">{instance.name}</h4>
+                                <EndpointLabel 
+                                  type={serverDefinitions.find(def => def.id === instance.definitionId)?.type || 'Custom'} 
+                                />
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                <div className="flex flex-col space-y-1">
+                                  {instance.description && (
+                                    <span>{instance.description}</span>
                                   )}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  <div className="flex flex-col space-y-1">
-                                    {instance.description && (
-                                      <span>{instance.description}</span>
-                                    )}
-                                    {instance.addedAt && (
-                                      <span className="flex items-center">
-                                        <Clock className="h-3 w-3 mr-1" /> 
-                                        Added on {format(instance.addedAt, "MMM dd, yyyy")}
-                                      </span>
-                                    )}
-                                  </div>
+                                  {instance.addedAt && (
+                                    <span className="flex items-center">
+                                      <Clock className="h-3 w-3 mr-1" /> 
+                                      Added on {format(instance.addedAt, "MMM dd, yyyy")}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>
-                            <Button 
-                              size="sm" 
-                              variant="secondary"
-                              onClick={() => handleAddExistingInstance(instance)}
-                            >
-                              Add
-                            </Button>
                           </div>
-                        );
-                      })}
+                          <Button 
+                            size="sm" 
+                            variant="secondary"
+                            onClick={() => handleAddExistingInstance(instance)}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

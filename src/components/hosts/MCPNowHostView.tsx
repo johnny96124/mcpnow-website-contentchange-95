@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   MessageSquare, Bot, Server, 
@@ -26,8 +27,10 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { ModelSelector } from "@/components/chat/InputArea/ModelSelector";
 import { ServerSelector } from "@/components/chat/ServerSelector/ServerSelector";
 import { MCPServer, MCPProfile } from "@/components/chat/types/chat";
+import { InlineChatPanel } from "./InlineChatPanel";
 
 interface MCPNowHostViewProps {
   host: Host;
@@ -57,6 +60,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   onStartAIChat
 }) => {
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
@@ -108,13 +112,18 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   };
 
   const handleStartAIChat = () => {
+    setIsChatOpen(true);
+    toast({
+      title: "AI Chat Started",
+      description: "AI chat panel has been opened",
+    });
     if (onStartAIChat) {
       onStartAIChat();
-      toast({
-        title: "AI Chat Started",
-        description: "AI chat panel has been opened",
-      });
     }
+  };
+
+  const handleToggleChat = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   const getServerLoad = (serverId: string) => {
@@ -178,6 +187,33 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
         getServerLoad={getServerLoad}
         hostConnectionStatus="connected"
       />
+
+      {/* AI Chat Panel - Inline Display */}
+      {isChatOpen && (
+        <Card className="border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                AI Chat
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleToggleChat}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                收起
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="h-96 border-t">
+              <InlineChatPanel />
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <ServerSelectionDialog 
         open={serverSelectionDialogOpen} 
