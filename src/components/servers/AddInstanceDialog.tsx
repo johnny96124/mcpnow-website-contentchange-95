@@ -126,6 +126,11 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
           defaultData.description = "EverArt API integration for image generation";
           defaultData.env = { EVERART_API_KEY: "" };
           break;
+        case 'codeassistant api':
+        case 'codeassistant':
+          defaultData.args = "--host localhost --port 8080";
+          defaultData.description = "AI-powered code assistant API for development support";
+          break;
         default:
           // Keep default values
           break;
