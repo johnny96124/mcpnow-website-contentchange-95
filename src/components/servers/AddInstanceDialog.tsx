@@ -200,19 +200,6 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {/* AI Install Option - Only show for non-edit mode */}
-        {!editMode && onStartAIChat && (
-          <div className="px-6 pb-4">
-            <Button 
-              variant="outline" 
-              onClick={handleAIInstall}
-              className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/50"
-            >
-              <Bot className="h-4 w-4 mr-2" />
-              AI 辅助安装
-            </Button>
-          </div>
-        )}
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -265,13 +252,29 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!formData.name || (!isStdio && !formData.url)}>
-            {editMode ? "Update" : "Create"} Instance
-          </Button>
+        <DialogFooter className="flex justify-between">
+          {/* AI Install Option - Only show for non-edit mode */}
+          {!editMode && onStartAIChat ? (
+            <Button 
+              variant="outline" 
+              onClick={handleAIInstall}
+              className="border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/50"
+            >
+              <Bot className="h-4 w-4 mr-2" />
+              AI 辅助安装
+            </Button>
+          ) : (
+            <div />
+          )}
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={!formData.name || (!isStdio && !formData.url)}>
+              {editMode ? "Update" : "Create"} Instance
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
 
