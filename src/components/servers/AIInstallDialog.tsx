@@ -243,27 +243,42 @@ export const AIInstallDialog: React.FC<AIInstallDialogProps> = ({
         </div>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <StepIcon className="h-5 w-5 text-primary" />
-              <span className="font-medium">{stepLabels[progress.step]}</span>
-              <Badge variant="outline">{currentStepIndex + 1}/{totalSteps}</Badge>
-            </div>
-            
-            <Progress value={progressPercentage} className="mb-4" />
-            
+          <CardContent className="p-6">
             {progress.step === 'confirm' && (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  AI助手将帮助您：
-                </p>
-                <ul className="text-sm space-y-1 text-muted-foreground pl-4">
-                  <li>• 选择最适合的连接模式</li>
-                  <li>• 自动检查并安装依赖项</li>
-                  <li>• 配置必要的API密钥</li>
-                  <li>• 验证服务器连接</li>
-                  <li>• 完成自动化配置</li>
-                </ul>
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2">即将安装：{serverDefinition?.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {serverDefinition?.description}
+                  </p>
+                  <div className="flex justify-center mt-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {serverDefinition?.type} 连接
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-medium text-center">AI助手将为您完成以下步骤：</h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Settings className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">智能选择最佳连接模式</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Server className="h-4 w-4 text-green-600" />
+                      <span className="text-sm">自动检查并配置依赖项</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Key className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm">引导配置必要的API密钥</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Play className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm">验证服务器连接并完成配置</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
             
