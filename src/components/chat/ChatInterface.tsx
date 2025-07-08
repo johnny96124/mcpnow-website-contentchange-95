@@ -79,36 +79,32 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         const sessionId = createNewChat(selectedServers.length > 0 ? selectedServers : [connectedServers[0].id], selectedProfile);
         selectChat(sessionId.id);
         
-        // Add initial context messages and start the installation flow
-        for (const message of initialContext.messages) {
-          const msg: Message = {
-            id: `msg-${Date.now()}-${Math.random()}`,
-            role: message.role,
-            content: message.content,
-            timestamp: Date.now()
-          };
-          addMessage(sessionId.id, msg);
-          setCurrentMessages(prev => [...prev, msg]);
-        }
-
-        // Display the installation progress message
-        const progressMsg: Message = {
-          id: `msg-${Date.now()}-progress`,
+        // Add only the initial welcome message
+        const welcomeMsg: Message = {
+          id: `msg-${Date.now()}-welcome`,
           role: 'assistant',
-          content: `正在为您准备 **${initialContext.serverDefinition?.name}** 的安装环境...\n\n**安装步骤概览：**\n1. ✅ 确认安装意图\n2. 🔄 选择连接模式\n3. ⏳ 检查依赖项\n4. ⏳ 配置API密钥\n5. ⏳ 完成配置\n6. ⏳ 验证连接\n\n请回复"开始"或"continue"来继续安装过程。`,
+          content: `你好！我将协助你安装 **${initialContext.serverDefinition?.name}** 服务器。
+
+**服务器信息：**
+- 名称：${initialContext.serverDefinition?.name}
+- 类型：${initialContext.serverDefinition?.type}
+- 描述：${initialContext.serverDefinition?.description}
+
+请确认是否要开始安装此服务器？回复"确认"或"开始"来继续安装过程。`,
           timestamp: Date.now()
         };
-        addMessage(sessionId.id, progressMsg);
-        setCurrentMessages(prev => [...prev, progressMsg]);
+        
+        addMessage(sessionId.id, welcomeMsg);
+        setCurrentMessages([welcomeMsg]);
 
         toast({
           title: "AI安装助手已启动",
-          description: `正在准备安装 ${initialContext.serverDefinition?.name}`,
+          description: `准备安装 ${initialContext.serverDefinition?.name}`,
         });
       };
       
       // Delay to ensure everything is initialized
-      setTimeout(handleInitializeInstallation, 500);
+      setTimeout(handleInitializeInstallation, 100);
     }
   }, [mode, initialContext, connectedServers, createNewChat, selectChat, addMessage, selectedServers, selectedProfile, toast]);
 
