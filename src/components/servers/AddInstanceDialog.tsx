@@ -14,8 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
 import { ServerDefinition } from "@/data/mockData";
+import { AIInstallDialog } from "./AIInstallDialog";
+import { Bot } from "lucide-react";
 
 export interface InstanceFormValues {
   name: string;
@@ -36,6 +39,7 @@ interface AddInstanceDialogProps {
   editMode?: boolean;
   instanceId?: string;
   availableHosts?: any[];
+  onStartAIChat?: (context: any) => void;
 }
 
 export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
@@ -46,7 +50,8 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
   initialValues,
   editMode = false,
   instanceId,
-  availableHosts
+  availableHosts,
+  onStartAIChat
 }) => {
   const [formData, setFormData] = useState<InstanceFormValues>({
     name: initialValues?.name || "",
@@ -57,6 +62,8 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
     headers: initialValues?.headers || {},
     instanceId: instanceId
   });
+
+  const [showAIInstallDialog, setShowAIInstallDialog] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -71,6 +78,23 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
     } else {
       onCreateInstance(formData);
     }
+  };
+
+  const handleAIInstall = () => {
+    setShowAIInstallDialog(true);
+  };
+
+  const handleAIInstallComplete = (instanceData: any) => {
+    // Convert AI install data to form format
+    const aiFormData: InstanceFormValues = {
+      name: instanceData.name || serverDefinition?.name || "",
+      url: instanceData.url || "",
+      args: instanceData.args || "",
+      description: `AI assisted installation of ${serverDefinition?.name}`,
+    };
+    onCreateInstance(aiFormData);
+    setShowAIInstallDialog(false);
+    onOpenChange(false);
   };
 
   if (!serverDefinition) return null;
@@ -91,6 +115,36 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
             {isCustom && <Badge variant="outline">Custom</Badge>}
           </DialogTitle>
         </DialogHeader>
+
+        {/* AI Install Option - Only show for non-edit mode */}
+        {!editMode && onStartAIChat && (
+          <div className="px-6 pb-4">
+            <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <Bot className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-blue-900 dark:text-blue-100">AI 辅助安装</h3>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        让AI助手引导您完成服务器的自动化安装和配置
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleAIInstall}
+                    className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300"
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    使用AI安装
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -152,6 +206,14 @@ export const AddInstanceDialog: React.FC<AddInstanceDialogProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <AIInstallDialog
+        open={showAIInstallDialog}
+        onOpenChange={setShowAIInstallDialog}
+        serverDefinition={serverDefinition}
+        onComplete={handleAIInstallComplete}
+        onStartAIChat={onStartAIChat || (() => {})}
+      />
     </Dialog>
   );
 };

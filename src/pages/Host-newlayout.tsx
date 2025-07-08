@@ -17,6 +17,7 @@ import { ServerHistoryDialog } from "@/components/new-layout/ServerHistoryDialog
 import { ServerErrorDialog } from "@/components/hosts/new-layout/ServerErrorDialog";
 import { ServerDetailsDialog } from "@/components/hosts/new-layout/ServerDetailsDialog";
 import { useHostProfiles } from "@/hooks/useHostProfiles";
+import { useAIInstallation } from "@/hooks/useAIInstallation";
 
 export default function HostNewLayout() {
   const [hosts, setHosts] = useState<any[]>([]);
@@ -37,6 +38,7 @@ export default function HostNewLayout() {
   const [errorDetails, setErrorDetails] = useState<string>("");
   const { toast } = useToast();
   const { hostProfiles, allProfiles, getProfileById, handleProfileChange, addInstanceToProfile } = useHostProfiles();
+  const { startAIInstallation } = useAIInstallation();
 
   // Listen for custom event to open manual dialog
   useEffect(() => {
@@ -458,6 +460,7 @@ export default function HostNewLayout() {
         open={isServerSelectionOpen}
         onOpenChange={setIsServerSelectionOpen}
         onAddServers={handleAddServer}
+        onStartAIChat={startAIInstallation}
       />
       
       <ServerDebugDialog

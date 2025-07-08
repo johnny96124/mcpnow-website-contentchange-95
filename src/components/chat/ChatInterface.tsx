@@ -19,7 +19,15 @@ interface AttachedFile {
   preview?: string;
 }
 
-export const ChatInterface = () => {
+interface ChatInterfaceProps {
+  mode?: string;
+  initialContext?: any;
+}
+
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
+  mode, 
+  initialContext 
+}) => {
   const { servers, profiles, getConnectedServers } = useMCPServers();
   const { 
     chatSessions, 
@@ -62,6 +70,31 @@ export const ChatInterface = () => {
       setCurrentMessages([]);
     }
   }, [currentSession]);
+
+  // Handle AI installation mode initialization
+  useEffect(() => {
+    if (mode === 'installation' && initialContext && connectedServers.length > 0) {
+      // Initialize AI installation session
+      const handleInitializeInstallation = async () => {
+        const sessionId = createNewChat(selectedServers.length > 0 ? selectedServers : [connectedServers[0].id], selectedProfile);
+        selectChat(sessionId.id);
+        
+        // Add initial context messages
+        for (const message of initialContext.messages) {
+          const msg: Message = {
+            id: `msg-${Date.now()}-${Math.random()}`,
+            role: message.role,
+            content: message.content,
+            timestamp: Date.now()
+          };
+          addMessage(sessionId.id, msg);
+        }
+      };
+      
+      // Delay to ensure everything is initialized
+      setTimeout(handleInitializeInstallation, 100);
+    }
+  }, [mode, initialContext, connectedServers, createNewChat, selectChat, addMessage, selectedServers, selectedProfile]);
 
   const handleNewChat = () => {
     selectChat('');

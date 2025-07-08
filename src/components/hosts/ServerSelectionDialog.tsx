@@ -18,6 +18,7 @@ interface ServerSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddServers: (servers: ServerInstance[]) => void;
+  onStartAIChat?: (context: any) => void;
 }
 
 // Enhanced instance type with additional metadata
@@ -53,6 +54,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
   open,
   onOpenChange,
   onAddServers,
+  onStartAIChat,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -302,6 +304,7 @@ export const ServerSelectionDialog: React.FC<ServerSelectionDialogProps> = ({
         onOpenChange={setShowInstanceDialog}
         serverDefinition={selectedServer}
         onCreateInstance={handleCreateInstance}
+        onStartAIChat={onStartAIChat}
       />
 
       <AddServerDialog

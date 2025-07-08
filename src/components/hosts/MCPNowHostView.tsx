@@ -21,6 +21,7 @@ import { ServerItem } from "./ServerItem";
 import { ServerSelectionDialog } from "./ServerSelectionDialog";
 import { CollapsibleServerManagement } from "./CollapsibleServerManagement";
 import { Separator } from "@/components/ui/separator";
+import { useAIInstallation } from "@/hooks/useAIInstallation";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -62,6 +63,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
   const [serverSelectionDialogOpen, setServerSelectionDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const { toast } = useToast();
+  const { startAIInstallation } = useAIInstallation();
 
   const currentProfile = profiles.find(p => p.id === selectedProfileId);
 
@@ -219,6 +221,7 @@ export const MCPNowHostView: React.FC<MCPNowHostViewProps> = ({
         open={serverSelectionDialogOpen} 
         onOpenChange={setServerSelectionDialogOpen}
         onAddServers={handleAddServers}
+        onStartAIChat={startAIInstallation}
       />
     </div>
   );

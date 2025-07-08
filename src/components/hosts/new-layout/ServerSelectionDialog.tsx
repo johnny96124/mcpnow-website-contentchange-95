@@ -9,21 +9,24 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { ServerLogo } from "@/components/servers/ServerLogo";
 import { EndpointLabel } from "@/components/status/EndpointLabel";
-import { Search, Check, ChevronLeft, Plus } from "lucide-react";
+import { Search, Check, ChevronLeft, Plus, Bot } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ServerSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddServers: (instances: any[]) => void;
+  onStartAIChat?: (context: any) => void;
 }
 
 export function ServerSelectionDialog({
   open,
   onOpenChange,
-  onAddServers
+  onAddServers,
+  onStartAIChat
 }: ServerSelectionDialogProps) {
   const [showAddedOnly, setShowAddedOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -398,10 +401,61 @@ export function ServerSelectionDialog({
                     {selectedServer.name}
                     <EndpointLabel type={selectedServer.type} className="text-xs" />
                   </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Configure new instance
-                  </p>
-                </div>
+                   <p className="text-sm text-muted-foreground mt-1">
+                     Configure new instance
+                   </p>
+                 </div>
+
+                 {/* AI Install Option */}
+                 {onStartAIChat && (
+                   <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20 mb-4">
+                     <CardContent className="p-4">
+                       <div className="flex items-start justify-between">
+                         <div className="flex items-start gap-3">
+                           <Bot className="h-5 w-5 text-blue-600 mt-0.5" />
+                           <div>
+                             <h3 className="font-medium text-blue-900 dark:text-blue-100">AI 辅助安装</h3>
+                             <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                               让AI助手引导您完成服务器的自动化安装和配置
+                             </p>
+                           </div>
+                         </div>
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={() => {
+                             const aiContext = {
+                               type: 'server_installation',
+                               serverDefinition: selectedServer,
+                               currentStep: 'confirm',
+                               progress: { step: 'confirm', completed: [], data: {} },
+                               messages: [
+                                 {
+                                   role: 'assistant',
+                                   content: `你好！我将协助你安装 ${selectedServer.name} 服务器。让我们开始安装过程。
+
+首先，请确认你要安装 **${selectedServer.name}** 吗？
+
+**服务器信息：**
+- 类型：${selectedServer.type}
+- 描述：${selectedServer.description}
+
+如果确认，请回复"确认"或"yes"，我将引导你完成接下来的步骤。`
+                                 }
+                               ]
+                             };
+                             onStartAIChat(aiContext);
+                             onOpenChange(false);
+                           }}
+                           className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300"
+                         >
+                           <Bot className="h-4 w-4 mr-2" />
+                           使用AI安装
+                         </Button>
+                       </div>
+                     </CardContent>
+                   </Card>
+                 )}
 
                 <div className="space-y-4">
                   <div className="space-y-2">
