@@ -79,7 +79,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         const sessionId = createNewChat(selectedServers.length > 0 ? selectedServers : [connectedServers[0].id], selectedProfile);
         selectChat(sessionId.id);
         
-        // Add initial context messages
+        // Add initial context messages and start the installation flow
         for (const message of initialContext.messages) {
           const msg: Message = {
             id: `msg-${Date.now()}-${Math.random()}`,
@@ -88,13 +88,29 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             timestamp: Date.now()
           };
           addMessage(sessionId.id, msg);
+          setCurrentMessages(prev => [...prev, msg]);
         }
+
+        // Display the installation progress message
+        const progressMsg: Message = {
+          id: `msg-${Date.now()}-progress`,
+          role: 'assistant',
+          content: `正在为您准备 **${initialContext.serverDefinition?.name}** 的安装环境...\n\n**安装步骤概览：**\n1. ✅ 确认安装意图\n2. 🔄 选择连接模式\n3. ⏳ 检查依赖项\n4. ⏳ 配置API密钥\n5. ⏳ 完成配置\n6. ⏳ 验证连接\n\n请回复"开始"或"continue"来继续安装过程。`,
+          timestamp: Date.now()
+        };
+        addMessage(sessionId.id, progressMsg);
+        setCurrentMessages(prev => [...prev, progressMsg]);
+
+        toast({
+          title: "AI安装助手已启动",
+          description: `正在准备安装 ${initialContext.serverDefinition?.name}`,
+        });
       };
       
       // Delay to ensure everything is initialized
-      setTimeout(handleInitializeInstallation, 100);
+      setTimeout(handleInitializeInstallation, 500);
     }
-  }, [mode, initialContext, connectedServers, createNewChat, selectChat, addMessage, selectedServers, selectedProfile]);
+  }, [mode, initialContext, connectedServers, createNewChat, selectChat, addMessage, selectedServers, selectedProfile, toast]);
 
   const handleNewChat = () => {
     selectChat('');
@@ -143,41 +159,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     addMessage(sessionId, userMessage);
 
     try {
-      // 创建AI助手消息，开始流式生成
-      const aiMessageId = `msg-${Date.now()}-ai`;
-      const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
-
-      const aiMessage: Message = {
-        id: aiMessageId,
-        role: 'assistant',
-        content: '',
-        timestamp: Date.now()
-      };
-
-      setCurrentMessages(prev => [...prev, aiMessage]);
-      addMessage(sessionId, aiMessage);
-
-      // 先完成流式文字生成
-      await simulateStreamingText(sessionId, aiMessageId, fullContent);
-      
-      // 文字生成完成后，生成工具调用序列
-      const toolCalls = generateSequentialToolCalls(content, selectedServers);
-      const messageWithTools: Partial<Message> = {
-        pendingToolCalls: toolCalls,
-        toolCallStatus: 'pending',
-        currentToolIndex: 0 // 从第一个工具开始
-      };
-
-      setCurrentMessages(prev => 
-        prev.map(msg => 
-          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
-        )
-      );
-      
-      if (currentSession) {
-        updateMessage(sessionId, aiMessageId, messageWithTools);
+      // Check if this is installation mode and handle accordingly
+      if (mode === 'installation' && initialContext) {
+        await handleInstallationMessage(content, sessionId);
+      } else {
+        // Regular chat mode
+        await handleRegularChatMessage(content, sessionId);
       }
-
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -190,6 +178,222 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       addMessage(sessionId, errorMessage);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleInstallationMessage = async (content: string, sessionId: string) => {
+    const aiMessageId = `msg-${Date.now()}-ai`;
+    const userInput = content.toLowerCase();
+    
+    // Installation flow responses based on user input
+    let responseContent = '';
+    let installationToolCalls: PendingToolCall[] = [];
+    
+    if (userInput.includes('开始') || userInput.includes('continue') || userInput.includes('确认')) {
+      responseContent = `好的！开始安装 **${initialContext.serverDefinition?.name}**。
+
+**第1步：选择连接模式**
+
+根据您要安装的服务器类型，我推荐使用 **${initialContext.serverDefinition?.type}** 连接模式。
+
+- ✅ **${initialContext.serverDefinition?.type}**: 最适合当前服务器的连接方式
+- 📊 稳定性高，性能良好
+- 🔧 配置简单
+
+请确认是否使用 **${initialContext.serverDefinition?.type}** 模式？回复"确认连接模式"继续下一步。`;
+
+    } else if (userInput.includes('确认连接模式') || userInput.includes('连接模式')) {
+      responseContent = `太好了！连接模式已确认为 **${initialContext.serverDefinition?.type}**。
+
+**第2步：检查依赖项**
+
+现在我将检查您系统中的必要依赖项...`;
+
+      installationToolCalls = [
+        {
+          id: `install-tool-${Date.now()}-1`,
+          toolName: 'check_dependencies',
+          serverId: 'system',
+          serverName: '系统检查',
+          request: { 
+            serverType: initialContext.serverDefinition?.type,
+            serverName: initialContext.serverDefinition?.name
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        }
+      ];
+
+    } else if (userInput.includes('依赖') || userInput.includes('继续检查')) {
+      responseContent = `依赖项检查完成！✅
+
+**检查结果：**
+- ✅ Node.js v18.0+ (已安装)
+- ✅ npm v8.0+ (已安装)  
+- ✅ ${initialContext.serverDefinition?.name} 包 (准备安装)
+
+**第3步：配置API密钥**
+
+请提供以下必要的API密钥：`;
+
+      installationToolCalls = [
+        {
+          id: `install-tool-${Date.now()}-2`,
+          toolName: 'configure_api_keys',
+          serverId: 'config',
+          serverName: '配置管理',
+          request: { 
+            serverName: initialContext.serverDefinition?.name,
+            requiredKeys: ['API_KEY', 'SECRET_KEY']
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        }
+      ];
+
+    } else if (userInput.includes('api') || userInput.includes('密钥') || userInput.includes('配置完成')) {
+      responseContent = `API密钥配置完成！🔑
+
+**第4步：创建服务器实例**
+
+正在为您创建 ${initialContext.serverDefinition?.name} 实例...`;
+
+      installationToolCalls = [
+        {
+          id: `install-tool-${Date.now()}-3`,
+          toolName: 'create_server_instance',
+          serverId: 'mcp-manager',
+          serverName: 'MCP管理器',
+          request: { 
+            serverDefinition: initialContext.serverDefinition,
+            connectionMode: initialContext.serverDefinition?.type,
+            profile: 'default'
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        }
+      ];
+
+    } else if (userInput.includes('验证') || userInput.includes('测试') || userInput.includes('完成实例')) {
+      responseContent = `服务器实例创建成功！🎉
+
+**第5步：验证连接**
+
+正在验证服务器连接...`;
+
+      installationToolCalls = [
+        {
+          id: `install-tool-${Date.now()}-4`,
+          toolName: 'verify_server_connection',
+          serverId: 'mcp-manager',
+          serverName: 'MCP管理器',
+          request: { 
+            serverId: `${initialContext.serverDefinition?.name}-instance`,
+            testConnection: true
+          },
+          status: 'pending' as const,
+          order: 0,
+          visible: true
+        }
+      ];
+
+    } else if (userInput.includes('成功') || userInput.includes('完成')) {
+      responseContent = `🎊 **安装完成！**
+
+**${initialContext.serverDefinition?.name}** 已成功安装并添加到您的当前Profile中！
+
+**安装摘要：**
+- ✅ 连接模式：${initialContext.serverDefinition?.type}
+- ✅ 依赖项检查：通过
+- ✅ API密钥：已配置
+- ✅ 服务器实例：已创建
+- ✅ 连接验证：成功
+
+您现在可以开始使用这个服务器了！返回主界面查看您的新服务器。`;
+
+    } else {
+      // Default response for unrecognized input
+      responseContent = `我正在引导您完成 **${initialContext.serverDefinition?.name}** 的安装过程。
+
+当前安装步骤包括：
+1. 确认安装意图
+2. 选择连接模式  
+3. 检查依赖项
+4. 配置API密钥
+5. 创建实例
+6. 验证连接
+
+请回复相关关键词来继续安装，例如："开始"、"确认连接模式"、"继续检查"等。`;
+    }
+
+    const aiMessage: Message = {
+      id: aiMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now()
+    };
+
+    setCurrentMessages(prev => [...prev, aiMessage]);
+    addMessage(sessionId, aiMessage);
+
+    // Stream the response
+    await simulateStreamingText(sessionId, aiMessageId, responseContent);
+    
+    // Add tool calls if any
+    if (installationToolCalls.length > 0) {
+      const messageWithTools: Partial<Message> = {
+        pendingToolCalls: installationToolCalls,
+        toolCallStatus: 'pending',
+        currentToolIndex: 0
+      };
+
+      setCurrentMessages(prev => 
+        prev.map(msg => 
+          msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+        )
+      );
+      
+      updateMessage(sessionId, aiMessageId, messageWithTools);
+    }
+  };
+
+  const handleRegularChatMessage = async (content: string, sessionId: string) => {
+    // 创建AI助手消息，开始流式生成
+    const aiMessageId = `msg-${Date.now()}-ai`;
+    const fullContent = `我理解您的请求"${content}"。基于您的问题，我需要调用一些工具来获取相关信息，以便为您提供更准确和详细的回答。让我先分析一下您的需求...`;
+
+    const aiMessage: Message = {
+      id: aiMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: Date.now()
+    };
+
+    setCurrentMessages(prev => [...prev, aiMessage]);
+    addMessage(sessionId, aiMessage);
+
+    // 先完成流式文字生成
+    await simulateStreamingText(sessionId, aiMessageId, fullContent);
+    
+    // 文字生成完成后，生成工具调用序列
+    const toolCalls = generateSequentialToolCalls(content, selectedServers);
+    const messageWithTools: Partial<Message> = {
+      pendingToolCalls: toolCalls,
+      toolCallStatus: 'pending',
+      currentToolIndex: 0 // 从第一个工具开始
+    };
+
+    setCurrentMessages(prev => 
+      prev.map(msg => 
+        msg.id === aiMessageId ? { ...msg, ...messageWithTools } : msg
+      )
+    );
+    
+    if (currentSession) {
+      updateMessage(sessionId, aiMessageId, messageWithTools);
     }
   };
 
